@@ -44,6 +44,18 @@ export const eventsQuery = groq`
   }
 `
 
+export const upcomingEventsHomeQuery = groq`
+  *[_type == "event" && date >= now()] | order(date asc)[0...3] {
+    title,
+    slug,
+    date,
+    location,
+    shortDescription,
+    image,
+    registrationLink
+  }
+`
+
 export const singleEventQuery = groq`
   *[_type == "event" && slug.current == $slug][0] {
     title,
