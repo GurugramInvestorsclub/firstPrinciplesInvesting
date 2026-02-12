@@ -75,3 +75,15 @@ export const pastEventsQuery = groq`
     image
   }
 `
+
+export const testimonialsQuery = groq`
+  *[_type == "testimonial" && featured == true] | order(order asc) {
+    name,
+    role,
+    company,
+    quote,
+    photo,
+    featured,
+    order
+  }
+`
