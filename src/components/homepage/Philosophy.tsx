@@ -32,10 +32,10 @@ export function Philosophy() {
 
             <div className="container max-w-5xl px-4 mx-auto relative z-10">
                 <div className="text-center mb-20">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-b from-white via-white/90 to-white/50 bg-clip-text text-transparent">
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-foreground dark:bg-gradient-to-b dark:from-white dark:via-white/90 dark:to-white/50 dark:bg-clip-text dark:text-transparent">
                         Our Philosophy.
                     </h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                         We don't chase trends. We adhere to a rigid framework of quality and durability.
                     </p>
                 </div>
@@ -44,7 +44,10 @@ export function Philosophy() {
                     {philosophies.map((item, index) => (
                         <div
                             key={index}
-                            className={`group relative p-8 rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 hover:border-primary/20 hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.15)] flex flex-col justify-between ${item.className}`}
+                            className={`group relative p-8 rounded-3xl border transition-all duration-300 flex flex-col justify-between ${item.className}
+                                bg-card border-border shadow-sm hover:shadow-md
+                                dark:bg-white/5 dark:border-white/5 dark:backdrop-blur-sm dark:hover:bg-white/10 dark:hover:border-primary/20 dark:hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.15)]
+                            `}
                         >
                             <div className="mb-6">
                                 <div className="p-3 bg-primary/10 w-fit rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -55,7 +58,9 @@ export function Philosophy() {
                             </div>
 
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <span className="text-sm font-medium text-primary">Learn more &rarr;</span>
+                                <span className="text-sm font-medium text-primary flex items-center gap-1">
+                                    Learn more &rarr;
+                                </span>
                             </div>
                         </div>
                     ))}

@@ -14,9 +14,11 @@ export function Hero() {
 
             <div className="space-y-10 max-w-5xl mx-auto z-10">
                 {/* Pill Badge */}
-                <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary backdrop-blur-md shadow-[0_0_15px_-3px_rgba(59,130,246,0.2)] hover:bg-primary/10 transition-colors cursor-default">
-                    <Sparkles className="w-3.5 h-3.5 mr-2 text-primary" />
-                    <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent font-semibold">
+                <div className="group inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 cursor-default
+                    bg-[#eef2f7] border border-[#e2e8f0] text-[#0f172a] shadow-sm hover:shadow hover:-translate-y-0.5
+                    dark:bg-[#1a1f2b] dark:border-white/10 dark:text-[#e2e8f0] dark:hover:bg-[#202534] dark:hover:border-white/20">
+                    <Sparkles className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                    <span className="font-semibold tracking-wide">
                         Intelligent Compounding
                     </span>
                 </div>
