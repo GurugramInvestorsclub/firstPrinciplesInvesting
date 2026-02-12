@@ -4,6 +4,9 @@ import { client } from "@/lib/sanity.client"
 import { singlePostQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
 import { RichText } from "@/components/sanity/RichText"
+import Link from "next/link"
+import Image from "next/image"
+import { urlForImage } from "@/lib/sanity.image"
 import { notFound } from "next/navigation"
 
 export const revalidate = 60
@@ -43,12 +46,17 @@ export default async function InsightPage({ params }: Props) {
                         </p>
                     </header>
 
-                    <div className="aspect-video w-full bg-secondary/20 rounded-2xl mb-12 relative overflow-hidden">
-                        {/* Main Image */}
-                        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                            Main Image
+                    {post.mainImage && (
+                        <div className="aspect-video w-full bg-secondary/20 rounded-2xl mb-12 relative overflow-hidden">
+                            <Image
+                                src={urlForImage(post.mainImage).url()}
+                                alt={post.title}
+                                fill
+                                className="object-cover"
+                                priority
+                            />
                         </div>
-                    </div>
+                    )}
 
                     <div className="prose prose-lg dark:prose-invert mx-auto">
                         <RichText value={post.body} />
