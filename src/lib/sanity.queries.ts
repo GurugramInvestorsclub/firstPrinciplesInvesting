@@ -77,13 +77,10 @@ export const pastEventsQuery = groq`
 `
 
 export const testimonialsQuery = groq`
-  *[_type == "testimonial" && featured == true] | order(order asc) {
+  *[_type == "testimonial"] | order(_createdAt desc) {
     name,
     role,
-    company,
     quote,
-    photo,
-    featured,
-    order
+    photo
   }
 `

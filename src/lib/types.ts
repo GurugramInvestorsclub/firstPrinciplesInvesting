@@ -38,9 +38,6 @@ export interface Event {
 export interface Testimonial {
     name: string
     role?: string
-    company?: string
     quote: string
     photo?: any
-    featured: boolean
-    order?: number
 }

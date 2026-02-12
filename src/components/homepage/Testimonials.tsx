@@ -102,11 +102,9 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
                         <cite className="not-italic font-medium text-text-primary block">
                             {testimonial.name}
                         </cite>
-                        {(testimonial.role || testimonial.company) && (
+                        {testimonial.role && (
                             <span className="text-sm text-text-secondary block mt-0.5">
                                 {testimonial.role}
-                                {testimonial.role && testimonial.company && " • "}
-                                {testimonial.company}
                             </span>
                         )}
                     </div>

@@ -17,11 +17,6 @@ export default defineType({
             type: 'string',
         }),
         defineField({
-            name: 'company',
-            title: 'Company',
-            type: 'string',
-        }),
-        defineField({
             name: 'quote',
             title: 'Quote',
             type: 'text',
@@ -34,17 +29,6 @@ export default defineType({
             options: {
                 hotspot: true,
             },
-        }),
-        defineField({
-            name: 'featured',
-            title: 'Featured',
-            type: 'boolean',
-            initialValue: false,
-        }),
-        defineField({
-            name: 'order',
-            title: 'Order',
-            type: 'number',
         }),
     ],
 })

@@ -22,9 +22,9 @@ export default async function Home() {
       <main className="flex-1">
         <Hero />
         <Philosophy />
-        <Testimonials testimonials={testimonials} />
         <RecentInsights posts={posts} />
         <UpcomingEvents events={events} />
+        <Testimonials testimonials={testimonials} />
 
 
       </main>
