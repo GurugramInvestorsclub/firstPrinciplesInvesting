@@ -47,10 +47,18 @@ export const eventsQuery = groq`
 export const singleEventQuery = groq`
   *[_type == "event" && slug.current == $slug][0] {
     title,
+    subHeading,
     slug,
     date,
     location,
+    highlightStat,
     shortDescription,
+    whyThisMatters,
+    learningPoints,
+    targetAudience,
+    speaker,
+    agenda,
+    faq,
     longDescription,
     registrationLink,
     image
