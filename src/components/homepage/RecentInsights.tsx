@@ -10,7 +10,7 @@ interface RecentInsightsProps {
 
 export function RecentInsights({ posts }: RecentInsightsProps) {
     return (
-        <section className="py-24 container max-w-screen-xl px-4 sm:px-8">
+        <section className="py-24 container max-w-5xl px-4 mx-auto">
             <div className="flex items-center justify-between mb-12">
                 <h2 className="text-3xl font-bold tracking-tight">Recent Insights</h2>
                 <Link href="/insights" className="text-sm font-medium hover:underline hidden sm:block">

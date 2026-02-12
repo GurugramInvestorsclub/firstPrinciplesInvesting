@@ -15,7 +15,7 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
 
     return (
         <section className="py-24 bg-secondary/30">
-            <div className="container max-w-screen-xl px-4 sm:px-8">
+            <div className="container max-w-5xl px-4 mx-auto">
                 <div className="flex items-center justify-between mb-12">
                     <h2 className="text-3xl font-bold tracking-tight">Upcoming Events</h2>
                     <Link href="/events" className="text-sm font-medium hover:underline hidden sm:block">
