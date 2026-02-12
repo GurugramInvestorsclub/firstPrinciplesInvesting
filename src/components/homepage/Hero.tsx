@@ -20,26 +20,25 @@ export function Hero() {
 
                 {/* Main Headline */}
                 <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-text-primary leading-[1.1] drop-shadow-sm">
-                    Unleash the power of <br className="hidden md:block" />
-                    <span className="text-gold">Structural Thinking</span>
+                    Learn How to invest from <br className="hidden md:block" />
+                    <span className="text-gold">First Principles</span>
                 </h1>
 
                 {/* Subtext */}
                 <p className="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed font-normal">
-                    Strip away noise. Think clearly. Compound intelligently. <br className="hidden md:inline" />
-                    The first principles platform for the modern investor.
+                    Join a growing community of independent thinkers learning to analyse businesses from the ground up. No hot tips. No noise. Just clear, structured thinking !
                 </p>
 
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
                     <Button asChild size="lg" className="rounded-full px-10 h-14 text-lg font-semibold bg-gold hover:bg-gold-muted text-bg-deep border-none transition-all duration-300">
-                        <Link href="/insights">
-                            Start Reading <ArrowRight className="ml-2 h-5 w-5" />
+                        <Link href="/events">
+                            Signup for our next Event <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                     </Button>
                     <Button asChild variant="outline" size="lg" className="rounded-full px-10 h-14 text-lg font-medium border-gold text-gold bg-transparent hover:bg-gold/10 transition-all">
-                        <Link href="/events">
-                            Upcoming Events
+                        <Link href="/insights">
+                            Read Our Insights
                         </Link>
                     </Button>
                 </div>
