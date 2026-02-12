@@ -45,7 +45,7 @@ export default async function EventPage({ params }: Props) {
                                 <div className="flex flex-wrap justify-center items-center gap-3">
                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gold/10 text-gold border border-gold/20">
                                         <Calendar className="w-3.5 h-3.5" />
-                                        {eventDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                        {eventDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "Asia/Kolkata" })}
                                     </span>
                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#2E2E2E] text-text-secondary border border-[#2E2E2E]">
                                         <MapPin className="w-3.5 h-3.5" />
@@ -75,13 +75,13 @@ export default async function EventPage({ params }: Props) {
                                         <div className="flex items-center gap-3 text-sm text-text-secondary">
                                             <Calendar className="w-4 h-4 text-gold" />
                                             <span>
-                                                {eventDate.toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric' })}
+                                                {eventDate.toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric', timeZone: "Asia/Kolkata" })}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3 text-sm text-text-secondary">
                                             <Clock className="w-4 h-4 text-gold" />
                                             <span>
-                                                {eventDate.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })}
+                                                {eventDate.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', timeZone: "Asia/Kolkata" })} IST
                                             </span>
                                         </div>
                                         {event.location && (

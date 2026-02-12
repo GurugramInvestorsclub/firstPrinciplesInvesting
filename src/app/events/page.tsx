@@ -77,7 +77,7 @@ function EventCard({ event }: { event: Event }) {
             <div className="mb-4 flex items-center gap-2 text-xs text-text-secondary">
                 <span className="flex items-center gap-1 rounded-full bg-[#2E2E2E] px-2 py-1 border border-[#2E2E2E] group-hover:border-gold/20 transition-colors">
                     <Calendar className="h-3 w-3 text-gold" />
-                    {new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    {new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "Asia/Kolkata" })}
                 </span>
                 <span className="flex items-center gap-1 rounded-full bg-[#2E2E2E] px-2 py-1 border border-[#2E2E2E] group-hover:border-gold/20 transition-colors">
                     <MapPin className="h-3 w-3 text-gold" />
