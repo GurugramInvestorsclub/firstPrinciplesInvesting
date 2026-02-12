@@ -109,8 +109,12 @@
     scrollbar-width: none;
   }
 
-  .animate-scroll-vertical {
-    animation: scroll-vertical 60s linear infinite;
+  .animate-scroll-vertical-slow {
+    animation: scroll-vertical 40s linear infinite;
+  }
+
+  .animate-scroll-vertical-fast {
+    animation: scroll-vertical 25s linear infinite;
   }
 
   @keyframes scroll-vertical {
@@ -119,7 +123,7 @@
     }
 
     100% {
-      transform: translateY(-33.33%);
+      transform: translateY(-50%);
     }
   }
 
