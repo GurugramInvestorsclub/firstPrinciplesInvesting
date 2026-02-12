@@ -3,24 +3,24 @@ import { Brain, Layers, TrendingUp } from "lucide-react"
 const philosophies = [
     {
         icon: Brain,
-        title: "Independent Thinking",
+        title: "Think For Yourself",
         description:
-            "We reject consensus for the sake of consensus. True value is found in divergent, correct views derived from first principles analysis.",
-        className: "md:col-span-2",
+            "Most investors outsource their thinking to analysts, social media, or the loudest voice in the room. We help you build your own view - grounded in logic, not noise. Come see how at our next event.",
+        className: "md:col-span-1",
     },
     {
         icon: Layers,
-        title: "Structural Moats",
+        title: "Moats are over-rated",
         description:
-            "We look for durable competitive advantages. Businesses that are structurally interconnected with their customers' success.",
+            "Moats matter — but they're wildly overhyped. A wide moat won't save a bad entry price or a stretched valuation. We teach you to look past the buzzwords and focus on what actually drives returns.",
         className: "md:col-span-1",
     },
     {
         icon: TrendingUp,
-        title: "Long-Term Compounding",
+        title: "Let Compounding Do the Work",
         description:
-            "The most powerful force in investing. We focus on businesses effectively deploying capital at high rates of return over decades.",
-        className: "md:col-span-3",
+            "The Indian retail investor is often sold the idea of quick returns. We believe the real edge is patience — owning decent businesses, bought at value, held long enough for the story to play out.",
+        className: "md:col-span-1",
     },
 ]
 
@@ -33,7 +33,7 @@ export function Philosophy() {
                         Our Philosophy.
                     </h2>
                     <p className="text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-                        We don't chase trends. We adhere to a rigid framework of quality and durability.
+                        We don't have hot tips. We have a simple framework — and we love teaching it.
                     </p>
                 </div>
 
