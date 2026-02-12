@@ -3,7 +3,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle"
 
 export function Navbar() {
     return (
-        <header className="fixed top-0 w-full z-50 border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+        <header className="fixed top-0 w-full z-50 border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between px-4 md:px-8 max-w-5xl mx-auto">
                 <Link href="/" className="font-bold text-xl tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2">
                     <span className="w-6 h-6 rounded bg-primary flex items-center justify-center text-white text-xs">FP</span>
