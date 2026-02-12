@@ -1,6 +1,8 @@
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { Post } from "@/lib/types"
+import { urlForImage } from "@/lib/sanity.image"
 
 interface RecentInsightsProps {
     posts: Post[]
@@ -20,6 +22,16 @@ export function RecentInsights({ posts }: RecentInsightsProps) {
                 {posts.map((post) => (
                     <div key={post.slug.current} className="group flex flex-col justify-between h-full space-y-4">
                         <div className="space-y-4">
+                            {post.mainImage && (
+                                <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+                                    <Image
+                                        src={urlForImage(post.mainImage).url()}
+                                        alt={post.title}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                </div>
+                            )}
                             <div className="text-xs text-muted-foreground">
                                 {new Date(post.publishedAt).toLocaleDateString("en-US", {
                                     year: "numeric",

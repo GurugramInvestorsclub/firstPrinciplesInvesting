@@ -1,6 +1,8 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Calendar, MapPin } from "lucide-react"
 import { Event } from "@/lib/types"
+import { urlForImage } from "@/lib/sanity.image"
 
 interface UpcomingEventsProps {
     events: Event[]
@@ -23,7 +25,17 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
 
                 <div className="grid gap-6 md:grid-cols-3">
                     {events.map((event) => (
-                        <div key={event.slug.current} className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
+                        <div key={event.slug.current} className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md h-full">
+                            {event.image && (
+                                <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4">
+                                    <Image
+                                        src={urlForImage(event.image).url()}
+                                        alt={event.title}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            )}
                             <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
                                     <Calendar className="h-3 w-3" />

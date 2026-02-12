@@ -4,7 +4,9 @@ import { client } from "@/lib/sanity.client"
 import { postQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight } from "lucide-react"
+import { urlForImage } from "@/lib/sanity.image"
 
 export const revalidate = 60
 
@@ -27,10 +29,15 @@ export default async function InsightsPage() {
                 {featuredPost && (
                     <div className="group relative rounded-2xl border border-border bg-card overflow-hidden grid md:grid-cols-2 gap-8 hover:shadow-lg transition-all mb-16">
                         <div className="aspect-video md:aspect-auto bg-secondary/20 relative min-h-[300px]">
-                            {/* Image would go here */}
-                            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                                Feature Image
-                            </div>
+                            {featuredPost.mainImage && (
+                                <Image
+                                    src={urlForImage(featuredPost.mainImage).url()}
+                                    alt={featuredPost.title}
+                                    fill
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    priority
+                                />
+                            )}
                         </div>
                         <div className="p-8 flex flex-col justify-center">
                             <div className="text-sm text-primary mb-2 font-medium">Featured Insight</div>
@@ -62,7 +69,14 @@ export default async function InsightsPage() {
                     {otherPosts.map((post) => (
                         <div key={post.slug.current} className="group flex flex-col h-full">
                             <div className="aspect-video bg-secondary/10 rounded-xl mb-4 relative overflow-hidden">
-                                {/* Image placeholder */}
+                                {post.mainImage && (
+                                    <Image
+                                        src={urlForImage(post.mainImage).url()}
+                                        alt={post.title}
+                                        fill
+                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                )}
                             </div>
                             <div className="text-xs text-muted-foreground mb-2">
                                 {new Date(post.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}

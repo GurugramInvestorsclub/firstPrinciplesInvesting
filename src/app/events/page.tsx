@@ -4,7 +4,9 @@ import { client } from "@/lib/sanity.client"
 import { eventsQuery, pastEventsQuery } from "@/lib/sanity.queries"
 import { Event } from "@/lib/types"
 import Link from "next/link"
+import Image from "next/image"
 import { Calendar, MapPin, ArrowRight } from "lucide-react"
+import { urlForImage } from "@/lib/sanity.image"
 
 export const revalidate = 60
 
@@ -62,6 +64,16 @@ export default async function EventsPage() {
 function EventCard({ event }: { event: Event }) {
     return (
         <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md h-full">
+            {event.image && (
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4">
+                    <Image
+                        src={urlForImage(event.image).url()}
+                        alt={event.title}
+                        fill
+                        className="object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                </div>
+            )}
             <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1">
                     <Calendar className="h-3 w-3" />
