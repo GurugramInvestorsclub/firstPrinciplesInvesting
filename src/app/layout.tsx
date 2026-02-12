@@ -23,6 +23,11 @@ export const metadata: Metadata = {
   keywords: ["First Principles", "Investing", "Compounding", "Structural Moats", "Independent Thinking"],
   authors: [{ name: "First Principles Investing" }],
   creator: "First Principles Investing",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

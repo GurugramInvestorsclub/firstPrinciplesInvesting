@@ -26,16 +26,13 @@ const philosophies = [
 
 export function Philosophy() {
     return (
-        <section className="py-24 md:py-32 bg-background relative overflow-hidden">
-            {/* Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
-
+        <section className="py-24 md:py-32 bg-bg-primary relative overflow-hidden text-text-primary">
             <div className="container max-w-5xl px-4 mx-auto relative z-10">
                 <div className="text-center mb-20">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-foreground dark:bg-gradient-to-b dark:from-white dark:via-white/90 dark:to-white/50 dark:bg-clip-text dark:text-transparent">
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-text-primary">
                         Our Philosophy.
                     </h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
                         We don't chase trends. We adhere to a rigid framework of quality and durability.
                     </p>
                 </div>
@@ -45,20 +42,19 @@ export function Philosophy() {
                         <div
                             key={index}
                             className={`group relative p-8 rounded-3xl border transition-all duration-300 flex flex-col justify-between ${item.className}
-                                bg-card border-border shadow-sm hover:shadow-md
-                                dark:bg-white/5 dark:border-white/5 dark:backdrop-blur-sm dark:hover:bg-white/10 dark:hover:border-primary/20 dark:hover:shadow-[0_0_30px_-10px_rgba(59,130,246,0.15)]
+                                bg-bg-deep border-text-secondary/20 shadow-sm hover:border-gold/30 hover:shadow-md
                             `}
                         >
                             <div className="mb-6">
-                                <div className="p-3 bg-primary/10 w-fit rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <item.icon className="h-8 w-8 text-primary" />
+                                <div className="p-3 bg-gold/10 w-fit rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <item.icon className="h-8 w-8 text-gold" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4 text-foreground">{item.title}</h3>
-                                <p className="text-muted-foreground leading-relaxed text-lg">{item.description}</p>
+                                <h3 className="text-2xl font-bold mb-4 text-text-primary">{item.title}</h3>
+                                <p className="text-text-secondary leading-relaxed text-lg">{item.description}</p>
                             </div>
 
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <span className="text-sm font-medium text-primary flex items-center gap-1">
+                                <span className="text-sm font-medium text-gold flex items-center gap-1">
                                     Learn more &rarr;
                                 </span>
                             </div>

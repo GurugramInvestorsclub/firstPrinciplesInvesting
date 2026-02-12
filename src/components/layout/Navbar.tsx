@@ -1,26 +1,48 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
-import { ModeToggle } from "@/components/ui/mode-toggle"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 export function Navbar() {
+    const pathname = usePathname()
+
+    const navLinks = [
+        { href: "/insights", label: "Insights" },
+        { href: "/events", label: "Events" },
+        { href: "/about", label: "About" },
+    ]
+
     return (
-        <header className="fixed top-2.5 left-1/2 -translate-x-1/2 w-[calc(100%-1.25rem)] max-w-5xl z-50 rounded-full border border-border/40 bg-background/60 backdrop-blur-xl shadow-sm supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-14 items-center justify-between px-6 w-full">
+        <header className="fixed top-0 left-0 w-full z-50 border-b border-[#2E2E2E] bg-bg-deep">
+            <div className="flex h-16 items-center justify-between px-6 max-w-7xl mx-auto w-full">
                 <Link href="/" className="font-bold text-lg tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2">
-                    <span className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center text-white text-[10px]">FP</span>
-                    <span>First Principles Investing</span>
+                    <div className="relative w-10 h-10">
+                        <Image
+                            src="/logo.png"
+                            alt="First Principles Investing Logo"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+                    <span className="text-text-primary">First Principles <span className="text-gold">Investing</span></span>
                 </Link>
 
-                <nav className="flex items-center gap-6">
-                    <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-                        <Link href="/insights" className="hover:text-primary transition-colors">Insights</Link>
-                        <Link href="/events" className="hover:text-primary transition-colors">Events</Link>
-                        <Link href="/about" className="hover:text-primary transition-colors">About</Link>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <ModeToggle />
-                    </div>
+                <nav className="hidden md:flex items-center gap-8">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                "text-sm font-medium transition-colors hover:text-gold",
+                                pathname?.startsWith(link.href) ? "text-gold" : "text-text-secondary"
+                            )}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
                 </nav>
             </div>
         </header>
