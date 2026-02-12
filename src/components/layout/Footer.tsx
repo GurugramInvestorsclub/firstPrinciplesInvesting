@@ -4,7 +4,7 @@ export function Footer() {
             <div className="container max-w-5xl px-4 md:px-8 mx-auto py-16">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     <div className="md:col-span-2 space-y-4">
-                        <h3 className="text-xl font-bold tracking-tight text-foreground">First Principles</h3>
+                        <h3 className="text-xl font-bold tracking-tight text-foreground">First Principles Investing</h3>
                         <p className="text-muted-foreground max-w-sm">
                             Investing through structural thinking and business fundamentals.
                         </p>
@@ -21,7 +21,7 @@ export function Footer() {
                     <div className="space-y-4">
                         <h4 className="font-semibold text-foreground">Company</h4>
                         <ul className="space-y-2 text-muted-foreground">
-                            <li><a href="#" className="hover:text-primary transition-colors">About</a></li>
+                            <li><a href="/about" className="hover:text-primary transition-colors">About</a></li>
                             <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
                             <li><a href="#" className="hover:text-primary transition-colors">Privacy</a></li>
                         </ul>
