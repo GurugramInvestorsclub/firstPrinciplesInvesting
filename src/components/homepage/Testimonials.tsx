@@ -85,7 +85,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-bg-deep shrink-0 border border-text-secondary/20">
                     {testimonial.photo ? (
                         <Image
-                            src={urlForImage(testimonial.photo).url()}
+                            src={urlForImage(testimonial.photo).width(200).height(200).url()}
                             alt={testimonial.name}
                             fill
                             className="object-cover"

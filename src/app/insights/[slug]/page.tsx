@@ -49,7 +49,7 @@ export default async function InsightPage({ params }: Props) {
                     {post.mainImage && (
                         <div className="aspect-video w-full bg-secondary/20 rounded-2xl mb-12 relative overflow-hidden">
                             <Image
-                                src={urlForImage(post.mainImage).url()}
+                                src={urlForImage(post.mainImage).width(1200).height(675).url()}
                                 alt={post.title}
                                 fill
                                 className="object-cover"

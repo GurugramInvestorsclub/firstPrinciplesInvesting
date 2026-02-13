@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Calendar, MapPin } from "lucide-react"
 import { Event } from "@/lib/types"
-import { urlForImage } from "@/lib/sanity.image"
+import { urlForImage, getImageDimensions } from "@/lib/sanity.image"
 
 interface UpcomingEventsProps {
     events: Event[]
@@ -27,9 +27,9 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
                     {events.map((event) => (
                         <div key={event.slug.current} className="flex flex-col rounded-xl border border-text-secondary/20 bg-bg-deep p-6 shadow-sm transition-all hover:shadow-md hover:border-gold/30 h-full">
                             {event.image && (
-                                <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4">
+                                <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 bg-secondary/20">
                                     <Image
-                                        src={urlForImage(event.image).url()}
+                                        src={urlForImage(event.image).width(800).height(450).fit("crop").url()}
                                         alt={event.title}
                                         fill
                                         className="object-cover"

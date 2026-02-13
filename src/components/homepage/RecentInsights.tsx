@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { Post } from "@/lib/types"
-import { urlForImage } from "@/lib/sanity.image"
+import { urlForImage, getImageDimensions } from "@/lib/sanity.image"
 
 interface RecentInsightsProps {
     posts: Post[]
@@ -23,9 +23,9 @@ export function RecentInsights({ posts }: RecentInsightsProps) {
                     <div key={post.slug.current} className="group flex flex-col justify-between h-full space-y-4">
                         <div className="space-y-4">
                             {post.mainImage && (
-                                <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-text-secondary/10">
+                                <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-text-secondary/10 bg-secondary/20">
                                     <Image
-                                        src={urlForImage(post.mainImage).url()}
+                                        src={urlForImage(post.mainImage).width(800).height(450).fit("crop").url()}
                                         alt={post.title}
                                         fill
                                         className="object-cover transition-transform duration-300 group-hover:scale-105"

@@ -199,7 +199,7 @@ export default async function EventPage({ params }: Props) {
                                     {event.speaker.image && (
                                         <div className="aspect-[3/4] relative rounded-2xl overflow-hidden bg-bg-deep border border-[#2E2E2E] shadow-lg transform rotate-2 hover:rotate-0 transition-transform duration-500">
                                             <Image
-                                                src={urlForImage(event.speaker.image).url()}
+                                                src={urlForImage(event.speaker.image).width(400).height(533).url()}
                                                 alt={event.speaker.name}
                                                 fill
                                                 className="object-cover"

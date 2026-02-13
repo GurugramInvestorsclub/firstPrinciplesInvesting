@@ -1,5 +1,5 @@
 import { PortableText as PortableTextReact, PortableTextComponents } from "@portabletext/react"
-import { urlForImage } from "@/lib/sanity.image"
+import { urlForImage, getImageDimensions } from "@/lib/sanity.image"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -7,14 +7,21 @@ const components: PortableTextComponents = {
     types: {
         image: ({ value }: any) => {
             const imageUrl = urlForImage(value)?.url()
+            const { width, height } = getImageDimensions(value) || { width: 800, height: 450 } // Fallback
+
             return (
-                <div className="relative w-full aspect-video my-8 rounded-xl overflow-hidden bg-secondary/20">
+                <div className="my-8 rounded-xl overflow-hidden bg-secondary/20">
                     {imageUrl && (
                         <Image
                             src={imageUrl}
                             alt={value.alt || "Post image"}
-                            fill
-                            className="object-cover"
+                            width={width}
+                            height={height}
+                            className="w-full h-auto"
+                            style={{
+                                maxWidth: "100%",
+                                aspectRatio: `${width} / ${height}`
+                            }}
                         />
                     )}
                 </div>
