@@ -1,13 +1,14 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { postQuery } from "@/lib/sanity.queries"
+import { postQuery, featuredPostQuery, nonFeaturedPostsQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { FeaturedInsightCard } from "@/components/cards/FeaturedInsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 
-export const revalidate = 60
+// Set revalidate to 0 for instant updates (dynamic rendering)
+export const revalidate = 0
 
 export default async function InsightsPage({
     searchParams,
@@ -16,32 +17,39 @@ export default async function InsightsPage({
 }) {
     // Await searchParams to suppress Next.js sync access warning (pending proper fix in future Next.js versions)
     const { search } = await Promise.resolve(searchParams)
-    const posts = await client.fetch<Post[]>(postQuery, { search: search || null })
 
-    // Logic:
-    // 1. If searching, show all matching posts in grid.
-    // 2. If not searching:
-    //    a. Find the first post with isFeatured == true.
-    //    b. If none found, fallback to the most recent post (posts[0]).
-    //    c. The remaining posts form the grid.
+    // Using split queries for cleaner logic and better reliability
+    // 1. If searching, just use the search query (all posts formatted)
+    // 2. If NOT searching, fetch featured + non-featured separately
 
-    let featuredPost = null
-    let gridPosts = posts
+    let featuredPost: Post | null = null
+    let gridPosts: Post[] = []
+    let searchResults: Post[] = []
 
-    if (!search && posts.length > 0) {
-        // Try to find an explicit featured post
-        const explicitFeatured = posts.find((p) => p.isFeatured)
+    if (search) {
+        searchResults = await client.fetch<Post[]>(postQuery, { search })
+        // In search mode, we don't show featured section, just the grid of results
+        gridPosts = searchResults
+    } else {
+        // Parallel fetch for performance
+        const [explicitFeatured, otherPosts] = await Promise.all([
+            client.fetch<Post | null>(featuredPostQuery),
+            client.fetch<Post[]>(nonFeaturedPostsQuery)
+        ])
 
         if (explicitFeatured) {
             featuredPost = explicitFeatured
-            // Filter out the featured post from the grid
-            gridPosts = posts.filter((p) => p !== explicitFeatured)
-        } else {
-            // Fallback to latest
-            featuredPost = posts[0]
-            gridPosts = posts.slice(1)
+            gridPosts = otherPosts
+        } else if (otherPosts.length > 0) {
+            // Fallback: If no explicit featured, take the first of the "others" (which are ordered by date)
+            featuredPost = otherPosts[0]
+            gridPosts = otherPosts.slice(1)
         }
     }
+
+    // Debug logging
+    console.log("Featured Post:", featuredPost?.title)
+    console.log("Grid Posts Count:", gridPosts.length)
 
     return (
         <div className="flex flex-col min-h-screen bg-bg-deep">
@@ -70,11 +78,7 @@ export default async function InsightsPage({
                     <div className="mb-12">
                         <h2 className="text-2xl font-bold mb-4">Search Results</h2>
                         <div className="text-base text-text-secondary">
-                            {posts.length === 0 ? (
-                                <p>No results found for <span className="text-text-primary font-semibold">"{search}"</span></p>
-                            ) : (
-                                <p>Showing {posts.length} result{posts.length === 1 ? "" : "s"} for <span className="text-text-primary font-semibold">"{search}"</span></p>
-                            )}
+                            {postsSummary(gridPosts.length, search)}
                         </div>
                     </div>
                 )}
@@ -104,4 +108,11 @@ export default async function InsightsPage({
             <Footer />
         </div>
     )
+}
+
+function postsSummary(count: number, search: string) {
+    if (count === 0) {
+        return <p>No results found for <span className="text-text-primary font-semibold">"{search}"</span></p>
+    }
+    return <p>Showing {count} result{count === 1 ? "" : "s"} for <span className="text-text-primary font-semibold">"{search}"</span></p>
 }

@@ -12,6 +12,30 @@ export const postQuery = groq`
   }
 `
 
+export const featuredPostQuery = groq`
+  *[_type == "post" && isFeatured == true] | order(_updatedAt desc)[0] {
+    title,
+    slug,
+    isFeatured,
+    excerpt,
+    mainImage,
+    publishedAt,
+    body
+  }
+`
+
+export const nonFeaturedPostsQuery = groq`
+  *[_type == "post" && (!defined(isFeatured) || isFeatured == false)] | order(publishedAt desc) {
+    title,
+    slug,
+    isFeatured,
+    excerpt,
+    mainImage,
+    publishedAt,
+    body
+  }
+`
+
 export const recentPostsQuery = groq`
   *[_type == "post"] | order(publishedAt desc)[0...3] {
     title,
