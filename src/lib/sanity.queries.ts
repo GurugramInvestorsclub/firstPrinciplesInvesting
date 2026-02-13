@@ -1,7 +1,7 @@
 import { groq } from 'next-sanity'
 
 export const postQuery = groq`
-  *[_type == "post"] | order(publishedAt desc) {
+  *[_type == "post" && (!defined($search) || title match $search + "*" || excerpt match $search + "*" || body[].children[].text match $search + "*")] | order(publishedAt desc) {
     title,
     slug,
     excerpt,

@@ -3,98 +3,80 @@ import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
 import { postQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowRight } from "lucide-react"
-import { urlForImage } from "@/lib/sanity.image"
+import { InsightCard } from "@/components/cards/InsightCard"
+import { FeaturedInsightCard } from "@/components/cards/FeaturedInsightCard"
+import { SearchInput } from "@/components/ui/search-input"
 
 export const revalidate = 60
 
-export default async function InsightsPage() {
-    const posts = await client.fetch<Post[]>(postQuery)
-    const featuredPost = posts[0]
-    const otherPosts = posts.slice(1)
+export default async function InsightsPage({
+    searchParams,
+}: {
+    searchParams: { search?: string }
+}) {
+    // Await searchParams to suppress Next.js sync access warning (pending proper fix in future Next.js versions)
+    const { search } = await Promise.resolve(searchParams)
+    const posts = await client.fetch<Post[]>(postQuery, { search: search || null })
+
+    const featuredPost = !search && posts.length > 0 ? posts[0] : null
+    const gridPosts = !search && posts.length > 0 ? posts.slice(1) : posts
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-bg-deep">
             <Navbar />
-            <main className="flex-1 container max-w-5xl px-4 mx-auto py-12 md:py-20">
-                <div className="mb-12">
-                    <h1 className="text-4xl font-bold tracking-tight mb-4">Inside the Machine.</h1>
-                    <p className="text-xl text-muted-foreground max-w-2xl">
-                        Deep dives into business models, structural advantages, and the art of compounding.
-                    </p>
+
+            <main className="flex-1 container max-w-6xl px-4 mx-auto py-16 md:py-24 text-text-primary">
+
+                {/* HERO SECTION */}
+                <div className="mb-16 md:mb-24 flex flex-col items-start gap-8 border-b border-text-secondary/10 pb-12">
+                    <div className="max-w-3xl">
+                        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-text-primary leading-[1.1]">
+                            Inside the <span className="text-gold">Machine.</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-text-secondary leading-relaxed font-light">
+                            Deep dives into business models, structural advantages, and the art of compounding. Uncovering signal from noise.
+                        </p>
+                    </div>
+
+                    <div className="w-full flex justify-end mt-4">
+                        <SearchInput className="w-full md:w-[400px]" />
+                    </div>
                 </div>
 
-                {featuredPost && (
-                    <div className="group relative rounded-2xl border border-border bg-card overflow-hidden grid md:grid-cols-2 gap-8 hover:shadow-lg transition-all mb-16">
-                        <div className="aspect-video md:aspect-auto bg-secondary/20 relative min-h-[300px]">
-                            {featuredPost.mainImage && (
-                                <Image
-                                    src={urlForImage(featuredPost.mainImage).url()}
-                                    alt={featuredPost.title}
-                                    fill
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    priority
-                                />
+                {/* SEARCH RESULTS HEADER */}
+                {search && (
+                    <div className="mb-12">
+                        <h2 className="text-2xl font-bold mb-4">Search Results</h2>
+                        <div className="text-base text-text-secondary">
+                            {posts.length === 0 ? (
+                                <p>No results found for <span className="text-text-primary font-semibold">"{search}"</span></p>
+                            ) : (
+                                <p>Showing {posts.length} result{posts.length === 1 ? "" : "s"} for <span className="text-text-primary font-semibold">"{search}"</span></p>
                             )}
-                        </div>
-                        <div className="p-8 flex flex-col justify-center">
-                            <div className="text-sm text-primary mb-2 font-medium">Featured Insight</div>
-                            <h2 className="text-3xl font-bold mb-4 group-hover:text-primary/80 transition-colors">
-                                <Link href={`/insights/${featuredPost.slug.current}`}>
-                                    {featuredPost.title}
-                                </Link>
-                            </h2>
-                            <p className="text-muted-foreground text-lg mb-6 line-clamp-3">
-                                {featuredPost.excerpt}
-                            </p>
-                            <div className="flex items-center justify-between mt-auto">
-                                <span className="text-sm text-muted-foreground">
-                                    {new Date(featuredPost.publishedAt).toLocaleDateString("en-US", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })}
-                                </span>
-                                <Link href={`/insights/${featuredPost.slug.current}`} className="inline-flex items-center text-sm font-medium text-primary hover:underline">
-                                    Read Article <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                            </div>
                         </div>
                     </div>
                 )}
 
-                <div className="grid gap-x-8 gap-y-12 md:grid-cols-3">
-                    {otherPosts.map((post) => (
-                        <div key={post.slug.current} className="group flex flex-col h-full">
-                            <div className="aspect-video bg-secondary/10 rounded-xl mb-4 relative overflow-hidden">
-                                {post.mainImage && (
-                                    <Image
-                                        src={urlForImage(post.mainImage).url()}
-                                        alt={post.title}
-                                        fill
-                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                )}
-                            </div>
-                            <div className="text-xs text-muted-foreground mb-2">
-                                {new Date(post.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                            </div>
-                            <h3 className="text-xl font-bold mb-3 group-hover:text-primary/80 transition-colors">
-                                <Link href={`/insights/${post.slug.current}`}>
-                                    {post.title}
-                                </Link>
-                            </h3>
-                            <p className="text-muted-foreground line-clamp-3 mb-4 flex-1">
-                                {post.excerpt}
-                            </p>
-                            <Link href={`/insights/${post.slug.current}`} className="inline-flex items-center text-sm font-medium text-primary hover:underline mt-auto">
-                                Read Article <ArrowRight className="ml-1 h-3 w-3" />
-                            </Link>
-                        </div>
-                    ))}
-                </div>
+                {/* FEATURED SECTION (Only show when NOT searching) */}
+                {featuredPost && (
+                    <div className="mb-20 animate-fade-in-up">
+                        <FeaturedInsightCard post={featuredPost} />
+                    </div>
+                )}
+
+                {/* MAIN GRID */}
+                {gridPosts.length > 0 ? (
+                    <div className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+                        {gridPosts.map((post) => (
+                            <InsightCard key={post.slug.current} post={post} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="py-24 text-center text-text-secondary border border-dashed border-text-secondary/20 rounded-2xl bg-bg-deep/50">
+                        <p className="text-xl font-medium mb-2">No insights found</p>
+                        <p className="text-sm opacity-70">Try adjusting your search criteria.</p>
+                    </div>
+                )}
 
             </main>
             <Footer />
