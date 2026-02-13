@@ -18,8 +18,30 @@ export default async function InsightsPage({
     const { search } = await Promise.resolve(searchParams)
     const posts = await client.fetch<Post[]>(postQuery, { search: search || null })
 
-    const featuredPost = !search && posts.length > 0 ? posts[0] : null
-    const gridPosts = !search && posts.length > 0 ? posts.slice(1) : posts
+    // Logic:
+    // 1. If searching, show all matching posts in grid.
+    // 2. If not searching:
+    //    a. Find the first post with isFeatured == true.
+    //    b. If none found, fallback to the most recent post (posts[0]).
+    //    c. The remaining posts form the grid.
+
+    let featuredPost = null
+    let gridPosts = posts
+
+    if (!search && posts.length > 0) {
+        // Try to find an explicit featured post
+        const explicitFeatured = posts.find((p) => p.isFeatured)
+
+        if (explicitFeatured) {
+            featuredPost = explicitFeatured
+            // Filter out the featured post from the grid
+            gridPosts = posts.filter((p) => p !== explicitFeatured)
+        } else {
+            // Fallback to latest
+            featuredPost = posts[0]
+            gridPosts = posts.slice(1)
+        }
+    }
 
     return (
         <div className="flex flex-col min-h-screen bg-bg-deep">

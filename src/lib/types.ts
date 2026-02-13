@@ -4,6 +4,7 @@ export interface Post {
     _id: string
     title: string
     slug: { current: string }
+    isFeatured?: boolean
     excerpt: string
     mainImage?: any
     publishedAt: string

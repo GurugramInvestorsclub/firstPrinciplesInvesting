@@ -4,6 +4,7 @@ export const postQuery = groq`
   *[_type == "post" && (!defined($search) || title match $search + "*" || excerpt match $search + "*" || body[].children[].text match $search + "*")] | order(publishedAt desc) {
     title,
     slug,
+    isFeatured,
     excerpt,
     mainImage,
     publishedAt,

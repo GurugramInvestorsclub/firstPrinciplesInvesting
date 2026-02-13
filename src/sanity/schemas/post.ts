@@ -11,6 +11,13 @@ export default defineType({
             type: 'string',
         }),
         defineField({
+            name: 'isFeatured',
+            title: 'Featured Insight',
+            type: 'boolean',
+            initialValue: false,
+            description: 'Mark this insight as featured. Only one insight should be featured at a time.',
+        }),
+        defineField({
             name: 'slug',
             title: 'Slug',
             type: 'slug',
