@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { postQuery, featuredPostQuery, nonFeaturedPostsQuery } from "@/lib/sanity.queries"
+import { postQuery, featuredPostQuery, allPostsQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { FeaturedInsightCard } from "@/components/cards/FeaturedInsightCard"
@@ -18,9 +18,10 @@ export default async function InsightsPage({
     // Await searchParams to suppress Next.js sync access warning (pending proper fix in future Next.js versions)
     const { search } = await Promise.resolve(searchParams)
 
-    // Using split queries for cleaner logic and better reliability
-    // 1. If searching, just use the search query (all posts formatted)
-    // 2. If NOT searching, fetch featured + non-featured separately
+    // Cleaner Architecture:
+    // 1. Fetch explicit featured post (most recently updated wins).
+    // 2. Fetch ALL posts.
+    // 3. Client-side filter to ensure no duplicates and robust fallback.
 
     let featuredPost: Post | null = null
     let gridPosts: Post[] = []
@@ -28,22 +29,30 @@ export default async function InsightsPage({
 
     if (search) {
         searchResults = await client.fetch<Post[]>(postQuery, { search })
-        // In search mode, we don't show featured section, just the grid of results
         gridPosts = searchResults
     } else {
-        // Parallel fetch for performance
-        const [explicitFeatured, otherPosts] = await Promise.all([
+        const [explicitFeatured, allPosts] = await Promise.all([
             client.fetch<Post | null>(featuredPostQuery),
-            client.fetch<Post[]>(nonFeaturedPostsQuery)
+            client.fetch<Post[]>(allPostsQuery)
         ])
 
         if (explicitFeatured) {
             featuredPost = explicitFeatured
-            gridPosts = otherPosts
-        } else if (otherPosts.length > 0) {
-            // Fallback: If no explicit featured, take the first of the "others" (which are ordered by date)
-            featuredPost = otherPosts[0]
-            gridPosts = otherPosts.slice(1)
+        } else if (allPosts.length > 0) {
+            // Fallback: Use latest post if no explicit featured exist
+            featuredPost = allPosts[0]
+        }
+
+        // Filter out the featured post from the grid to avoid duplication
+        if (featuredPost) {
+            gridPosts = allPosts.filter(p => p._id !== featuredPost?._id)
+            // Note: If using slug as key, filter by slug or _id. Post type has _id.
+            // Ensure Post type includes _id in next step if not present.
+            // Using slug for visual filtering if _id missing in current type def, 
+            // but strongly prefer _id.
+            gridPosts = allPosts.filter(p => p.slug.current !== featuredPost?.slug.current)
+        } else {
+            gridPosts = allPosts
         }
     }
 

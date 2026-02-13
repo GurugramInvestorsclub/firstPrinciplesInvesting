@@ -12,6 +12,7 @@ export const postQuery = groq`
   }
 `
 
+// Fetch the single most recently updated featured post
 export const featuredPostQuery = groq`
   *[_type == "post" && isFeatured == true] | order(_updatedAt desc)[0] {
     title,
@@ -24,8 +25,9 @@ export const featuredPostQuery = groq`
   }
 `
 
-export const nonFeaturedPostsQuery = groq`
-  *[_type == "post" && (!defined(isFeatured) || isFeatured == false)] | order(publishedAt desc) {
+// Fetch ALL posts, ordered by date
+export const allPostsQuery = groq`
+  *[_type == "post"] | order(publishedAt desc) {
     title,
     slug,
     isFeatured,
