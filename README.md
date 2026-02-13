@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# First Principles Investing
 
-## Getting Started
+Strip away noise. Think clearly. Compound intelligently.
 
-First, run the development server:
+**First Principles Investing** is a content platform dedicated to long-term structural thinking and business fundamentals. It serves as a digital journal and community hub for investors who prioritize signal over noise.
+
+![Project Preview](/public/logo.png)
+
+## 🚀 Key Features
+
+-   **Insights**: A deep-dive blog system with a "Featured Insight" toggle powered by Sanity CMS.
+    -   *Architecture*: Uses a split-query approach to ensure the most recently updated "Featured" post always takes the top spot, with a robust fallback to the latest post.
+-   **Events**: A section to list upcoming and past events, complete with registration links and detailed agendas.
+-   **CMS Powered**: Fully dynamic content managed via Sanity Studio.
+-   **Modern UI**: Built with a custom Design System using Tailwind CSS v4, featuring dark mode aesthetics and gold accents.
+-   **Performance**: Built on Next.js 16 (App Router) with Geist fonts and optimized image loading.
+
+## 🛠️ Tech Stack
+
+-   **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+-   **CMS**: [Sanity v5](https://www.sanity.io/)
+-   **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+-   **Icons**: [Lucide React](https://lucide.dev/)
+-   **Analytics**: Google Analytics (via `@next/third-parties`)
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+-   Node.js 18+
+-   npm or yarn
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/your-username/first-principles-investing.git
+cd first-principles-investing
+npm install
+```
+
+### 2. Configure Environment
+
+Create a `.env.local` file in the root directory and add your Sanity credentials:
+
+```bash
+NEXT_PUBLIC_SANITY_PROJECT_ID=your_project_id
+NEXT_PUBLIC_SANITY_DATASET=production
+NEXT_PUBLIC_SANITY_API_VERSION=2024-03-19
+NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=your_ga_id
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Admin Studio
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To manage content, navigate to `http://localhost:3000/studio`. This will open the embedded Sanity Studio where you can:
 
-## Learn More
+-   Create/Edit **Insights** (Blog posts)
+-   Manage **Events**
+-   Update **Authors**
+-   Toggle **Featured Insights**
 
-To learn more about Next.js, take a look at the following resources:
+## 📂 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+├── public/          # Static assets
+├── src/
+│   ├── app/         # Next.js App Router pages
+│   ├── components/  # React components (UI, Layout, Cards)
+│   ├── lib/         # Utilities, Types, Sanity Client
+│   ├── sanity/      # Sanity Studio config & schemas
+│   └── styles/      # Global styles
+├── sanity.config.ts # Sanity Studio configuration
+└── tailwind.config.ts # Tailwind configuration
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🎨 Design System
 
-## Deploy on Vercel
+The project uses a custom color palette defined in `src/app/globals.css`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-   **Primary**: Deep Black/Grey backgrounds (`bg-bg-deep`)
+-   **Accent**: Gold (`text-gold`) for highlights and active states.
+-   **Typography**: Geist Sans & Mono for clean, editorial readability.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🤝 Contributing
+
+1.  Fork the repository.
+2.  Create a feature branch (`git checkout -b feature/amazing-feature`).
+3.  Commit your changes (`git commit -m 'Add some amazing feature'`).
+4.  Push to the branch (`git push origin feature/amazing-feature`).
+5.  Open a Pull Request.
+
+---
+
+Built with ❤️ for clear thinkers.
