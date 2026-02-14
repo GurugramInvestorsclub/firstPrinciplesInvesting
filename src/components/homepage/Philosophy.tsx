@@ -1,65 +1,77 @@
-import { Brain, Layers, TrendingUp } from "lucide-react"
+import { Brain, Layers, TrendingUp, CheckCircle2 } from "lucide-react"
 
 const philosophies = [
     {
         icon: Brain,
-        title: "Think For Yourself",
+        title: "Independent Analysis",
         description:
-            "Most investors outsource their thinking to analysts, social media, or the loudest voice in the room. We help you build your own view - grounded in logic, not noise. Come see how at our next event.",
+            "Consensus is priced in. Outperformance requires a divergent view that happens to be right. We build conviction from raw data up, avoiding the echo chamber of market sentiment.",
         className: "md:col-span-1",
     },
     {
         icon: Layers,
-        title: "Moats are over-rated",
+        title: "Valuation Discipline",
         description:
-            "Moats matter — but they're wildly overhyped. A wide moat won't save a bad entry price or a stretched valuation. We teach you to look past the buzzwords and focus on what actually drives returns.",
+            "A great business at a bad price is a bad investment. We demand a margin of safety that protects against the unknown, focusing on free cash flow yield over narrative.",
         className: "md:col-span-1",
     },
     {
         icon: TrendingUp,
-        title: "Let Compounding Do the Work",
+        title: "Long-Term Horizon",
         description:
-            "The Indian retail investor is often sold the idea of quick returns. We believe the real edge is patience — owning decent businesses, bought at value, held long enough for the story to play out.",
+            "Time is the arbitrage. While the market chases quarterly beats, we position for multi-year structural compounding, allowing the business fundamentals to do the heavy lifting.",
         className: "md:col-span-1",
     },
 ]
 
 export function Philosophy() {
     return (
-        <section className="py-24 md:py-32 bg-bg-primary relative overflow-hidden text-text-primary">
+        <section className="py-24 md:py-32 bg-bg-primary relative overflow-hidden text-text-primary border-t border-text-secondary/10">
             <div className="container max-w-5xl px-4 mx-auto relative z-10">
-                <div className="text-center mb-20">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-text-primary">
-                        Our Philosophy.
+                <div className="text-center mb-16 md:mb-20">
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-text-primary drop-shadow-sm">
+                        The Framework
                     </h2>
-                    <p className="text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-                        We don't have hot tips. We have a simple framework — and we love teaching it.
+                    <p className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed font-normal">
+                        Markets are noisy. Evaluation is quiet. We allocate capital based on structural reality, not narrative.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
                     {philosophies.map((item, index) => (
                         <div
                             key={index}
-                            className={`group relative p-8 rounded-3xl border transition-all duration-300 flex flex-col justify-between ${item.className}
-                                bg-bg-deep border-text-secondary/20 shadow-sm hover:border-gold/30 hover:shadow-md
+                            className={`group relative p-8 rounded-2xl border transition-all duration-300 flex flex-col justify-start h-full ${item.className}
+                                bg-bg-deep border-text-secondary/10 hover:border-gold/20 hover:shadow-[0_0_30px_rgba(245,184,0,0.05)]
                             `}
                         >
                             <div className="mb-6">
-                                <div className="p-3 bg-gold/10 w-fit rounded-xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <item.icon className="h-8 w-8 text-gold" />
+                                <div className="p-3 bg-white/5 w-fit rounded-lg mb-6 group-hover:bg-gold/10 transition-colors duration-300">
+                                    <item.icon className="h-6 w-6 text-gold/80 group-hover:text-gold transition-colors" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4 text-text-primary">{item.title}</h3>
-                                <p className="text-text-secondary leading-relaxed text-lg">{item.description}</p>
-                            </div>
-
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <span className="text-sm font-medium text-gold flex items-center gap-1">
-                                    Learn more &rarr;
-                                </span>
+                                <h3 className="text-xl font-semibold mb-3 text-text-primary tracking-wide">{item.title}</h3>
+                                <p className="text-text-secondary/80 leading-relaxed text-base">{item.description}</p>
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Proof Layer */}
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-sm text-text-secondary/50 font-medium uppercase tracking-wider">
+                    <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-gold/60" />
+                        <span>Used by 100+ Serious Investors</span>
+                    </div>
+                    <div className="hidden md:block w-1 h-1 rounded-full bg-text-secondary/20"></div>
+                    <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-gold/60" />
+                        <span>5+ Years of Data</span>
+                    </div>
+                    <div className="hidden md:block w-1 h-1 rounded-full bg-text-secondary/20"></div>
+                    <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-gold/60" />
+                        <span>Institutional Grade</span>
+                    </div>
                 </div>
             </div>
         </section>
