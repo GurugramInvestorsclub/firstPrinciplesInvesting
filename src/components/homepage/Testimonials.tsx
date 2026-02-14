@@ -78,39 +78,44 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
     )
 }
 
+import { Quote } from "lucide-react"
+
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
     return (
-        <div className="bg-[#2E2E2E] p-6 rounded-2xl border border-[#3E3E3E] shadow-lg transition-transform duration-300 hover:scale-[1.02] hover:border-gold/30">
-            <div className="flex items-start gap-4 mb-4">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-bg-deep shrink-0 border border-text-secondary/20">
-                    {testimonial.photo ? (
-                        <Image
-                            src={urlForImage(testimonial.photo).width(200).height(200).url()}
-                            alt={testimonial.name}
-                            fill
-                            className="object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gold/10 flex items-center justify-center text-gold font-bold text-sm">
-                            {testimonial.name.slice(0, 2).toUpperCase()}
-                        </div>
-                    )}
-                </div>
-                <div>
-                    <h4 className="font-bold text-text-primary text-base leading-none mb-1">
-                        {testimonial.name}
-                    </h4>
-                    {testimonial.role && (
-                        <p className="text-xs text-text-secondary font-medium uppercase tracking-wide">
-                            {testimonial.role}
-                        </p>
-                    )}
-                </div>
-            </div>
+        <div className="group relative bg-[#2E2E2E]/80 backdrop-blur-sm p-8 rounded-3xl border border-white/5 shadow-lg transition-all duration-500 hover:scale-[1.02] hover:border-gold/20 hover:bg-[#2E2E2E]">
+            {/* Decorative Quote Icon */}
+            <Quote className="absolute top-6 right-6 w-8 h-8 text-white/5 group-hover:text-gold/10 transition-colors duration-500" />
 
-            <p className="text-[#A1A1A1] text-sm leading-relaxed">
-                "{testimonial.quote}"
-            </p>
+            <div className="flex flex-col gap-5">
+                <div className="flex items-center gap-4">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-bg-deep shrink-0 border border-white/10 group-hover:border-gold/30 transition-colors shadow-inner">
+                        {testimonial.photo ? (
+                            <Image
+                                src={urlForImage(testimonial.photo).width(200).height(200).url()}
+                                alt={testimonial.name}
+                                fill
+                                className="object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center text-gold font-bold text-sm tracking-wider">
+                                {testimonial.name.slice(0, 2).toUpperCase()}
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-text-primary text-lg tracking-tight leading-tight">
+                            {testimonial.name}
+                        </h4>
+                        <p className="text-xs text-gold/60 font-medium uppercase tracking-widest mt-0.5 group-hover:text-gold/80 transition-colors">
+                            {testimonial.role || "Member"}
+                        </p>
+                    </div>
+                </div>
+
+                <p className="text-neutral-300 text-[15px] leading-relaxed relative z-10 font-light italic opacity-90 group-hover:opacity-100 transition-opacity">
+                    "{testimonial.quote}"
+                </p>
+            </div>
         </div>
     )
 }
