@@ -6,6 +6,9 @@ import Link from "next/link"
 const components: PortableTextComponents = {
     types: {
         image: ({ value }: any) => {
+            if (!value?.asset?._ref) {
+                return null
+            }
             const imageUrl = urlForImage(value)?.url()
             const { width, height } = getImageDimensions(value) || { width: 800, height: 450 } // Fallback
 

@@ -34,7 +34,7 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
                                 Community
                             </span>
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-text-primary leading-[1.1]">
-                                We believe in the power of community.
+                                We believe in the power of <span className="text-gold">community.</span>
                             </h2>
                         </div>
 

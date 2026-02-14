@@ -32,18 +32,20 @@ export default async function InsightPage({ params }: Props) {
                 <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto">
                     <header className="mb-12 text-center">
                         <div className="text-sm text-muted-foreground mb-4">
-                            {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                            {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
-                            })}
+                            }) : "Date not available"}
                         </div>
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
                             {post.title}
                         </h1>
-                        <p className="text-xl text-muted-foreground leading-relaxed">
-                            {post.excerpt}
-                        </p>
+                        {post.excerpt && (
+                            <p className="text-xl text-muted-foreground leading-relaxed">
+                                {post.excerpt}
+                            </p>
+                        )}
                     </header>
 
                     {post.mainImage && (
@@ -58,9 +60,11 @@ export default async function InsightPage({ params }: Props) {
                         </div>
                     )}
 
-                    <div className="prose prose-lg dark:prose-invert mx-auto">
-                        <RichText value={post.body} />
-                    </div>
+                    {post.body && (
+                        <div className="prose prose-lg dark:prose-invert mx-auto">
+                            <RichText value={post.body} />
+                        </div>
+                    )}
                 </article>
             </main>
             <Footer />

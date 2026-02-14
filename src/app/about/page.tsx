@@ -13,7 +13,7 @@ export default function AboutPage() {
                         Signal in the Noise.
                     </h1>
                     <p className="text-xl md:text-2xl text-text-secondary leading-relaxed max-w-2xl mx-auto font-light">
-                        In a market obsessed with speed, we choose depth. We deconstruct businesses to their fundamental truths—unit economics, competitive advantages, and structural durability.
+                        In a market obsessed with speed, we choose depth. We deconstruct businesses to their fundamental truths unit economics, competitive advantages, and structural durability.
                     </p>
                 </section>
 
@@ -69,7 +69,7 @@ export default function AboutPage() {
 
                                 <div className="prose prose-invert prose-lg text-text-secondary leading-relaxed">
                                     <p>
-                                        In 2014, at 22, I bought my first stock—Cairn India—while managing an educational loan from my Aerospace Engineering degree in the UK.
+                                        In 2014, at 22, I bought my first stock Cairn India while managing an educational loan from my Aerospace Engineering degree in the UK.
                                     </p>
                                     <p>
                                         My real education began under a mentor with 20+ years of experience. Together, we built one of India's largest financial literacy programs, training over <span className="text-text-primary font-semibold">500,000+ investors</span>, including personnel from the BSF and state police forces.
@@ -99,7 +99,7 @@ export default function AboutPage() {
                 {/* Closing Mission */}
                 <section className="py-24 px-4 container max-w-3xl mx-auto text-center">
                     <p className="text-2xl font-serif italic text-text-primary leading-relaxed opacity-90">
-                        "I've walked this path myself—now I help others do the same."
+                        "I've walked this path myself now I help others do the same."
                     </p>
                 </section>
 
