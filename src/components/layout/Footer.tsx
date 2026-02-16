@@ -5,7 +5,7 @@ export function Footer() {
     return (
         <footer className="border-t border-gold bg-bg-deep text-sm">
             <div className="container max-w-5xl px-4 md:px-8 mx-auto py-16">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-12">
                     <div className="md:col-span-2 space-y-4">
                         <Link href="/" className="inline-block">
                             <div className="flex items-center gap-2">
@@ -38,7 +38,15 @@ export function Footer() {
                         <ul className="space-y-2 text-text-secondary">
                             <li><Link href="/about" className="hover:text-gold transition-colors">About</Link></li>
                             <li><Link href="/contact" className="hover:text-gold transition-colors">Contact</Link></li>
-                            <li><Link href="/privacy" className="hover:text-gold transition-colors">Privacy</Link></li>
+                        </ul>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="font-semibold text-text-primary">Legal</h4>
+                        <ul className="space-y-2 text-text-secondary">
+                            <li><Link href="/privacy-policy" className="hover:text-gold transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/terms-of-service" className="hover:text-gold transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/refund-cancellation-policy" className="hover:text-gold transition-colors">Refund Policy</Link></li>
                         </ul>
                     </div>
                 </div>
