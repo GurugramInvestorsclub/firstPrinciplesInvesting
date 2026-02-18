@@ -7,44 +7,8 @@ export default function AboutPage() {
         <div className="flex flex-col min-h-screen bg-bg-deep text-text-primary selection:bg-gold/20 selection:text-gold">
             <Navbar />
             <main className="flex-1">
-                {/* Hero / Philosophy - "Doctrine" style */}
-                <section className="pt-40 pb-20 px-4 container max-w-4xl mx-auto text-center">
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 text-text-primary">
-                        Signal in the Noise.
-                    </h1>
-                    <p className="text-xl md:text-2xl text-text-secondary leading-relaxed max-w-2xl mx-auto font-light">
-                        In a market obsessed with speed, we choose depth. We deconstruct businesses to their fundamental truths unit economics, competitive advantages, and structural durability.
-                    </p>
-                </section>
-
-                <div className="border-t border-border/20 w-full max-w-xs mx-auto mb-20"></div>
-
-                {/* Values - Structured Grid */}
-                <section className="pb-24 px-4 container max-w-5xl mx-auto">
-                    <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-gold uppercase tracking-widest border-b border-border/30 pb-2 inline-block">Intellectual Honesty</h3>
-                            <p className="text-text-secondary leading-relaxed text-lg">
-                                We admit what we don't know. We kill our best ideas if the data changes. No ego, just truth.
-                            </p>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-gold uppercase tracking-widest border-b border-border/30 pb-2 inline-block">Long-Term Orientation</h3>
-                            <p className="text-text-secondary leading-relaxed text-lg">
-                                Wealth is compounded over decades, not days. We think in 10-year cycles, ignoring quarterly noise.
-                            </p>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-gold uppercase tracking-widest border-b border-border/30 pb-2 inline-block">Structural Analysis</h3>
-                            <p className="text-text-secondary leading-relaxed text-lg">
-                                We look for moats, not hype. We focus on what doesn't change when everything else does.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
                 {/* Founder Section - Integrated & Authoritative */}
-                <section className="py-20 bg-bg-surface/20 border-t border-border/20">
+                <section className="pt-40 pb-20 bg-bg-surface/20">
                     <div className="px-4 container max-w-5xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 items-start">
                             {/* Image Side */}

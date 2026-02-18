@@ -13,24 +13,28 @@ interface AccordionItemProps {
 
 export function AccordionItem({ title, children, isOpen, onToggle }: AccordionItemProps) {
     return (
-        <div className="border-b border-border/50 last:border-0">
+        <div className="mb-4 rounded-xl border border-white/5 bg-[#1A1A1A] overflow-hidden transition-all duration-300 hover:border-gold/20">
             <button
                 onClick={onToggle}
-                className="flex w-full items-center justify-between py-4 text-left font-medium transition-all hover:text-primary"
+                className="flex w-full items-center justify-between px-6 py-5 text-left transition-all"
             >
-                {title}
+                <span className={cn("text-lg font-medium text-text-primary", isOpen && "text-gold")}>
+                    {title}
+                </span>
                 <ChevronDown
-                    className={cn("h-4 w-4 shrink-0 transition-transform duration-200", isOpen && "rotate-180")}
+                    className={cn("h-5 w-5 shrink-0 text-gold transition-transform duration-300", isOpen && "rotate-180")}
                 />
             </button>
             <div
                 className={cn(
-                    "overflow-hidden transition-all duration-300 ease-in-out",
-                    isOpen ? "max-h-96 opacity-100 mb-4" : "max-h-0 opacity-0"
+                    "grid transition-all duration-300 ease-in-out",
+                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                 )}
             >
-                <div className="text-muted-foreground text-sm leading-relaxed">
-                    {children}
+                <div className="overflow-hidden">
+                    <div className="px-6 pb-6 pt-0 text-text-secondary leading-relaxed">
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>
