@@ -3,6 +3,9 @@
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-heading: var(--font-inter-tight), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-mono-code: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
 
   /* Extend colors with brand variables */
   --color-gold: var(--gold);

@@ -1,7 +1,9 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
-import { Hero } from "@/components/homepage/Hero"
-import { Philosophy } from "@/components/homepage/Philosophy"
+import { CinematicHero } from "@/components/homepage/CinematicHero"
+import { Manifesto } from "@/components/homepage/Manifesto"
+import { Method } from "@/components/homepage/Method"
+import { ProofStats } from "@/components/homepage/ProofStats"
 import { RecentInsights } from "@/components/homepage/RecentInsights"
 import { UpcomingEvents } from "@/components/homepage/UpcomingEvents"
 import { Testimonials } from "@/components/homepage/Testimonials"
@@ -20,15 +22,16 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1">
-        <Hero />
-        <Philosophy />
-        <RecentInsights posts={posts} />
-        <UpcomingEvents events={events} />
+        <CinematicHero />
+        <Manifesto />
+        <Method />
+        <ProofStats />
         <Testimonials testimonials={testimonials} />
-
-
+        <UpcomingEvents events={events} />
+        <RecentInsights posts={posts} />
       </main>
       <Footer />
     </div>
   )
 }
+
