@@ -182,3 +182,86 @@
     animation-delay: 500ms;
   }
 }
+
+/* ─── Insights Page — Cinematic Research Archive ─── */
+.insights-page {
+  --insights-bg: #080810;
+  --insights-card: #12121A;
+  --insights-card-hover: #1A1A24;
+  --insights-card-featured: #16161F;
+  --insights-text: #F5F5F4;
+  --insights-text-muted: #9CA3AF;
+  --insights-accent: #C9A84C;
+  background-color: var(--insights-bg);
+}
+
+/* Disable GSAP-driven animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .insights-page [data-gsap] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ─── Insight Card Styles ─── */
+.insight-card {
+  background-color: var(--insights-card, #12121A);
+  border: 1px solid rgba(156, 163, 175, 0.08);
+}
+
+.insight-card:hover {
+  background-color: var(--insights-card-hover, #1A1A24);
+  border-color: rgba(201, 168, 76, 0.2);
+}
+
+.insight-card:hover .insight-arrow {
+  transform: translateX(4px);
+}
+
+/* ─── Featured Card Styles ─── */
+.featured-card {
+  background-color: var(--insights-card-featured, #16161F);
+  border: 1px solid rgba(156, 163, 175, 0.08);
+}
+
+.featured-card:hover {
+  border-color: rgba(201, 168, 76, 0.2);
+  transform: translateY(-4px);
+}
+
+.featured-card:hover .insight-arrow {
+  transform: translateX(6px);
+}
+
+/* ─── Shared Insight Typography ─── */
+.insight-date {
+  color: var(--insights-text-muted, #9CA3AF);
+}
+
+.insight-title {
+  color: var(--insights-text, #F5F5F4);
+}
+
+.insight-title-link {
+  text-decoration-color: rgba(201, 168, 76, 0.3);
+}
+
+.insight-excerpt {
+  color: var(--insights-text-muted, #9CA3AF);
+}
+
+.insight-cta-divider {
+  border-top: 1px solid rgba(156, 163, 175, 0.1);
+}
+
+.insight-cta {
+  color: var(--insights-text, #F5F5F4);
+}
+
+.insight-card:hover .insight-cta {
+  color: var(--insights-accent, #C9A84C);
+}
+
+.featured-cta {
+  color: var(--insights-accent, #C9A84C);
+}
