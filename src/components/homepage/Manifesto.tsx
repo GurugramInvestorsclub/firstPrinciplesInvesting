@@ -3,9 +3,18 @@
 import { useEffect, useRef } from "react"
 
 const paragraphs = [
-    "Tactics expire. Frameworks endure. We teach investors to see businesses as systems : to understand competitive moats, capital allocation logic, and the incentive structures that drive long-term outcomes.",
-    "This is not about hot stock tips or quarterly earnings reactions. It is about building the analytical infrastructure to make decisions you can hold for years.",
-    "Clarity in investing begins with clarity in thinking."
+    {
+        intro: "Tactics expire. Frameworks endure.",
+        text: "We teach investors to see businesses as systems : to understand competitive moats, capital allocation logic, and the incentive structures that drive long-term outcomes."
+    },
+    {
+        intro: "",
+        text: "This is not about hot stock tips or quarterly earnings reactions. It is about building the analytical infrastructure to make decisions you can hold for years."
+    },
+    {
+        intro: "",
+        text: "Clarity in investing begins with clarity in thinking."
+    }
 ]
 
 export function Manifesto() {
@@ -88,7 +97,7 @@ export function Manifesto() {
 
             <div className="container max-w-4xl px-6 md:px-12 mx-auto relative z-10">
                 {/* Muted lead-in */}
-                <p className="text-sm md:text-base text-text-secondary tracking-wide mb-6 uppercase font-medium"
+                <p className="text-sm md:text-base text-gray-400 tracking-wide mb-6 uppercase font-medium"
                     style={{ letterSpacing: "0.08em" }}
                 >
                     Most investing education focuses on tactics.
@@ -103,7 +112,7 @@ export function Manifesto() {
                         {headlineWords.map((word, i) => (
                             <span
                                 key={i}
-                                className={`word inline-block mr-[0.3em] ${word === "foundations." ? "text-gold font-bold" : "text-text-primary"
+                                className={`word inline-block mr-[0.3em] ${word === "foundations." ? "text-gold font-bold" : "text-white"
                                     }`}
                             >
                                 {word}
@@ -113,13 +122,18 @@ export function Manifesto() {
                 </div>
 
                 {/* Sharp paragraphs */}
-                <div className="space-y-6 max-w-2xl">
+                <div className="space-y-8 max-w-prose">
                     {paragraphs.map((p, i) => (
                         <p
                             key={i}
-                            className="manifesto-para text-base md:text-lg text-text-secondary leading-relaxed"
+                            className="manifesto-para text-base md:text-lg text-gray-300 leading-[1.7]"
                         >
-                            {p}
+                            {p.intro && (
+                                <span className="block text-xl font-medium text-white mb-2">
+                                    {p.intro}
+                                </span>
+                            )}
+                            {p.text}
                         </p>
                     ))}
                 </div>

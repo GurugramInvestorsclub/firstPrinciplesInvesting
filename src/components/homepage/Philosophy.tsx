@@ -26,14 +26,14 @@ const philosophies = [
 
 export function Philosophy() {
     return (
-        <section className="py-24 md:py-32 bg-bg-deep relative overflow-hidden text-text-primary border-t border-white/5">
+        <section className="py-24 md:py-32 bg-bg-deep relative overflow-hidden text-white border-t border-white/5">
             <div className="container max-w-6xl px-4 mx-auto relative z-10">
                 {/* Header Area - Increased Spacing & Clarity */}
                 <div className="text-center mb-20 md:mb-28">
-                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-text-primary">
+                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-white">
                         The Framework
                     </h2>
-                    <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto leading-relaxed font-light">
+                    <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-[1.7] font-light max-w-prose">
                         Markets are noisy. Evaluation is quiet. <br className="hidden md:block" />
                         We allocate capital based on <span className="text-gold font-medium">structural reality</span>, not narrative.
                     </p>
@@ -53,11 +53,11 @@ export function Philosophy() {
                                     <item.icon className="h-6 w-6 text-gold/90 group-hover:text-gold transition-colors" />
                                 </div>
 
-                                <h3 className="text-2xl font-bold mb-4 text-text-primary tracking-tight">
+                                <h3 className="text-2xl font-bold mb-4 text-white tracking-tight">
                                     {item.title}
                                 </h3>
 
-                                <p className="text-neutral-300 leading-loose text-lg font-light opacity-90 group-hover:opacity-100 transition-opacity">
+                                <p className="text-gray-400 leading-[1.7] text-base font-light opacity-90 group-hover:opacity-100 transition-opacity">
                                     {item.description}
                                 </p>
                             </div>
@@ -66,7 +66,7 @@ export function Philosophy() {
                 </div>
 
                 {/* Proof Layer - Improved Visibility & Spacing */}
-                <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm text-neutral-400 font-medium uppercase tracking-widest opacity-80 hover:opacity-100 transition-opacity">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm text-gray-400 font-medium uppercase tracking-widest opacity-80 hover:opacity-100 transition-opacity">
                     <div className="flex items-center gap-3">
                         <CheckCircle2 className="w-5 h-5 text-gold" />
                         <span>Used by 100+ Serious Investors</span>
