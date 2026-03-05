@@ -16,4 +16,6 @@ model Registration {
   razorpayOrderId   String?
   razorpayPaymentId String?
   createdAt         DateTime @default(now())
+
+  @@unique([email, seminarSlug])
 }
