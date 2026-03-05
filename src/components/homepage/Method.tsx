@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { ArrowRight } from "lucide-react"
 
 const steps = [
     {
@@ -37,11 +38,11 @@ export function Method() {
             gsap.registerPlugin(ScrollTrigger)
 
             ctx = gsap.context(() => {
-                const cards = sectionRef.current?.querySelectorAll(".method-step")
-                if (!cards) return
+                const elements = sectionRef.current?.querySelectorAll(".method-element")
+                if (!elements) return
 
-                gsap.set(cards, { opacity: 0, y: 30 })
-                gsap.to(cards, {
+                gsap.set(elements, { opacity: 0, y: 30 })
+                gsap.to(elements, {
                     opacity: 1,
                     y: 0,
                     duration: 0.8,
@@ -63,44 +64,57 @@ export function Method() {
     return (
         <section
             ref={sectionRef}
-            className="py-28 md:py-36 bg-bg-deep border-t border-white/5"
+            className="py-24 md:py-32 bg-bg-deep border-t border-white/5 overflow-hidden"
         >
-            <div className="container max-w-6xl px-6 md:px-12 mx-auto">
-                {/* Section label */}
-                <p
-                    className="text-xs uppercase tracking-[0.2em] text-text-secondary mb-4 font-medium"
-                    style={{ fontFamily: "var(--font-mono-code)" }}
-                >
-                    Methodology
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-text-primary mb-16 md:mb-20">
-                    How It Works
-                </h2>
+            <div className="container max-w-5xl px-6 mx-auto flex flex-col items-center">
+                {/* Section Header */}
+                <div className="text-center mb-16 md:mb-20 method-element w-full">
+                    <p
+                        className="text-xs uppercase tracking-[0.2em] text-text-secondary mb-4 font-medium"
+                        style={{ fontFamily: "var(--font-mono-code)" }}
+                    >
+                        Methodology
+                    </p>
+                    <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary">
+                        How It Works
+                    </h2>
+                </div>
 
-                {/* Steps */}
-                <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
-                    {/* Connecting line (desktop only) */}
-                    <div className="hidden md:block absolute top-12 left-[16.66%] right-[16.66%] h-px bg-white/10" aria-hidden="true" />
-
+                {/* Flow Container */}
+                <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 w-full">
                     {steps.map((step, i) => (
-                        <div key={i} className="method-step relative flex flex-col gap-4">
-                            {/* Step number */}
-                            <span
-                                className="text-5xl md:text-6xl font-bold text-gold/20 leading-none"
-                                style={{ fontFamily: "var(--font-mono-code)" }}
-                            >
-                                {step.number}
-                            </span>
+                        <div key={i} className="flex flex-col md:flex-row items-center gap-6 md:gap-4 w-full md:w-auto method-element">
+                            {/* Card */}
+                            <div className="peer group relative w-full md:w-[280px] p-8 md:p-10 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] hover:-translate-y-1 overflow-hidden flex flex-col justify-center min-h-[200px]">
+                                {/* Background Number */}
+                                <span
+                                    className="absolute -bottom-2 -right-4 text-[120px] font-bold text-white/[0.02] transition-colors duration-300 group-hover:text-gold/[0.06] leading-none pointer-events-none select-none tracking-tighter"
+                                    style={{ fontFamily: "var(--font-mono-code)" }}
+                                >
+                                    {step.number}
+                                </span>
 
-                            {/* Title */}
-                            <h3 className="text-xl md:text-2xl font-bold text-text-primary tracking-tight">
-                                {step.title}
-                            </h3>
+                                <div className="relative z-10 flex flex-col gap-3">
+                                    <h3 className="text-2xl font-bold text-text-primary tracking-tight">
+                                        {step.title}
+                                    </h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">
+                                        {step.description}
+                                    </p>
+                                </div>
+                            </div>
 
-                            {/* Description */}
-                            <p className="text-text-secondary text-base leading-relaxed max-w-xs">
-                                {step.description}
-                            </p>
+                            {/* Arrow Connection (except last item) */}
+                            {i < steps.length - 1 && (
+                                <>
+                                    <div className="hidden relative md:flex items-center justify-center text-white/20 transition-all duration-300 peer-hover:text-gold/50 peer-hover:drop-shadow-[0_0_8px_rgba(245,184,0,0.5)]">
+                                        <ArrowRight className="w-6 h-6" strokeWidth={1.5} />
+                                    </div>
+                                    <div className="md:hidden flex items-center justify-center py-2 text-white/20 transition-all duration-300 peer-hover:text-gold/50 peer-hover:drop-shadow-[0_0_8px_rgba(245,184,0,0.5)]">
+                                        <ArrowRight className="w-6 h-6 rotate-90" strokeWidth={1.5} />
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
