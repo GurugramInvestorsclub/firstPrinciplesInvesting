@@ -89,11 +89,11 @@ export default function AdminRegistrationsPage() {
             case "paid":
                 return { bg: "rgba(34,197,94,0.12)", color: "#4ade80" };
             case "pending":
-                return { bg: "rgba(250,204,21,0.12)", color: "#facc15" };
+                return { bg: "rgba(245,184,0,0.12)", color: "var(--gold)" };
             case "failed":
                 return { bg: "rgba(239,68,68,0.12)", color: "#f87171" };
             default:
-                return { bg: "rgba(161,161,170,0.1)", color: "#a1a1aa" };
+                return { bg: "rgba(107,107,107,0.1)", color: "var(--text-secondary)" };
         }
     };
 
@@ -116,7 +116,7 @@ export default function AdminRegistrationsPage() {
                             fontSize: "24px",
                             fontWeight: 700,
                             letterSpacing: "-0.03em",
-                            color: "#fafafa",
+                            color: "var(--text-primary)",
                             margin: 0,
                         }}
                     >
@@ -125,7 +125,7 @@ export default function AdminRegistrationsPage() {
                     <p
                         style={{
                             fontSize: "14px",
-                            color: "#71717a",
+                            color: "var(--text-secondary)",
                             marginTop: "4px",
                         }}
                     >
@@ -139,8 +139,8 @@ export default function AdminRegistrationsPage() {
                     onClick={handleExport}
                     style={{
                         padding: "10px 20px",
-                        background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                        color: "#fff",
+                        background: "linear-gradient(135deg, var(--gold), var(--gold-muted))",
+                        color: "#1A1A1A",
                         border: "none",
                         borderRadius: "8px",
                         fontSize: "13px",
@@ -148,7 +148,7 @@ export default function AdminRegistrationsPage() {
                         cursor: "pointer",
                         letterSpacing: "0.02em",
                         transition: "all 0.2s",
-                        boxShadow: "0 2px 8px rgba(99,102,241,0.25)",
+                        boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
                     }}
                     onMouseEnter={(e) =>
                         (e.currentTarget.style.transform = "translateY(-1px)")
@@ -178,19 +178,19 @@ export default function AdminRegistrationsPage() {
                     style={{
                         padding: "10px 16px",
                         background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(107,107,107,0.2)",
                         borderRadius: "8px",
-                        color: "#e4e4e7",
+                        color: "var(--text-primary)",
                         fontSize: "14px",
                         minWidth: "260px",
                         outline: "none",
                         transition: "border-color 0.2s",
                     }}
                     onFocus={(e) =>
-                        (e.currentTarget.style.borderColor = "rgba(99,102,241,0.4)")
+                        (e.currentTarget.style.borderColor = "var(--gold)")
                     }
                     onBlur={(e) =>
-                        (e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)")
+                        (e.currentTarget.style.borderColor = "rgba(107,107,107,0.2)")
                     }
                 />
 
@@ -200,9 +200,9 @@ export default function AdminRegistrationsPage() {
                     style={{
                         padding: "10px 16px",
                         background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(107,107,107,0.2)",
                         borderRadius: "8px",
-                        color: "#e4e4e7",
+                        color: "var(--text-primary)",
                         fontSize: "14px",
                         cursor: "pointer",
                         outline: "none",
@@ -239,7 +239,7 @@ export default function AdminRegistrationsPage() {
             <div
                 style={{
                     borderRadius: "12px",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(107,107,107,0.2)",
                     overflow: "hidden",
                     background: "rgba(255,255,255,0.02)",
                 }}
@@ -255,7 +255,7 @@ export default function AdminRegistrationsPage() {
                         <thead>
                             <tr
                                 style={{
-                                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                    borderBottom: "1px solid rgba(107,107,107,0.2)",
                                     background: "rgba(255,255,255,0.03)",
                                 }}
                             >
@@ -276,7 +276,7 @@ export default function AdminRegistrationsPage() {
                                             fontSize: "11px",
                                             letterSpacing: "0.08em",
                                             textTransform: "uppercase",
-                                            color: "#71717a",
+                                            color: "var(--text-secondary)",
                                             whiteSpace: "nowrap",
                                         }}
                                     >
@@ -293,7 +293,7 @@ export default function AdminRegistrationsPage() {
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
-                                            color: "#71717a",
+                                            color: "var(--text-secondary)",
                                         }}
                                     >
                                         <span
@@ -313,7 +313,7 @@ export default function AdminRegistrationsPage() {
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
-                                            color: "#52525b",
+                                            color: "var(--text-secondary)",
                                         }}
                                     >
                                         No registrations found
@@ -327,7 +327,7 @@ export default function AdminRegistrationsPage() {
                                             key={reg.id}
                                             style={{
                                                 borderBottom:
-                                                    "1px solid rgba(255,255,255,0.04)",
+                                                    "1px solid rgba(107,107,107,0.1)",
                                                 transition: "background 0.15s",
                                             }}
                                             onMouseEnter={(e) =>
@@ -343,7 +343,7 @@ export default function AdminRegistrationsPage() {
                                                 style={{
                                                     padding: "14px 16px",
                                                     fontWeight: 500,
-                                                    color: "#fafafa",
+                                                    color: "var(--text-primary)",
                                                     whiteSpace: "nowrap",
                                                 }}
                                             >
@@ -352,7 +352,7 @@ export default function AdminRegistrationsPage() {
                                             <td
                                                 style={{
                                                     padding: "14px 16px",
-                                                    color: "#a1a1aa",
+                                                    color: "var(--text-secondary)",
                                                 }}
                                             >
                                                 {reg.email}
@@ -360,7 +360,7 @@ export default function AdminRegistrationsPage() {
                                             <td
                                                 style={{
                                                     padding: "14px 16px",
-                                                    color: "#a1a1aa",
+                                                    color: "var(--text-secondary)",
                                                     fontFamily:
                                                         "var(--font-geist-mono), monospace",
                                                     fontSize: "13px",
@@ -378,8 +378,8 @@ export default function AdminRegistrationsPage() {
                                                         padding: "3px 10px",
                                                         borderRadius: "4px",
                                                         background:
-                                                            "rgba(99,102,241,0.1)",
-                                                        color: "#a5b4fc",
+                                                            "rgba(245,184,0,0.1)",
+                                                        color: "var(--gold)",
                                                         fontSize: "12px",
                                                         fontWeight: 500,
                                                     }}
@@ -410,7 +410,7 @@ export default function AdminRegistrationsPage() {
                                             <td
                                                 style={{
                                                     padding: "14px 16px",
-                                                    color: "#71717a",
+                                                    color: "var(--text-secondary)",
                                                     fontSize: "13px",
                                                     whiteSpace: "nowrap",
                                                 }}

@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "#0a0a0f",
+                background: "var(--bg-deep)",
                 fontFamily:
                     'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}
@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
                     maxWidth: "380px",
                     padding: "40px",
                     background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(107,107,107,0.2)",
                     borderRadius: "16px",
                     backdropFilter: "blur(12px)",
                 }}
@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
                         style={{
                             fontSize: "22px",
                             fontWeight: 700,
-                            color: "#fafafa",
+                            color: "var(--text-primary)",
                             letterSpacing: "-0.03em",
                             margin: 0,
                         }}
@@ -75,7 +75,7 @@ export default function AdminLoginPage() {
                     <p
                         style={{
                             fontSize: "14px",
-                            color: "#71717a",
+                            color: "var(--text-secondary)",
                             marginTop: "8px",
                         }}
                     >
@@ -111,9 +111,9 @@ export default function AdminLoginPage() {
                         width: "100%",
                         padding: "12px 16px",
                         background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(107,107,107,0.2)",
                         borderRadius: "8px",
-                        color: "#e4e4e7",
+                        color: "var(--text-primary)",
                         fontSize: "14px",
                         outline: "none",
                         transition: "border-color 0.2s",
@@ -122,11 +122,11 @@ export default function AdminLoginPage() {
                     }}
                     onFocus={(e) =>
                     (e.currentTarget.style.borderColor =
-                        "rgba(99,102,241,0.4)")
+                        "var(--gold)")
                     }
                     onBlur={(e) =>
                     (e.currentTarget.style.borderColor =
-                        "rgba(255,255,255,0.08)")
+                        "rgba(107,107,107,0.2)")
                     }
                 />
 
@@ -137,16 +137,16 @@ export default function AdminLoginPage() {
                         width: "100%",
                         padding: "12px",
                         background: loading
-                            ? "rgba(99,102,241,0.4)"
-                            : "linear-gradient(135deg, #6366f1, #4f46e5)",
-                        color: "#fff",
+                            ? "var(--gold-muted)"
+                            : "linear-gradient(135deg, var(--gold), var(--gold-muted))",
+                        color: "#1A1A1A",
                         border: "none",
                         borderRadius: "8px",
                         fontSize: "14px",
                         fontWeight: 600,
                         cursor: loading ? "not-allowed" : "pointer",
                         transition: "all 0.2s",
-                        boxShadow: "0 2px 8px rgba(99,102,241,0.25)",
+                        boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
                     }}
                 >
                     {loading ? "Logging in…" : "Login"}

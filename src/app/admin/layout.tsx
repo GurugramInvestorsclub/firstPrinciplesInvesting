@@ -14,20 +14,20 @@ export default function AdminLayout({
         <div
             style={{
                 minHeight: "100vh",
-                background: "#0a0a0f",
-                color: "#e4e4e7",
+                background: "var(--bg-deep)",
+                color: "var(--text-primary)",
                 fontFamily:
                     'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}
         >
             <header
                 style={{
-                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    borderBottom: "1px solid rgba(107, 107, 107, 0.2)",
                     padding: "16px 32px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    background: "rgba(10,10,15,0.95)",
+                    background: "rgba(26, 26, 26, 0.95)",
                     backdropFilter: "blur(12px)",
                     position: "sticky",
                     top: 0,
@@ -40,7 +40,7 @@ export default function AdminLayout({
                             fontSize: "18px",
                             fontWeight: 600,
                             letterSpacing: "-0.02em",
-                            color: "#fafafa",
+                            color: "var(--text-primary)",
                         }}
                     >
                         FPI Admin
@@ -50,9 +50,9 @@ export default function AdminLayout({
                             fontSize: "11px",
                             padding: "2px 8px",
                             borderRadius: "4px",
-                            background: "rgba(99,102,241,0.15)",
-                            color: "#818cf8",
-                            fontWeight: 500,
+                            background: "rgba(245, 184, 0, 0.15)",
+                            color: "var(--gold)",
+                            fontWeight: 600,
                             letterSpacing: "0.05em",
                             textTransform: "uppercase",
                         }}
