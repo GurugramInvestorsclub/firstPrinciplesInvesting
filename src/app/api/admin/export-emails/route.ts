@@ -14,7 +14,7 @@ export async function GET() {
 
         const header = "name,email,seminarSlug"
         const rows = registrations.map(
-            (r) =>
+            (r: { name: string; email: string; seminarSlug: string }) =>
                 `"${r.name.replace(/"/g, '""')}","${r.email.replace(/"/g, '""')}","${r.seminarSlug.replace(/"/g, '""')}"`
         )
         const csv = [header, ...rows].join("\n")
