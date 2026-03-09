@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: "Admin | First Principles Investing",
@@ -34,31 +35,42 @@ export default function AdminLayout({
                     zIndex: 50,
                 }}
             >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span
-                        style={{
-                            fontSize: "18px",
-                            fontWeight: 600,
-                            letterSpacing: "-0.02em",
-                            color: "var(--text-primary)",
-                        }}
-                    >
-                        FPI Admin
-                    </span>
-                    <span
-                        style={{
-                            fontSize: "11px",
-                            padding: "2px 8px",
-                            borderRadius: "4px",
-                            background: "rgba(245, 184, 0, 0.15)",
-                            color: "var(--gold)",
-                            fontWeight: 600,
-                            letterSpacing: "0.05em",
-                            textTransform: "uppercase",
-                        }}
-                    >
-                        Dashboard
-                    </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <span
+                            style={{
+                                fontSize: "18px",
+                                fontWeight: 600,
+                                letterSpacing: "-0.02em",
+                                color: "var(--text-primary)",
+                            }}
+                        >
+                            FPI Admin
+                        </span>
+                        <span
+                            style={{
+                                fontSize: "11px",
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                background: "rgba(245, 184, 0, 0.15)",
+                                color: "var(--gold)",
+                                fontWeight: 600,
+                                letterSpacing: "0.05em",
+                                textTransform: "uppercase",
+                            }}
+                        >
+                            Dashboard
+                        </span>
+                    </div>
+
+                    <nav style={{ display: "flex", gap: "24px" }}>
+                        <Link href="/admin/registrations" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Registrations
+                        </Link>
+                        <Link href="/admin/questions" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Questions
+                        </Link>
+                    </nav>
                 </div>
             </header>
             <main style={{ padding: "32px" }}>{children}</main>
