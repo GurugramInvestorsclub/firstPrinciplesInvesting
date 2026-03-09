@@ -28,7 +28,8 @@ export default function AdminLoginPage() {
                 return;
             }
 
-            router.push("/admin/registrations");
+            // Force a full page reload to clear router cache and ensure middleware re-evaluates auth cookie
+            window.location.href = "/admin/registrations";
         } catch {
             setError("Something went wrong. Please try again.");
         } finally {
