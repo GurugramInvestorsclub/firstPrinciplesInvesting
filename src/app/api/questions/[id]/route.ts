@@ -15,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json(updatedQuestion);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
+            return NextResponse.json({ error: error.issues[0].message }, { status: 400 });
         }
         console.error('Error updating question:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
