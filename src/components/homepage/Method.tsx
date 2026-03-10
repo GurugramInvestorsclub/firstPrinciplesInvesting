@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
 
 const steps = [
     {
@@ -22,101 +21,99 @@ const steps = [
 ]
 
 export function Method() {
-    const sectionRef = useRef<HTMLElement>(null)
-
-    useEffect(() => {
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-        ).matches
-        if (prefersReducedMotion) return
-
-        let ctx: any = null
-
-        async function init() {
-            const gsap = (await import("gsap")).default
-            const { ScrollTrigger } = await import("gsap/ScrollTrigger")
-            gsap.registerPlugin(ScrollTrigger)
-
-            ctx = gsap.context(() => {
-                const elements = sectionRef.current?.querySelectorAll(".method-element")
-                if (!elements) return
-
-                gsap.set(elements, { opacity: 0, y: 30 })
-                gsap.to(elements, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.8,
-                    stagger: 0.15,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 70%",
-                        once: true,
-                    },
-                })
-            }, sectionRef)
-        }
-
-        init()
-        return () => ctx?.revert()
-    }, [])
-
     return (
         <section
-            ref={sectionRef}
-            className="py-24 md:py-32 bg-bg-deep border-t border-white/5 overflow-hidden"
+            className="py-24 md:py-32 bg-[#0E0E11] relative overflow-hidden z-10"
         >
-            <div className="container max-w-5xl px-6 mx-auto flex flex-col items-center">
+            {/* Ambient Lighting */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,199,44,0.08),transparent_60%)] pointer-events-none -z-10" />
+            
+            <div className="container max-w-6xl px-6 mx-auto flex flex-col items-center relative z-10">
                 {/* Section Header */}
-                <div className="text-center mb-16 md:mb-20 method-element w-full">
+                <motion.div 
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="text-center mb-16 md:mb-24 w-full"
+                >
                     <p
-                        className="text-xs uppercase tracking-[0.2em] text-text-secondary mb-4 font-medium"
+                        className="text-sm font-bold text-gold uppercase tracking-widest mb-4 inline-block"
                         style={{ fontFamily: "var(--font-mono-code)" }}
                     >
                         Methodology
                     </p>
-                    <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary">
+                    <h2 className="text-4xl md:text-5xl lg:text-[44px] font-semibold tracking-tight text-white drop-shadow-lg">
                         How It Works
                     </h2>
-                </div>
+                </motion.div>
 
                 {/* Flow Container */}
-                <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 w-full">
-                    {steps.map((step, i) => (
-                        <div key={i} className="flex flex-col md:flex-row items-center gap-6 md:gap-4 w-full md:w-auto method-element">
-                            {/* Card */}
-                            <div className="peer group relative w-full md:w-[280px] p-8 md:p-10 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] hover:-translate-y-1 overflow-hidden flex flex-col justify-center min-h-[200px]">
+                <div className="w-full flex-col md:flex-row flex items-center justify-center relative">
+                    {/* Desktop Horizontal Connecting Line */}
+                    <div className="hidden md:block absolute top-[90px] left-[15%] right-[15%] h-[2px] z-0">
+                        {/* Static Track Background */}
+                        <div className="absolute inset-0 bg-white/5 rounded-full" />
+                        {/* Animated Sweep Line */}
+                        <motion.div 
+                            initial={{ scaleX: 0 }}
+                            whileInView={{ scaleX: 1 }}
+                            viewport={{ once: true, margin: "-100px" }}
+                            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FFC72C]/60 to-[#FFC72C] rounded-full origin-left"
+                        />
+                    </div>
+
+                    {/* Mobile Vertical Connecting Line */}
+                    <div className="md:hidden absolute top-[10%] bottom-[10%] left-1/2 -translate-x-1/2 w-[2px] z-0">
+                        {/* Static Track Background */}
+                        <div className="absolute inset-0 bg-white/5 rounded-full" />
+                        {/* Animated Sweep Line */}
+                        <motion.div 
+                            initial={{ scaleY: 0 }}
+                            whileInView={{ scaleY: 1 }}
+                            viewport={{ once: true, margin: "-100px" }}
+                            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
+                            className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFC72C]/60 to-[#FFC72C] rounded-full origin-top"
+                        />
+                    </div>
+
+                    {/* Steps Container */}
+                    <div className="flex flex-col md:flex-row items-center justify-between w-full h-full gap-16 md:gap-4 relative z-10">
+                        {steps.map((step, i) => (
+                            <motion.div 
+                                key={i} 
+                                initial={{ opacity: 0, y: 40 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-100px" }}
+                                transition={{ duration: 0.6, delay: i * 0.2, ease: "easeOut" }}
+                                whileHover={{ y: -6, scale: 1.02 }}
+                                className="group relative w-[280px] p-8 rounded-[18px] bg-gradient-to-b from-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.08)] hover:border-gold/30 hover:shadow-[0_20px_60px_rgba(255,199,44,0.15)] flex flex-col min-h-[220px] transition-all duration-500 overflow-hidden backdrop-blur-md"
+                            >
                                 {/* Background Number */}
                                 <span
-                                    className="absolute -bottom-2 -right-4 text-[120px] font-bold text-white/[0.02] transition-colors duration-300 group-hover:text-gold/[0.06] leading-none pointer-events-none select-none tracking-tighter"
-                                    style={{ fontFamily: "var(--font-mono-code)" }}
+                                    className="absolute -bottom-2 right-5 text-[120px] font-bold text-white opacity-5 transition-colors duration-500 leading-none select-none tracking-tighter"
                                 >
                                     {step.number}
                                 </span>
 
-                                <div className="relative z-10 flex flex-col gap-3">
-                                    <h3 className="text-2xl font-bold text-text-primary tracking-tight">
+                                <div className="relative z-10 flex flex-col gap-4">
+                                    <div className="flex items-center gap-4 mb-2">
+                                        <div className="w-10 h-10 rounded-full bg-[#111113] border border-white/10 flex items-center justify-center text-gold font-bold text-sm shadow-[0_0_15px_rgba(0,0,0,0.5)] group-hover:border-gold/30 group-hover:bg-gold/10 transition-colors duration-300">
+                                            {step.number}
+                                        </div>
+                                    </div>
+                                    <h3 className="text-[22px] font-semibold text-white tracking-tight">
                                         {step.title}
                                     </h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">
+                                    <p className="text-[16px] text-[#b8b3aa] leading-[1.6] font-light">
                                         {step.description}
                                     </p>
                                 </div>
-                            </div>
-
-                            {/* Arrow Connection (except last item) */}
-                            {i < steps.length - 1 && (
-                                <>
-                                    <div className="hidden relative md:flex items-center justify-center text-white/20 transition-all duration-300 peer-hover:text-gold/50 peer-hover:drop-shadow-[0_0_8px_rgba(245,184,0,0.5)]">
-                                        <ArrowRight className="w-6 h-6" strokeWidth={1.5} />
-                                    </div>
-                                    <div className="md:hidden flex items-center justify-center py-2 text-white/20 transition-all duration-300 peer-hover:text-gold/50 peer-hover:drop-shadow-[0_0_8px_rgba(245,184,0,0.5)]">
-                                        <ArrowRight className="w-6 h-6 rotate-90" strokeWidth={1.5} />
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    ))}
+                                <div className="absolute inset-0 bg-gold/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
