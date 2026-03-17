@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Menu, X } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 export function Navbar() {
+    const { data: session } = useSession()
     const pathname = usePathname()
     const [scrolled, setScrolled] = useState(false)
     const [hidden, setHidden] = useState(false)
@@ -20,6 +22,9 @@ export function Navbar() {
         { href: "/ask", label: "Ask" },
         { href: "/about", label: "About" },
     ]
+
+    // Desktop auth link
+    const authLink = session ? { href: "/dashboard", label: "Dashboard" } : { href: "/login", label: "Login" }
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -101,6 +106,17 @@ export function Navbar() {
                             {link.label}
                         </Link>
                     ))}
+                    <Link
+                        href={authLink.href}
+                        className={cn(
+                            "text-sm font-semibold px-5 py-2 rounded-full transition-all",
+                            session
+                                ? "bg-white/5 border border-white/10 text-text-primary hover:bg-white/10"
+                                : "bg-gold text-bg-deep hover:bg-gold-muted shadow-lg shadow-gold/10"
+                        )}
+                    >
+                        {authLink.label}
+                    </Link>
                 </nav>
 
                 {/* Mobile burger button */}
@@ -118,7 +134,7 @@ export function Navbar() {
             <div
                 className={cn(
                     "md:hidden w-[92%] max-w-7xl mx-auto overflow-hidden transition-all duration-300 ease-in-out",
-                    mobileOpen ? "max-h-[300px] opacity-100 mt-2" : "max-h-0 opacity-0 mt-0"
+                    mobileOpen ? "max-h-[400px] opacity-100 mt-2" : "max-h-0 opacity-0 mt-0"
                 )}
             >
                 <nav className="rounded-2xl border border-[#2E2E2E] bg-bg-deep/95 backdrop-blur-xl shadow-2xl py-4 px-6 flex flex-col gap-1">
@@ -137,6 +153,19 @@ export function Navbar() {
                             {link.label}
                         </Link>
                     ))}
+                    <div className="h-px bg-white/10 my-2" />
+                    <Link
+                        href={authLink.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                            "text-base font-bold py-3 px-4 rounded-xl transition-all text-center",
+                            session
+                                ? "text-text-primary bg-white/5"
+                                : "text-bg-deep bg-gold"
+                        )}
+                    >
+                        {authLink.label}
+                    </Link>
                 </nav>
             </div>
 

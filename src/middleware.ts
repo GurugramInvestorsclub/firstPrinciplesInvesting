@@ -1,26 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
 
-export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl
+export default auth((req) => {
+    const { pathname } = req.nextUrl
+    const isLoggedIn = !!req.auth
 
-    // Skip the login page itself
-    if (pathname === "/admin/login") {
-        return NextResponse.next()
+    // Protect /dashboard
+    if (pathname.startsWith("/dashboard")) {
+        if (!isLoggedIn) {
+            const loginUrl = new URL("/login", req.url)
+            return NextResponse.redirect(loginUrl)
+        }
     }
 
-    // Protect all /admin routes
-    if (pathname.startsWith("/admin")) {
-        const session = request.cookies.get("admin_session")
+    // Protect all /admin routes (Existing Logic)
+    if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+        const session = req.cookies.get("admin_session")
 
         if (!session || session.value !== "true") {
-            const loginUrl = new URL("/admin/login", request.url)
+            const loginUrl = new URL("/admin/login", req.url)
             return NextResponse.redirect(loginUrl)
         }
     }
 
     return NextResponse.next()
-}
+})
 
 export const config = {
-    matcher: ["/admin/:path*"],
+    matcher: ["/admin/:path*", "/dashboard/:path*"],
 }
