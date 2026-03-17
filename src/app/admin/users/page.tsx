@@ -45,6 +45,13 @@ export default function AdminUsersPage() {
         return () => clearTimeout(timer);
     }, [fetchUsers]);
 
+    const handleExport = () => {
+        const a = document.createElement("a");
+        a.href = "/api/admin/users/export";
+        a.download = "users.csv";
+        a.click();
+    };
+
     const formatDate = (iso: string) => {
         const d = new Date(iso);
         return d.toLocaleDateString("en-IN", {
@@ -93,6 +100,31 @@ export default function AdminUsersPage() {
                             : `${users.length} user${users.length !== 1 ? "s" : ""} joined via Auth.js`}
                     </p>
                 </div>
+
+                 <button
+                    onClick={handleExport}
+                    style={{
+                        padding: "10px 20px",
+                        background: "linear-gradient(135deg, var(--gold), var(--gold-muted))",
+                        color: "#1A1A1A",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        letterSpacing: "0.02em",
+                        transition: "all 0.2s",
+                        boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
+                    }}
+                    onMouseEnter={(e) =>
+                        (e.currentTarget.style.transform = "translateY(-1px)")
+                    }
+                    onMouseLeave={(e) =>
+                        (e.currentTarget.style.transform = "translateY(0)")
+                    }
+                >
+                    ↓ Export CSV
+                </button>
             </div>
 
             {/* Filters */}
