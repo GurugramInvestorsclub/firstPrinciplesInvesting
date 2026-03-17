@@ -5,11 +5,11 @@ import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { authConfig } from "./auth.config"
 
-const { 
-  handlers, 
-  auth, 
-  signIn, 
-  signOut 
+const {
+    handlers,
+    auth,
+    signIn,
+    signOut
 } = NextAuth({
     ...authConfig,
     adapter: PrismaAdapter(prisma),

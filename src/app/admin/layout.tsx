@@ -70,6 +70,9 @@ export default function AdminLayout({
                         <Link href="/admin/questions" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Questions
                         </Link>
+                        <Link href="/admin/users" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Users
+                        </Link>
                     </nav>
                 </div>
             </header>
