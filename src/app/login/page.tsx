@@ -1,13 +1,13 @@
 "use client"
 
 import { signIn } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 
-export default function LoginPage() {
+function LoginContent() {
     const [isLogin, setIsLogin] = useState(true)
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -247,5 +247,13 @@ export default function LoginPage() {
                 </p>
             </div>
         </main>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-bg-deep" />}>
+            <LoginContent />
+        </Suspense>
     )
 }
