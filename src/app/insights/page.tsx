@@ -45,10 +45,6 @@ export default async function InsightsPage({
         }
     }
 
-    // Debug logging
-    console.log("Featured Post:", featuredPost?.title)
-    console.log("Grid Posts Count:", gridPosts.length)
-
     return (
         <div className="flex flex-col min-h-screen insights-page">
             <Navbar />

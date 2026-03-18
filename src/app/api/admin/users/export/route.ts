@@ -2,6 +2,12 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 
+function toSafeCsvCell(value: string | null | undefined): string {
+    const normalized = (value ?? "").replace(/\r?\n/g, " ").trim()
+    const formulaPrefixed = /^[=+\-@]/.test(normalized) ? `'${normalized}` : normalized
+    return `"${formulaPrefixed.replace(/"/g, '""')}"`
+}
+
 export async function GET() {
     try {
         if (!(await isAdminAuthenticated())) {
@@ -21,8 +27,14 @@ export async function GET() {
             const name = u.name || ""
             const email = u.email || ""
             const createdAt = u.createdAt.toISOString()
-            
-            return `"${u.id}","${name.replace(/"/g, '""')}","${email.replace(/"/g, '""')}","${loginMethod}","${createdAt}"`
+
+            return [
+                toSafeCsvCell(u.id),
+                toSafeCsvCell(name),
+                toSafeCsvCell(email),
+                toSafeCsvCell(loginMethod),
+                toSafeCsvCell(createdAt),
+            ].join(",")
         })
         
         const csv = [header, ...rows].join("\n")

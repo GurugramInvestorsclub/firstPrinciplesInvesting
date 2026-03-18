@@ -32,6 +32,46 @@ export default defineType({
             type: 'datetime',
         }),
         defineField({
+            name: 'eventId',
+            title: 'Event ID',
+            description: 'Stable backend identifier used for payment mapping (e.g. APR2026_MASTERCLASS).',
+            type: 'string',
+            validation: (Rule) =>
+                Rule.required()
+                    .min(3)
+                    .max(64)
+                    .regex(/^[A-Za-z0-9_-]+$/, {
+                        name: 'letters, numbers, underscore or hyphen',
+                    })
+                    .custom(async (value, context) => {
+                        if (!value) return true
+
+                        const client = context.getClient({ apiVersion: '2024-03-19' })
+
+                        const documentId = context.document?._id?.replace(/^drafts\./, '')
+                        if (!documentId) return true
+
+                        const duplicate = await client.fetch(
+                            `*[_type == "event" && eventId == $eventId && !(_id in [$draftId, $publishedId])][0]._id`,
+                            {
+                                eventId: value,
+                                draftId: `drafts.${documentId}`,
+                                publishedId: documentId,
+                            }
+                        )
+
+                        return !duplicate || 'eventId must be unique across events'
+                    }),
+        }),
+        defineField({
+            name: 'price',
+            title: 'Display Price (INR)',
+            description:
+                'Display-only CMS price. Billing amount is calculated from backend event pricing, not from this field.',
+            type: 'number',
+            validation: (Rule) => Rule.required().min(1),
+        }),
+        defineField({
             name: 'location',
             title: 'Location',
             type: 'string',

@@ -34,6 +34,11 @@ const {
                     return null
                 }
 
+                const isVerified = user.emailVerified || process.env.NODE_ENV !== "production"
+                if (!isVerified) {
+                    return null
+                }
+
                 const isPasswordValid = await bcrypt.compare(
                     credentials.password as string,
                     user.password

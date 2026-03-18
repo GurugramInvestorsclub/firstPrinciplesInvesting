@@ -1,8 +1,8 @@
 "use client"
 
 import { signIn } from "next-auth/react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -14,12 +14,36 @@ export default function LoginPage() {
     const [name, setName] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const [notice, setNotice] = useState("")
     const router = useRouter()
+    const searchParams = useSearchParams()
+
+    useEffect(() => {
+        const verificationState = searchParams.get("verification")
+        if (verificationState === "success") {
+            setNotice("Email verified. You can sign in now.")
+            setError("")
+            setIsLogin(true)
+            return
+        }
+        if (verificationState === "already_verified") {
+            setNotice("Email already verified. Please sign in.")
+            setError("")
+            setIsLogin(true)
+            return
+        }
+        if (verificationState === "invalid") {
+            setError("Verification link is invalid or expired.")
+            setNotice("")
+            setIsLogin(true)
+        }
+    }, [searchParams])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError("")
+        setNotice("")
 
         if (isLogin) {
             const result = await signIn("credentials", {
@@ -49,14 +73,15 @@ export default function LoginPage() {
                     setError(data.error || "Something went wrong")
                     setLoading(false)
                 } else {
-                    // Automatically log in after signup
-                    await signIn("credentials", {
-                        email,
-                        password,
-                        callbackUrl: "/dashboard",
-                    })
+                    setNotice(
+                        data.message ||
+                            "If your email can receive messages, a verification link has been sent."
+                    )
+                    setIsLogin(true)
+                    setPassword("")
+                    setLoading(false)
                 }
-            } catch (err) {
+            } catch {
                 setError("An error occurred during signup")
                 setLoading(false)
             }
@@ -151,6 +176,11 @@ export default function LoginPage() {
                             {error && (
                                 <p className="text-destructive text-sm px-1 py-1">
                                     {error}
+                                </p>
+                            )}
+                            {notice && (
+                                <p className="text-emerald-400 text-sm px-1 py-1">
+                                    {notice}
                                 </p>
                             )}
 

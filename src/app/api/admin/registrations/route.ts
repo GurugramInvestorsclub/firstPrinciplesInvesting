@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
 
 export async function GET(request: NextRequest) {
     try {
+        if (!(await isAdminAuthenticated())) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+
         const { searchParams } = new URL(request.url)
         const seminar = searchParams.get("seminar")
         const email = searchParams.get("email")

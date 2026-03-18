@@ -13,11 +13,13 @@ export interface Post {
 
 export interface Event {
     _id: string
+    eventId: string
     title: string
     subHeading?: string
     slug: { current: string }
     date: string
     location: string
+    price: number
     highlightStat?: string
     shortDescription: string
     whyThisMatters?: PortableTextBlock[]
@@ -32,7 +34,7 @@ export interface Event {
     agenda?: { time: string; title: string; description: string }[]
     faq?: { question: string; answer: string }[]
     longDescription?: PortableTextBlock[]
-    registrationLink: string
+    registrationLink?: string
     image?: any
 }
 

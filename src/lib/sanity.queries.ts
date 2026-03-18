@@ -61,10 +61,12 @@ export const singlePostQuery = groq`
 
 export const eventsQuery = groq`
   *[_type == "event" && date >= now()] | order(date asc) {
+    eventId,
     title,
     slug,
     date,
     location,
+    price,
     shortDescription,
     image,
     registrationLink
@@ -73,10 +75,12 @@ export const eventsQuery = groq`
 
 export const upcomingEventsHomeQuery = groq`
   *[_type == "event" && date >= now()] | order(date asc)[0...3] {
+    eventId,
     title,
     slug,
     date,
     location,
+    price,
     shortDescription,
     image,
     registrationLink
@@ -85,11 +89,13 @@ export const upcomingEventsHomeQuery = groq`
 
 export const singleEventQuery = groq`
   *[_type == "event" && slug.current == $slug][0] {
+    eventId,
     title,
     subHeading,
     slug,
     date,
     location,
+    price,
     highlightStat,
     shortDescription,
     whyThisMatters,
@@ -106,10 +112,12 @@ export const singleEventQuery = groq`
 
 export const pastEventsQuery = groq`
   *[_type == "event" && date < now()] | order(date desc) {
+    eventId,
     title,
     slug,
     date,
     location,
+    price,
     shortDescription,
     image
   }

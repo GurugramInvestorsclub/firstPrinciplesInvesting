@@ -1,8 +1,19 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
+
+function toSafeCsvCell(value: string | null | undefined): string {
+    const normalized = (value ?? "").replace(/\r?\n/g, " ").trim()
+    const formulaPrefixed = /^[=+\-@]/.test(normalized) ? `'${normalized}` : normalized
+    return `"${formulaPrefixed.replace(/"/g, '""')}"`
+}
 
 export async function GET() {
     try {
+        if (!(await isAdminAuthenticated())) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+
         const registrations = await prisma.registration.findMany({
             select: {
                 name: true,
@@ -15,7 +26,7 @@ export async function GET() {
         const header = "name,email,seminarSlug"
         const rows = registrations.map(
             (r: { name: string; email: string; seminarSlug: string }) =>
-                `"${r.name.replace(/"/g, '""')}","${r.email.replace(/"/g, '""')}","${r.seminarSlug.replace(/"/g, '""')}"`
+                `${toSafeCsvCell(r.name)},${toSafeCsvCell(r.email)},${toSafeCsvCell(r.seminarSlug)}`
         )
         const csv = [header, ...rows].join("\n")
 

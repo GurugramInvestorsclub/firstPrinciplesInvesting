@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from "framer-motion"
-import { Calendar, MapPin, Clock, ExternalLink } from "lucide-react"
+import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Event } from "@/lib/types"
@@ -11,7 +11,7 @@ interface EventHeroProps {
 }
 
 export function EventHero({ event }: EventHeroProps) {
-    const isRegistrationOpen = !!event.registrationLink && new Date(event.date) > new Date()
+    const isRegistrationOpen = !!event.eventId && new Date(event.date) > new Date()
     const eventDate = new Date(event.date)
 
     return (
@@ -98,8 +98,8 @@ export function EventHero({ event }: EventHeroProps) {
                             <div className="pt-4">
                                 {isRegistrationOpen ? (
                                     <Button asChild size="lg" className="w-full text-base font-bold h-14 bg-gradient-to-r from-[#FFC72C] via-[#E6B422] to-[#C89B3C] text-[#0b0b0c] hover:shadow-[0_14px_35px_rgba(255,199,44,0.35)] hover:-translate-y-0.5 border-none transition-all duration-300">
-                                        <Link href={event.registrationLink} target="_blank" rel="noopener noreferrer">
-                                            Register Now <ExternalLink className="ml-2 h-4 w-4" />
+                                        <Link href="#register">
+                                            Proceed to Secure Checkout <ArrowRight className="ml-2 h-4 w-4" />
                                         </Link>
                                     </Button>
                                 ) : (
