@@ -1,9 +1,10 @@
 "use client"
 
+import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { motion, Variants } from "framer-motion"
-import { Calendar, MapPin, User } from "lucide-react"
+import { motion, Variants, AnimatePresence } from "framer-motion"
+import { Calendar, MapPin, User, ChevronLeft, ChevronRight } from "lucide-react"
 import { Event } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -147,11 +148,70 @@ function EventCard({ event, isPastEvent }: { event: Event; isPastEvent?: boolean
 }
 
 export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPastEvent?: boolean }) {
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(false);
+
+    const updateArrowVisibility = () => {
+        if (!scrollRef.current) return;
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        setShowLeftArrow(scrollLeft > 10);
+        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    };
+
+    useEffect(() => {
+        updateArrowVisibility();
+        window.addEventListener("resize", updateArrowVisibility);
+        return () => window.removeEventListener("resize", updateArrowVisibility);
+    }, [events]);
+
+    const scroll = (direction: "left" | "right") => {
+        if (!scrollRef.current) return;
+        const scrollAmount = scrollRef.current.clientWidth * 0.8;
+        scrollRef.current.scrollBy({
+            left: direction === "left" ? -scrollAmount : scrollAmount,
+            behavior: "smooth"
+        });
+    };
+
     if (!events || events.length === 0) return null;
 
     return (
-        <div className="relative -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="relative group/carousel -mx-4 px-4 md:mx-0 md:px-0">
+            {/* Navigation Arrows */}
+            <AnimatePresence>
+                {showLeftArrow && (
+                    <motion.button
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        onClick={() => scroll("left")}
+                        className="hidden md:flex absolute left-4 top-[40%] -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-gold hover:text-bg-deep transition-all duration-300 shadow-2xl"
+                        aria-label="Scroll left"
+                    >
+                        <ChevronLeft className="w-6 h-6" />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showRightArrow && (
+                    <motion.button
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        onClick={() => scroll("right")}
+                        className="hidden md:flex absolute right-4 top-[40%] -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-gold hover:text-bg-deep transition-all duration-300 shadow-2xl"
+                        aria-label="Scroll right"
+                    >
+                        <ChevronRight className="w-6 h-6" />
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
             <motion.div 
+                ref={scrollRef}
+                onScroll={updateArrowVisibility}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-50px" }}
@@ -177,5 +237,5 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
                 }
             `}} />
         </div>
-    )
+    );
 }
