@@ -19,6 +19,12 @@ function LoginContent() {
     const searchParams = useSearchParams()
 
     useEffect(() => {
+        const errorState = searchParams.get("error")
+        if (errorState === "OAuthAccountNotLinked") {
+            setError("An account with this email already exists using a different sign-in method. Please log in with your email and password.")
+            return
+        }
+
         const verificationState = searchParams.get("verification")
         if (verificationState === "success") {
             setNotice("Email verified. You can sign in now.")
