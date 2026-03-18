@@ -50,12 +50,12 @@ function parseIpCandidate(raw: string): string | null {
   }
 
   const ipv4WithOptionalPort =
-    /^(?<ip>(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3})(?::\d{1,5})?$/
+    /^((?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3})(?::\d{1,5})?$/
   const ipv6 = /^(?:[A-Fa-f0-9:]+)$/
 
   const ipv4Match = candidate.match(ipv4WithOptionalPort)
-  if (ipv4Match?.groups?.ip) {
-    return ipv4Match.groups.ip
+  if (ipv4Match?.[1]) {
+    return ipv4Match[1]
   }
 
   if (ipv6.test(candidate)) {
