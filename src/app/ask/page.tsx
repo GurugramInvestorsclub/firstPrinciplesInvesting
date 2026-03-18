@@ -2,6 +2,7 @@
 
 import { useState, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import { questionTopics } from '@/modules/questions/validation/questionSchema';
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
@@ -73,14 +74,13 @@ export default function AskPage() {
             <Navbar />
 
             <main
-                className="flex-1 relative overflow-hidden flex flex-col justify-center items-center py-32 px-4 sm:px-6 lg:px-8 font-sans"
-                style={{ background: 'linear-gradient(180deg, #0b0b0c 0%, #0f1114 50%, #0b0b0c 100%)' }}
+                className="flex-1 relative overflow-hidden flex flex-col justify-center items-center py-32 px-4 sm:px-6 lg:px-8 font-sans bg-[#080808]"
             >
                 {/* Background Network Graphic with radial fade */}
                 <div
                     className="absolute inset-0 pointer-events-none z-0"
                     style={{
-                        opacity: 0.10,
+                        opacity: 0.08,
                         maskImage: 'radial-gradient(circle at center, black 0%, transparent 70%)',
                         WebkitMaskImage: 'radial-gradient(circle at center, black 0%, transparent 70%)'
                     }}
@@ -94,36 +94,33 @@ export default function AskPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, ease: "easeOut" }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
                         className="text-center mb-16"
                     >
                         {/* Header Label */}
-                        <span className="text-gold text-xs font-mono uppercase tracking-[0.25em] mb-6 block" style={{ color: '#FFC72C' }}>
+                        <span className="text-gold text-xs font-heading font-medium uppercase tracking-[0.3em] mb-6 block">
                             INVESTOR DESK
                         </span>
 
                         {/* Headline */}
-                        <h1 className="text-[52px] md:text-[64px] font-serif font-light text-[#F3F0EA] mb-[24px] tracking-tight leading-[1.05]" style={{ fontFamily: "var(--font-display)" }}>
+                        <h1 className="text-6xl md:text-7xl font-serif font-bold text-text-primary mb-6 tracking-tight leading-[1.05]">
                             Ask a Question.<br />
-                            Think in <span style={{ background: 'linear-gradient(90deg, #FFC72C, #E6B422, #C89B3C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'inline-block' }}>First Principles.</span>
+                            <span className="text-gold">Think in First Principles.</span>
                         </h1>
 
                         {/* Description */}
-                        <p className="text-[#B8B3AA] text-[18px] max-w-[520px] mx-auto font-light leading-relaxed">
+                        <p className="text-text-secondary text-xl max-w-[540px] mx-auto font-light leading-relaxed">
                             Have a question about markets, investing, or strategy?
-                            <br />
                             Submit it below and we may address it in an upcoming insight.
                         </p>
                     </motion.div>
 
                     <div
-                        className="backdrop-blur-md relative"
+                        className="backdrop-blur-2xl relative group/card transition-all duration-700 hover:shadow-[0_0_80px_rgba(245,184,0,0.12)] border-white/5 hover:border-gold/20"
                         style={{
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: '20px',
+                            background: 'rgba(0, 0, 0, 0.4)',
+                            borderRadius: '32px',
                             padding: '48px',
-                            boxShadow: '0 0 80px rgba(255,199,44,0.06)'
                         }}
                     >
                         {success ? (
@@ -143,9 +140,10 @@ export default function AskPage() {
                                 </p>
                                 <button
                                     onClick={() => setSuccess(false)}
-                                    className="font-mono uppercase tracking-[0.14em] text-[13px] px-8 py-4 rounded-md border border-[rgba(255,255,255,0.1)] text-[#F3F0EA] hover:border-[#FFC72C] hover:text-[#FFC72C] transition-all duration-300 bg-transparent"
+                                    className="px-8 py-4 rounded-xl bg-gold text-bg-deep font-bold hover:bg-gold/90 transition-all duration-300 shadow-lg hover:shadow-gold/30 hover:scale-[1.02] flex items-center justify-center gap-2 group"
                                 >
                                     Submit Another Inquiry
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </motion.div>
                         ) : (
@@ -163,7 +161,7 @@ export default function AskPage() {
                                     transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
                                     className="mb-[48px]"
                                 >
-                                    <label className="block text-xs font-mono uppercase tracking-[0.14em] text-[#8E8A82] mb-5 pl-1">
+                                    <label className="block text-[11px] font-heading font-semibold uppercase tracking-[0.2em] text-text-secondary mb-5 pl-1 opacity-60">
                                         Select Topic Area
                                     </label>
                                     <div className="flex flex-wrap gap-3">
@@ -174,13 +172,13 @@ export default function AskPage() {
                                                     key={topic}
                                                     type="button"
                                                     onClick={() => handleTopicSelect(topic)}
-                                                    className={`px-[20px] py-[10px] rounded-full text-[14px] transition-all duration-[180ms] ${isActive
-                                                            ? 'border text-[#FFC72C]'
-                                                            : 'bg-transparent border-[1px] border-[rgba(255,255,255,0.12)] text-[#B8B3AA] hover:border-[rgba(255,199,44,0.5)] hover:text-[#F3F0EA] hover:-translate-y-[2px]'
+                                                    className={`px-5 py-2.5 rounded-full text-sm transition-all duration-300 ${isActive
+                                                            ? 'text-gold'
+                                                            : 'bg-white/5 border border-white/10 text-text-secondary hover:border-gold/30 hover:text-text-primary hover:-translate-y-0.5'
                                                         }`}
                                                     style={isActive ? {
-                                                        background: 'linear-gradient(135deg, rgba(255,199,44,0.18), rgba(255,199,44,0.08))',
-                                                        border: '1px solid rgba(255,199,44,0.45)'
+                                                        background: 'rgba(245,184,0,0.1)',
+                                                        border: '1px solid rgba(245,184,0,0.3)'
                                                     } : {}}
                                                 >
                                                     {topic}
@@ -198,10 +196,10 @@ export default function AskPage() {
                                     className="mb-[32px]"
                                 >
                                     <div className="flex justify-between items-center mb-4 pl-1 pr-2">
-                                        <label htmlFor="question" className="block text-xs font-mono uppercase tracking-[0.14em] text-[#8E8A82]">
+                                        <label htmlFor="question" className="block text-[11px] font-heading font-semibold uppercase tracking-[0.2em] text-text-secondary opacity-60">
                                             Your Question
                                         </label>
-                                        <span className="text-[11px] font-mono text-[#8E8A82]/60">{formData.question.length} / 500</span>
+                                        <span className="text-[10px] font-heading text-text-secondary/40">{formData.question.length} / 500</span>
                                     </div>
                                     <textarea
                                         name="question"
@@ -212,10 +210,7 @@ export default function AskPage() {
                                         onBlur={() => setIsFormFocused(false)}
                                         required
                                         maxLength={500}
-                                        style={{
-                                            background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))'
-                                        }}
-                                        className="w-full border border-[rgba(255,255,255,0.10)] rounded-[16px] p-[24px] font-serif text-[#F3F0EA] placeholder-[#8E8A82] transition-all duration-300 min-h-[160px] outline-none resize-none focus:border-[rgba(255,199,44,0.6)] focus:shadow-[0_0_0_2px_rgba(255,199,44,0.15)] text-[18px] leading-[1.6]"
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-serif text-text-primary placeholder-text-secondary/40 transition-all duration-300 min-h-[160px] outline-none resize-none focus:border-gold/30 focus:bg-white/[0.07] text-xl leading-relaxed"
                                         placeholder="What investing question would you like answered?"
                                     />
                                 </motion.div>
@@ -228,7 +223,7 @@ export default function AskPage() {
                                     className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-[48px]"
                                 >
                                     <div>
-                                        <label htmlFor="name" className="block text-xs font-mono uppercase tracking-[0.14em] text-[#8E8A82] mb-3 pl-1">
+                                        <label htmlFor="name" className="block text-[11px] font-heading font-semibold uppercase tracking-[0.2em] text-text-secondary mb-3 pl-1 opacity-60">
                                             Name
                                         </label>
                                         <input
@@ -240,12 +235,12 @@ export default function AskPage() {
                                             onFocus={() => setIsFormFocused(true)}
                                             onBlur={() => setIsFormFocused(false)}
                                             required
-                                            className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-[16px] text-[#F3F0EA] placeholder-[#8E8A82]/60 transition-all duration-300 outline-none focus:border-[rgba(255,199,44,0.5)] font-light text-[15px]"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-text-primary placeholder-text-secondary/30 transition-all duration-300 outline-none focus:border-gold/30 focus:bg-white/[0.07] font-light text-base"
                                             placeholder="Jane Doe"
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="email" className="block text-xs font-mono uppercase tracking-[0.14em] text-[#8E8A82] mb-3 pl-1">
+                                        <label htmlFor="email" className="block text-[11px] font-heading font-semibold uppercase tracking-[0.2em] text-text-secondary mb-3 pl-1 opacity-60">
                                             Email
                                         </label>
                                         <input
@@ -257,7 +252,7 @@ export default function AskPage() {
                                             onFocus={() => setIsFormFocused(true)}
                                             onBlur={() => setIsFormFocused(false)}
                                             required
-                                            className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-[16px] text-[#F3F0EA] placeholder-[#8E8A82]/60 transition-all duration-300 outline-none focus:border-[rgba(255,199,44,0.5)] font-light text-[15px]"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-text-primary placeholder-text-secondary/30 transition-all duration-300 outline-none focus:border-gold/30 focus:bg-white/[0.07] font-light text-base"
                                             placeholder="jane@example.com"
                                         />
                                     </div>
@@ -284,16 +279,14 @@ export default function AskPage() {
                                     <button
                                         type="submit"
                                         disabled={loading || formData.question.length < 10 || !formData.name || !formData.email}
-                                        style={{
-                                            background: 'linear-gradient(135deg, #FFC72C, #E6B422, #C89B3C)'
-                                        }}
-                                        className="w-full block text-[#0b0b0c] font-mono uppercase tracking-[0.14em] text-[13px] rounded-md py-[18px] px-[32px] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_14px_35px_rgba(255,199,44,0.35)] active:scale-[0.96] disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                        className="w-full py-5 rounded-xl bg-[#FFD700] text-black font-bold text-base hover:bg-[#FFC72C] transition-all duration-500 shadow-[0_10px_30px_rgba(255,215,0,0.15)] hover:shadow-[0_0_40px_rgba(255,215,0,0.5)] hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
                                     >
                                         {loading ? 'Submitting...' : 'Submit Inquiry'}
+                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                     </button>
 
-                                    <p className="text-center text-[#8e8a82] text-[13px] mt-6 leading-relaxed">
-                                        All submissions are reviewed personally and remain strictly confidential.
+                                    <p className="text-center text-text-secondary/60 text-xs mt-6 leading-relaxed font-heading uppercase tracking-widest">
+                                        All submissions remain strictly confidential.
                                     </p>
                                 </motion.div>
                             </motion.form>
@@ -308,7 +301,7 @@ export default function AskPage() {
                         transition={{ duration: 1, delay: 0.8 }}
                         className="mt-16 mx-auto max-w-[500px]"
                     >
-                        <h4 className="text-[#8E8A82] text-xs font-mono uppercase tracking-[0.14em] mb-6 text-center">
+                        <h4 className="text-text-secondary font-heading font-semibold uppercase tracking-[0.2em] text-[10px] mb-6 text-center opacity-60">
                             Recently Discussed Topics
                         </h4>
                         <ul className="space-y-4">
@@ -317,8 +310,8 @@ export default function AskPage() {
                                 "How should investors approach nuclear energy stocks?",
                                 "Are chemical companies entering a new cycle?"
                             ].map((q, i) => (
-                                <li key={i} className="flex gap-4 items-start text-[#B8B3AA] font-light text-[15px]">
-                                    <span className="text-[#FFC72C] font-serif text-lg leading-none mt-0.5">•</span>
+                                <li key={i} className="flex gap-4 items-start text-text-secondary font-light text-base">
+                                    <span className="text-gold font-serif text-xl leading-none mt-0.5">•</span>
                                     <span className="leading-snug">{q}</span>
                                 </li>
                             ))}
