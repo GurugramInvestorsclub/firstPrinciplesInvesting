@@ -17,7 +17,10 @@ function safeCompare(a: string, b: string): boolean {
 }
 
 function getSessionSecret(): string {
-    const secret = process.env.ADMIN_SESSION_SECRET ?? process.env.NEXTAUTH_SECRET
+    const secret =
+        process.env.ADMIN_SESSION_SECRET ??
+        process.env.AUTH_SECRET ??
+        process.env.NEXTAUTH_SECRET
     if (!secret || secret.length < 32) {
         throw new Error(
             "ADMIN_SESSION_SECRET (or NEXTAUTH_SECRET) must be set and at least 32 characters long"
