@@ -773,7 +773,7 @@ export async function createOrReuseOrder(params: {
       return {
         paymentId: prepared.paymentId,
         orderId: order.id,
-        amount: order.amount,
+        amount: Number(order.amount),
         currency: order.currency,
         eventId: params.eventId,
         couponCode: pricing.coupon?.code ?? null,
