@@ -59,14 +59,6 @@ export default function AboutPage() {
                         </div>
                     </div>
                 </section>
-
-                {/* Closing Mission */}
-                <section className="py-24 px-4 container max-w-3xl mx-auto text-center">
-                    <p className="text-2xl font-serif italic text-text-primary leading-relaxed opacity-90">
-                        "I've walked this path myself now I help others do the same."
-                    </p>
-                </section>
-
             </main>
             <Footer />
         </div>
