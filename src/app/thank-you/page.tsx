@@ -25,6 +25,21 @@ function ThankYouContent() {
                 has_email: !!email
             })
         }
+
+        // GSAP Micro-interactions
+        const initGSAP = async () => {
+            const gsap = (await import("gsap")).default
+            // Subtle pulse for the main button glow
+            gsap.to(".primary-btn-glow", {
+                opacity: 0.4,
+                scale: 1.1,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            })
+        }
+        initGSAP()
     }, [source, type, email])
 
     const trackClick = (label: string) => {
@@ -82,28 +97,15 @@ function ThankYouContent() {
                     </div>
                 </motion.div>
 
-                {/* SECTION 2: Value Reinforcement */}
-                <motion.div 
-                    variants={itemVariants} 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/5"
-                >
-                    {[
-                        "Practical investing insights",
-                        "No noise. Only what matters",
-                        "Built for long-term investors"
-                    ].map((text, i) => (
-                        <div key={i} className="px-6 py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center">
-                            <p className="text-sm font-medium text-text-secondary">{text}</p>
-                        </div>
-                    ))}
-                </motion.div>
-
                 {/* SECTION 3: Primary CTA */}
-                <motion.div variants={itemVariants} className="pt-8">
+                <motion.div variants={itemVariants} className="pt-8 relative">
+                    {/* Premium Pulse Glow */}
+                    <div className="primary-btn-glow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[60px] bg-gold/30 blur-2xl rounded-full pointer-events-none opacity-0" />
+                    
                     <Button
                         asChild
                         size="lg"
-                        className="group rounded-full px-10 h-14 text-lg font-bold bg-gold text-bg-deep hover:bg-gold-muted transition-all duration-300 shadow-lg shadow-gold/20"
+                        className="group rounded-full px-10 h-14 text-lg font-bold bg-gold text-bg-deep hover:bg-gold-muted transition-all duration-300 shadow-lg shadow-gold/20 relative z-10"
                         onClick={() => trackClick("explore_click")}
                     >
                         <Link href="/insights">
@@ -111,6 +113,32 @@ function ThankYouContent() {
                             <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                         </Link>
                     </Button>
+                </motion.div>
+
+                {/* SECTION 2: Value Reinforcement (Moved below CTA) */}
+                <motion.div 
+                    variants={itemVariants} 
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-12"
+                >
+                    {[
+                        "Practical investing insights",
+                        "No noise. Only what matters",
+                        "Built for long-term investors"
+                    ].map((text, i) => (
+                        <motion.div 
+                            key={i} 
+                            whileHover={{ 
+                                scale: 1.05, 
+                                backgroundColor: "rgba(245, 184, 0, 0.05)", 
+                                borderColor: "rgba(245, 184, 0, 0.3)",
+                                color: "#F5B800"
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                            className="px-6 py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center cursor-default transition-all duration-300 group"
+                        >
+                            <p className="text-sm font-medium text-text-secondary group-hover:text-gold transition-colors">{text}</p>
+                        </motion.div>
+                    ))}
                 </motion.div>
 
                 {/* SECTION 4: Secondary CTA (Events) */}
