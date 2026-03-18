@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, CheckCircle2, Calendar, BookOpen, ExternalLink, Home } from "lucide-react"
+import { ArrowRight, CheckCircle2, Calendar, BookOpen, ExternalLink, Home, Zap, TrendingUp } from "lucide-react"
 import { motion } from "framer-motion"
 
 function ThankYouContent() {
@@ -115,30 +115,45 @@ function ThankYouContent() {
                     </Button>
                 </motion.div>
 
-                {/* SECTION 2: Value Reinforcement (Moved below CTA) */}
+                {/* SECTION 2: Value Reinforcement (Redesigned as Pillars) */}
                 <motion.div 
                     variants={itemVariants} 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-12"
+                    className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 text-left"
                 >
                     {[
-                        "Practical investing insights",
-                        "No noise. Only what matters",
-                        "Built for long-term investors"
-                    ].map((text, i) => (
-                        <motion.div 
-                            key={i} 
-                            whileHover={{ 
-                                scale: 1.05, 
-                                backgroundColor: "rgba(245, 184, 0, 0.05)", 
-                                borderColor: "rgba(245, 184, 0, 0.3)",
-                                color: "#F5B800"
-                            }}
-                            whileTap={{ scale: 0.98 }}
-                            className="px-6 py-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center cursor-default transition-all duration-300 group"
-                        >
-                            <p className="text-sm font-medium text-text-secondary group-hover:text-gold transition-colors">{text}</p>
-                        </motion.div>
-                    ))}
+                        {
+                            title: "Practical Investing Insights",
+                            description: "No jargon. Only actionable ideas.",
+                            icon: BookOpen
+                        },
+                        {
+                            title: "No Noise. Only What Matters",
+                            description: "We filter the signal from the noise.",
+                            icon: Zap
+                        },
+                        {
+                            title: "Built for Long-Term Investors",
+                            description: "Designed for compounding, not speculation.",
+                            icon: TrendingUp
+                        }
+                    ].map((item, i) => {
+                        const Icon = item.icon
+                        return (
+                            <div key={i} className="space-y-4 group">
+                                <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold/20 transition-colors">
+                                    <Icon className="w-5 h-5" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <h3 className="text-base font-bold text-text-primary tracking-tight">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">
+                                        {item.description}
+                                    </p>
+                                </div>
+                            </div>
+                        )
+                    })}
                 </motion.div>
 
                 {/* SECTION 4: Secondary CTA (Events) */}
