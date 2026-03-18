@@ -34,7 +34,10 @@ async function verifyAdminSessionToken(token: string): Promise<boolean> {
         return false
     }
 
-    const secret = process.env.ADMIN_SESSION_SECRET ?? process.env.NEXTAUTH_SECRET
+    const secret =
+        process.env.ADMIN_SESSION_SECRET ??
+        process.env.AUTH_SECRET ??
+        process.env.NEXTAUTH_SECRET
     if (!secret || secret.length < 32) {
         return false
     }
