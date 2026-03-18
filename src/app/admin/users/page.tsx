@@ -16,6 +16,7 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [emailSearch, setEmailSearch] = useState("");
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -44,6 +45,29 @@ export default function AdminUsersPage() {
         }, 300); // Debounce search
         return () => clearTimeout(timer);
     }, [fetchUsers]);
+
+    const handleDelete = async (id: string, email: string | null) => {
+        if (!window.confirm(`Are you sure you want to delete user ${email || id}? This action cannot be undone.`)) {
+            return;
+        }
+
+        setDeletingId(id);
+        try {
+            const res = await fetch(`/api/admin/users/${id}`, {
+                method: "DELETE",
+            });
+            const json = await res.json();
+
+            if (!json.success) throw new Error(json.error || "Failed to delete");
+
+            // Refresh the list
+            fetchUsers();
+        } catch (err) {
+            alert(err instanceof Error ? err.message : String(err));
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const handleExport = () => {
         const a = document.createElement("a");
@@ -207,6 +231,7 @@ export default function AdminUsersPage() {
                                     "Email",
                                     "Login Method",
                                     "Date Joined",
+                                    "Actions",
                                 ].map((h) => (
                                     <th
                                         key={h}
@@ -230,7 +255,7 @@ export default function AdminUsersPage() {
                             {loading && users.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={5}
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
@@ -250,7 +275,7 @@ export default function AdminUsersPage() {
                             ) : users.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={4}
+                                        colSpan={5}
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
@@ -329,6 +354,38 @@ export default function AdminUsersPage() {
                                                 }}
                                             >
                                                 {formatDate(user.createdAt)}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    padding: "14px 16px",
+                                                    textAlign: "right",
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() => handleDelete(user.id, user.email)}
+                                                    disabled={deletingId === user.id}
+                                                    style={{
+                                                        padding: "6px 12px",
+                                                        background: "rgba(239, 68, 68, 0.1)",
+                                                        color: "#EF4444",
+                                                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                                                        borderRadius: "6px",
+                                                        fontSize: "12px",
+                                                        fontWeight: 600,
+                                                        cursor: "pointer",
+                                                        transition: "all 0.2s",
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)";
+                                                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
+                                                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)";
+                                                    }}
+                                                >
+                                                    {deletingId === user.id ? "Deleting..." : "Delete"}
+                                                </button>
                                             </td>
                                         </tr>
                                     );
