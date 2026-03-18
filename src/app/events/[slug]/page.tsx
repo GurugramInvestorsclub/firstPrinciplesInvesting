@@ -18,6 +18,7 @@ import { EventAudience } from "@/components/events/EventAudience"
 import { EventSpeaker } from "@/components/events/EventSpeaker"
 import { EventAgenda } from "@/components/events/EventAgenda"
 import { EventFAQ } from "@/components/events/EventFAQ"
+import { EventRecordingSection } from "@/components/events/EventRecordingSection"
 import { EventCTA } from "@/components/events/EventCTA"
 
 export const revalidate = 60
@@ -56,6 +57,7 @@ export default async function EventPage({ params }: Props) {
                 <EventHero event={event} />
                 <EventHighlights event={event} />
                 <EventNarrative event={event} />
+                <EventRecordingSection event={event} />
                 <EventLearning event={event} />
                 <SectionDivider />
                 <EventAudience event={event} />
