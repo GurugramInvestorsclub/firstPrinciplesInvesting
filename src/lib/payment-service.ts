@@ -1029,6 +1029,35 @@ export async function finalizeCapturedPayment(params: {
         },
       })
 
+      const user = await tx.user.findUnique({
+        where: { id: payment.userId },
+        select: { name: true, email: true },
+      })
+
+      if (user && user.email) {
+        await tx.registration.upsert({
+          where: {
+            email_seminarSlug: {
+              email: user.email,
+              seminarSlug: payment.eventId,
+            },
+          },
+          update: {
+            paymentStatus: "paid",
+            razorpayOrderId: params.razorpayOrderId,
+            razorpayPaymentId: params.razorpayPaymentId,
+          },
+          create: {
+            name: user.name || "Unknown",
+            email: user.email,
+            seminarSlug: payment.eventId,
+            paymentStatus: "paid",
+            razorpayOrderId: params.razorpayOrderId,
+            razorpayPaymentId: params.razorpayPaymentId,
+          },
+        })
+      }
+
       await logAudit(tx, payment.id, "PAYMENT_CAPTURED", {
         source: params.source,
         razorpayPaymentId: params.razorpayPaymentId,
