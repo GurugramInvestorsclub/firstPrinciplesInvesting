@@ -4,7 +4,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth"
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         if (!(await isAdminAuthenticated())) {
