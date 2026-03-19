@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import Image from "next/image"
+import { FeaturedIn } from "@/components/ui/FeaturedIn"
 
 export default function AboutPage() {
     return (
@@ -47,15 +48,19 @@ export default function AboutPage() {
                                     <ul className="space-y-4 text-sm text-text-secondary/80">
                                         <li className="flex items-center gap-3">
                                             <div className="h-px w-4 bg-gold"></div>
-                                            Contributor to <span className="text-text-primary">The Indian Express</span> and <span className="text-text-primary">Mint</span>
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <div className="h-px w-4 bg-gold"></div>
                                             Early member of a <span className="text-text-primary">50-year-old family office</span>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
+                        </div>
+
+                    </div>
+
+                    {/* Full Width Featured In Block */}
+                    <div className="mt-32 pt-20 border-t border-border/10 bg-bg-surface/10">
+                        <div className="container mx-auto px-4">
+                            <FeaturedIn />
                         </div>
                     </div>
                 </section>
