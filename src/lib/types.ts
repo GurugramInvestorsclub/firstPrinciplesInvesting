@@ -36,6 +36,8 @@ export interface Event {
     longDescription?: PortableTextBlock[]
     registrationLink?: string
     image?: any
+    startTime?: string
+    endTime?: string
 }
 
 export interface Testimonial {
