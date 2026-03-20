@@ -17,7 +17,7 @@ export function EventFAQ({ event }: { event: Event }) {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Frequently Asked Questions</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">Frequently Asked <span className="text-gold">Questions</span></h2>
                 </motion.div>
 
                 <motion.div

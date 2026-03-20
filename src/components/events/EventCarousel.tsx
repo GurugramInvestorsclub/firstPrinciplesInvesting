@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, Variants, AnimatePresence } from "framer-motion"
-import { Calendar, MapPin, User, ChevronLeft, ChevronRight } from "lucide-react"
+import { Calendar, MapPin, User, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
 import { Event } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -38,109 +38,106 @@ function EventCard({ event, isPastEvent }: { event: Event; isPastEvent?: boolean
     return (
         <motion.div 
             variants={itemVariants}
-            whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } }}
+            whileHover={{ 
+                y: -10, 
+                scale: 1.02, 
+                transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] } 
+            }}
             className="md:w-[420px] w-full flex-shrink-0 md:snap-center group"
         >
-            <div className="relative h-full flex flex-col rounded-3xl border border-text-secondary/10 bg-bg-primary/20 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:border-text-secondary/30 hover:shadow-[0_8px_40px_rgba(255,255,255,0.05)] hover:bg-bg-primary/40">
+            <div className="relative h-full flex flex-col rounded-[24px] border border-white/5 bg-[#111113]/40 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:border-gold/30 hover:shadow-[0_20px_60px_rgba(255,199,44,0.15)] hover:bg-[#111113]/60">
                 {/* Subtle gradient light from top */}
-                <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none z-10" />
+                <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-gold/5 to-transparent pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 {/* Poster Container */}
-                <div className="h-[200px] relative overflow-hidden bg-[#0A0A0A] border-b border-text-secondary/10 flex-shrink-0">
+                <div className="h-[240px] relative overflow-hidden bg-[#0A0A0A] border-b border-white/5 flex-shrink-0">
                     {event.image ? (
                         <>
                             <Image
-                                src={urlForImage(event.image).width(800).height(450).url()}
+                                src={urlForImage(event.image).width(800).height(500).url()}
                                 alt={event.title}
                                 fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                className="object-cover transition-transform duration-1000 group-hover:scale-110"
                             />
                             {/* Dark gradient overlay for readability */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/85" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                         </>
                     ) : (
                         <>
-                            <div className="absolute inset-0 bg-gradient-to-br from-bg-primary/60 via-bg-deep/80 to-gold/10 opacity-80" />
-                            <div className="absolute top-0 right-0 w-56 h-56 bg-gold/10 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 group-hover:bg-gold/25 transition-colors duration-700" />
-                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[50px] -translate-x-1/3 translate-y-1/3 group-hover:bg-blue-500/20 transition-colors duration-700" />
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/0 to-black/80" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-bg-primary via-bg-deep to-gold/10 opacity-80" />
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 group-hover:bg-gold/25 transition-colors duration-700" />
+                            <div className="absolute bottom-0 left-0 w-56 h-56 bg-blue-500/10 rounded-full blur-[70px] -translate-x-1/3 translate-y-1/3 group-hover:bg-blue-500/20 transition-colors duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                         </>
                     )}
                     
-                    <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
-                    
-                    {/* Badge positioned over the abstract visual or poster */}
-                    <div className="absolute top-6 left-6 z-20">
-                        <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-sm font-bold text-text-primary shadow-xl tracking-wide">
-                            {month.toUpperCase()} {day}
+                    {/* Badge */}
+                    <div className="absolute bottom-6 left-6 z-20">
+                        <div className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gold/20 backdrop-blur-md border border-gold/30 text-xs font-bold text-gold shadow-xl tracking-wider uppercase">
+                            {month} {day}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex-1 p-8 flex flex-col z-20">
+                <div className="flex-1 p-8 flex flex-col z-20 relative">
                     {/* Metadata Row */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-mono tracking-wider text-text-secondary mb-5 uppercase">
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-gold/80" />
+                    <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold tracking-[0.2em] text-gray-500 mb-6 uppercase">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-gold" />
                             <span>{dateStr}</span>
                         </div>
-                        <span className="text-text-secondary/30">•</span>
-                        <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-gold/80" />
-                            <span className="truncate max-w-[120px]">{event.location || "Virtual"}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/10" />
+                        <div className="flex items-center gap-2">
+                            <MapPin className="w-3.5 h-3.5 text-gold" />
+                            <span className="truncate max-w-[140px]">{event.location || "Virtual"}</span>
                         </div>
                     </div>
 
-                    <h3 className="text-2xl font-bold text-text-primary mb-3 leading-tight group-hover:text-gold transition-colors duration-300">
+                    <h3 className="text-2xl font-bold text-white mb-4 leading-tight group-hover:text-gold transition-colors duration-300">
                         {event.title}
                     </h3>
                     
-                    <p className="text-text-secondary/80 leading-relaxed max-w-sm mb-6 flex-1 line-clamp-3">
+                    <p className="text-gray-400 leading-relaxed mb-8 flex-1 line-clamp-2">
                         {event.shortDescription}
                     </p>
 
-                    {/* Speaker Authority */}
-                    {event.speaker && (
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-white/5 border border-white/10 flex-shrink-0">
-                                {event.speaker.image ? (
-                                    <Image
-                                        src={urlForImage(event.speaker.image).width(100).height(100).fit("crop").url()}
-                                        alt={event.speaker.name}
-                                        fill
-                                        className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                                    />
-                                ) : (
-                                    <User className="absolute inset-0 m-auto w-5 h-5 text-text-secondary/50" />
-                                )}
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-text-primary">
-                                    {event.speaker.name}
-                                </span>
-                                {event.speaker.credentials && event.speaker.credentials.length > 0 ? (
-                                    <span className="text-xs text-text-secondary/70 truncate max-w-[200px]">
-                                        {event.speaker.credentials[0]}
+                    <div className="mt-auto space-y-6">
+                        {/* Speaker Information */}
+                        {event.speaker && (
+                            <div className="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 group-hover:border-gold/10 transition-colors">
+                                <div className="relative w-11 h-11 rounded-full overflow-hidden border border-white/10">
+                                    {event.speaker.image ? (
+                                        <Image
+                                            src={urlForImage(event.speaker.image).width(110).height(110).fit("crop").url()}
+                                            alt={event.speaker.name}
+                                            fill
+                                            className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                        />
+                                    ) : (
+                                        <User className="absolute inset-0 m-auto w-5 h-5 text-gray-500" />
+                                    )}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-sm font-bold text-white truncate">
+                                        {event.speaker.name}
                                     </span>
-                                ) : event.speaker.bio ? (
-                                    <span className="text-xs text-text-secondary/70 truncate max-w-[200px]">
-                                        {event.speaker.bio}
+                                    <span className="text-[11px] text-gray-500 truncate">
+                                        {event.speaker.credentials?.[0] || event.speaker.bio || "Expert Speaker"}
                                     </span>
-                                ) : (
-                                    <span className="text-xs text-text-secondary/70">Expert Panelist</span>
-                                )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={!event.speaker ? "mt-auto" : ""}>
-                        <Link 
-                            href={`/events/${event.slug.current}`}
-                            className="flex items-center justify-center w-full py-4 rounded-xl bg-white/5 border border-white/10 text-text-primary font-bold hover:bg-gold hover:text-bg-deep hover:border-gold transition-all duration-300 shadow-lg"
-                        >
-                            {isPastEvent ? "View Details" : "Reserve Your Seat"}
-                        </Link>
-                    </motion.div>
+                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                            <Link 
+                                href={`/events/${event.slug.current}`}
+                                className="flex items-center justify-center w-full py-4 rounded-xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 text-gold font-bold hover:from-gold hover:to-[#C89B3C] hover:text-[#0b0b0c] hover:border-transparent transition-all duration-500 shadow-lg group-hover:shadow-gold/10"
+                            >
+                                {isPastEvent ? "View Highlights" : "Reserve Your Seat"}
+                                <ArrowRight className="ml-2 w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1" />
+                            </Link>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -182,14 +179,14 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
             <AnimatePresence>
                 {showLeftArrow && (
                     <motion.button
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
                         onClick={() => scroll("left")}
-                        className="hidden md:flex absolute left-4 top-[40%] -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-gold hover:text-bg-deep transition-all duration-300 shadow-2xl"
+                        className="hidden md:flex absolute left-8 top-[45%] -translate-y-1/2 z-40 w-14 h-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-xl border border-white/10 text-white hover:bg-gold hover:text-bg-deep hover:scale-110 transition-all duration-300 shadow-[0_0_30px_rgba(0,0,0,0.5)] group"
                         aria-label="Scroll left"
                     >
-                        <ChevronLeft className="w-6 h-6" />
+                        <ChevronLeft className="w-8 h-8 group-hover:scale-110 transition-transform" />
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -197,14 +194,14 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
             <AnimatePresence>
                 {showRightArrow && (
                     <motion.button
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
                         onClick={() => scroll("right")}
-                        className="hidden md:flex absolute right-4 top-[40%] -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-gold hover:text-bg-deep transition-all duration-300 shadow-2xl"
+                        className="hidden md:flex absolute right-8 top-[45%] -translate-y-1/2 z-40 w-14 h-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-xl border border-white/10 text-white hover:bg-gold hover:text-bg-deep hover:scale-110 transition-all duration-300 shadow-[0_0_30px_rgba(0,0,0,0.5)] group"
                         aria-label="Scroll right"
                     >
-                        <ChevronRight className="w-6 h-6" />
+                        <ChevronRight className="w-8 h-8 group-hover:scale-110 transition-transform" />
                     </motion.button>
                 )}
             </AnimatePresence>

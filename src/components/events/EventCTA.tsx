@@ -20,7 +20,7 @@ export function EventCTA({ event }: { event: Event }) {
                     className="max-w-4xl mx-auto flex flex-col items-center"
                 >
                     <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight leading-tight text-white drop-shadow-xl">
-                        Ready to level up your investing?
+                        Ready to <span className="text-gold">level up</span> your investing?
                     </h2>
                     <p className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl font-light">
                         Secure your seat with backend-verified pricing and signed payment capture.

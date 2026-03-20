@@ -35,13 +35,27 @@ function AnimatedNumber({ value }: { value: number }) {
 function AnimatedTextWithNumbers({ text }: { text: string }) {
     // Find all numbers, including decimals
     const parts = text.split(/(\d+(?:\.\d+)?)/);
+    const hasNumbers = parts.some(part => !isNaN(parseFloat(part)) && part.trim() !== '');
     
+    if (!hasNumbers) {
+        const words = text.split(' ');
+        if (words.length > 2) {
+            const firstPart = words.slice(0, -2).join(' ');
+            const lastPart = words.slice(-2).join(' ');
+            return (
+                <span>
+                    {firstPart} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFC72C] to-[#C89B3C]">{lastPart}</span>
+                </span>
+            );
+        }
+    }
+
     return (
         <span>
             {parts.map((part, i) => {
                 const num = parseFloat(part)
                 if (!isNaN(num) && part.trim() !== '') {
-                    return <AnimatedNumber key={i} value={num} />
+                    return <span key={i} className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFC72C] to-[#C89B3C]"><AnimatedNumber value={num} /></span>
                 }
                 return <span key={i}>{part}</span>
             })}
@@ -60,11 +74,16 @@ export function EventHighlights({ event }: { event: Event }) {
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.7 }}
-                    whileHover={{ y: -6, scale: 1.02 }}
-                    className="p-8 md:p-14 rounded-[16px] text-center bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] hover:shadow-[0_12px_40px_rgba(255,199,44,0.15)] transition-all duration-500 cursor-default"
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ 
+                        y: -8, 
+                        scale: 1.02,
+                        transition: { duration: 0.4 }
+                    }}
+                    className="p-12 md:p-20 rounded-[32px] text-center bg-[#111113]/40 backdrop-blur-2xl border border-white/5 hover:border-gold/30 hover:shadow-[0_40_100px_rgba(255,199,44,0.15)] transition-all duration-500 cursor-default group relative overflow-hidden"
                 >
-                    <h2 className="text-3xl md:text-5xl md:leading-tight font-bold text-white drop-shadow-lg">
+                    <div className="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <h2 className="relative z-10 text-4xl md:text-6xl md:leading-tight font-bold text-white drop-shadow-2xl">
                         <AnimatedTextWithNumbers text={event.highlightStat} />
                     </h2>
                 </motion.div>

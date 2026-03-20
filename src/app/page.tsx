@@ -7,6 +7,7 @@ import { ProofStats } from "@/components/homepage/ProofStats"
 import { RecentInsights } from "@/components/homepage/RecentInsights"
 import { UpcomingEvents } from "@/components/homepage/UpcomingEvents"
 import { Testimonials } from "@/components/homepage/Testimonials"
+import { LogoMarquee } from "@/components/events/LogoMarquee"
 import { client } from "@/lib/sanity.client"
 import { recentPostsQuery, upcomingEventsHomeQuery, testimonialsQuery } from "@/lib/sanity.queries"
 import { Testimonial } from "@/lib/types"
@@ -23,6 +24,7 @@ export default async function Home() {
       <Navbar />
       <main className="flex-1">
         <CinematicHero />
+        <LogoMarquee />
         <Manifesto />
         <Method />
         <ProofStats />
