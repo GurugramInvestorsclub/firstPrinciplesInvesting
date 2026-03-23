@@ -360,9 +360,6 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
       {!isRegistrationOpen && (
         <p className="mt-3 text-sm text-gray-500">Registration is closed for this event.</p>
       )}
-      <p className="mt-3 text-xs text-gray-500">
-        Final charge is always computed and verified server-side before payment capture.
-      </p>
     </div>
   )
 }
