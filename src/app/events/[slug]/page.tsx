@@ -61,7 +61,7 @@ export default async function EventPage({ params }: Props) {
                 <EventNarrative event={event} />
                 <EventRecordingSection event={event} />
                 <EventLearning event={event} />
-                <SectionDivider />
+                <SectionDivider text={event.title} />
                 <EventAudience event={event} />
                 <EventSpeaker event={event} />
                 <EventAgenda event={event} />
