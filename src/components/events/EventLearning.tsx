@@ -10,7 +10,7 @@ export function EventLearning({ event }: { event: Event }) {
     return (
         <section id="learning" className="py-24 md:py-32 bg-[#0E0E11] border-y border-white/5 relative z-10">
             <div className="w-[80%] mx-auto max-w-screen-2xl">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
@@ -18,7 +18,7 @@ export function EventLearning({ event }: { event: Event }) {
                     className="max-w-3xl mx-auto mb-20 text-center"
                 >
                     <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white uppercase tracking-tight">
-                        The High-Performance <span className="text-gold">Framework</span>
+                        Master the Market Cycle <span className="text-gold">Framework</span>
                     </h2>
                     <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto">
                         This isn't just information. It's a systematic approach to gaining a decisive market edge.
@@ -33,8 +33,8 @@ export function EventLearning({ event }: { event: Event }) {
                         const bullets = lines.slice(1).map(l => l.replace(/^[-\u2022]\s*/, '').trim());
 
                         return (
-                            <motion.div 
-                                key={idx} 
+                            <motion.div
+                                key={idx}
                                 initial={{ opacity: 0, y: 40 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: "-50px" }}
@@ -44,7 +44,7 @@ export function EventLearning({ event }: { event: Event }) {
                             >
                                 {/* Subtle background glow */}
                                 <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold/5 rounded-full blur-[80px] group-hover:bg-gold/10 transition-all duration-700" />
-                                
+
                                 <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center shrink-0 border border-gold/20 mb-10 group-hover:scale-110 group-hover:bg-gold/20 transition-all duration-500">
                                     <CheckCircle2 className="w-7 h-7 text-gold" />
                                 </div>
@@ -52,7 +52,7 @@ export function EventLearning({ event }: { event: Event }) {
                                 <h3 className="font-bold text-2xl mb-4 text-white group-hover:text-gold transition-colors duration-300 tracking-tight">
                                     {point.title}
                                 </h3>
-                                
+
                                 {payoff ? (
                                     <p className="text-gray-300 font-medium mb-8 leading-relaxed italic border-l-2 border-gold/30 pl-4">
                                         {payoff}
