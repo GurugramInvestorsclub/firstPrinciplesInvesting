@@ -75,7 +75,7 @@ function eventIsOpen(date: string): boolean {
   return new Date(date).getTime() > Date.now()
 }
 
-export function EventCheckoutCard({ event }: { event: Event }) {
+export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: boolean }) {
   const { data: session, status } = useSession()
   const router = useRouter()
 
@@ -294,22 +294,18 @@ export function EventCheckoutCard({ event }: { event: Event }) {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8">
+    <div className={minimal ? "" : "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8"}>
       <div className="flex flex-col gap-3">
         <p className="text-xs uppercase tracking-[0.18em] text-gray-400">Secure Checkout</p>
         <div className="flex items-center justify-between gap-4">
-          <span className="text-sm text-gray-400">Displayed price (CMS)</span>
+          <span className="text-sm text-gray-400">Secure Your Spot</span>
           <span className="text-lg font-semibold text-white">
-            {cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "Not configured"}
+            {pricing ? formatInrFromPaise(pricing.baseAmount) : (cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "Not configured")}
           </span>
         </div>
 
         {pricing && (
           <>
-            <div className="flex items-center justify-between gap-4 text-sm text-gray-300">
-              <span>Authoritative base (backend)</span>
-              <span>{formatInrFromPaise(pricing.baseAmount)}</span>
-            </div>
             {pricing.discountAmount > 0 && (
               <div className="flex items-center justify-between gap-4 text-sm text-emerald-300">
                 <span>Discount ({pricing.couponCode})</span>
