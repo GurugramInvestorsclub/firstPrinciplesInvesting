@@ -220,9 +220,6 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
                 ))}
             </motion.div>
             
-            {/* Fade out edges for desktop carousel */}
-            <div className="hidden md:block absolute top-0 right-0 bottom-0 w-32 bg-gradient-to-l from-bg-deep to-transparent pointer-events-none z-10" />
-            <div className="hidden md:block absolute top-0 left-0 bottom-0 w-16 bg-gradient-to-r from-bg-deep to-transparent pointer-events-none z-10" />
             
             <style dangerouslySetInnerHTML={{__html: `
                 .hide-scrollbar::-webkit-scrollbar {
