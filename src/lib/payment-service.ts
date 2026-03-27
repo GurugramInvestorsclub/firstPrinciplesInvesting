@@ -200,7 +200,7 @@ export async function validateCapturedPaymentAtProvider(params: {
   razorpayOrderId: string
   razorpayPaymentId: string
   expectedUserId?: string
-}): Promise<void> {
+}): Promise<{ contact: string | null }> {
   const payment = await prisma.payment.findUnique({
     where: {
       razorpayOrderId: params.razorpayOrderId,
@@ -280,6 +280,13 @@ export async function validateCapturedPaymentAtProvider(params: {
       "Provider payment amount does not match expected order amount"
     )
   }
+
+  const contact =
+    typeof (providerPayment as { contact?: unknown }).contact === "string"
+      ? (providerPayment as { contact: string }).contact
+      : null
+
+  return { contact }
 }
 
 export function hashPayload(rawBody: string): string {
@@ -814,6 +821,7 @@ export async function finalizeCapturedPayment(params: {
   razorpayPaymentId: string
   razorpaySignature?: string | null
   expectedUserId?: string
+  phoneNumber?: string | null
   source: "api" | "webhook"
 }): Promise<FinalizePaymentResult> {
   return prisma.$transaction(
@@ -1046,10 +1054,12 @@ export async function finalizeCapturedPayment(params: {
             paymentStatus: "paid",
             razorpayOrderId: params.razorpayOrderId,
             razorpayPaymentId: params.razorpayPaymentId,
+            phone: params.phoneNumber || undefined,
           },
           create: {
             name: user.name || "Unknown",
             email: user.email,
+            phone: params.phoneNumber,
             seminarSlug: payment.eventId,
             paymentStatus: "paid",
             razorpayOrderId: params.razorpayOrderId,

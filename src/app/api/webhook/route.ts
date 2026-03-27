@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
         captureResult = await finalizeCapturedPayment({
           razorpayOrderId,
           razorpayPaymentId,
+          phoneNumber: asString(paymentEntity?.contact),
           source: "webhook",
         })
       } catch (error) {

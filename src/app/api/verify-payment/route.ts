@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    await validateCapturedPaymentAtProvider({
+    const { contact } = await validateCapturedPaymentAtProvider({
       razorpayOrderId,
       razorpayPaymentId,
       expectedUserId: session.user.id,
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       razorpayPaymentId,
       razorpaySignature,
       expectedUserId: session.user.id,
+      phoneNumber: contact,
       source: "api",
     })
 
