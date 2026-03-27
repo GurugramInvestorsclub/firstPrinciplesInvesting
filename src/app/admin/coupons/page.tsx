@@ -69,6 +69,8 @@ export default function AdminCouponsPage() {
   const [couponExpiry, setCouponExpiry] = useState("")
   const [couponEventId, setCouponEventId] = useState("")
   const [couponActive, setCouponActive] = useState(true)
+  const [editingCouponId, setEditingCouponId] = useState<string | null>(null)
+  const [editExpiry, setEditExpiry] = useState("")
 
   const sortedEvents = useMemo(
     () => [...events].sort((a, b) => a.eventId.localeCompare(b.eventId)),
@@ -215,6 +217,46 @@ export default function AdminCouponsPage() {
     } catch (updateError) {
       setError(updateError instanceof Error ? updateError.message : "Failed to update coupon")
     }
+  }
+
+  const handleUpdateExpiry = async (couponId: string) => {
+    setError(null)
+
+    try {
+      const expiryDate = new Date(editExpiry)
+      if (Number.isNaN(expiryDate.getTime())) {
+        throw new Error("Expiry date is invalid")
+      }
+
+      const response = await fetch("/api/admin/coupons", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: couponId,
+          expiryDate: expiryDate.toISOString(),
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || "Failed to update expiry date")
+      }
+
+      setEditingCouponId(null)
+      await loadData()
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : "Failed to update expiry date")
+    }
+  }
+
+  const startEditing = (coupon: CouponRow) => {
+    setEditingCouponId(coupon.id)
+    // Format date for datetime-local input (YYYY-MM-DDTHH:mm)
+    const date = new Date(coupon.expiryDate)
+    const formattedDate = date.toISOString().slice(0, 16)
+    setEditExpiry(formattedDate)
   }
 
   const formatMoney = (value: number) =>
@@ -516,7 +558,16 @@ export default function AdminCouponsPage() {
                         {coupon.eventId ?? "All"}
                       </td>
                       <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>
-                        {new Date(coupon.expiryDate).toLocaleString("en-IN")}
+                        {editingCouponId === coupon.id ? (
+                          <input
+                            type="datetime-local"
+                            style={{ ...inputStyle, padding: "4px 8px", fontSize: "12px" }}
+                            value={editExpiry}
+                            onChange={(e) => setEditExpiry(e.target.value)}
+                          />
+                        ) : (
+                          new Date(coupon.expiryDate).toLocaleString("en-IN")
+                        )}
                       </td>
                       <td style={{ padding: "10px 8px" }}>
                         <span
@@ -535,22 +586,70 @@ export default function AdminCouponsPage() {
                         </span>
                       </td>
                       <td style={{ padding: "10px 8px" }}>
-                        <button
-                          type="button"
-                          onClick={() => toggleCouponStatus(coupon)}
-                          style={{
-                            ...buttonStyle,
-                            background: coupon.isActive
-                              ? "rgba(239,68,68,0.18)"
-                              : "rgba(34,197,94,0.18)",
-                            color: coupon.isActive ? "#fca5a5" : "#86efac",
-                            boxShadow: "none",
-                            padding: "6px 10px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          {coupon.isActive ? "Deactivate" : "Activate"}
-                        </button>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          {editingCouponId === coupon.id ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateExpiry(coupon.id)}
+                                style={{
+                                  ...buttonStyle,
+                                  padding: "6px 10px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingCouponId(null)}
+                                style={{
+                                  ...buttonStyle,
+                                  background: "rgba(255,255,255,0.08)",
+                                  color: "var(--text-primary)",
+                                  boxShadow: "none",
+                                  padding: "6px 10px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => startEditing(coupon)}
+                                style={{
+                                  ...buttonStyle,
+                                  background: "rgba(255,255,255,0.08)",
+                                  color: "var(--text-primary)",
+                                  boxShadow: "none",
+                                  padding: "6px 10px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleCouponStatus(coupon)}
+                                style={{
+                                  ...buttonStyle,
+                                  background: coupon.isActive
+                                    ? "rgba(239,68,68,0.18)"
+                                    : "rgba(34,197,94,0.18)",
+                                  color: coupon.isActive ? "#fca5a5" : "#86efac",
+                                  boxShadow: "none",
+                                  padding: "6px 10px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                {coupon.isActive ? "Deactivate" : "Activate"}
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )
