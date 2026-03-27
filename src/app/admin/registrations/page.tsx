@@ -9,6 +9,7 @@ interface Registration {
     phone: string | null;
     seminarSlug: string;
     paymentStatus: string;
+    amountPaise: number | null;
     createdAt: string;
 }
 
@@ -265,6 +266,7 @@ export default function AdminRegistrationsPage() {
                                     "Phone",
                                     "Seminar",
                                     "Status",
+                                    "Amount",
                                     "Date",
                                 ].map((h) => (
                                     <th
@@ -406,6 +408,20 @@ export default function AdminRegistrationsPage() {
                                                 >
                                                     {reg.paymentStatus}
                                                 </span>
+                                            </td>
+                                            <td
+                                                style={{
+                                                    padding: "14px 16px",
+                                                    color: "var(--text-primary)",
+                                                    fontWeight: 500,
+                                                }}
+                                            >
+                                                {reg.amountPaise !== null
+                                                    ? new Intl.NumberFormat("en-IN", {
+                                                          style: "currency",
+                                                          currency: "INR",
+                                                      }).format(reg.amountPaise / 100)
+                                                    : "—"}
                                             </td>
                                             <td
                                                 style={{
