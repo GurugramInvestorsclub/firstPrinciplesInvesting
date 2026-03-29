@@ -254,7 +254,14 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
               throw new Error(verifyPayload.message ?? "Payment verification failed")
             }
 
-            setSuccess("Payment verified successfully")
+            // Redirect to the thank-you page with event details
+            const searchParams = new URLSearchParams({
+              type: "event",
+              eventTitle: event.title,
+              eventDate: event.startTime || event.date,
+              email: session?.user?.email ?? ""
+            })
+            router.push(`/thank-you?${searchParams.toString()}`)
           } catch (verificationError) {
             setError(
               verificationError instanceof Error

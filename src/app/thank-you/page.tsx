@@ -14,6 +14,17 @@ function ThankYouContent() {
     const email = searchParams.get("email")
     const source = searchParams.get("source")
     const type = searchParams.get("type")
+    const eventTitle = searchParams.get("eventTitle")
+    const eventDateRaw = searchParams.get("eventDate")
+
+    const formattedDate = eventDateRaw ? new Date(eventDateRaw).toLocaleDateString("en-IN", {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: "Asia/Kolkata"
+    }) + " IST" : null
 
     useEffect(() => {
         // Fire tracking event: thank_you_view
@@ -85,15 +96,42 @@ function ThankYouContent() {
                         className="text-4xl md:text-6xl font-bold tracking-tight text-text-primary"
                         style={{ fontFamily: "var(--font-heading)" }}
                     >
-                        You&apos;re all set 👍
+                        {type === 'event' ? "Registration Confirmed! 🎉" : "You're all set 👍"}
                     </h1>
-                    <div className="space-y-2">
-                        <p className="text-xl md:text-2xl text-text-secondary font-medium">
-                            Your response has been recorded.
-                        </p>
-                        <p className="text-lg text-text-secondary/70">
-                            We&apos;ll keep you posted with what&apos;s next.
-                        </p>
+                    <div className="space-y-4 max-w-2xl mx-auto">
+                        {type === 'event' ? (
+                            <>
+                                <div className="space-y-2">
+                                    <p className="text-xl md:text-2xl text-text-secondary font-medium leading-tight">
+                                        Thank you for registering for the webinar:
+                                    </p>
+                                    <p className="text-2xl md:text-4xl text-gold font-extrabold tracking-tight">
+                                        {eventTitle}
+                                    </p>
+                                </div>
+                                {formattedDate && (
+                                    <div className="flex items-center justify-center gap-2 text-text-secondary bg-white/5 py-3 px-6 rounded-2xl border border-white/10 w-fit mx-auto mt-4">
+                                        <Calendar className="w-5 h-5 text-gold" />
+                                        <span className="font-semibold">{formattedDate}</span>
+                                    </div>
+                                )}
+                                <div className="mt-8 p-6 bg-gold/5 border border-gold/20 rounded-2xl relative overflow-hidden group">
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-gold/50" />
+                                    <p className="text-lg text-text-primary font-medium">
+                                        🚀 The webinar link will be mailed to you <span className="text-gold font-bold">30 minutes before</span> the start of the session.
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-xl md:text-2xl text-text-secondary font-medium">
+                                    Your response has been recorded.
+                                </p>
+                                <p className="text-lg text-text-secondary/70">
+                                    We&apos;ll keep you posted with what&apos;s next.
+                                </p>
+                            </>
+                        )}
                     </div>
                 </motion.div>
 
