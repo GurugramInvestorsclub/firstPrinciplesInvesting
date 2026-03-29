@@ -18,15 +18,16 @@ export async function GET() {
             select: {
                 name: true,
                 email: true,
+                phone: true,
                 seminarSlug: true,
             },
             orderBy: { createdAt: "desc" },
         })
 
-        const header = "name,email,seminarSlug"
+        const header = "name,email,phone,seminarSlug"
         const rows = registrations.map(
-            (r: { name: string; email: string; seminarSlug: string }) =>
-                `${toSafeCsvCell(r.name)},${toSafeCsvCell(r.email)},${toSafeCsvCell(r.seminarSlug)}`
+            (r: { name: string; email: string; phone: string | null; seminarSlug: string }) =>
+                `${toSafeCsvCell(r.name)},${toSafeCsvCell(r.email)},${toSafeCsvCell(r.phone)},${toSafeCsvCell(r.seminarSlug)}`
         )
         const csv = [header, ...rows].join("\n")
 
