@@ -104,8 +104,7 @@ export default function AskPage() {
 
                         {/* Headline */}
                         <h1 className="text-6xl md:text-7xl font-serif font-bold text-text-primary mb-6 tracking-tight leading-[1.05]">
-                            Ask a Question.<br />
-                            <span className="text-gold">Think in First Principles.</span>
+                            Ask a Question.
                         </h1>
 
                         {/* Description */}
