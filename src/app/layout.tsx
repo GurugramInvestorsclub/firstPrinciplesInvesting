@@ -54,6 +54,9 @@ export const metadata: Metadata = {
     description: "Strip away noise. Think clearly. Compound intelligently.",
     siteName: "First Principles Investing",
   },
+  verification: {
+    google: "XbJR72D3Pr-zTPbyhaLbMnYI3YzZqCdJDiALXArYKf4",
+  },
 };
 
 export default function RootLayout({
