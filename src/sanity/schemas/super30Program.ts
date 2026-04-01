@@ -46,7 +46,7 @@ export default defineType({
         defineField({
             name: 'heroVideo',
             title: 'Hero Background Video (URL)',
-            description: 'Optional. URL to a video file (.mp4) to autoplay in the hero background instead of the default gradient.',
+            description: 'Optional. URL to a video file (.mp4) or a YouTube URL to autoplay in the hero background instead of the default gradient.',
             type: 'string',
         }),
         defineField({

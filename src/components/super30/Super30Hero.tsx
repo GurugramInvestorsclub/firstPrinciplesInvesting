@@ -9,6 +9,12 @@ interface Super30HeroProps {
     program: Super30Program
 }
 
+const getYoutubeVideoId = (url: string) => {
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/
+    const match = url.match(regExp)
+    return (match && match[2].length === 11) ? match[2] : null
+}
+
 export function Super30Hero({ program }: Super30HeroProps) {
     const deadlineDate = program.applicationDeadline ? new Date(program.applicationDeadline) : null
     const containerRef = useRef<HTMLElement>(null)
@@ -40,14 +46,24 @@ export function Super30Hero({ program }: Super30HeroProps) {
             {/* Background Layer: Cinematic Video or default gradient */}
             {program.heroVideo ? (
                 <>
-                    <video 
-                        className="absolute inset-0 w-full h-full object-cover -z-10 opacity-40 mix-blend-screen"
-                        autoPlay 
-                        muted 
-                        loop 
-                        playsInline
-                        src={program.heroVideo}
-                    />
+                    {getYoutubeVideoId(program.heroVideo) ? (
+                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none -z-10 opacity-40 mix-blend-screen">
+                            <iframe 
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh]"
+                                src={`https://www.youtube.com/embed/${getYoutubeVideoId(program.heroVideo)}?autoplay=1&mute=1&loop=1&playlist=${getYoutubeVideoId(program.heroVideo)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                allow="autoplay; encrypted-media; picture-in-picture"
+                            />
+                        </div>
+                    ) : (
+                        <video 
+                            className="absolute inset-0 w-full h-full object-cover -z-10 opacity-40 mix-blend-screen pointer-events-none"
+                            autoPlay 
+                            muted 
+                            loop 
+                            playsInline
+                            src={program.heroVideo}
+                        />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E11] via-[#0E0E11]/80 to-transparent -z-10" />
                 </>
             ) : (
