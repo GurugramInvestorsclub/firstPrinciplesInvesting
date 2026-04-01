@@ -19,6 +19,9 @@ import { Super30Testimonials } from "@/components/super30/Super30Testimonials"
 import { Super30Pricing } from "@/components/super30/Super30Pricing"
 import { Super30FAQ } from "@/components/super30/Super30FAQ"
 import { Super30FinalCTA } from "@/components/super30/Super30FinalCTA"
+import { Super30Cursor } from "@/components/super30/Super30Cursor"
+import { Super30Trust } from "@/components/super30/Super30Trust"
+import { Super30StickyCTA } from "@/components/super30/Super30StickyCTA"
 
 export const revalidate = 60
 
@@ -67,6 +70,8 @@ export default async function Super30Page({ params }: Props) {
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0E0E11] text-text-primary selection:bg-gold/20 selection:text-gold relative z-0 super30-page">
+            <Super30Cursor />
+            <div className="noise-bg" />
             <AmbientLighting />
             <ScrollProgress />
             <StickyNav items={navItems} />
@@ -74,6 +79,11 @@ export default async function Super30Page({ params }: Props) {
 
             <main className="flex-1">
                 <Super30Hero program={program} />
+                <Super30Trust 
+                    logoMarquee={program.logoMarquee} 
+                    statsCounter={program.statsCounter} 
+                    videoTestimonials={program.videoTestimonials} 
+                />
                 <Super30ProblemSection painPoints={program.painPoints} />
                 <Super30PhilosophySection heading={program.philosophyHeading} description={program.philosophyDescription} />
                 <Super30Deliverables deliverables={program.deliverables} />
@@ -85,6 +95,7 @@ export default async function Super30Page({ params }: Props) {
                 <Super30FinalCTA heading="Ready to master the meta-game of investing?" ctaText={program.ctaText} />
             </main>
 
+            <Super30StickyCTA />
             <Footer />
         </div>
     )

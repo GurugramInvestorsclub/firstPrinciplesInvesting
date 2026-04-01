@@ -44,6 +44,21 @@ export default defineType({
 
         // 2. Hero Section
         defineField({
+            name: 'heroVideo',
+            title: 'Hero Background Video (URL)',
+            description: 'Optional. URL to a video file (.mp4) to autoplay in the hero background instead of the default gradient.',
+            type: 'string',
+        }),
+        defineField({
+            name: 'socialProofBadge',
+            title: 'Social Proof Badge',
+            type: 'object',
+            fields: [
+                { name: 'text', title: 'Text Example: "Trusted by 2,400+ professionals"', type: 'string' },
+                { name: 'avatars', title: 'Avatars', type: 'array', of: [{ type: 'image', options: { hotspot: true } }] },
+            ]
+        }),
+        defineField({
             name: 'headline',
             title: 'Hero Headline',
             type: 'string',
@@ -158,8 +173,72 @@ export default defineType({
                         name: 'letters, numbers, underscore or hyphen',
                     })
         }),
+        defineField({
+            name: 'comparisonTable',
+            title: 'Comparison Table',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'feature', title: 'Feature', type: 'string' },
+                    { name: 'withoutSuper30', title: 'Without Super 30', type: 'string' },
+                    { name: 'withSuper30', title: 'With Super 30', type: 'string' },
+                ]
+            }],
+        }),
+        defineField({
+            name: 'saleEndsAt',
+            title: 'Sale Ends At (Countdown)',
+            description: 'If set, displays an urgency countdown timer below the pricing.',
+            type: 'datetime',
+        }),
 
         // 10. Social Proof
+        defineField({
+            name: 'logoMarquee',
+            title: 'Logo Marquee',
+            description: 'Company or partner logos to display in an infinite scrolling marquee.',
+            type: 'array',
+            of: [{ type: 'image' }],
+        }),
+        defineField({
+            name: 'videoTestimonials',
+            title: 'Video Testimonials',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'videoUrl', title: 'Video URL (e.g., YouTube/Vimeo/mp4)', type: 'string' },
+                    { name: 'overlayText', title: 'Overlay Text', type: 'string' },
+                ]
+            }],
+        }),
+        defineField({
+            name: 'statsCounter',
+            title: 'Stats Counter',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'label', title: 'Stat Label', type: 'string' },
+                    { name: 'value', title: 'Target Value (Number)', type: 'number' },
+                    { name: 'suffix', title: 'Suffix (e.g., K, +)', type: 'string' },
+                ]
+            }],
+        }),
+        defineField({
+            name: 'caseStudies',
+            title: 'Case Studies',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'name', title: 'Person Name / Title', type: 'string' },
+                    { name: 'outcomeMetrics', title: 'Outcome Metric (e.g., From 5L to 50L Portfolio)', type: 'string' },
+                    { name: 'description', title: 'Short Description', type: 'text', rows: 2 },
+                ]
+            }],
+        }),
         defineField({
             name: 'testimonials',
             title: 'Testimonials',

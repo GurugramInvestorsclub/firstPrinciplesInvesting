@@ -56,6 +56,8 @@ export interface Super30Program {
     shortDescription?: string
     headline?: string
     subheadline?: string
+    heroVideo?: string
+    socialProofBadge?: { text: string; avatars?: any[] }
     ctaText?: string
     seatsAvailable?: number
     applicationDeadline?: string
@@ -69,6 +71,12 @@ export interface Super30Program {
     price?: number
     currency?: string
     eventId: string
+    comparisonTable?: { feature: string; withoutSuper30: string; withSuper30: string }[]
+    saleEndsAt?: string
+    logoMarquee?: any[]
+    videoTestimonials?: { videoUrl: string; overlayText?: string }[]
+    statsCounter?: { label: string; value: number; suffix?: string }[]
+    caseStudies?: { name: string; outcomeMetrics: string; description?: string }[]
     testimonials?: { name: string; text: string; image?: any }[]
     faq?: { question: string; answer: string }[]
     isActive?: boolean

@@ -11,10 +11,8 @@ export function Super30Deliverables({ deliverables }: Super30DeliverablesProps) 
     if (!deliverables || deliverables.length === 0) return null
 
     return (
-        <section id="deliverables" className="py-24 bg-[#0b0b0c] relative overflow-hidden text-text-primary z-10 transition-colors duration-500 border-t border-white/5">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,199,44,0.03),transparent_50%)] pointer-events-none" />
-            
-            <div className="w-[80%] mx-auto max-w-5xl relative z-10">
+        <section id="deliverables" className="py-24 bg-[#0E0E11] relative overflow-hidden z-10 transition-colors duration-500 border-t border-white/5">
+            <div className="w-[80%] mx-auto max-w-7xl relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -27,35 +25,38 @@ export function Super30Deliverables({ deliverables }: Super30DeliverablesProps) 
                     </h2>
                 </motion.div>
 
-                <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-                    {deliverables.map((item, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-50px" }}
-                            transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-                            className="group p-6 md:p-8 rounded-2xl bg-[#131315] hover:bg-[#18181b] border border-[#2E2E2E] hover:border-gold/30 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-gold/5 overflow-hidden relative"
-                        >
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/10 transition-colors duration-500 rounded-full" />
-                            
-                            <div className="flex gap-4 relative z-10">
-                                <div className="mt-1 shrink-0">
-                                    <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20 text-gold shadow-[0_0_10px_rgba(255,199,44,0.1)]">
-                                        <CheckCircle2 className="w-4 h-4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 auto-rows-[minmax(200px,auto)]">
+                    {deliverables.map((item, index) => {
+                        // Create an asymmetric bento grid pattern
+                        // Example: 2 col wide, 1 col wide, 1 col wide, 2 col wide
+                        const isWide = index % 4 === 0 || index % 4 === 3;
+                        const bentoClass = isWide ? "md:col-span-2 lg:col-span-2" : "md:col-span-1 lg:col-span-1";
+
+                        return (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+                                className={`group p-8 md:p-10 rounded-[2rem] bg-white/5 backdrop-blur-xl border border-white/10 hover:border-gold/30 transition-all duration-300 shadow-2xl hover:shadow-[0_0_30px_rgba(255,199,44,0.1)] overflow-hidden relative flex flex-col justify-between ${bentoClass}`}
+                            >
+                                <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-gold/15 transition-colors duration-500 rounded-full pointer-events-none" />
+                                
+                                <div className="relative z-10 mb-8">
+                                    <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center border border-gold/20 text-gold shadow-[0_0_15px_rgba(255,199,44,0.15)] mb-6 group-hover:scale-110 transition-transform duration-300">
+                                        <CheckCircle2 className="w-6 h-6" />
                                     </div>
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold mb-3 text-white group-hover:text-gold transition-colors duration-300">
+                                    <h3 className={`font-bold mb-4 text-white group-hover:text-gold transition-colors duration-300 ${isWide ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'}`}>
                                         {item.title}
                                     </h3>
-                                    <p className="text-lg text-text-secondary leading-relaxed font-light">
+                                    <p className="text-lg text-gray-400 leading-relaxed font-light">
                                         {item.description}
                                     </p>
                                 </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                            </motion.div>
+                        )
+                    })}
                 </div>
             </div>
         </section>
