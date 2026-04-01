@@ -28,7 +28,8 @@ interface Props {
     }
 }
 
-export async function generateMetadata({ params: { slug } }: Props) {
+export async function generateMetadata({ params }: Props) {
+    const { slug } = await params
     const program = await client.fetch<Super30Program>(singleSuper30Query, { slug })
 
     if (!program) {
