@@ -47,9 +47,9 @@ export function Super30Hero({ program }: Super30HeroProps) {
             {program.heroVideo ? (
                 <>
                     {getYoutubeVideoId(program.heroVideo) ? (
-                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none -z-10 bg-[#0E0E11]">
+                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0 bg-transparent">
                             <iframe 
-                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh] opacity-40 mix-blend-screen"
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh] opacity-60"
                                 src={`https://www.youtube-nocookie.com/embed/${getYoutubeVideoId(program.heroVideo)}?autoplay=1&mute=1&loop=1&playlist=${getYoutubeVideoId(program.heroVideo)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
                                 allow="autoplay; encrypted-media; picture-in-picture"
                                 title="Background Video"
@@ -57,7 +57,7 @@ export function Super30Hero({ program }: Super30HeroProps) {
                         </div>
                     ) : (
                         <video 
-                            className="absolute inset-0 w-full h-full object-cover -z-10 opacity-40 mix-blend-screen pointer-events-none"
+                            className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"
                             autoPlay 
                             muted 
                             loop 
@@ -65,7 +65,7 @@ export function Super30Hero({ program }: Super30HeroProps) {
                             src={program.heroVideo}
                         />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E11] via-[#0E0E11]/80 to-transparent -z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E11] via-[#0E0E11]/80 to-transparent z-[1]" />
                 </>
             ) : (
                 <>
