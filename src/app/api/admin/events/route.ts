@@ -79,3 +79,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: message }, { status: 400 })
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    if (!(await isAdminAuthenticated())) {
+      return unauthorized()
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+    
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "id parameter is required" },
+        { status: 400 }
+      )
+    }
+
+    await prisma.eventPricing.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ success: false, error: message }, { status: 400 })
+  }
+}

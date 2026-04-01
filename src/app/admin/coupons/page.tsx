@@ -265,6 +265,45 @@ export default function AdminCouponsPage() {
       currency: "INR",
     }).format(value)
 
+  const handleDeleteEvent = async (id: string, eventId: string) => {
+    if (!window.confirm(`Are you sure you want to delete pricing for event '${eventId}'? This action cannot be undone.`)) return
+
+    setError(null)
+    setSavingEvent(true)
+    try {
+      const response = await fetch(`/api/admin/events?id=${id}`, {
+        method: "DELETE",
+      })
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || "Failed to delete event pricing")
+      }
+      await loadData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete event pricing")
+    } finally {
+      setSavingEvent(false)
+    }
+  }
+
+  const handleDeleteCoupon = async (id: string, code: string) => {
+    if (!window.confirm(`Are you sure you want to delete coupon '${code}'? This action cannot be undone.`)) return
+
+    setError(null)
+    try {
+      const response = await fetch(`/api/admin/coupons?id=${id}`, {
+        method: "DELETE",
+      })
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || "Failed to delete coupon")
+      }
+      await loadData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete coupon")
+    }
+  }
+
   return (
     <div style={{ display: "grid", gap: "24px" }}>
       <div>
@@ -345,6 +384,7 @@ export default function AdminCouponsPage() {
                 <th style={{ textAlign: "left", padding: "10px 8px", color: "var(--text-secondary)", fontWeight: 600 }}>Event ID</th>
                 <th style={{ textAlign: "left", padding: "10px 8px", color: "var(--text-secondary)", fontWeight: 600 }}>Price</th>
                 <th style={{ textAlign: "left", padding: "10px 8px", color: "var(--text-secondary)", fontWeight: 600 }}>Updated</th>
+                <th style={{ textAlign: "right", padding: "10px 8px", color: "var(--text-secondary)", fontWeight: 600 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -367,6 +407,22 @@ export default function AdminCouponsPage() {
                     <td style={{ padding: "10px 8px", color: "var(--text-primary)" }}>{formatMoney(row.priceRupees)}</td>
                     <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>
                       {new Date(row.updatedAt).toLocaleString("en-IN")}
+                    </td>
+                    <td style={{ padding: "10px 8px", textAlign: "right" }}>
+                      <button
+                        onClick={() => handleDeleteEvent(row.id, row.eventId)}
+                        style={{
+                          background: "rgba(239,68,68,0.1)",
+                          color: "#ef4444",
+                          border: "1px solid rgba(239,68,68,0.2)",
+                          borderRadius: "6px",
+                          padding: "4px 8px",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -646,6 +702,21 @@ export default function AdminCouponsPage() {
                                 }}
                               >
                                 {coupon.isActive ? "Deactivate" : "Activate"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCoupon(coupon.id, coupon.code)}
+                                style={{
+                                  ...buttonStyle,
+                                  background: "rgba(239,68,68,0.1)",
+                                  color: "#ef4444",
+                                  border: "1px solid rgba(239,68,68,0.2)",
+                                  boxShadow: "none",
+                                  padding: "6px 10px",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                Delete
                               </button>
                             </>
                           )}
