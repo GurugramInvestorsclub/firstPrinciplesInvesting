@@ -47,11 +47,12 @@ export function Super30Hero({ program }: Super30HeroProps) {
             {program.heroVideo ? (
                 <>
                     {getYoutubeVideoId(program.heroVideo) ? (
-                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none -z-10 opacity-40 mix-blend-screen">
+                        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none -z-10 bg-[#0E0E11]">
                             <iframe 
-                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh]"
-                                src={`https://www.youtube.com/embed/${getYoutubeVideoId(program.heroVideo)}?autoplay=1&mute=1&loop=1&playlist=${getYoutubeVideoId(program.heroVideo)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh] opacity-40 mix-blend-screen"
+                                src={`https://www.youtube-nocookie.com/embed/${getYoutubeVideoId(program.heroVideo)}?autoplay=1&mute=1&loop=1&playlist=${getYoutubeVideoId(program.heroVideo)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
                                 allow="autoplay; encrypted-media; picture-in-picture"
+                                title="Background Video"
                             />
                         </div>
                     ) : (

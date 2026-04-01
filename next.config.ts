@@ -7,7 +7,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://www.google-analytics.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.sanity.io wss://*.sanity.io",
-  "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com",
+  "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
