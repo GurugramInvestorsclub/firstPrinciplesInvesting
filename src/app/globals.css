@@ -265,3 +265,13 @@
 .featured-cta {
   color: var(--insights-accent, #C9A84C);
 }
+
+/* ─── Super 30 Pages ─── */
+.super30-page {
+  /* Inherit generic styling but keep a dark, premium aesthetic */
+  --super30-bg: #0E0E11;
+  --super30-card: #131315;
+  --super30-card-hover: #18181b;
+  --super30-gold: #FFC72C;
+  --super30-gold-muted: #C89B3C;
+}

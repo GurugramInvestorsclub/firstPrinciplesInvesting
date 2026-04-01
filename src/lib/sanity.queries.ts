@@ -131,3 +131,49 @@ export const testimonialsQuery = groq`
     photo
   }
 `
+
+export const allSuper30ProgramsQuery = groq`
+  *[_type == "super30Program" && isActive == true] | order(_createdAt desc) {
+    _id,
+    title,
+    slug,
+    batchName,
+    tagline,
+    shortDescription,
+    seatsAvailable,
+    applicationDeadline,
+    price,
+    eventId,
+    isSoldOut
+  }
+`
+
+export const singleSuper30Query = groq`
+  *[_type == "super30Program" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    batchName,
+    tagline,
+    shortDescription,
+    headline,
+    subheadline,
+    ctaText,
+    seatsAvailable,
+    applicationDeadline,
+    painPoints,
+    philosophyHeading,
+    philosophyDescription,
+    deliverables,
+    outcomes,
+    whoItsFor,
+    whoItsNotFor,
+    price,
+    currency,
+    eventId,
+    testimonials,
+    faq,
+    isActive,
+    isSoldOut
+  }
+`

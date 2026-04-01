@@ -46,3 +46,31 @@ export interface Testimonial {
     quote: string
     photo?: any
 }
+
+export interface Super30Program {
+    _id: string
+    title: string
+    slug: { current: string }
+    batchName?: string
+    tagline?: string
+    shortDescription?: string
+    headline?: string
+    subheadline?: string
+    ctaText?: string
+    seatsAvailable?: number
+    applicationDeadline?: string
+    painPoints?: string[]
+    philosophyHeading?: string
+    philosophyDescription?: PortableTextBlock[]
+    deliverables?: { title: string; description: string }[]
+    outcomes?: string[]
+    whoItsFor?: string[]
+    whoItsNotFor?: string[]
+    price?: number
+    currency?: string
+    eventId: string
+    testimonials?: { name: string; text: string; image?: any }[]
+    faq?: { question: string; answer: string }[]
+    isActive?: boolean
+    isSoldOut?: boolean
+}
