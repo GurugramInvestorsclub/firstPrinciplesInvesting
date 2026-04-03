@@ -75,7 +75,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           flex-direction: column;
           justify-content: center;
           position: relative;
-          padding: 140px 60px 100px;
+          padding: 80px 60px 100px;
           overflow: hidden;
         }
 
@@ -88,16 +88,6 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           z-index: 1;
         }
 
-        .hero-grid {
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(rgba(255, 199, 44, 0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 199, 44, 0.04) 1px, transparent 1px);
-          background-size: 60px 60px;
-          mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
-          z-index: 1;
-        }
 
         .hero-eyebrow {
           font-family: var(--font-mono);
@@ -667,7 +657,6 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           </>
         )}
         <div className="hero-bg-overlay" />
-        <div className="hero-grid" />
 
         <p className="hero-eyebrow">Super30 Masterclass - Limited Cohort</p>
 
