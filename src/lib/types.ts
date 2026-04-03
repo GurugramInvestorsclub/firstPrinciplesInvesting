@@ -54,6 +54,10 @@ export interface Super30Program {
     batchName?: string
     tagline?: string
     shortDescription?: string
+    investorsEducated?: string
+    batchNumber?: string
+    seatsRemaining?: string
+    applyByDate?: string
     headline?: string
     subheadline?: string
     heroVideo?: string

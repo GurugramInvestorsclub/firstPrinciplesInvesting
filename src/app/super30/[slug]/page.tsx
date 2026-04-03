@@ -23,6 +23,8 @@ import { Super30Cursor } from "@/components/super30/Super30Cursor"
 import { Super30Trust } from "@/components/super30/Super30Trust"
 import { Super30StickyCTA } from "@/components/super30/Super30StickyCTA"
 
+import { Super30NewDesign } from "@/components/super30/Super30NewDesign"
+
 export const revalidate = 60
 
 interface Props {
@@ -51,51 +53,19 @@ export default async function Super30Page({ params }: Props) {
     const { slug } = await params
     const program = await client.fetch<Super30Program>(singleSuper30Query, { slug })
 
-    // If program doesn't exist or is set to inactive, 404
     if (!program || program.isActive === false) {
         notFound()
     }
 
-    const navItems = [
-        { label: "Overview", id: "overview" },
-        ...(program.painPoints?.length ? [{ label: "The Problem", id: "problem" }] : []),
-        ...(program.philosophyDescription ? [{ label: "Philosophy", id: "philosophy" }] : []),
-        ...(program.deliverables?.length ? [{ label: "What You Get", id: "deliverables" }] : []),
-        ...(program.outcomes?.length ? [{ label: "Transformation", id: "outcomes" }] : []),
-        ...(program.whoItsFor?.length || program.whoItsNotFor?.length ? [{ label: "Audience", id: "audience" }] : []),
-        ...(program.testimonials?.length ? [{ label: "Testimonials", id: "proof" }] : []),
-        { label: "Apply Now", id: "apply" },
-        ...(program.faq?.length ? [{ label: "FAQ", id: "faq" }] : []),
-    ]
-
     return (
         <div className="flex flex-col min-h-screen bg-[#0E0E11] text-text-primary selection:bg-gold/20 selection:text-gold relative z-0 super30-page">
-            <Super30Cursor />
             <div className="noise-bg" />
-            <AmbientLighting />
-            <ScrollProgress />
-            <StickyNav items={navItems} />
             <Navbar />
 
             <main className="flex-1">
-                <Super30Hero program={program} />
-                <Super30Trust 
-                    logoMarquee={program.logoMarquee} 
-                    statsCounter={program.statsCounter} 
-                    videoTestimonials={program.videoTestimonials} 
-                />
-                <Super30ProblemSection painPoints={program.painPoints} />
-                <Super30PhilosophySection heading={program.philosophyHeading} description={program.philosophyDescription} />
-                <Super30Deliverables deliverables={program.deliverables} />
-                <Super30Outcomes outcomes={program.outcomes} />
-                <Super30Audience whoItsFor={program.whoItsFor} whoItsNotFor={program.whoItsNotFor} />
-                <Super30Testimonials testimonials={program.testimonials} />
-                <Super30Pricing program={program} />
-                <Super30FAQ faq={program.faq} />
-                <Super30FinalCTA heading="Ready to master the meta-game of investing?" ctaText={program.ctaText} />
+                <Super30NewDesign program={program} />
             </main>
 
-            <Super30StickyCTA />
             <Footer />
         </div>
     )

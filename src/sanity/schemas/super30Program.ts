@@ -42,11 +42,37 @@ export default defineType({
             rows: 3,
         }),
 
+        // 1.5 Highlights (New)
+        defineField({
+            name: 'investorsEducated',
+            title: 'Investors Educated Highlight',
+            description: 'Example: 500+ Investors Educated',
+            type: 'string',
+        }),
+        defineField({
+            name: 'batchNumber',
+            title: 'Batch Number Highlight',
+            description: 'Example: Batch 3',
+            type: 'string',
+        }),
+        defineField({
+            name: 'seatsRemaining',
+            title: 'Seats Remaining Highlight',
+            description: 'Example: Only 26 seats remaining',
+            type: 'string',
+        }),
+        defineField({
+            name: 'applyByDate',
+            title: 'Apply By Date Highlight',
+            description: 'Example: Apply by Apr 19',
+            type: 'string',
+        }),
+
         // 2. Hero Section
         defineField({
             name: 'heroVideo',
-            title: 'Hero Background Video (URL)',
-            description: 'Optional. URL to a video file (.mp4) or a YouTube URL to autoplay in the hero background instead of the default gradient.',
+            title: 'Hero Background Video (URL/YouTube)',
+            description: 'URL to a video file (.mp4) or a YouTube URL to autoplay in the background.',
             type: 'string',
         }),
         defineField({
