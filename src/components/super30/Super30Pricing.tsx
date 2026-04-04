@@ -62,10 +62,10 @@ export function Super30Pricing({ program }: { program: Super30Program }) {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-center mb-16 md:mb-24"
                 >
-                    <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight drop-shadow-md">
+                    <h2 className="text-5xl md:text-8xl font-black mb-10 text-white tracking-tighter drop-shadow-2xl">
                         Secure your <span className="text-gold">seat</span>
                     </h2>
-                    <p className="text-xl md:text-2xl text-gray-400 font-light max-w-2xl mx-auto">
+                    <p className="text-2xl md:text-3xl text-gray-400 font-light max-w-4xl mx-auto">
                         {program.seatsAvailable ? `Only ${program.seatsAvailable} seats remaining for ${program.batchName || 'this cohort'}.` : 'Applications are closing soon.'}
                     </p>
                 </motion.div>
@@ -111,12 +111,12 @@ export function Super30Pricing({ program }: { program: Super30Program }) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-50px" }}
                         transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                        className={`w-full ${program.comparisonTable && program.comparisonTable.length > 0 ? 'lg:w-[40%]' : 'max-w-2xl mx-auto'}`}
+                        className={`w-full ${program.comparisonTable && program.comparisonTable.length > 0 ? 'lg:w-[60%]' : 'max-w-5xl mx-auto'}`}
                     >
                         <div className="relative group">
                             {/* Animated Glowing Ring for Premium Feel */}
-                            <div className="absolute -inset-1 bg-gradient-to-br from-gold/30 via-gold/10 to-transparent rounded-[2rem] blur-xl opacity-70 group-hover:opacity-100 group-hover:blur-2xl transition-all duration-700 pointer-events-none" />
-                            <div className="absolute inset-0 rounded-[2rem] border border-gold/30 pointer-events-none z-20" />
+                            <div className="absolute -inset-2 bg-gradient-to-br from-gold/30 via-gold/10 to-transparent rounded-[3rem] blur-2xl opacity-70 group-hover:opacity-100 group-hover:blur-3xl transition-all duration-700 pointer-events-none" />
+                            <div className="absolute inset-0 rounded-[3rem] border border-gold/30 pointer-events-none z-20" />
                             
                             {/* Native Event Checkout Bridge */}
                             <div className="relative z-10 drop-shadow-2xl">

@@ -49,33 +49,33 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
     <div className="super30-new-design">
       <style jsx>{`
         .super30-new-design {
-          --s30-bg: #0E0E11;
-          --s30-bg2: #131315;
-          --s30-bg3: #1c1c1f;
-          --s30-surface: #242427;
-          --s30-gold: #FFC72C;
-          --s30-gold-light: #FFE082;
-          --s30-gold-dim: #C89B3C;
-          --s30-cream: #F0EDE8;
-          --s30-cream-dim: #9CA3AF;
-          --s30-border: rgba(255, 199, 44, 0.18);
+          --s30-bg: #0a0a08;
+          --s30-bg2: #111110;
+          --s30-bg3: #181816;
+          --s30-surface: #1e1e1b;
+          --s30-gold: #F5B800;
+          --s30-gold-light: #FFD700;
+          --s30-gold-dim: #C89A00;
+          --s30-cream: #f5f0e8;
+          --s30-cream-dim: #d1cdc7;
+          --s30-border: rgba(245, 184, 0, 0.18);
           --s30-border-dim: rgba(255, 255, 255, 0.07);
           
           background: var(--s30-bg);
           color: var(--s30-cream);
-          font-weight: 300;
-          line-height: 1.65;
+          font-weight: 400;
+          line-height: 1.8;
           overflow-x: hidden;
         }
 
         /* ── HERO ── */
         .s30-hero {
-          min-height: 100vh;
+          height: 100vh;
           display: flex;
           flex-direction: column;
           justify-content: center;
           position: relative;
-          padding: 80px 60px 100px;
+          padding: 80px 60px 80px;
           overflow: hidden;
         }
 
@@ -83,11 +83,10 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           position: absolute;
           inset: 0;
           background:
-            radial-gradient(ellipse 80% 60% at 60% 40%, rgba(255, 199, 44, 0.06) 0%, transparent 70%),
-            radial-gradient(ellipse 50% 80% at 10% 80%, rgba(255, 199, 44, 0.04) 0%, transparent 60%);
+            radial-gradient(ellipse 80% 60% at 60% 40%, rgba(245, 184, 0, 0.06) 0%, transparent 70%),
+            radial-gradient(ellipse 50% 80% at 10% 80%, rgba(245, 184, 0, 0.04) 0%, transparent 60%);
           z-index: 1;
         }
-
 
         .hero-eyebrow {
           font-family: var(--font-mono);
@@ -114,12 +113,12 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
 
         .hero-headline {
           font-family: var(--font-display);
-          font-size: clamp(3rem, 7vw, 6.5rem);
+          font-size: clamp(2.2rem, 5.5vw, 4.6rem);
           font-weight: 900;
-          line-height: 1.03;
+          line-height: 1.1;
           letter-spacing: -0.02em;
-          max-width: 820px;
-          margin-bottom: 32px;
+          max-width: 940px;
+          margin-bottom: 24px;
           opacity: 0;
           animation: fadeUp 0.9s ease 0.35s forwards;
           z-index: 2;
@@ -131,12 +130,8 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
         }
 
         .hero-sub {
-          font-size: 1.1rem;
-          font-weight: 300;
-          color: var(--s30-cream-dim);
           max-width: 520px;
-          margin-bottom: 52px;
-          line-height: 1.75;
+          margin-bottom: 36px;
           opacity: 0;
           animation: fadeUp 0.9s ease 0.5s forwards;
           z-index: 2;
@@ -172,16 +167,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           transition: all 0.3s ease;
           clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
         }
-        .s30-btn-primary::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: var(--s30-gold-light);
-          transform: translateX(-100%);
-          transition: transform 0.3s ease;
-        }
-        .s30-btn-primary:hover::before { transform: translateX(0); }
-        .s30-btn-primary:hover { box-shadow: 0 8px 40px rgba(255, 199, 44, 0.35); }
+        .s30-btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
         .s30-btn-primary span, .s30-btn-primary svg { position: relative; z-index: 1; }
 
         .s30-btn-ghost {
@@ -204,7 +190,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
         .hero-stats {
           position: absolute;
           right: 60px;
-          bottom: 100px;
+          bottom: 80px;
           display: flex;
           flex-direction: column;
           gap: 28px;
@@ -253,12 +239,6 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           width: 1px;
           height: 40px;
           background: linear-gradient(to bottom, var(--s30-gold), transparent);
-          animation: scrollPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes scrollPulse {
-          0%, 100% { opacity: 1; transform: scaleY(1); }
-          50% { opacity: 0.4; transform: scaleY(0.6); }
         }
 
         /* ── MARQUEE ── */
@@ -274,7 +254,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
         }
         .marquee-track {
           display: inline-flex;
-          animation: s30marquee 22s linear infinite;
+          animation: s30marquee 30s linear infinite;
         }
         .marquee-item {
           display: inline-flex;
@@ -292,395 +272,179 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           border-radius: 50%;
           background: var(--s30-gold);
         }
-
         @keyframes s30marquee {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
         }
 
         /* ── STORY SECTION ── */
-        .s30-story {
-          padding: 120px 60px;
-          max-width: 1200px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 1fr 1.6fr;
-          gap: 80px;
-          align-items: start;
-          position: relative;
-          z-index: 5;
-        }
+        .s30-story { padding: 120px 60px; max-width: 820px; margin: 0 auto; position: relative; z-index: 5; }
         .story-label {
-          font-family: var(--font-mono);
-          font-size: 0.68rem;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          color: var(--s30-gold);
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
+          font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--s30-gold); margin-bottom: 56px; display: flex; align-items: center; gap: 14px;
         }
-        .story-label::before {
-          content: '01';
-          color: var(--s30-border);
-          font-size: 0.65rem;
-        }
-        .story-left h2 {
-          font-family: var(--font-display);
-          font-size: clamp(2rem, 3.5vw, 3rem);
-          font-weight: 700;
-          line-height: 1.2;
-          letter-spacing: -0.01em;
-        }
-        .story-left h2 em { font-style: italic; color: var(--s30-gold); }
-        .sticky-top { position: sticky; top: 120px; }
+        .story-label::after { content: ''; width: 36px; height: 1px; background: var(--s30-gold); }
+        .dear-investor { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s30-gold); margin-bottom: 32px; }
+        .letter-body p { font-size: 1.15rem; color: var(--s30-cream-dim); margin-bottom: 24px; line-height: 1.85; }
+        .letter-body p strong { color: var(--s30-cream); font-weight: 600; }
+        .letter-body p.opener { font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; font-style: italic; color: var(--s30-cream); line-height: 1.5; margin-bottom: 40px; }
+        .letter-body p.shout { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--s30-cream); line-height: 1.4; margin-bottom: 20px; }
 
-        .story-right p {
-          font-size: 1.05rem;
-          color: var(--s30-cream-dim);
-          margin-bottom: 22px;
-          line-height: 1.8;
-        }
-        .story-right p strong { color: var(--s30-cream); font-weight: 500; }
-        .story-right p.big { font-size: 1.25rem; color: var(--s30-cream); font-weight: 400; line-height: 1.65; }
+        .grand-plan { margin: 32px 0; padding: 36px 40px; background: var(--s30-bg2); border: 1px solid var(--s30-gold); display: flex; flex-direction: column; gap: 14px; }
+        .grand-plan-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--s30-gold); margin-bottom: 8px; }
+        .plan-item { display: flex; align-items: flex-start; gap: 16px; font-size: 1rem; color: var(--s30-cream); }
+        .plan-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--s30-gold); padding-top: 4px; flex-shrink: 0; }
 
-        .s30-journey {
-          margin: 48px 0;
-          border-left: 2px solid var(--s30-border);
-          padding-left: 28px;
-          display: flex;
-          flex-direction: column;
-          gap: 32px;
-        }
-        .journey-item { position: relative; }
-        .journey-item::before {
-          content: '';
-          position: absolute;
-          left: -35px;
-          top: 8px;
-          width: 10px; height: 10px;
-          border-radius: 50%;
-          background: var(--s30-bg);
-          border: 2px solid var(--s30-gold-dim);
-          transition: border-color 0.3s;
-        }
-        .journey-item:hover::before { border-color: var(--s30-gold); }
-        .journey-label {
-          font-family: var(--font-mono);
-          font-size: 0.68rem;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: var(--s30-gold-dim);
-          margin-bottom: 6px;
-        }
-        .journey-text { font-size: 0.95rem; color: var(--s30-cream-dim); line-height: 1.7; }
-        .journey-text strong { color: var(--s30-cream); font-weight: 500; }
-
-        /* ── SECRETS SECTION ── */
-        .secrets-wrap {
-          background: var(--s30-bg2);
-          border-top: 1px solid var(--s30-border-dim);
-          border-bottom: 1px solid var(--s30-border-dim);
-          padding: 120px 60px;
-          position: relative;
-          z-index: 5;
-        }
-        .s30-section-header {
-          max-width: 1200px;
-          margin: 0 auto 72px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 40px;
-        }
-        .section-label {
-          font-family: var(--font-mono);
-          font-size: 0.68rem;
-          letter-spacing: 0.25em;
-          text-transform: uppercase;
-          color: var(--s30-gold);
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .section-label.num::before {
-          content: attr(data-num);
-          color: var(--s30-border);
-          font-size: 0.65rem;
-        }
-        .s30-section-header h2 {
-          font-family: var(--font-display);
-          font-size: clamp(2rem, 3.5vw, 3rem);
-          font-weight: 900;
-          letter-spacing: -0.02em;
-          max-width: 600px;
-          line-height: 1.15;
-        }
-        .s30-section-header h2 em { font-style: italic; color: var(--s30-gold); }
-        .s30-section-header p {
-          max-width: 320px;
-          font-size: 0.92rem;
-          color: var(--s30-cream-dim);
-          line-height: 1.75;
-        }
-
-        .secrets-grid {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 2px;
-        }
-        .secret-card {
-          background: var(--s30-bg3);
-          padding: 56px 52px;
-          position: relative;
-          overflow: hidden;
-          transition: background 0.3s;
-          cursor: default;
-        }
-        .secret-card:hover { background: var(--s30-surface); }
-        .secret-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0;
-          width: 3px; height: 0;
-          background: var(--s30-gold);
-          transition: height 0.4s ease;
-        }
-        .secret-card:hover::before { height: 100%; }
-
-        .secret-number {
-          font-family: var(--font-display);
-          font-size: 5rem;
-          font-weight: 900;
-          color: rgba(255, 199, 44, 0.08);
-          line-height: 1;
-          position: absolute;
-          top: 24px; right: 36px;
-          letter-spacing: -0.04em;
-          transition: color 0.3s;
-        }
-        .secret-card:hover .secret-number { color: rgba(255, 199, 44, 0.12); }
-
-        .secret-tag {
-          font-family: var(--font-mono);
-          font-size: 0.65rem;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          color: var(--s30-gold);
-          margin-bottom: 20px;
-          display: inline-block;
-          border: 1px solid var(--s30-gold-dim);
-          padding: 4px 12px;
-        }
-        .secret-card h3 {
-          font-family: var(--font-display);
-          font-size: 1.75rem;
-          font-weight: 700;
-          line-height: 1.25;
-          margin-bottom: 20px;
-          letter-spacing: -0.01em;
-        }
-        .secret-card p { font-size: 0.95rem; color: var(--s30-cream-dim); line-height: 1.75; margin-bottom: 20px; }
-        .secret-result {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-top: 36px;
-          padding-top: 28px;
-          border-top: 1px solid var(--s30-border-dim);
-        }
-        .result-number { font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: var(--s30-gold); line-height: 1; }
-        .result-label { font-size: 0.82rem; color: var(--s30-cream-dim); line-height: 1.5; }
+        .journey-phases { margin: 48px 0; border-left: 2px solid var(--s30-gold); }
+        .phase { padding: 28px 32px; border-bottom: 1px solid var(--s30-border-dim); position: relative; transition: background 0.3s; }
+        .phase:last-child { border-bottom: none; }
+        .phase:hover { background: var(--s30-bg2); }
+        .phase::before { content: ''; position: absolute; left: -7px; top: 36px; width: 12px; height: 12px; border-radius: 50%; background: var(--s30-bg); border: 2px solid var(--s30-gold-dim); transition: border-color 0.3s, background 0.3s; }
+        .phase:hover::before { border-color: var(--s30-gold); background: var(--s30-gold-dim); }
+        .phase-tag { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s30-gold); margin-bottom: 8px; }
+        .phase-body { font-size: 1rem; color: var(--s30-cream-dim); line-height: 1.75; }
+        .phase-result { margin-top: 12px; display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--s30-gold); }
+        .phase-result::before { content: '→'; }
+        .pull-quote { margin: 56px 0; padding: 48px 52px; border-left: 4px solid var(--s30-gold); background: var(--s30-bg2); }
+        .pull-quote p { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; font-style: italic; line-height: 1.45; color: var(--s30-cream); margin: 0; }
+        .pull-quote p em { color: var(--s30-gold); font-style: normal; }
 
         /* ── PROOF SECTION ── */
-        .s30-proof { padding: 120px 60px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 5; }
-        .trades-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 60px; }
-        .trade-card {
-          background: var(--s30-bg2);
-          padding: 40px 36px;
-          border: 1px solid var(--s30-border-dim);
-          position: relative;
-          overflow: hidden;
-          transition: border-color 0.3s, transform 0.3s;
-        }
+        .s30-proof { padding: 100px 60px; background: var(--s30-bg2); border-top: 1px solid var(--s30-border-dim); border-bottom: 1px solid var(--s30-border-dim); }
+        .s-eyebrow { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--s30-gold); margin-bottom: 24px; display: flex; align-items: center; gap: 14px; }
+        .s-eyebrow::after { content: ''; flex: 0 0 36px; height: 1px; background: var(--s30-gold-dim); }
+        .s-heading { font-family: var(--font-display); font-size: clamp(2.4rem, 4vw, 3.5rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 20px; }
+        .s-heading em { font-style: italic; color: var(--s30-gold); }
+        .trades-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 56px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+        .trade-card { background: var(--s30-bg3); padding: 44px 36px; border: 1px solid var(--s30-border-dim); transition: border-color 0.3s, transform 0.3s; }
         .trade-card:hover { border-color: var(--s30-gold-dim); transform: translateY(-4px); }
-        .trade-stock { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s30-cream-dim); margin-bottom: 12px; }
-        .trade-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-        .trade-return { font-family: var(--font-display); font-size: 3rem; font-weight: 900; color: var(--s30-gold); line-height: 1; margin-bottom: 4px; }
+        .trade-stock { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s30-cream-dim); margin-bottom: 10px; }
+        .trade-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 24px; }
+        .trade-return { font-family: var(--font-display); font-size: 3.8rem; font-weight: 900; color: var(--s30-gold); line-height: 1; margin-bottom: 6px; }
         .trade-time { font-size: 0.82rem; color: var(--s30-cream-dim); }
-        .trade-bar {
-          position: absolute;
-          bottom: 0; left: 0;
-          height: 3px;
-          background: linear-gradient(to right, var(--s30-gold), var(--s30-gold-light));
-          width: 0;
-          transition: width 0.8s ease;
-        }
-        .trade-card:hover .trade-bar { width: 100%; }
 
-        /* ── COMPOUNDING CALC ── */
-        .calc-wrap {
-          background: var(--s30-bg2);
-          border-top: 1px solid var(--s30-border-dim);
-          border-bottom: 1px solid var(--s30-border-dim);
-          padding: 120px 60px;
-          position: relative;
-          z-index: 5;
-        }
-        .calc-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-        .calc-label { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--s30-gold); margin-bottom: 16px; }
-        .calc-left h2 { font-family: var(--font-display); font-size: clamp(2rem, 3vw, 2.8rem); font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 24px; }
-        .calc-left h2 em { font-style: italic; color: var(--s30-gold); }
-        .calc-left p { font-size: 1rem; color: var(--s30-cream-dim); line-height: 1.8; margin-bottom: 16px; }
+        /* ── SECRETS SECTION ── */
+        .secrets-wrap { background: var(--s30-bg); padding: 120px 60px; position: relative; z-index: 5; }
+        .secrets-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+        .secret-card { background: var(--s30-bg2); padding: 56px 48px; position: relative; overflow: hidden; border: 1px solid var(--s30-border-dim); transition: border-color 0.3s, background 0.3s; }
+        .secret-card:hover { border-color: var(--s30-gold-dim); background: var(--s30-bg3); }
+        .secret-num-bg { font-family: var(--font-display); font-size: 8rem; font-weight: 900; color: rgba(245, 184, 0, 0.05); line-height: 1; position: absolute; right: 24px; top: 16px; letter-spacing: -0.04em; transition: color 0.3s; user-select: none; }
+        .secret-card:hover .secret-num-bg { color: rgba(245, 184, 0, 0.09); }
+        .secret-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--s30-gold); border: 1px solid var(--s30-gold-dim); padding: 4px 12px; margin-bottom: 24px; }
+        .secret-card h3 { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1.25; margin-bottom: 20px; letter-spacing: -0.01em; }
+        .secret-card h3 em { font-style: italic; color: var(--s30-gold); }
+        .secret-body { font-size: 0.95rem; color: var(--s30-cream-dim); line-height: 1.8; margin-bottom: 16px; }
+        .avoid-list { margin: 20px 0; display: flex; flex-direction: column; gap: 10px; }
+        .avoid-item { display: flex; align-items: flex-start; gap: 12px; font-size: 0.9rem; color: var(--s30-cream-dim); line-height: 1.5; }
+        .avoid-item::before { content: '✕'; color: var(--s30-gold-dim); font-size: 0.7rem; flex-shrink: 0; margin-top: 3px; }
+        .secret-result { margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--s30-border-dim); display: flex; align-items: center; gap: 18px; }
+        .result-big { font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; color: var(--s30-gold); line-height: 1; }
+        .result-caption { font-size: 0.84rem; color: var(--s30-cream-dim); line-height: 1.6; }
 
-        .calc-visual { background: var(--s30-bg3); border: 1px solid var(--s30-border); padding: 48px; }
-        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--s30-border-dim); }
-        .calc-row:last-child { border-bottom: none; }
-        .calc-row-label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; color: var(--s30-cream-dim); text-transform: uppercase; }
-        .calc-row-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--s30-cream); }
-        .calc-row-value.highlight { color: var(--s30-gold); }
-        .calc-row-value.big { font-size: 2.2rem; font-weight: 900; }
-        .calc-divider { height: 1px; background: var(--s30-border); margin: 12px 0; }
-        .calc-delta { margin-top: 28px; padding: 20px; background: rgba(255, 199, 44, 0.06); border: 1px solid var(--s30-border); text-align: center; }
-        .calc-delta .delta-num { font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: var(--s30-gold); }
-        .calc-delta .delta-label { font-size: 0.85rem; color: var(--s30-cream-dim); margin-top: 4px; }
+        /* ── COMPOUNDING SECTION ── */
+        .calc-wrap { padding: 120px 60px; background: var(--s30-bg); border-bottom: 1px solid var(--s30-border-dim); }
+        .calc-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 80px; align-items: center; }
+        .calc-visual { background: var(--s30-bg3); border: 1px solid var(--s30-gold); overflow: hidden; }
+        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 36px; border-bottom: 1px solid var(--s30-border-dim); }
+        .calc-row.header { background: rgba(245, 184, 0, 0.05); padding: 14px 36px; }
+        .calc-row-label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--s30-cream-dim); }
+        .calc-row-value { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--s30-cream); }
+        .calc-row-value.highlight { color: var(--s30-gold); font-size: 1.8rem; }
+        .calc-delta { padding: 28px 36px; text-align: center; background: rgba(245, 184, 0, 0.06); border-top: 1px solid var(--s30-gold); }
+        .calc-delta .delta-num { font-family: var(--font-display); font-size: 2.4rem; font-weight: 900; color: var(--s30-gold); display: block; margin-bottom: 6px; }
+        .calc-delta .delta-label { font-size: 0.82rem; color: var(--s30-cream-dim); font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; }
 
-        /* ── WHAT YOU'LL LEARN ── */
-        .s30-learn { padding: 120px 60px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 5; }
-        .learn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; margin-top: 60px; }
+        /* ── WIN RATE WRAP ── */
+        .winrate-wrap { background: var(--s30-bg2); border-top: 1px solid var(--s30-border-dim); padding: 100px 60px; }
+        .winrate-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+        .winrate-card { padding: 52px 40px; background: var(--s30-bg3); text-align: center; border: 1px solid var(--s30-border-dim); }
+
+        /* ── LEARN GRID ── */
+        .s30-learn { padding: 120px 60px; max-width: 1100px; margin: 0 auto; }
+        .learn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; margin-top: 60px; }
         .learn-item { padding: 40px 36px; border: 1px solid var(--s30-border-dim); display: flex; gap: 24px; align-items: flex-start; transition: border-color 0.3s, background 0.3s; }
         .learn-item:hover { border-color: var(--s30-gold-dim); background: var(--s30-bg2); }
-        .learn-icon {
-          width: 44px; height: 44px;
-          border: 1px solid var(--s30-gold-dim);
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; font-family: var(--font-mono); font-size: 0.72rem;
-          color: var(--s30-gold); letter-spacing: 0.05em;
-        }
-        .learn-content h4 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-        .learn-content p { font-size: 0.88rem; color: var(--s30-cream-dim); line-height: 1.7; }
-
-        /* ── WIN RATE ── */
-        .winrate-wrap { background: var(--s30-bg2); border-top: 1px solid var(--s30-border-dim); padding: 100px 60px; position: relative; z-index: 5; }
-        .winrate-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; }
-        .winrate-card { padding: 52px 40px; background: var(--s30-bg3); text-align: center; }
-        .winrate-number { font-family: var(--font-display); font-size: 4rem; font-weight: 900; color: var(--s30-gold); line-height: 1; margin-bottom: 12px; }
-        .winrate-desc { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--s30-cream-dim); line-height: 1.6; }
 
         /* ── CTA SECTION ── */
         .s30-cta-section { padding: 140px 60px; text-align: center; position: relative; overflow: hidden; z-index: 5; }
-        .cta-bg-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(255, 199, 44, 0.07) 0%, transparent 70%); }
+        .cta-bg-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(245, 184, 0, 0.07) 0%, transparent 70%); }
         .s30-cta-section h2 { font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; max-width: 800px; margin: 0 auto 24px; position: relative; }
         .s30-cta-section h2 em { font-style: italic; color: var(--s30-gold); }
         .s30-cta-section p { font-size: 1rem; color: var(--s30-cream-dim); max-width: 480px; margin: 0 auto 48px; line-height: 1.8; position: relative; }
         .cta-group { position: relative; display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .cta-note {
-          font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.15em;
-          text-transform: uppercase; color: var(--s30-gold-dim); margin-top: 24px;
-          position: relative; display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
+        .cta-note { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--s30-gold-dim); margin-top: 24px; position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .cta-note::before, .cta-note::after { content: ''; width: 30px; height: 1px; background: var(--s30-gold-dim); }
 
-        /* ── DISCLAIMER ── */
-        .s30-disclaimer { background: rgba(255, 199, 44, 0.05); border-top: 1px solid var(--s30-border); padding: 16px 60px; text-align: center; position: relative; z-index: 5; }
+        .s30-disclaimer { background: rgba(245, 184, 0, 0.05); border-top: 1px solid var(--s30-border); padding: 16px 60px; text-align: center; position: relative; z-index: 5; }
         .s30-disclaimer p { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; color: var(--s30-cream-dim); line-height: 1.6; max-width: 900px; margin: 0 auto; }
 
-        /* ── ANIMATIONS ── */
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeLeft {
-          from { opacity: 0; transform: translateX(24px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-
-        .reveal {
-          opacity: 0;
-          transform: translateY(32px);
-          transition: opacity 0.7s ease, transform 0.7s ease;
-        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeLeft { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+        .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
         .reveal-delay-1 { transition-delay: 0.1s; }
         .reveal-delay-2 { transition-delay: 0.2s; }
-        .reveal-delay-3 { transition-delay: 0.3s; }
-        .reveal-delay-4 { transition-delay: 0.4s; }
 
-        /* Responsive */
         @media (max-width: 900px) {
-          .s30-hero { padding: 120px 28px 80px; }
-          .hero-stats { right: 28px; bottom: 80px; position: static; margin-top: 48px; flex-direction: row; justify-content: flex-start; }
-          .hero-stat { text-align: left; border-right: none; border-left: 2px solid var(--s30-gold-dim); padding-right: 0; padding-left: 16px; }
-          .s30-story { grid-template-columns: 1fr; padding: 80px 28px; }
-          .secrets-wrap, .calc-wrap, .winrate-wrap { padding: 80px 28px; }
-          .s30-proof, .s30-learn, .s30-cta-section { padding: 80px 28px; }
-          .s30-disclaimer { padding: 14px 28px; }
-          .scroll-indicator { left: 28px; }
-          .secrets-grid, .trades-grid, .learn-grid, .winrate-inner, .calc-inner { grid-template-columns: 1fr; }
-          .s30-section-header { flex-direction: column; align-items: flex-start; }
+          .s30-hero { 
+            height: 100vh; /* Locked even on mobile for first fold consistency */
+            padding: 80px 24px 60px; 
+          }
+          .hero-stats { position: static; margin-top: 48px; flex-direction: row; flex-wrap: wrap; gap: 3px; }
+          .hero-stat { flex: 1 1 45%; text-align: left; border-right: none; border-left: 2px solid var(--s30-gold-dim); padding-left: 16px; padding-right: 0; }
+          .s30-story, .secrets-wrap, .calc-wrap, .winrate-wrap, .s30-proof, .s30-learn, .s30-cta-section { padding: 80px 28px; }
+          .calc-inner, .secrets-grid, .trades-grid, .learn-grid, .winrate-inner { grid-template-columns: 1fr; }
+          .calc-inner { gap: 40px; }
         }
       `}</style>
 
-      {/* HERO SECTION */}
+      {/* 1. HERO SECTION */}
       <section className="s30-hero">
-        {/* Background Layer: Cinematic Video or fallback */}
         {program.heroVideo && (
           <>
             {getYoutubeVideoId(program.heroVideo) ? (
               <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-                <iframe
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[100vh] min-w-[177.77vh] opacity-60"
-                  src={`https://www.youtube-nocookie.com/embed/${getYoutubeVideoId(
-                    program.heroVideo
-                  )}?autoplay=1&mute=1&loop=1&playlist=${getYoutubeVideoId(
-                    program.heroVideo
-                  )}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  title="Background Video"
-                />
+                <div className="absolute inset-0 w-full h-full scale-[1.02]"> {/* Slight scale to prevent edge bleed */}
+                  <iframe
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[56.25vw] min-h-[101vh] min-w-[178.77vh] opacity-60"
+                    src={`https://www.youtube-nocookie.com/embed/${getYoutubeVideoId(program.heroVideo)}?autoplay=1&mute=1&loop=1&playlist=${getYoutubeVideoId(program.heroVideo)}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    title="Background Video"
+                    frameBorder="0"
+                  />
+                </div>
               </div>
             ) : (
-              <video
-                className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"
-                autoPlay
-                muted
-                loop
-                playsInline
-                src={program.heroVideo}
-              />
+              <video className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none" autoPlay muted loop playsInline src={program.heroVideo} />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--s30-bg)] via-[var(--s30-bg)]/80 to-transparent z-[1]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a08] via-[#0a0a08]/80 to-transparent z-[1]" />
           </>
         )}
         <div className="hero-bg-overlay" />
-
         <p className="hero-eyebrow">Super30 Masterclass - Limited Cohort</p>
-
         <h1 className="hero-headline">
-          10 Years to Discover<br />
-          Two <em>Secrets</em> That<br />
-          Changed Everything.
+          10 Years Into My Career,<br />
+          I Accidentally Discovered<br />
+          a <em>SECRET</em> That Changed<br />
+          Everything About How<br />
+          I Pick Stocks.
         </h1>
 
-        <p className="hero-sub">
-          A first-principles framework for stock picking that improved returns by 3% CAGR and pushed win-rates to 72% - built from a decade of real trades, real losses, and one accidental discovery.
-        </p>
+        <div className="hero-sub">
+          <div className="flex flex-col gap-3 mb-8">
+            <div className="flex items-center gap-3 text-s30-cream-dim">
+              <div className="w-5 h-[1px] bg-s30-gold" /> This secret helped me improve my returns by <strong>~3% CAGR</strong>
+            </div>
+            <div className="flex items-center gap-3 text-s30-cream-dim">
+              <div className="w-5 h-[1px] bg-s30-gold" /> It helped me increase my <strong>&quot;win-rate&quot; exponentially</strong>
+            </div>
+          </div>
+        </div>
 
         <div className="hero-cta-group">
           <a href="#apply" className="s30-btn-primary">
             <span>Join Super30</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M3 8h10M9 4l4 4-4 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </a>
           <a href="#story" className="s30-btn-ghost">Read the story ↓</a>
@@ -689,270 +453,288 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
         <div className="hero-stats">
           <div className="hero-stat">
             <div className="stat-number">{program.investorsEducated || "72%"}</div>
-            <div className="stat-label">Win Rate ({'>'}1yr holds)</div>
+            <div className="stat-label">Win rate on positions<br />held over 1 year</div>
           </div>
           <div className="hero-stat">
             <div className="stat-number">{program.batchNumber || "8×"}</div>
-            <div className="stat-label">Win / Loss (₹ terms)</div>
+            <div className="stat-label">Win / Loss ratio<br />in absolute ₹ terms</div>
           </div>
           <div className="hero-stat">
             <div className="stat-number">{program.seatsRemaining || "+3.2%"}</div>
-            <div className="stat-label">CAGR From Not Buying</div>
+            <div className="stat-label">CAGR left on the table<br />by not applying Secret #2</div>
+          </div>
+          <div className="hero-stat">
+            <div className="stat-number">10yr</div>
+            <div className="stat-label">Of real investing<br />distilled into one framework</div>
           </div>
         </div>
-
         <div className="scroll-indicator">
           <div className="scroll-line"></div>
           Scroll to discover
         </div>
       </section>
 
-      {/* MARQUEE */}
+      {/* 2. MARQUEE */}
       <div className="marquee-wrap">
         <div className="marquee-track">
           {[1, 2].map((i) => (
             <div key={i} className="flex">
-              <div className="marquee-item"><span className="dot"></span> Suzlon - 2X in 12 Months</div>
-              <div className="marquee-item"><span className="dot"></span> Inox Wind - 3X in 12 Months</div>
-              <div className="marquee-item"><span className="dot"></span> Sanghvi Movers - 2X in 12 Months</div>
+              <div className="marquee-item"><span className="dot"></span> Suzlon - 2X in 1 Year</div>
+              <div className="marquee-item"><span className="dot"></span> Inox Wind - 3X in 1 Year</div>
+              <div className="marquee-item"><span className="dot"></span> Sanghvi Movers - 2X in 1 Year</div>
               <div className="marquee-item"><span className="dot"></span> 72% Win Rate Over 5 Years</div>
-              <div className="marquee-item"><span className="dot"></span> 8X Win / Loss Ratio</div>
-              <div className="marquee-item"><span className="dot"></span> 3.2% CAGR From Not Buying</div>
-              <div className="marquee-item"><span className="dot"></span> First Principles. Not Magic.</div>
+              <div className="marquee-item"><span className="dot"></span> 8X Win / Loss Ratio in ₹ Terms</div>
+              <div className="marquee-item"><span className="dot"></span> +3.2% CAGR From Not Buying</div>
+              <div className="marquee-item"><span className="dot"></span> First Principles. Not Stardust.</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* STORY SECTION */}
+      {/* 3. STORY SECTION */}
       <section className="s30-story" id="story">
-        <div className="story-left sticky-top">
-          <div className="story-label">The Origin</div>
-          <h2>A 12-Year<br /><em>Education</em><br />in What Works.</h2>
+        <div className="story-label">The Story</div>
+        <div className="dear-investor">Dear Investor,</div>
+        <div className="letter-body">
+          <p className="opener">You are going to HATE what I'm about to tell you.</p>
+          <p>But as a trusted friend {'&'} advisor I MUST...</p>
+          <p>12 years ago, I started my investing journey when I was 22 years young.</p>
+          <p>The only thing I knew about FINANCE was how to spell the word - <strong>FINANCE.</strong></p>
+          <p>My <strong>GRAND PLAN</strong> was:</p>
+          <div className="grand-plan reveal" ref={addToRevealRefs}>
+            <div className="grand-plan-label">The Grand Plan</div>
+            <div className="plan-item"><span className="plan-num">01</span>Read &apos;The Intelligent Investor&apos;</div>
+            <div className="plan-item"><span className="plan-num">02</span>Start Investing.</div>
+            <div className="plan-item"><span className="plan-num">03</span>Get RICH $$</div>
+          </div>
+          <p>It worked. For some time.</p>
+          <div className="pull-quote reveal" ref={addToRevealRefs}>
+            <p>I bought my first stock - Cairn India {'<'} 0.5X Book value. In less than two years it <em>doubled.</em></p>
+          </div>
+          <p>Confident, I applied the same &quot;strategy&quot; to the next stock {'&'} <strong>IT WENT NOWHERE FOR 4 YEARS!</strong></p>
+          <p>You know what I mean?</p>
+          <p>My solution was to read ANOTHER book. This time on GROWTH INVESTING.</p>
         </div>
-        <div className="story-right">
-          <p className="big">
-            In 2012, at 22, the only finance word I knew was <strong>finance</strong>. My grand plan: Read <em>The Intelligent Investor</em>. Start Investing. Get Rich.
-          </p>
-          <p>
-            It sort of worked. My first stock - Cairn India at under 0.5× book value - doubled in under two years. Confidence soared. I applied the same logic to the next pick. <strong>It went nowhere for 4 years.</strong>
-          </p>
 
-          <div className="s30-journey reveal" ref={addToRevealRefs}>
-            <div className="journey-item">
-              <div className="journey-label">Value Investing Phase</div>
-              <div className="journey-text">First stock <strong>doubled in 2 years</strong>. Applied same strategy. Went nowhere for 4 years. Moved on.</div>
+        <div className="journey-phases reveal" ref={addToRevealRefs}>
+          <div className="phase">
+            <div className="phase-tag">Growth Investing Phase</div>
+            <div className="phase-body">
+              Confident again, I bought a &quot;Growth stock&quot; - which went up <strong>3X in 2 years!</strong>
+              <br /><br />
+              I applied the same &quot;Growth strategy&quot; to the next stock pick {'&'} <strong>THE STOCK CRASHED 30%!</strong>
             </div>
-            <div className="journey-item">
-              <div className="journey-label">Growth Investing Phase</div>
-              <div className="journey-text">New book, new framework. <strong>Next pick 3X'd in 2 years.</strong> Applied same approach again. Stock crashed 30%.</div>
-            </div>
-            <div className="journey-item">
-              <div className="journey-label">Techno-Funda Phase</div>
-              <div className="journey-text">Combined fundamentals {'&'} technicals. <strong>First pick: 10X in under 2 years.</strong> But it was 1% of the portfolio. Scaled position. Got chopped out at -15%.</div>
-            </div>
-            <div className="journey-item">
-              <div className="journey-label">The Accidental Discovery - 2022</div>
-              <div className="journey-text">After a decade of strategies - special situations, turnarounds, everything - one afternoon everything changed. <strong>The discovery wasn't a new strategy. It was a first principle.</strong></div>
+            <div className="phase-result">Did I give up? Noo!</div>
+          </div>
+          <div className="phase">
+            <div className="phase-tag">Techno-Funda Phase</div>
+            <div className="phase-body">
+              I went all guns blazing on &quot;TECHNO-FUNDA&quot; - An approach that combines Fundamentals {'&'} Technicals. Finally, I felt like I was about to get RICH. FAST!
+              <br /><br />
+              First stock I bought using this approach? <strong>10X in under 2 years!!</strong> I was unstoppable. The chosen one. The next RJ.
+              <br /><br />
+              The only problem? It was 1% of my portfolio. I tweaked the approach - applied the &quot;techno-funda strategy&quot; BUT with a 20% position from Day 1. The result? Got &quot;chopped out&quot; when stock corrected 15%.
             </div>
           </div>
-
-          <p>
-            The best part? What I discovered wasn't some complicated quant model or insider edge. It was simple, boring, and it <strong>worked every time I applied it with discipline.</strong>
-          </p>
+          <div className="phase">
+            <div className="phase-tag">Special Situations → Turnarounds → Everything</div>
+            <div className="phase-body">
+              Next? Special situations…then Turnarounds…&quot;strategy&quot; after &quot;strategy&quot;, book after book until…
+              <br /><br />
+              <strong>One fine afternoon in 2022, when EVERYTHING CHANGED.</strong>
+            </div>
+            <div className="phase-result">It literally took me 10 years to accidentally discover this SECRET.</div>
+          </div>
         </div>
       </section>
 
-      {/* SECRETS SECTION */}
-      <section className="secrets-wrap">
-        <div className="s30-section-header reveal" ref={addToRevealRefs}>
-          <div>
-            <div className="section-label num" data-num="02">The Discovery</div>
-            <h2>Two Secrets.<br /><em>One Framework.</em></h2>
+      {/* 4. PROOF SECTION */}
+      <section className="s30-proof">
+        <div className="trades-inner" style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="reveal" ref={addToRevealRefs}>
+            <div className="s-eyebrow">Secret #1 in Action</div>
+            <h2 className="s-heading">Using this SECRET,<br />I bought these stocks.</h2>
           </div>
-          <p>These aren't shortcuts or tips. They're first principles that permanently altered how I approach every single investment decision.</p>
+          <div className="trades-grid">
+            <div className="trade-card reveal" ref={addToRevealRefs}>
+              <div className="trade-stock">NSE: SUZLON</div>
+              <div className="trade-name">Suzlon Energy</div>
+              <div className="trade-return">2×</div>
+              <div className="trade-time">in 1 year</div>
+            </div>
+            <div className="trade-card reveal reveal-delay-1" ref={addToRevealRefs}>
+              <div className="trade-stock">NSE: INOXWIND</div>
+              <div className="trade-name">Inox Wind Ltd</div>
+              <div className="trade-return">3×</div>
+              <div className="trade-time">in 1 year</div>
+            </div>
+            <div className="trade-card reveal reveal-delay-2" ref={addToRevealRefs}>
+              <div className="trade-stock">NSE: SANGHVIMOV</div>
+              <div className="trade-name">Sanghvi Movers</div>
+              <div className="trade-return">~2×</div>
+              <div className="trade-time">in 1 year</div>
+            </div>
+          </div>
+          <div className="letter-body reveal" style={{ marginTop: '48px', maxWidth: '680px' }} ref={addToRevealRefs}>
+            <p>All thanks to SECRET #1.</p>
+            <p>But it wasn't all rainbows {'&'} butterflies. I made mistakes too. MAS Financial, Repco Home Finance, DB Corp to name a few. <strong>THAT WILL ALWAYS HAPPEN NO MATTER WHO YOU ARE.</strong></p>
+            <p>But my win rate for holdings over 1 year is <strong>{program.investorsEducated || "72%"}</strong> and Win/Loss in absolute INR terms is <strong>~{program.batchNumber || "8X"} over the last 5 years.</strong></p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SECRETS SECTION */}
+      <section className="secrets-wrap">
+        <div className="letter-body reveal" style={{ maxWidth: '680px', margin: '0 auto 48px' }} ref={addToRevealRefs}>
+          <p className="shout">Here's where it gets CRAZIER!</p>
+          <p>When I analysed my trades over 10 years, I learnt something that <strong>BLEW MY MIND!</strong></p>
+          <p>If I HAD JUST NOT BOUGHT CERTAIN STOCKS, my CAGR would be UP by <strong>{program.seatsRemaining || "3.2%"} CAGR!</strong><br />That&apos;s annualised growth I was leaving on the table.</p>
+          <p>And I don&apos;t want to leave ANYTHING on the table.</p>
+          <p><strong>{program.seatsRemaining || "3.2%"} CAGR is the difference between BEATING the STREET and GETTING BEAT.</strong></p>
+          <p className="shout">THAT WAS SECRET #2</p>
         </div>
 
         <div className="secrets-grid">
           <div className="secret-card reveal" ref={addToRevealRefs}>
-            <div className="secret-number">01</div>
-            <div className="secret-tag">Secret #1</div>
+            <div className="secret-num-bg">01</div>
+            <div className="secret-badge">Secret #1</div>
             <h3>Know <em>What</em> to Buy - and When</h3>
-            <p>After cycling through every strategy imaginable, the discovery was pattern recognition at the business level - not the chart level. The type of companies at the right point in their cycle that almost always reward patient capital.</p>
-            <p>Suzlon. Inox Wind. Sanghvi Movers. All Secret #1 picks.</p>
+            <p className="secret-body">
+              The pattern I discovered after 10 years - a business-level, cycle-aware framework that identifies which companies are almost certain to reward patient capital. Not chart patterns. First principles.
+            </p>
             <div className="secret-result">
-              <div className="result-number">3 picks</div>
-              <div className="result-label">Each returned 2–3× within 12 months of application</div>
+              <div className="result-big">3 picks</div>
+              <div className="result-caption">Suzlon 2X, Inox Wind 3X,<br />Sanghvi Movers 2X - all in ~12 months</div>
             </div>
           </div>
-
           <div className="secret-card reveal reveal-delay-2" ref={addToRevealRefs}>
-            <div className="secret-number">02</div>
-            <div className="secret-tag">Secret #2 - The More Powerful One</div>
-            <h3>What You <em>Don't Buy</em> Is the Real Edge</h3>
-            <p>When I forensically analysed 10 years of trades, the revelation wasn't my winners - it was my avoidable losers. A category of businesses, valuations, time-frames, and narratives that destroyed returns when I ignored the rules.</p>
-            <p>Not buying them would have added <strong>3.2% CAGR to my portfolio.</strong></p>
+            <div className="secret-num-bg">02</div>
+            <div className="secret-badge">Secret #2</div>
+            <h3>What You <em>Don&apos;t Buy</em> Is Equally - If Not More - Important</h3>
+            <p className="secret-body">Most investors obsess over WHAT TO BUY. Not me. I'm very clear on what I will NOT buy:</p>
+            <div className="avoid-list">
+              <div className="avoid-item">The type of business models I'll avoid like the plague</div>
+              <div className="avoid-item">The type of valuations I'll never buy at</div>
+              <div className="avoid-item">The type of time-frames I'll NOT invest for</div>
+              <div className="avoid-item">The type of stories I&apos;ll put in the &quot;pump {'&'} dump&quot; category</div>
+            </div>
             <div className="secret-result">
-              <div className="result-number">+3.2%</div>
-              <div className="result-label">CAGR left on the table every single year by not applying this principle</div>
+              <div className="result-big">{program.seatsRemaining || "+3.2%"}</div>
+              <div className="result-caption">CAGR NOT BUYING would've added<br />to my annualised performance</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* PROOF SECTION */}
-      <section className="s30-proof">
-        <div className="s30-section-header reveal" ref={addToRevealRefs}>
-          <div>
-            <div className="section-label num" data-num="03">Verified Track Record</div>
-            <h2>Real Trades.<br /><em>Real Returns.</em></h2>
-          </div>
-          <p>Past performance doesn't guarantee future results. But the framework that generated these results can be learned, replicated, and applied.</p>
-        </div>
-
-        <div className="trades-grid">
-          <div className="trade-card reveal" ref={addToRevealRefs}>
-            <div className="trade-stock">NSE: SUZLON</div>
-            <div className="trade-name">Suzlon Energy</div>
-            <div className="trade-return">2×</div>
-            <div className="trade-time">Returned in ~12 months</div>
-            <div className="trade-bar"></div>
-          </div>
-          <div className="trade-card reveal reveal-delay-2" ref={addToRevealRefs}>
-            <div className="trade-stock">NSE: INOXWIND</div>
-            <div className="trade-name">Inox Wind</div>
-            <div className="trade-return">3×</div>
-            <div className="trade-time">Returned in ~12 months</div>
-            <div className="trade-bar"></div>
-          </div>
-          <div className="trade-card reveal reveal-delay-3" ref={addToRevealRefs}>
-            <div className="trade-stock">NSE: SANGHVIMOV</div>
-            <div className="trade-name">Sanghvi Movers</div>
-            <div className="trade-return">~2×</div>
-            <div className="trade-time">Returned in ~12 months</div>
-            <div className="trade-bar"></div>
-          </div>
-        </div>
-      </section>
-
-      {/* COMPOUNDING CALCULATOR */}
+      {/* 6. COMPOUNDING SECTION */}
       <section className="calc-wrap">
-        <div className="calc-inner">
-          <div className="calc-left reveal" ref={addToRevealRefs}>
-            <div className="calc-label">The 8th Wonder</div>
-            <h2>Why <em>3%</em> Is Worth ₹171 Crore</h2>
-            <p>They call compounding the 8th wonder of the world. Most investors treat a 3% CAGR difference as noise. Over 30 years, it is not noise. It is the difference between a comfortable retirement and generational wealth.</p>
-            <p>This is what Secret #2 - simply <em>not buying</em> the wrong stocks - actually means in rupees.</p>
+        <div className="calc-inner reveal" ref={addToRevealRefs}>
+          <div className="calc-left">
+            <div className="s-eyebrow">The Context</div>
+            <h2 className="s-heading">You know why they call compounding<br />the <em>8th wonder</em> of the world?</h2>
+            <div className="letter-body">
+              <p>Here&apos;s why:</p>
+              <p>3% CAGR is the difference between BEATING the STREET and GETTING BEAT.</p>
+              <p>If that doesn&apos;t hit you right in the gut - <strong>₹171 Crore more over 30 years</strong> - nothing will.</p>
+              <p><strong>NOT BUYING</strong> would&apos;ve added {program.seatsRemaining || "3.2%"} of annualised performance to my portfolio.</p>
+            </div>
           </div>
-          <div className="calc-visual reveal reveal-delay-2" ref={addToRevealRefs}>
-            <div className="calc-row">
-              <div className="calc-row-label">Starting Capital</div>
-              <div className="calc-row-value">₹1 Crore</div>
-            </div>
-            <div className="calc-row">
-              <div className="calc-row-label">Time Horizon</div>
-              <div className="calc-row-value">30 Years</div>
-            </div>
-            <div className="calc-divider"></div>
-            <div className="calc-row">
-              <div className="calc-row-label">At 17% CAGR</div>
-              <div className="calc-row-value">₹66 Crore</div>
-            </div>
-            <div className="calc-row">
-              <div className="calc-row-label">At 20% CAGR (+3%)</div>
-              <div className="calc-row-value highlight big">₹237 Crore</div>
-            </div>
-            <div className="calc-delta">
-              <div className="delta-num">₹171 Crore</div>
-              <div className="delta-label">The difference 3% makes - over 30 years</div>
-            </div>
+          <div className="calc-visual">
+            <div className="calc-row header"><div className="calc-row-label">Starting Capital</div><div className="calc-row-label">Horizon</div></div>
+            <div className="calc-row"><div className="calc-row-label">₹1 Crore</div><div className="calc-row-label">30 Years</div></div>
+            <div className="calc-row"><div className="calc-row-label">At 17% CAGR</div><div className="calc-row-value">₹66 Cr</div></div>
+            <div className="calc-row"><div className="calc-row-label">At 20% CAGR (+3%)</div><div className="calc-row-value highlight">₹237 Cr</div></div>
+            <div className="calc-delta"><span className="delta-num">₹171 Crore</span><span className="delta-label">The difference 3% makes over 30 years</span></div>
           </div>
         </div>
       </section>
 
-      {/* WHAT YOU'LL LEARN */}
-      <section className="s30-learn">
-        <div className="s30-section-header reveal" ref={addToRevealRefs}>
-          <div>
-            <div className="section-label num" data-num="04">The Super30 Program</div>
-            <h2>What You'll<br /><em>Actually</em> Learn.</h2>
+      {/* 7. WIN RATE CARDS */}
+      <section className="winrate-wrap">
+        <div className="winrate-inner">
+          <div className="winrate-card reveal" ref={addToRevealRefs}>
+            <div className="result-big" style={{ fontSize: '4rem', marginBottom: '12px' }}>{program.investorsEducated || "72%"}</div>
+            <div className="phase-tag">Win Rate</div>
+            <p className="trade-time">On positions held {'>'} 1 year</p>
           </div>
-          <p>No stardust. No get-rich-quick. First principles, taught directly, with context from real trades across a decade.</p>
+          <div className="winrate-card reveal reveal-delay-1" ref={addToRevealRefs}>
+            <div className="result-big" style={{ fontSize: '4rem', marginBottom: '12px' }}>{program.batchNumber || "8×"}</div>
+            <div className="phase-tag">Win / Loss Ratio</div>
+            <p className="trade-time">In absolute ₹ terms</p>
+          </div>
+          <div className="winrate-card reveal reveal-delay-2" ref={addToRevealRefs}>
+            <div className="result-big" style={{ fontSize: '4rem', marginBottom: '12px' }}>{program.seatsRemaining || "3.2%"}</div>
+            <div className="phase-tag">CAGR &quot;Saved&quot;</div>
+            <p className="trade-time">By Secret #2 implementation</p>
+          </div>
         </div>
+      </section>
 
+      {/* 8. CURRICULUM GRID */}
+      <section className="s30-learn" id="curriculum">
+        <div className="reveal" ref={addToRevealRefs}>
+          <div className="s-eyebrow">Super30 Program</div>
+          <h2 className="s-heading">What we&apos;re going to teach you -<br /><em>everything.</em></h2>
+          <p style={{ maxWidth: '560px', color: 'var(--s30-cream-dim)', fontSize: '0.95rem', lineHeight: '1.8', marginBottom: '0' }}>
+            What we&apos;re calling secrets are simply first principles. In our Super30 program we&apos;re going to teach you everything you need to sharpen your stock picking skillset.
+          </p>
+        </div>
         <div className="learn-grid">
           {[
-            { id: 'S1', title: 'Secret #1 - The Buying Framework', desc: 'Identify the business models and market cycles that consistently reward patient investors. The exact framework behind Suzlon, Inox Wind, and Sanghvi Movers.' },
-            { id: 'S2', title: 'Secret #2 - The Avoidance List', desc: 'Business models to avoid forever. Valuation zones that destroy returns. Timeframes that don\'t work. The narrative patterns that belong in the "pump & dump" bucket.' },
-            { id: 'FP', title: 'First Principles Stock Analysis', desc: 'How to think about businesses from first principles - not analyst reports. The mental models that cut through noise and lead to high-conviction picks.' },
-            { id: 'WR', title: 'Improving Your Win Rate', desc: 'The structural habits and process checks that moved the win rate from random to 72% - across 5 years of documented trades and market cycles.' },
-            { id: 'PS', title: 'Position Sizing & Portfolio Construction', desc: 'The difference between a 10X stock and a 10X portfolio. How to size positions so your winners actually move the needle on your overall returns.' },
-            { id: 'LS', title: 'Learning From Losses', desc: 'MAS Financial. Repco Home Finance. DB Corp. The mistakes that always happen and the system that prevents the same mistake from hurting you twice.' },
-          ].map((item, i) => (
-            <div key={item.id} className={`learn-item reveal reveal-delay-${i % 4}`} ref={addToRevealRefs}>
-              <div className="learn-icon">{item.id}</div>
-              <div className="learn-content">
-                <h4>{item.title}</h4>
-                <p>{item.desc}</p>
-              </div>
+            { tag: 'S1', title: 'Secret #1 - The Buying Framework', desc: 'The exact first-principles pattern that identified Suzlon, Inox Wind, and Sanghvi Movers before they moved. Not a tip. A repeatable process.' },
+            { tag: 'S2', title: 'Secret #2 - What NOT to Buy', desc: 'Business models to avoid like the plague. Valuation zones. Time-frames that don&apos;t work. Narratives that go straight into the &quot;pump {\'&\'} dump&quot; bucket.' },
+            { tag: 'FP', title: 'Investing from First Principles', desc: 'These first principles are boring. They work. While the rest of the industry sells stardust, we teach the truth - invest from first principles.' },
+            { tag: 'WR', title: 'Building a 72% Win Rate', desc: 'The structural process and portfolio habits that moved the win rate from random luck to 72% - across real market cycles and real money.' },
+            { tag: 'PS', title: 'Position Sizing That Moves the Needle', desc: 'The difference between a 10X stock and a 10X portfolio is position size. Getting chopped out at 1% concentration is not investing. We fix that.' },
+            { tag: 'LS', title: 'Learning From the Losers', desc: 'MAS Financial. Repco Home Finance. DB Corp. Mistakes always happen no matter who you are. We&apos;ll show you how to make sure they never hurt twice.' }
+          ].map((u, i) => (
+            <div key={u.tag} className={`learn-item reveal reveal-delay-${(i % 2) + 1}`} ref={addToRevealRefs}>
+              <div className="secret-badge">{u.tag}</div>
+              <div className="learn-content"><h4 className="trade-name">{u.title}</h4><p className="phase-body" style={{ fontSize: '0.92rem' }}>{u.desc}</p></div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* WIN RATE STATS */}
-      <section className="winrate-wrap">
-        <div className="winrate-inner">
-          <div className="winrate-card reveal" ref={addToRevealRefs}>
-            <div className="winrate-number">72%</div>
-            <div className="winrate-desc">Win rate on<br />positions held {'>'}1 year<br />over the last 5 years</div>
+      {/* 8.5. FIRST PRINCIPLES CLOSE */}
+      <section className="s30-story">
+        <div className="letter-body">
+          <div className="pull-quote reveal" ref={addToRevealRefs}>
+            <p>You know why we&apos;re called First Principles Investing?</p>
           </div>
-          <div className="winrate-card reveal reveal-delay-1" ref={addToRevealRefs}>
-            <div className="winrate-number">8×</div>
-            <div className="winrate-desc">Win / Loss ratio<br />in absolute ₹ terms<br />over the last 5 years</div>
-          </div>
-          <div className="winrate-card reveal reveal-delay-2" ref={addToRevealRefs}>
-            <div className="winrate-number">10yr</div>
-            <div className="winrate-desc">Of live investing<br />distilled into a<br />single framework</div>
+          <p>Because while the rest of the industry is busy selling you stardust, we like telling the truth.</p>
+          <p>Which is: <strong>INVEST from FIRST PRINCIPLES.</strong></p>
+          <div className="grand-plan reveal" style={{ margin: '40px 0' }} ref={addToRevealRefs}>
+            <div className="grand-plan-label">The Truth</div>
+            <div className="plan-item" style={{ fontSize: '1.1rem', fontFamily: 'var(--font-display)', fontWeight: '700', color: 'var(--s30-cream)' }}>
+              <span className="plan-num" style={{ paddingTop: '6px' }}>→</span>
+              THESE FIRST PRINCIPLES ARE BORING.
+            </div>
+            <div className="plan-item" style={{ fontSize: '1.1rem', fontFamily: 'var(--font-display)', fontWeight: '700', color: 'var(--s30-gold)' }}>
+              <span className="plan-num" style={{ paddingTop: '6px' }}>→</span>
+              THEY WORK.
+            </div>
           </div>
         </div>
       </section>
 
-      {/* PRICING SECTION - This uses the existing logic */}
-      <Super30Pricing program={program} />
 
-      {/* FINAL CTA */}
-      <section className="s30-cta-section">
-        <div className="cta-bg-overlay" />
-        <h2 className="reveal" ref={addToRevealRefs}>Stop Leaving<br /><em>3% on the Table.</em></h2>
-        <p className="reveal reveal-delay-1" ref={addToRevealRefs}>
-          The Super30 is a limited cohort. When the seats are gone, they are gone. No reruns. No recordings sold separately. Show up or miss out.
-        </p>
-        <div className="cta-group reveal reveal-delay-2" ref={addToRevealRefs}>
-          <a href="#apply" className="s30-btn-primary" style={{ fontSize: '0.9rem', padding: '20px 44px' }}>
-            <span>Reserve My Seat in Super30</span>
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M3 8h10M9 4l4 4-4 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
-        </div>
-        <div className="cta-note reveal reveal-delay-3" ref={addToRevealRefs}>
-          {program.applyByDate ? `${program.applyByDate} · ` : ""}Limited Seats · First Principles Only · No Stardust
+
+      {/* 10. FINAL CTA */}
+      <section className="s30-cta-section" id="apply">
+        <div className="cta-bg-overlay"></div>
+        <div className="reveal" ref={addToRevealRefs}>
+          <h2>Sharpen Your<br />Stock Picking<br /><em>Skillset.</em></h2>
+          <p>Super30 is a limited cohort. The seats will go. Don&apos;t leave {program.seatsRemaining || "3.2%"} CAGR on the table for another year.</p>
+          <div className="cta-group"><Super30Pricing program={program} /></div>
+          <div className="cta-note">Limited Seats &nbsp;·&nbsp; First Principles Only &nbsp;·&nbsp; No Stardust</div>
         </div>
       </section>
 
-      {/* DISCLAIMER */}
-      <div className="s30-disclaimer">
-        <p>
-          Past performance is not indicative of future results. All investments carry risk including the risk of loss of principal. The information presented is for educational purposes only and does not constitute financial advice. Please consult a SEBI-registered investment advisor before making investment decisions. First Principles Investing is an educational platform.
-        </p>
-      </div>
+      {/* 11. DISCLAIMER */}
+      <footer className="s30-disclaimer">
+        <p>DISCLAIMER: Stocks mentioned (Suzlon, Inox Wind, etc.) are for educational case study purposes only and not buy/sell recommendations. Investing in securities is subject to market risks. Past performance is not indicative of future results.</p>
+      </footer>
     </div>
   );
 }
