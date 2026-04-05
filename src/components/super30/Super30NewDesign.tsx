@@ -75,7 +75,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           flex-direction: column;
           justify-content: center;
           position: relative;
-          padding: 80px 60px 80px;
+          padding: 80px 60px 140px;
           overflow: hidden;
         }
 
@@ -221,16 +221,18 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
 
         .scroll-indicator {
           position: absolute;
-          bottom: 36px;
-          left: 60px;
+          bottom: 30px;
+          left: 50%;
+          transform: translateX(-50%);
           display: flex;
+          flex-direction: column;
           align-items: center;
           gap: 12px;
           font-family: var(--font-mono);
-          font-size: 0.68rem;
-          letter-spacing: 0.2em;
+          font-size: 0.65rem;
+          letter-spacing: 0.25em;
           text-transform: uppercase;
-          color: var(--s30-cream-dim);
+          color: var(--s30-gold-dim);
           opacity: 0;
           animation: fadeUp 1s ease 1.1s forwards;
           z-index: 2;
@@ -389,6 +391,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
             height: 100vh; /* Locked even on mobile for first fold consistency */
             padding: 80px 24px 60px; 
           }
+          .scroll-indicator { display: none; }
           .hero-stats { position: static; margin-top: 48px; flex-direction: row; flex-wrap: wrap; gap: 3px; }
           .hero-stat { flex: 1 1 45%; text-align: left; border-right: none; border-left: 2px solid var(--s30-gold-dim); padding-left: 16px; padding-right: 0; }
           .s30-story, .secrets-wrap, .calc-wrap, .winrate-wrap, .s30-proof, .s30-learn, .s30-cta-section { padding: 80px 28px; }
