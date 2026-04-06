@@ -294,11 +294,34 @@ export async function PATCH(request: NextRequest) {
       perUserLimit?: number | null
       expiryDate?: Date
       eventId?: string | null
+      value?: number
     } = {}
 
     if (typeof body?.isActive === "boolean") {
       data.isActive = body.isActive
     }
+
+    if (body?.value !== undefined) {
+      if (existingCoupon.type === CouponType.PERCENTAGE) {
+        const percentageValue = Number(body.value)
+        if (!Number.isInteger(percentageValue) || percentageValue < 1 || percentageValue > 100) {
+          return NextResponse.json(
+            { success: false, error: "Percentage coupons must have value between 1 and 100" },
+            { status: 400 }
+          )
+        }
+        data.value = percentageValue
+      } else {
+        data.value = normalizeCouponValue(body.value)
+        if (data.value < 1) {
+          return NextResponse.json(
+            { success: false, error: "Flat coupon value must be greater than zero" },
+            { status: 400 }
+          )
+        }
+      }
+    }
+
 
     if (body?.maxUses !== undefined) {
       const maxUses = parseOptionalPositiveInt(body.maxUses, "maxUses")

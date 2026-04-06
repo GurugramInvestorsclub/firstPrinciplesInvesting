@@ -71,6 +71,7 @@ export default function AdminCouponsPage() {
   const [couponActive, setCouponActive] = useState(true)
   const [editingCouponId, setEditingCouponId] = useState<string | null>(null)
   const [editExpiry, setEditExpiry] = useState("")
+  const [editValue, setEditValue] = useState("")
 
   const sortedEvents = useMemo(
     () => [...events].sort((a, b) => a.eventId.localeCompare(b.eventId)),
@@ -219,7 +220,7 @@ export default function AdminCouponsPage() {
     }
   }
 
-  const handleUpdateExpiry = async (couponId: string) => {
+  const handleUpdateCoupon = async (couponId: string) => {
     setError(null)
 
     try {
@@ -236,18 +237,19 @@ export default function AdminCouponsPage() {
         body: JSON.stringify({
           id: couponId,
           expiryDate: expiryDate.toISOString(),
+          value: editValue,
         }),
       })
 
       const payload = await response.json()
       if (!response.ok || !payload.success) {
-        throw new Error(payload.error || "Failed to update expiry date")
+        throw new Error(payload.error || "Failed to update coupon")
       }
 
       setEditingCouponId(null)
       await loadData()
     } catch (updateError) {
-      setError(updateError instanceof Error ? updateError.message : "Failed to update expiry date")
+      setError(updateError instanceof Error ? updateError.message : "Failed to update coupon")
     }
   }
 
@@ -257,6 +259,13 @@ export default function AdminCouponsPage() {
     const date = new Date(coupon.expiryDate)
     const formattedDate = date.toISOString().slice(0, 16)
     setEditExpiry(formattedDate)
+
+    // Set edit value
+    if (coupon.type === "percentage") {
+      setEditValue(String(coupon.value))
+    } else {
+      setEditValue(String(coupon.valueRupees ?? 0))
+    }
   }
 
   const formatMoney = (value: number) =>
@@ -605,7 +614,19 @@ export default function AdminCouponsPage() {
                       <td style={{ padding: "10px 8px", color: "var(--text-secondary)", textTransform: "capitalize" }}>
                         {coupon.type}
                       </td>
-                      <td style={{ padding: "10px 8px", color: "var(--text-primary)" }}>{valueText}</td>
+                      <td style={{ padding: "10px 8px", color: "var(--text-primary)" }}>
+                        {editingCouponId === coupon.id ? (
+                          <input
+                            type="number"
+                            step={coupon.type === "percentage" ? "1" : "0.01"}
+                            style={{ ...inputStyle, padding: "4px 8px", fontSize: "12px", width: "80px" }}
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                          />
+                        ) : (
+                          valueText
+                        )}
+                      </td>
                       <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>{usageText}</td>
                       <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>
                         {coupon.perUserLimit ?? "-"}
@@ -647,7 +668,7 @@ export default function AdminCouponsPage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => handleUpdateExpiry(coupon.id)}
+                                onClick={() => handleUpdateCoupon(coupon.id)}
                                 style={{
                                   ...buttonStyle,
                                   padding: "6px 10px",
