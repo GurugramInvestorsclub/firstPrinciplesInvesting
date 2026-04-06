@@ -77,7 +77,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           align-items: center;
           text-align: center;
           position: relative;
-          padding: 140px 60px 140px;
+          padding: 120px 60px 180px;
           overflow: hidden;
         }
 
@@ -121,7 +121,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           line-height: 1.1;
           letter-spacing: -0.02em;
           max-width: 940px;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
           opacity: 0;
           animation: fadeUp 0.9s ease 0.35s forwards;
           z-index: 2;
@@ -134,7 +134,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
 
         .hero-sub {
           max-width: 520px;
-          margin: 0 auto 36px;
+          margin: 0 auto 28px;
           opacity: 0;
           animation: fadeUp 0.9s ease 0.5s forwards;
           z-index: 2;
@@ -193,7 +193,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
 
         .scroll-indicator {
           position: absolute;
-          bottom: 30px;
+          bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
