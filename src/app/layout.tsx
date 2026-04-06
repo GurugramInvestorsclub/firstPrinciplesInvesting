@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "./providers";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
@@ -81,6 +82,10 @@ export default function RootLayout({
         </ThemeProvider>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ""} />
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
+        <Script 
+          src="https://t.contentsquare.net/uxa/20a3622711501.js" 
+          strategy="afterInteractive" 
+        />
       </body>
     </html>
   );

@@ -74,8 +74,10 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          align-items: center;
+          text-align: center;
           position: relative;
-          padding: 80px 60px 140px;
+          padding: 140px 60px 140px;
           overflow: hidden;
         }
 
@@ -97,13 +99,14 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           margin-bottom: 28px;
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 16px;
           opacity: 0;
           animation: fadeUp 0.8s ease 0.2s forwards;
           z-index: 2;
           position: relative;
         }
-        .hero-eyebrow::before {
+        .hero-eyebrow::before, .hero-eyebrow::after {
           content: '';
           width: 40px;
           height: 1px;
@@ -131,7 +134,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
 
         .hero-sub {
           max-width: 520px;
-          margin-bottom: 36px;
+          margin: 0 auto 36px;
           opacity: 0;
           animation: fadeUp 0.9s ease 0.5s forwards;
           z-index: 2;
@@ -141,6 +144,7 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
         .hero-cta-group {
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 24px;
           opacity: 0;
           animation: fadeUp 0.9s ease 0.65s forwards;
@@ -186,38 +190,6 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           transition: all 0.2s;
         }
         .s30-btn-ghost:hover { color: var(--s30-gold); border-bottom-color: var(--s30-gold-dim); }
-
-        .hero-stats {
-          position: absolute;
-          right: 60px;
-          bottom: 80px;
-          display: flex;
-          flex-direction: column;
-          gap: 28px;
-          opacity: 0;
-          animation: fadeLeft 1s ease 0.8s forwards;
-          z-index: 2;
-        }
-        .hero-stat {
-          text-align: right;
-          border-right: 2px solid var(--s30-gold-dim);
-          padding-right: 20px;
-        }
-        .stat-number {
-          font-family: var(--font-display);
-          font-size: 2.4rem;
-          font-weight: 900;
-          color: var(--s30-gold);
-          line-height: 1;
-        }
-        .stat-label {
-          font-family: var(--font-mono);
-          font-size: 0.68rem;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: var(--s30-cream-dim);
-          margin-top: 4px;
-        }
 
         .scroll-indicator {
           position: absolute;
@@ -392,8 +364,6 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
             padding: 80px 24px 60px; 
           }
           .scroll-indicator { display: none; }
-          .hero-stats { position: static; margin-top: 48px; flex-direction: row; flex-wrap: wrap; gap: 3px; }
-          .hero-stat { flex: 1 1 45%; text-align: left; border-right: none; border-left: 2px solid var(--s30-gold-dim); padding-left: 16px; padding-right: 0; }
           .s30-story, .secrets-wrap, .calc-wrap, .winrate-wrap, .s30-proof, .s30-learn, .s30-cta-section { padding: 80px 28px; }
           .calc-inner, .secrets-grid, .trades-grid, .learn-grid, .winrate-inner { grid-template-columns: 1fr; }
           .calc-inner { gap: 40px; }
@@ -453,24 +423,6 @@ export function Super30NewDesign({ program }: Super30NewDesignProps) {
           <a href="#story" className="s30-btn-ghost">Read the story ↓</a>
         </div>
 
-        <div className="hero-stats">
-          <div className="hero-stat">
-            <div className="stat-number">{program.investorsEducated || "72%"}</div>
-            <div className="stat-label">Win rate on positions<br />held over 1 year</div>
-          </div>
-          <div className="hero-stat">
-            <div className="stat-number">{program.batchNumber || "8×"}</div>
-            <div className="stat-label">Win / Loss ratio<br />in absolute ₹ terms</div>
-          </div>
-          <div className="hero-stat">
-            <div className="stat-number">{program.seatsRemaining || "+3.2%"}</div>
-            <div className="stat-label">CAGR left on the table<br />by not applying Secret #2</div>
-          </div>
-          <div className="hero-stat">
-            <div className="stat-number">10yr</div>
-            <div className="stat-label">Of real investing<br />distilled into one framework</div>
-          </div>
-        </div>
         <div className="scroll-indicator">
           <div className="scroll-line"></div>
           Scroll to discover
