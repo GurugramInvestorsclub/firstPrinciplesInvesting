@@ -167,6 +167,12 @@ export default defineType({
             type: 'url',
         }),
         defineField({
+            name: 'whatsappLink',
+            title: 'WhatsApp Join Link',
+            description: 'Link to the WhatsApp group for this event (displayed after registration).',
+            type: 'url',
+        }),
+        defineField({
             name: 'image',
             title: 'Event Image',
             type: 'image',

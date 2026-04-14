@@ -43,6 +43,7 @@ export function Super30Pricing({ program }: { program: Super30Program }) {
         price: program.price,
         date: program.applicationDeadline || new Date(Date.now() + 86400000 * 365).toISOString(),
         startTime: program.applicationDeadline,
+        whatsappLink: program.whatsappLink,
     }
 
     if (program.isSoldOut) {

@@ -6,9 +6,13 @@ export interface Post {
     slug: { current: string }
     isFeatured?: boolean
     excerpt: string
+    access?: "public" | "subscriber"
     mainImage?: any
     publishedAt: string
     body: PortableTextBlock[]
+    previewBody?: PortableTextBlock[]
+    paywallHeadline?: string
+    paywallCtaText?: string
 }
 
 export interface Event {
@@ -36,6 +40,7 @@ export interface Event {
     longDescription?: PortableTextBlock[]
     registrationLink?: string
     image?: any
+    whatsappLink?: string
     startTime?: string
     endTime?: string
 }
@@ -83,6 +88,7 @@ export interface Super30Program {
     caseStudies?: { name: string; outcomeMetrics: string; description?: string }[]
     testimonials?: { name: string; text: string; image?: any }[]
     faq?: { question: string; answer: string }[]
+    whatsappLink?: string
     isActive?: boolean
     isSoldOut?: boolean
 }

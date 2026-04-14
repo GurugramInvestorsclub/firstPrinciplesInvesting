@@ -259,7 +259,8 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
               type: "event",
               eventTitle: event.title,
               eventDate: event.startTime || event.date,
-              email: session?.user?.email ?? ""
+              email: session?.user?.email ?? "",
+              whatsappLink: event.whatsappLink || ""
             })
             router.push(`/thank-you?${searchParams.toString()}`)
           } catch (verificationError) {

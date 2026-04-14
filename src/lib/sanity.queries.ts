@@ -1,14 +1,14 @@
 import { groq } from 'next-sanity'
 
 export const postQuery = groq`
-  *[_type == "post" && (!defined($search) || title match $search + "*" || excerpt match $search + "*" || body[].children[].text match $search + "*")] | order(publishedAt desc) {
+  *[_type == "post" && (!defined($search) || title match $search + "*" || excerpt match $search + "*")] | order(publishedAt desc) {
     title,
     slug,
     isFeatured,
     excerpt,
+    access,
     mainImage,
-    publishedAt,
-    body
+    publishedAt
   }
 `
 
@@ -19,9 +19,9 @@ export const featuredPostQuery = groq`
     slug,
     isFeatured,
     excerpt,
+    access,
     mainImage,
-    publishedAt,
-    body
+    publishedAt
   }
 `
 
@@ -32,9 +32,9 @@ export const allPostsQuery = groq`
     slug,
     isFeatured,
     excerpt,
+    access,
     mainImage,
-    publishedAt,
-    body
+    publishedAt
   }
 `
 
@@ -43,6 +43,7 @@ export const recentPostsQuery = groq`
     title,
     slug,
     excerpt,
+    access,
     publishedAt,
     mainImage
   }
@@ -53,9 +54,13 @@ export const singlePostQuery = groq`
     title,
     slug,
     excerpt,
+    access,
     mainImage,
     publishedAt,
-    body
+    body,
+    previewBody,
+    paywallHeadline,
+    paywallCtaText
   }
 `
 
@@ -106,6 +111,7 @@ export const singleEventQuery = groq`
     faq,
     longDescription,
     registrationLink,
+    whatsappLink,
     image
   }
 `
@@ -185,6 +191,7 @@ export const singleSuper30Query = groq`
     caseStudies,
     testimonials,
     faq,
+    whatsappLink,
     isActive,
     isSoldOut
   }

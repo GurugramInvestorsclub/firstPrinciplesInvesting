@@ -16,6 +16,7 @@ function ThankYouContent() {
     const type = searchParams.get("type")
     const eventTitle = searchParams.get("eventTitle")
     const eventDateRaw = searchParams.get("eventDate")
+    const whatsappLink = searchParams.get("whatsappLink")
 
     const formattedDate = eventDateRaw ? new Date(eventDateRaw).toLocaleDateString("en-IN", {
         weekday: 'long',
@@ -134,6 +135,37 @@ function ThankYouContent() {
                         )}
                     </div>
                 </motion.div>
+                
+                {/* SECTION 1.5: WhatsApp Community (Conditional) */}
+                {whatsappLink && (
+                    <motion.div 
+                        variants={itemVariants} 
+                        className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-8 space-y-6 relative overflow-hidden group"
+                    >
+                        {/* Decorative glow */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/20 transition-colors duration-500" />
+                        
+                        <div className="space-y-2 relative z-10">
+                            <h3 className="text-2xl font-bold text-[#25D366] flex items-center justify-center gap-2">
+                                <Zap className="w-6 h-6 fill-emerald-500/20" /> Join Our Exclusive Network
+                            </h3>
+                            <p className="text-text-secondary md:text-lg">
+                                Get instant updates, networking opportunities, and exclusive insights in our WhatsApp group.
+                            </p>
+                        </div>
+                        
+                        <Button
+                            asChild
+                            size="lg"
+                            className="bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full px-8 h-14 text-lg font-bold shadow-lg shadow-emerald-500/20 group-hover:scale-[1.02] transition-all duration-300"
+                        >
+                            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                Join the WhatsApp Group
+                                <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            </a>
+                        </Button>
+                    </motion.div>
+                )}
 
                 {/* SECTION 3: Primary CTA */}
                 <motion.div variants={itemVariants} className="pt-8 relative">

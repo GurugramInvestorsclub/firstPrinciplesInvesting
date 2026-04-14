@@ -301,6 +301,12 @@ export default defineType({
             initialValue: true,
         }),
         defineField({
+            name: 'whatsappLink',
+            title: 'WhatsApp Join Link',
+            description: 'Link to the WhatsApp group for this program (displayed after registration).',
+            type: 'url',
+        }),
+        defineField({
             name: 'isSoldOut',
             title: 'Is Sold Out?',
             type: 'boolean',
