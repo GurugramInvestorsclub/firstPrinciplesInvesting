@@ -153,6 +153,48 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function DELETE(request: NextRequest) {
+  try {
+    if (!(await isAdminAuthenticated())) {
+      return unauthorized()
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "id parameter is required" },
+        { status: 400 }
+      )
+    }
+
+    // Check if coupon has redemptions to prevent breaking data integrity
+    const redemptionCount = await prisma.couponRedemption.count({
+      where: { couponId: id },
+    })
+
+    if (redemptionCount > 0) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Cannot delete coupon because it has already been used. Please deactivate it instead to preserve history." 
+        },
+        { status: 400 }
+      )
+    }
+
+    await prisma.coupon.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ success: false, error: message }, { status: 400 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated())) {
