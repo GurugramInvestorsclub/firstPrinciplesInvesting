@@ -1,4 +1,6 @@
 import { auth } from "@/auth"
+import { client } from "@/lib/sanity.client"
+import { groq } from "next-sanity"
 import {
   finalizeCapturedPayment,
   initiateCompensatingRefund,
@@ -94,12 +96,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch the WhatsApp link securely only on successful verification
+    let whatsappLink = null
+    try {
+      const query = groq`*[_type in ["event", "super30Program"] && eventId == $eventId][0].whatsappLink`
+      whatsappLink = await client.fetch(query, { eventId: result.eventId })
+    } catch (sanityError) {
+      console.error("Failed to fetch WhatsApp link from Sanity:", sanityError)
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         paymentId: result.paymentId,
         eventId: result.eventId,
         idempotent: result.idempotent,
+        whatsappLink,
       },
     })
   } catch (error) {

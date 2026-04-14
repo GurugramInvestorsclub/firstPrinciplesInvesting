@@ -260,7 +260,7 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
               eventTitle: event.title,
               eventDate: event.startTime || event.date,
               email: session?.user?.email ?? "",
-              whatsappLink: event.whatsappLink || ""
+              whatsappLink: verifyPayload.data?.whatsappLink || ""
             })
             router.push(`/thank-you?${searchParams.toString()}`)
           } catch (verificationError) {

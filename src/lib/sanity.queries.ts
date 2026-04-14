@@ -111,7 +111,6 @@ export const singleEventQuery = groq`
     faq,
     longDescription,
     registrationLink,
-    whatsappLink,
     image
   }
 `
@@ -191,7 +190,6 @@ export const singleSuper30Query = groq`
     caseStudies,
     testimonials,
     faq,
-    whatsappLink,
     isActive,
     isSoldOut
   }
