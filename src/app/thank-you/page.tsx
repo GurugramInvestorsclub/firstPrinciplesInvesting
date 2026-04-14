@@ -146,12 +146,9 @@ function ThankYouContent() {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/20 transition-colors duration-500" />
                         
                         <div className="space-y-2 relative z-10">
-                            <h3 className="text-2xl font-bold text-[#25D366] flex items-center justify-center gap-2">
-                                <Zap className="w-6 h-6 fill-emerald-500/20" /> Join Our Exclusive Network
+                            <h3 className="text-2xl font-bold text-[#25D366] flex items-center justify-center gap-2 text-center">
+                                <Zap className="w-6 h-6 fill-emerald-500/20" /> Join our WhatsApp group for {eventTitle || (type === "super30" ? "this program" : "this event")}
                             </h3>
-                            <p className="text-text-secondary md:text-lg">
-                                Get instant updates, networking opportunities, and exclusive insights in our WhatsApp group.
-                            </p>
                         </div>
                         
                         <Button
