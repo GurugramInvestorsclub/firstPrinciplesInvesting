@@ -178,6 +178,17 @@ function LoginContent() {
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all"
                                 />
                             </div>
+                            
+                            {isLogin && (
+                                <div className="flex justify-end px-1">
+                                    <Link 
+                                        href="/forgot-password" 
+                                        className="text-xs text-text-secondary hover:text-gold transition-colors"
+                                    >
+                                        Forgot Password?
+                                    </Link>
+                                </div>
+                            )}
 
                             {error && (
                                 <p className="text-destructive text-sm px-1 py-1">
