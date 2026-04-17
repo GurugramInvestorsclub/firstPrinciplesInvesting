@@ -120,7 +120,7 @@ export function Super30Hero({ program }: Super30HeroProps) {
                             {program.seatsAvailable !== undefined && program.seatsAvailable > 0 && (
                                 <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-white/5 text-gray-300 border border-white/10 backdrop-blur-sm">
                                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                    Only {program.seatsAvailable} seats remaining
+                                    Only 12 seats remaining
                                 </span>
                             )}
                             

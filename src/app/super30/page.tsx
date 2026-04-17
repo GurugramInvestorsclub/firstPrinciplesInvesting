@@ -66,7 +66,7 @@ export default async function Super30IndexPage() {
                                                     ) : program.seatsAvailable ? (
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                            {program.seatsAvailable} seats left
+                                                            12 seats left
                                                         </span>
                                                     ) : null}
                                                     {deadlineDate && !program.isSoldOut && (

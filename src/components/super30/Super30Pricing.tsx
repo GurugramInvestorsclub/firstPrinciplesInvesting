@@ -67,7 +67,7 @@ export function Super30Pricing({ program }: { program: Super30Program }) {
                         Secure your <span className="text-gold">seat</span>
                     </h2>
                     <p className="text-2xl md:text-3xl text-gray-400 font-light max-w-4xl mx-auto">
-                        {program.seatsAvailable ? `Only ${program.seatsAvailable} seats remaining for ${program.batchName || 'this cohort'}.` : 'Applications are closing soon.'}
+                        Only 12 seats remaining
                     </p>
                 </motion.div>
 
