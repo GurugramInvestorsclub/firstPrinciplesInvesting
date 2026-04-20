@@ -41,7 +41,7 @@ export function EventRecordingSection({ event }: EventRecordingSectionProps) {
                         className="group/btn relative z-10 px-10 h-14 text-base font-bold rounded-full bg-gradient-to-r from-[#FFC72C] via-[#E6B422] to-[#C89B3C] text-[#0b0b0c] hover:shadow-[0_20px_50px_rgba(255,199,44,0.3)] hover:-translate-y-1 transition-all duration-300 border-none"
                     >
                         <a 
-                            href="https://superprofile.bio/firstprinciplesacademy" 
+                            href={event.superProfileLink || "https://superprofile.bio/firstprinciplesacademy"} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="flex items-center gap-2"

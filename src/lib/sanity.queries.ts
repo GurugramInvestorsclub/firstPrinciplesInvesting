@@ -74,7 +74,8 @@ export const eventsQuery = groq`
     price,
     shortDescription,
     image,
-    registrationLink
+    registrationLink,
+    superProfileLink
   }
 `
 
@@ -88,7 +89,8 @@ export const upcomingEventsHomeQuery = groq`
     price,
     shortDescription,
     image,
-    registrationLink
+    registrationLink,
+    superProfileLink
   }
 `
 
@@ -111,7 +113,8 @@ export const singleEventQuery = groq`
     faq,
     longDescription,
     registrationLink,
-    image
+    image,
+    superProfileLink
   }
 `
 
@@ -124,7 +127,8 @@ export const pastEventsQuery = groq`
     location,
     price,
     shortDescription,
-    image
+    image,
+    superProfileLink
   }
 `
 

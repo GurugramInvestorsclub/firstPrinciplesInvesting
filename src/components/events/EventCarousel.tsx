@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, Variants, AnimatePresence } from "framer-motion"
-import { Calendar, MapPin, User, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react"
+import { Calendar, MapPin, User, ChevronLeft, ChevronRight, ArrowRight, Play } from "lucide-react"
 import { Event } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -128,15 +128,39 @@ function EventCard({ event, isPastEvent }: { event: Event; isPastEvent?: boolean
                             </div>
                         )}
 
-                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Link 
-                                href={`/events/${event.slug.current}`}
-                                className="flex items-center justify-center w-full py-4 rounded-xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 text-gold font-bold hover:from-gold hover:to-[#C89B3C] hover:text-[#0b0b0c] hover:border-transparent transition-all duration-500 shadow-lg group-hover:shadow-gold/10"
-                            >
-                                {isPastEvent ? "View Highlights" : "Reserve Your Seat"}
-                                <ArrowRight className="ml-2 w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1" />
-                            </Link>
-                        </motion.div>
+                        <div className="space-y-3">
+                            {isPastEvent && event.superProfileLink ? (
+                                <>
+                                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                        <a 
+                                            href={event.superProfileLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center w-full py-4 rounded-xl bg-gradient-to-r from-gold to-[#C89B3C] text-[#0b0b0c] font-bold transition-all duration-500 shadow-lg shadow-gold/20"
+                                        >
+                                            Get Recording
+                                            <Play className="ml-2 w-4 h-4 fill-current" />
+                                        </a>
+                                    </motion.div>
+                                    <Link 
+                                        href={`/events/${event.slug.current}`}
+                                        className="flex items-center justify-center w-full py-2 text-sm text-gray-500 hover:text-gold transition-colors font-medium"
+                                    >
+                                        View Details
+                                    </Link>
+                                </>
+                            ) : (
+                                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                    <Link 
+                                        href={`/events/${event.slug.current}`}
+                                        className="flex items-center justify-center w-full py-4 rounded-xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 text-gold font-bold hover:from-gold hover:to-[#C89B3C] hover:text-[#0b0b0c] hover:border-transparent transition-all duration-500 shadow-lg group-hover:shadow-gold/10"
+                                    >
+                                        {isPastEvent ? "View Highlights" : "Reserve Your Seat"}
+                                        <ArrowRight className="ml-2 w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1" />
+                                    </Link>
+                                </motion.div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

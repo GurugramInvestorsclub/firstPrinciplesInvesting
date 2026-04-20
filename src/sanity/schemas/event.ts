@@ -180,5 +180,11 @@ export default defineType({
                 hotspot: true,
             },
         }),
+        defineField({
+            name: 'superProfileLink',
+            title: 'Super Profile Link',
+            description: 'Unique link to the recording or product on Super Profile (displayed after event completion).',
+            type: 'url',
+        }),
     ],
 })

@@ -41,6 +41,7 @@ export interface Event {
     registrationLink?: string
     image?: any
     whatsappLink?: string
+    superProfileLink?: string
     startTime?: string
     endTime?: string
 }
