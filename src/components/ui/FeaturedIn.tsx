@@ -2,21 +2,23 @@
 
 import { motion } from "framer-motion"
 
+import Image from "next/image"
+
 const IndianExpressLogo = () => (
-  <div className="font-display font-bold text-xl md:text-2xl tracking-tighter uppercase whitespace-nowrap leading-none grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300">
-    The Indian Express
+  <div className="relative h-6 md:h-8 w-40 md:w-56 transition-all duration-300 brightness-0 invert opacity-70 group-hover:opacity-100">
+    <Image src="/logos/ie.svg" alt="The Indian Express" fill className="object-contain" />
   </div>
 )
 
 const MintLogo = () => (
-  <div className="font-display font-semibold italic text-xl md:text-2xl lowercase whitespace-nowrap leading-none grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300">
-    mint
+  <div className="relative h-8 md:h-10 w-28 md:w-36 transition-all duration-300 brightness-0 invert opacity-70 group-hover:opacity-100">
+    <Image src="/logos/mint.svg" alt="Mint" fill className="object-contain" />
   </div>
 )
 
 const FinancialExpressLogo = () => (
-  <div className="font-display font-bold text-xl md:text-2xl tracking-tight uppercase whitespace-nowrap leading-none grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300">
-    Financial Express
+  <div className="relative h-6 md:h-8 w-48 md:w-64 transition-all duration-300 brightness-0 invert opacity-70 group-hover:opacity-100">
+    <Image src="/logos/fe.svg" alt="Financial Express" fill className="object-contain" />
   </div>
 )
 
