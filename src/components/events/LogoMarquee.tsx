@@ -5,19 +5,19 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 
 const IndianExpressLogo = () => (
-  <div className="relative h-6 md:h-8 w-40 md:w-56 transition-all duration-300 brightness-0 invert">
+  <div className="relative h-6 md:h-8 w-40 md:w-56 transition-all duration-300 brightness-0 invert group-hover/logo:brightness-100 group-hover/logo:invert-0 text-white">
     <Image src="/logos/ie.svg" alt="The Indian Express" fill className="object-contain" />
   </div>
 )
 
 const MintLogo = () => (
-  <div className="relative h-8 md:h-10 w-28 md:w-36 transition-all duration-300 brightness-0 invert">
+  <div className="relative h-8 md:h-10 w-28 md:w-36 transition-all duration-300 brightness-0 invert group-hover/logo:brightness-100 group-hover/logo:invert-0 text-white">
     <Image src="/logos/mint.svg" alt="Mint" fill className="object-contain" />
   </div>
 )
 
 const FinancialExpressLogo = () => (
-  <div className="relative h-6 md:h-8 w-48 md:w-64 transition-all duration-300 brightness-0 invert">
+  <div className="relative h-6 md:h-8 w-48 md:w-64 transition-all duration-300 brightness-0 invert group-hover/logo:brightness-100 group-hover/logo:invert-0 text-white">
     <Image src="/logos/fe.svg" alt="Financial Express" fill className="object-contain" />
   </div>
 )
