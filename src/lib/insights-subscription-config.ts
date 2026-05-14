@@ -18,7 +18,7 @@ const PLAN_CATALOG: Record<InsightsPlanSlug, InsightsPlanCatalogEntry> = {
     description: "Flexible recurring access to premium Insights.",
     cadence: "Billed every month",
     priceLabel: process.env.INSIGHTS_MONTHLY_PRICE_LABEL ?? "Monthly billing",
-    totalCount: 600,
+    totalCount: 120,
     envVar: "RAZORPAY_INSIGHTS_MONTHLY_PLAN_ID",
   },
   three_monthly: {
@@ -28,7 +28,7 @@ const PLAN_CATALOG: Record<InsightsPlanSlug, InsightsPlanCatalogEntry> = {
     cadence: "Billed every 3 months",
     priceLabel: process.env.INSIGHTS_THREE_MONTHLY_PRICE_LABEL ?? "3-month billing",
     badge: "Quarterly",
-    totalCount: 200,
+    totalCount: 40,
     envVar: "RAZORPAY_INSIGHTS_THREE_MONTHLY_PLAN_ID",
   },
   yearly: {
@@ -38,7 +38,7 @@ const PLAN_CATALOG: Record<InsightsPlanSlug, InsightsPlanCatalogEntry> = {
     cadence: "Billed once a year",
     priceLabel: process.env.INSIGHTS_YEARLY_PRICE_LABEL ?? "Annual billing",
     badge: "Best value",
-    totalCount: 50,
+    totalCount: 10,
     envVar: "RAZORPAY_INSIGHTS_YEARLY_PLAN_ID",
   },
 }
