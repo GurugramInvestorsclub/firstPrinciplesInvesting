@@ -41,18 +41,6 @@ export default async function InsightsPage({
 
         if (explicitFeatured) {
             featuredPost = explicitFeatured
-
-    if (search) {
-        searchResults = await client.fetch<Post[]>(postQuery, { search })
-        gridPosts = searchResults
-    } else {
-        const [explicitFeatured, allPosts] = await Promise.all([
-            client.fetch<Post | null>(featuredPostQuery),
-            client.fetch<Post[]>(allPostsQuery)
-        ])
-
-        if (explicitFeatured) {
-            featuredPost = explicitFeatured
         } else if (allPosts.length > 0) {
             featuredPost = allPosts[0]
         }
