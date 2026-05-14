@@ -50,6 +50,7 @@ model User {
   sessions      Session[]
   payments      Payment[]
   redemptions   CouponRedemption[]
+  insightsSubscriptions InsightsSubscription[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -214,6 +215,89 @@ model ApiRateLimit {
   @@map("api_rate_limits")
 }
 
+model InsightsSubscription {
+  id                    String                     @id @default(cuid())
+  userId                String                     @map("user_id")
+  planKey               InsightsPlanKey            @map("plan_key")
+  razorpayPlanId        String                     @map("razorpay_plan_id")
+  razorpaySubscriptionId String?                   @unique @map("razorpay_subscription_id")
+  status                InsightsSubscriptionStatus @default(CREATED)
+  currentStartAt        DateTime?                  @map("current_start_at")
+  currentEndAt          DateTime?                  @map("current_end_at")
+  chargeAt              DateTime?                  @map("charge_at")
+  startAt               DateTime?                  @map("start_at")
+  endedAt               DateTime?                  @map("ended_at")
+  cancelledAt           DateTime?                  @map("cancelled_at")
+  cancelRequestedAt     DateTime?                  @map("cancel_requested_at")
+  cancelAtCycleEnd      Boolean                    @default(false) @map("cancel_at_cycle_end")
+  customerId            String?                    @map("customer_id")
+  quantity              Int                        @default(1)
+  totalCount            Int?                       @map("total_count")
+  paidCount             Int                        @default(0) @map("paid_count")
+  remainingCount        Int?                       @map("remaining_count")
+  source                String?                    @map("source")
+  shortUrl              String?                    @map("short_url")
+  notes                 Json?
+  lastWebhookAt         DateTime?                  @map("last_webhook_at")
+  createdAt             DateTime                   @default(now()) @map("created_at")
+  updatedAt             DateTime                   @updatedAt @map("updated_at")
+  user                  User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charges               InsightsSubscriptionCharge[]
+  auditLogs             InsightsSubscriptionAuditLog[]
+
+  @@index([userId, status])
+  @@index([status, currentEndAt])
+  @@index([razorpayPlanId])
+  @@map("insights_subscriptions")
+}
+
+model InsightsSubscriptionCharge {
+  id                    String                          @id @default(cuid())
+  subscriptionId        String                          @map("subscription_id")
+  razorpayPaymentId     String?                         @unique @map("razorpay_payment_id")
+  razorpayInvoiceId     String?                         @unique @map("razorpay_invoice_id")
+  amount                Int
+  currency              String                          @default("INR")
+  status                InsightsSubscriptionChargeStatus @default(CREATED)
+  failureReason         String?                         @map("failure_reason")
+  chargedAt             DateTime?                       @map("charged_at")
+  createdAt             DateTime                        @default(now()) @map("created_at")
+  updatedAt             DateTime                        @updatedAt @map("updated_at")
+  subscription          InsightsSubscription            @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
+  @@index([status, chargedAt])
+  @@map("insights_subscription_charges")
+}
+
+model InsightsSubscriptionWebhookEvent {
+  id                    String   @id @default(cuid())
+  webhookEventId        String   @unique @map("webhook_event_id")
+  eventType             String   @map("event_type")
+  razorpaySubscriptionId String? @map("razorpay_subscription_id")
+  razorpayPaymentId     String?  @map("razorpay_payment_id")
+  payloadHash           String   @map("payload_hash")
+  receivedAt            DateTime @default(now()) @map("received_at")
+  processingStartedAt   DateTime? @map("processing_started_at")
+  processedAt           DateTime? @map("processed_at")
+
+  @@index([razorpaySubscriptionId])
+  @@index([razorpayPaymentId])
+  @@map("insights_subscription_webhook_events")
+}
+
+model InsightsSubscriptionAuditLog {
+  id             String               @id @default(cuid())
+  subscriptionId String               @map("subscription_id")
+  action         String
+  metadata       Json?
+  createdAt      DateTime             @default(now()) @map("created_at")
+  subscription   InsightsSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
+  @@map("insights_subscription_audit_logs")
+}
+
 enum CouponType {
   PERCENTAGE @map("percentage")
   FLAT       @map("flat")
@@ -227,4 +311,35 @@ enum PaymentStatus {
   FAILED  @map("failed")
 
   @@map("payment_status")
+}
+
+enum InsightsPlanKey {
+  MONTHLY       @map("monthly")
+  THREE_MONTHLY @map("three_monthly")
+  YEARLY        @map("yearly")
+
+  @@map("insights_plan_key")
+}
+
+enum InsightsSubscriptionStatus {
+  CREATED          @map("created")
+  AUTHENTICATED    @map("authenticated")
+  ACTIVE           @map("active")
+  PENDING          @map("pending")
+  HALTED           @map("halted")
+  PAUSED           @map("paused")
+  CANCEL_REQUESTED @map("cancel_requested")
+  CANCELLED        @map("cancelled")
+  COMPLETED        @map("completed")
+  EXPIRED          @map("expired")
+
+  @@map("insights_subscription_status")
+}
+
+enum InsightsSubscriptionChargeStatus {
+  CREATED  @map("created")
+  CAPTURED @map("captured")
+  FAILED   @map("failed")
+
+  @@map("insights_subscription_charge_status")
 }

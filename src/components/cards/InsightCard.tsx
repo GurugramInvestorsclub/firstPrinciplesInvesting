@@ -6,15 +6,15 @@ import { urlForImage } from "@/lib/sanity.image"
 
 interface InsightCardProps {
     post: Post
+    showSubscriberBadge?: boolean
 }
 
-export function InsightCard({ post }: InsightCardProps) {
+export function InsightCard({ post, showSubscriberBadge }: InsightCardProps) {
     return (
         <div
             data-gsap="grid-card"
-            className="insight-card group flex flex-col justify-between h-full rounded-xl overflow-hidden transition-all duration-[250ms] ease-in-out"
+            className="insight-card group flex h-full flex-col justify-between overflow-hidden rounded-xl transition-all duration-[250ms] ease-in-out"
         >
-            {/* Image Section */}
             <div className="relative aspect-[16/9] w-full overflow-hidden">
                 {post.mainImage && (
                     <Image
@@ -27,18 +27,23 @@ export function InsightCard({ post }: InsightCardProps) {
                 )}
             </div>
 
-            <div className="flex flex-col flex-grow p-6 space-y-4">
+            <div className="flex flex-grow flex-col space-y-4 p-6">
                 <div className="space-y-3">
-                    {/* Date — Mono */}
-                    <span className="insight-date block text-xs font-mono-code uppercase tracking-wider">
-                        {new Date(post.publishedAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                        })}
-                    </span>
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="insight-date block text-xs font-mono-code uppercase tracking-wider">
+                            {new Date(post.publishedAt).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                            })}
+                        </span>
+                        {showSubscriberBadge && post.access === "subscriber" ? (
+                            <span className="rounded-full border border-gold/25 bg-gold/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
+                                Members
+                            </span>
+                        ) : null}
+                    </div>
 
-                    {/* Title */}
                     <h3 className="insight-title text-xl font-heading font-bold leading-tight tracking-tight transition-colors duration-[250ms]">
                         <Link
                             href={`/insights/${post.slug.current}`}
@@ -48,19 +53,17 @@ export function InsightCard({ post }: InsightCardProps) {
                         </Link>
                     </h3>
 
-                    {/* Excerpt */}
                     <p className="insight-excerpt text-sm leading-relaxed line-clamp-3">
                         {post.excerpt}
                     </p>
                 </div>
 
-                {/* CTA — Divider + Access Note */}
-                <div className="insight-cta-divider pt-4 mt-auto">
+                <div className="insight-cta-divider mt-auto pt-4">
                     <Link
                         href={`/insights/${post.slug.current}`}
                         className="insight-cta flex items-center justify-between text-xs font-bold uppercase tracking-[0.15em] transition-colors duration-[250ms]"
                     >
-                        <span>Access Note</span>
+                        <span>{showSubscriberBadge && post.access === "subscriber" ? "Open Teaser" : "Access Note"}</span>
                         <ArrowRight className="insight-arrow h-3.5 w-3.5 transition-transform duration-[250ms]" />
                     </Link>
                 </div>

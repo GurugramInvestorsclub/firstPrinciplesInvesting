@@ -4,26 +4,45 @@ import { client } from "@/lib/sanity.client"
 import { singlePostQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
 import { RichText } from "@/components/sanity/RichText"
+import { auth } from "@/auth"
+import {
+    getInsightsSubscriptionUiState,
+    userHasInsightsAccess,
+} from "@/lib/insights-subscription-service"
+import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import Link from "next/link"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
 import { notFound } from "next/navigation"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 interface Props {
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
 
 export default async function InsightPage({ params }: Props) {
     const { slug } = await params
-    const post = await client.fetch<Post>(singlePostQuery, { slug })
+    const post = await client.fetch<Post | null>(singlePostQuery, { slug })
+    const session = await auth()
+    const subscriptionUi = getInsightsSubscriptionUiState()
+    const paywallReady =
+        subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
+    const hasSubscriptionAccess =
+        paywallReady && session?.user?.id
+            ? await userHasInsightsAccess(session.user.id)
+            : false
 
     if (!post) {
         notFound()
     }
+
+    const isSubscriberOnly = post.access === "subscriber"
+    const shouldLockContent = paywallReady && isSubscriberOnly && !hasSubscriptionAccess
+    const previewBody = getPreviewBlocks(post)
+    const callbackUrl = `/insights/${slug}`
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -60,14 +79,66 @@ export default async function InsightPage({ params }: Props) {
                         </div>
                     )}
 
-                    {post.body && (
+                    {(shouldLockContent ? previewBody : post.body) && (
                         <div className="prose prose-lg dark:prose-invert mx-auto">
-                            <RichText value={post.body} />
+                            <RichText value={shouldLockContent ? previewBody : post.body} />
                         </div>
                     )}
+
+                    {shouldLockContent ? (
+                        <section className="mt-10 rounded-3xl border border-gold/20 bg-[radial-gradient(circle_at_top_right,rgba(245,184,0,0.12),transparent_45%),rgba(255,255,255,0.03)] p-6 md:p-8">
+                            <div className="space-y-3">
+                                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold/80">
+                                    Subscriber Insight
+                                </p>
+                                <h2 className="text-2xl font-bold text-white">
+                                    {post.paywallHeadline ?? "Unlock the full memo with an Insights membership"}
+                                </h2>
+                                <p className="text-sm leading-7 text-white/70">
+                                    Read the complete analysis, future member-only notes, and the full archive with a recurring Insights membership.
+                                </p>
+                            </div>
+
+                            <div className="mt-6">
+                                {session?.user?.id ? (
+                                    <InsightsSubscriptionCheckout
+                                        callbackUrl={callbackUrl}
+                                        userName={session.user.name}
+                                        userEmail={session.user.email}
+                                        plans={subscriptionUi.plans}
+                                    />
+                                ) : (
+                                    <div className="space-y-4">
+                                        <p className="text-sm text-white/80">
+                                            Sign in to start a membership and unlock the rest of this memo.
+                                        </p>
+                                        <Link
+                                            href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                                            className="inline-flex items-center justify-center rounded-xl bg-gold px-5 py-3 text-sm font-bold text-black transition hover:brightness-105"
+                                        >
+                                            {post.paywallCtaText ?? "Log In To Subscribe"}
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    ) : null}
                 </article>
             </main>
             <Footer />
         </div>
     )
+}
+
+function getPreviewBlocks(post: Post) {
+    if (post.previewBody && post.previewBody.length > 0) {
+        return post.previewBody
+    }
+
+    if (!post.body || post.body.length === 0) {
+        return []
+    }
+
+    const previewCount = Math.max(1, Math.ceil(post.body.length * 0.1))
+    return post.body.slice(0, previewCount)
 }

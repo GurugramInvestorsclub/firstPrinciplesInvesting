@@ -33,6 +33,20 @@ export default defineType({
             rows: 3,
         }),
         defineField({
+            name: 'access',
+            title: 'Access',
+            type: 'string',
+            initialValue: 'public',
+            options: {
+                list: [
+                    { title: 'Public', value: 'public' },
+                    { title: 'Subscriber Only', value: 'subscriber' },
+                ],
+                layout: 'radio',
+            },
+            validation: (Rule) => Rule.required(),
+        }),
+        defineField({
             name: 'mainImage',
             title: 'Main image',
             type: 'image',
@@ -50,6 +64,28 @@ export default defineType({
             title: 'Body',
             type: 'array',
             of: [{ type: 'block' }, { type: 'image' }],
+        }),
+        defineField({
+            name: 'previewBody',
+            title: 'Preview Body',
+            type: 'array',
+            description: 'Optional teaser shown before the paywall for subscriber-only insights. If left empty, the frontend falls back to the opening portion of the body.',
+            of: [{ type: 'block' }, { type: 'image' }],
+            hidden: ({ parent }) => parent?.access !== 'subscriber',
+        }),
+        defineField({
+            name: 'paywallHeadline',
+            title: 'Paywall Headline',
+            type: 'string',
+            description: 'Optional override for the subscriber CTA headline.',
+            hidden: ({ parent }) => parent?.access !== 'subscriber',
+        }),
+        defineField({
+            name: 'paywallCtaText',
+            title: 'Paywall CTA Text',
+            type: 'string',
+            description: 'Optional override for the subscriber CTA button copy.',
+            hidden: ({ parent }) => parent?.access !== 'subscriber',
         }),
     ],
 })

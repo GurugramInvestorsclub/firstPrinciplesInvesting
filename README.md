@@ -66,6 +66,45 @@ To manage content, navigate to `http://localhost:3000/studio`. This will open th
 -   Update **Authors**
 -   Toggle **Featured Insights**
 
+## Insights Subscriptions
+
+Create one quarterly Razorpay subscription plan in the Razorpay dashboard, then add the plan ID and webhook secret to your environment:
+
+```bash
+INSIGHTS_SUBSCRIPTIONS_ENABLED=true
+RAZORPAY_KEY_ID=your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+RAZORPAY_SUBSCRIPTIONS_WEBHOOK_SECRET=your_subscription_webhook_secret
+RAZORPAY_INSIGHTS_THREE_MONTHLY_PLAN_ID=plan_three_monthly
+```
+
+Optional labels shown on the Insights subscription landing panel:
+
+```bash
+INSIGHTS_THREE_MONTHLY_PRICE_LABEL=₹1,299/3 mo
+```
+
+Webhook URL for Razorpay Subscriptions:
+
+```text
+https://your-domain.com/api/webhook/subscriptions
+```
+
+For low-value checkout testing, create a Razorpay Offer that applies to the quarterly subscription plan, then map a local test code to that offer:
+
+```bash
+RAZORPAY_INSIGHTS_TEST_COUPON_CODE=TEST1
+RAZORPAY_INSIGHTS_TEST_OFFER_ID=offer_all_plans
+```
+
+You can also use a quarterly-specific test offer:
+
+```bash
+RAZORPAY_INSIGHTS_THREE_MONTHLY_TEST_OFFER_ID=offer_three_monthly
+```
+
+Subscription records are managed separately at `/admin/subscriptions`.
+
 ## 📂 Project Structure
 
 ```

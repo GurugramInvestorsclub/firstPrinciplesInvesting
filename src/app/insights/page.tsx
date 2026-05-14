@@ -7,6 +7,10 @@ import { InsightCard } from "@/components/cards/InsightCard"
 import { FeaturedInsightCard } from "@/components/cards/FeaturedInsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
+import { getInsightsSubscriptionUiState } from "@/lib/insights-subscription-service"
+import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { auth } from "@/auth"
+import Link from "next/link"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -14,14 +18,17 @@ export const revalidate = 0
 export default async function InsightsPage({
     searchParams,
 }: {
-    searchParams: { search?: string }
+    searchParams: Promise<{ search?: string }>
 }) {
-    // Await searchParams to suppress Next.js sync access warning
-    const { search } = await Promise.resolve(searchParams)
+    const { search } = await searchParams
 
     let featuredPost: Post | null = null
     let gridPosts: Post[] = []
     let searchResults: Post[] = []
+    const subscriptionUi = getInsightsSubscriptionUiState()
+    const paywallReady =
+        subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
+    const session = await auth()
 
     if (search) {
         searchResults = await client.fetch<Post[]>(postQuery, { search })
@@ -91,6 +98,69 @@ export default async function InsightsPage({
                     </div>
 
                     {/* ─── SEARCH RESULTS HEADER ─── */}
+                    {!search && (
+                        <section
+                            data-gsap="featured"
+                            className="mb-20 overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(201,168,76,0.12),rgba(18,18,26,0.96)_38%,rgba(8,8,16,1))] p-6 md:p-8"
+                        >
+                            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+                                <div className="space-y-5">
+                                    <span className="text-xs font-mono-code font-semibold uppercase tracking-[0.2em] text-gold">
+                                        Premium Research
+                                    </span>
+                                    <h2 className="max-w-xl text-3xl font-heading font-extrabold leading-tight tracking-tight text-white md:text-4xl">
+                                        Unlock member-only investment memos without waiting for public drops.
+                                    </h2>
+                                    <p className="max-w-xl text-sm leading-7 text-white/65 md:text-base">
+                                        Start with a quarterly Insights membership for access to subscriber memos, full research archives, and new premium notes as they are published.
+                                    </p>
+                                    <div className="grid gap-3 text-sm text-white/75 sm:grid-cols-3">
+                                        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                                            <div className="font-semibold text-white">Full memos</div>
+                                            <div className="mt-1 text-xs leading-5 text-white/50">Complete thesis, risks, and valuation notes.</div>
+                                        </div>
+                                        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                                            <div className="font-semibold text-white">Recurring access</div>
+                                            <div className="mt-1 text-xs leading-5 text-white/50">Razorpay-managed billing and renewals.</div>
+                                        </div>
+                                        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                                            <div className="font-semibold text-white">Cancel anytime</div>
+                                            <div className="mt-1 text-xs leading-5 text-white/50">Access continues until the paid cycle ends.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {paywallReady ? (
+                                    session?.user?.id ? (
+                                        <InsightsSubscriptionCheckout
+                                            callbackUrl="/insights"
+                                            userName={session.user.name}
+                                            userEmail={session.user.email}
+                                            plans={subscriptionUi.plans}
+                                        />
+                                    ) : (
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 md:p-6">
+                                            <PlanPreview plans={subscriptionUi.plans} />
+                                            <Link
+                                                href={`/login?callbackUrl=${encodeURIComponent("/insights")}`}
+                                                className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-gold px-4 py-3 text-sm font-bold text-black transition hover:brightness-105"
+                                            >
+                                                Log in to subscribe
+                                            </Link>
+                                        </div>
+                                    )
+                                ) : (
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 md:p-6">
+                                        <PlanPreview plans={subscriptionUi.plans} />
+                                        <p className="mt-4 text-sm leading-6 text-white/60">
+                                            Subscriptions will be available here once the Razorpay quarterly plan ID and webhook settings are configured.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
                     {search && (
                         <div className="mb-12">
                             <h2
@@ -111,7 +181,7 @@ export default async function InsightsPage({
                     {/* ─── FEATURED MEMO ─── */}
                     {featuredPost && (
                         <div className="mb-20">
-                            <FeaturedInsightCard post={featuredPost} />
+                            <FeaturedInsightCard post={featuredPost} showSubscriberBadge={paywallReady} />
                         </div>
                     )}
 
@@ -119,7 +189,7 @@ export default async function InsightsPage({
                     {gridPosts.length > 0 ? (
                         <div data-gsap="grid" className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                             {gridPosts.map((post) => (
-                                <InsightCard key={post.slug.current} post={post} />
+                                <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} />
                             ))}
                         </div>
                     ) : (
@@ -148,7 +218,38 @@ export default async function InsightsPage({
 
 function postsSummary(count: number, search: string) {
     if (count === 0) {
-        return <p>No results found for <span className="font-semibold" style={{ color: "var(--insights-text, #F5F5F4)" }}>"{search}"</span></p>
+        return <p>No results found for <span className="font-semibold" style={{ color: "var(--insights-text, #F5F5F4)" }}>&quot;{search}&quot;</span></p>
     }
-    return <p>Showing {count} result{count === 1 ? "" : "s"} for <span className="font-semibold" style={{ color: "var(--insights-text, #F5F5F4)" }}>"{search}"</span></p>
+    return <p>Showing {count} result{count === 1 ? "" : "s"} for <span className="font-semibold" style={{ color: "var(--insights-text, #F5F5F4)" }}>&quot;{search}&quot;</span></p>
+}
+
+function PlanPreview({
+    plans,
+}: {
+    plans: Array<{
+        key: string
+        label: string
+        cadence: string
+        priceLabel: string
+        badge: string | null
+    }>
+}) {
+    return (
+        <div className={plans.length === 1 ? "grid gap-2" : "grid gap-2 md:grid-cols-3"}>
+            {plans.map((plan) => (
+                <div key={plan.key} className="min-h-[116px] rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-semibold text-white">{plan.label}</div>
+                        {plan.badge ? (
+                            <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/70">
+                                {plan.badge}
+                            </span>
+                        ) : null}
+                    </div>
+                    <div className="mt-3 text-lg font-bold text-white">{plan.priceLabel}</div>
+                    <div className="mt-1 text-xs leading-5 text-white/55">{plan.cadence}</div>
+                </div>
+            ))}
+        </div>
+    )
 }

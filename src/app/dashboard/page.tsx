@@ -1,22 +1,55 @@
 import { auth, signOut } from "@/auth"
 import { redirect } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
+import { InsightsSubscriptionStatus } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { client } from "@/lib/sanity.client"
 import { Calendar, ArrowRight } from "lucide-react"
+import {
+    getCurrentInsightsMembershipForUser,
+    getInsightsSubscriptionUiState,
+} from "@/lib/insights-subscription-service"
+import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { InsightsCancelMembershipButton } from "@/components/insights/InsightsCancelMembershipButton"
+
+interface RegisteredEvent {
+    eventId: string
+    title: string
+    date: string
+    slug: {
+        current: string
+    }
+    shortDescription?: string
+}
 
 export default async function DashboardPage() {
     const session = await auth()
 
-    if (!session || !session.user) {
+    if (!session?.user?.id) {
         redirect("/login")
     }
+
+    const userId = session.user.id
+
+    const subscriptionUi = getInsightsSubscriptionUiState()
+    const paywallReady =
+        subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
+    const insightsMembership =
+        paywallReady ? await getCurrentInsightsMembershipForUser(userId) : null
+    const canStartNewMembership =
+        !insightsMembership ||
+        insightsMembership.status === InsightsSubscriptionStatus.CANCELLED ||
+        insightsMembership.status === InsightsSubscriptionStatus.COMPLETED ||
+        insightsMembership.status === InsightsSubscriptionStatus.EXPIRED
+    const canCancelMembership =
+        Boolean(insightsMembership?.razorpaySubscriptionId) &&
+        !insightsMembership?.cancelAtCycleEnd &&
+        !canStartNewMembership
 
     // Fetch registered events
     const payments = await prisma.payment.findMany({
         where: {
-            userId: session.user.id,
+            userId,
             status: "SUCCESS"
         },
         select: {
@@ -30,7 +63,7 @@ export default async function DashboardPage() {
 
     const eventIds = payments.map(p => p.eventId)
     const registeredEvents = eventIds.length > 0
-        ? await client.fetch<any[]>(
+        ? await client.fetch<RegisteredEvent[]>(
             `*[_type == "event" && eventId in $eventIds] {
                 eventId,
                 title,
@@ -70,13 +103,13 @@ export default async function DashboardPage() {
                         </p>
                         <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
                              <span className="px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-xs font-medium uppercase tracking-wider">
-                                Active Member
+                                Active Account
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up delay-200">
+                <div className={`grid grid-cols-1 ${paywallReady ? "md:grid-cols-3" : "md:grid-cols-2"} gap-6 animate-fade-in-up delay-200`}>
                     <div className="bg-bg-primary/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-gold/30 transition-all group">
                         <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-gold" />
@@ -89,7 +122,7 @@ export default async function DashboardPage() {
                             href="/events"
                             className="inline-flex items-center text-gold font-medium hover:gap-2 transition-all gap-1"
                         >
-                            Explore Events <span className="text-lg">→</span>
+                            Explore Events <span className="text-lg">-&gt;</span>
                         </Link>
                     </div>
 
@@ -115,6 +148,83 @@ export default async function DashboardPage() {
                             </button>
                         </form>
                     </div>
+
+                    {paywallReady ? (
+                        <div className="bg-bg-primary/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:border-gold/30 transition-all">
+                            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-gold" />
+                                Insights Membership
+                            </h2>
+
+                            {insightsMembership ? (
+                                <div className="space-y-4">
+                                    <p className="text-text-secondary">
+                                        Status: <span className="text-text-primary font-semibold">{insightsMembership.statusLabel}</span>
+                                    </p>
+                                    <p className="text-text-secondary">
+                                        Plan: <span className="text-text-primary font-semibold">{insightsMembership.planLabel}</span>
+                                    </p>
+                                    {insightsMembership.currentEndAt ? (
+                                        <p className="text-text-secondary">
+                                            Current period ends on{" "}
+                                            <span className="text-text-primary font-semibold">
+                                                {new Date(insightsMembership.currentEndAt).toLocaleDateString("en-US", {
+                                                    month: "long",
+                                                    day: "numeric",
+                                                    year: "numeric",
+                                                })}
+                                            </span>
+                                        </p>
+                                    ) : null}
+                                    {insightsMembership.hasAccess ? (
+                                        <p className="text-sm text-emerald-300">
+                                            Your account can read subscriber-only Insights.
+                                        </p>
+                                    ) : (
+                                        <p className="text-sm text-amber-300">
+                                            Your membership is recorded, but access is not active yet.
+                                        </p>
+                                    )}
+
+                                    {insightsMembership.cancelAtCycleEnd ? (
+                                        <p className="text-sm text-amber-300">
+                                            Cancellation is scheduled for the end of the current billing cycle.
+                                        </p>
+                                    ) : canCancelMembership ? (
+                                        <InsightsCancelMembershipButton />
+                                    ) : null}
+
+                                    {canStartNewMembership ? (
+                                        <div className="space-y-3 pt-2">
+                                            <p className="text-sm text-text-secondary">
+                                                Start a new membership to restore premium Insights access.
+                                            </p>
+                                            <InsightsSubscriptionCheckout
+                                                callbackUrl="/dashboard"
+                                                userName={session.user.name}
+                                                userEmail={session.user.email}
+                                                compact
+                                                plans={subscriptionUi.plans}
+                                            />
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <p className="text-text-secondary">
+                                        Unlock subscriber-only memos and the full Insights archive with a recurring membership.
+                                    </p>
+                                    <InsightsSubscriptionCheckout
+                                        callbackUrl="/dashboard"
+                                        userName={session.user.name}
+                                        userEmail={session.user.email}
+                                        compact
+                                        plans={subscriptionUi.plans}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
                 </div>
 
                 <div className="mt-12 animate-fade-in-up delay-300">
