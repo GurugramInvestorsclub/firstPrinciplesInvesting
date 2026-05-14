@@ -41,6 +41,18 @@ export default async function InsightsPage({
 
         if (explicitFeatured) {
             featuredPost = explicitFeatured
+
+    if (search) {
+        searchResults = await client.fetch<Post[]>(postQuery, { search })
+        gridPosts = searchResults
+    } else {
+        const [explicitFeatured, allPosts] = await Promise.all([
+            client.fetch<Post | null>(featuredPostQuery),
+            client.fetch<Post[]>(allPostsQuery)
+        ])
+
+        if (explicitFeatured) {
+            featuredPost = explicitFeatured
         } else if (allPosts.length > 0) {
             featuredPost = allPosts[0]
         }
@@ -51,6 +63,9 @@ export default async function InsightsPage({
             gridPosts = allPosts
         }
     }
+
+    const premiumPosts = gridPosts.filter((p) => p.access === "subscriber")
+    const publicPosts = gridPosts.filter((p) => p.access !== "subscriber")
 
     return (
         <div className="flex flex-col min-h-screen insights-page">
@@ -185,28 +200,67 @@ export default async function InsightsPage({
                         </div>
                     )}
 
-                    {/* ─── MEMO GRID ─── */}
-                    {gridPosts.length > 0 ? (
-                        <div data-gsap="grid" className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-                            {gridPosts.map((post) => (
-                                <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div
-                            className="py-24 text-center rounded-2xl"
-                            style={{
-                                color: "var(--insights-text-muted, #9CA3AF)",
-                                borderWidth: "1px",
-                                borderStyle: "dashed",
-                                borderColor: "rgba(156, 163, 175, 0.15)",
-                                backgroundColor: "rgba(18, 18, 26, 0.5)",
-                            }}
+                    {/* ─── MEMBER-ONLY MEMOS ─── */}
+                    <div data-gsap="grid" className="mb-20">
+                        <h2
+                            className="text-2xl font-heading font-bold mb-8"
+                            style={{ color: "var(--insights-text, #F5F5F4)" }}
                         >
-                            <p className="text-xl font-medium mb-2">No insights found</p>
-                            <p className="text-sm opacity-70">Try adjusting your search criteria.</p>
-                        </div>
-                    )}
+                            Member-Only Memos
+                        </h2>
+                        {premiumPosts.length > 0 ? (
+                            <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+                                {premiumPosts.map((post) => (
+                                    <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div
+                                className="py-16 text-center rounded-2xl"
+                                style={{
+                                    color: "var(--insights-text-muted, #9CA3AF)",
+                                    borderWidth: "1px",
+                                    borderStyle: "dashed",
+                                    borderColor: "rgba(156, 163, 175, 0.15)",
+                                    backgroundColor: "rgba(18, 18, 26, 0.5)",
+                                }}
+                            >
+                                <p className="text-lg font-medium mb-1">No member-only memos found</p>
+                                <p className="text-sm opacity-70">Check back later for premium content.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ─── PUBLIC MEMOS ─── */}
+                    <div className="mb-20">
+                        <h2
+                            className="text-2xl font-heading font-bold mb-8"
+                            style={{ color: "var(--insights-text, #F5F5F4)" }}
+                        >
+                            Free for All
+                        </h2>
+                        {publicPosts.length > 0 ? (
+                            <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+                                {publicPosts.map((post) => (
+                                    <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div
+                                className="py-16 text-center rounded-2xl"
+                                style={{
+                                    color: "var(--insights-text-muted, #9CA3AF)",
+                                    borderWidth: "1px",
+                                    borderStyle: "dashed",
+                                    borderColor: "rgba(156, 163, 175, 0.15)",
+                                    backgroundColor: "rgba(18, 18, 26, 0.5)",
+                                }}
+                            >
+                                <p className="text-lg font-medium mb-1">No public memos found</p>
+                                <p className="text-sm opacity-70">Try adjusting your search criteria.</p>
+                            </div>
+                        )}
+                    </div>
 
                 </InsightsAnimations>
             </main>
@@ -251,5 +305,4 @@ function PlanPreview({
                 </div>
             ))}
         </div>
-    )
-}
+

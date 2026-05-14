@@ -484,6 +484,10 @@ function membershipHasAccess(
     return false
   }
 
+  if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
+    return true
+  }
+
   if (!subscription.currentEndAt) {
     return true
   }
@@ -618,6 +622,10 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
     subscription.status !== InsightsSubscriptionStatus.AUTHENTICATED
   ) {
     return false
+  }
+
+  if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
+    return true
   }
 
   if (!subscription.currentEndAt) {
