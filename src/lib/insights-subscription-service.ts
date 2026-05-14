@@ -472,9 +472,15 @@ async function logSubscriptionAudit(
 }
 
 function membershipHasAccess(
-  subscription: Pick<SubscriptionWithLatestCharge, "status" | "currentEndAt">
+  subscription: Pick<SubscriptionWithLatestCharge, "status" | "currentEndAt" | "charges">
 ): boolean {
   const now = Date.now()
+
+  // Fallback for new subscribers: if status is still CREATED but we have a CAPTURED charge, grant access.
+  if (subscription.status === InsightsSubscriptionStatus.CREATED) {
+    return subscription.charges.some(c => c.status === InsightsSubscriptionChargeStatus.CAPTURED)
+  }
+
   const entitled =
     subscription.status === InsightsSubscriptionStatus.ACTIVE ||
     subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
@@ -600,12 +606,19 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
           InsightsSubscriptionStatus.ACTIVE,
           InsightsSubscriptionStatus.CANCEL_REQUESTED,
           InsightsSubscriptionStatus.AUTHENTICATED,
+          InsightsSubscriptionStatus.CREATED,
         ],
       },
     },
     select: {
       status: true,
       currentEndAt: true,
+      charges: {
+        where: {
+          status: InsightsSubscriptionChargeStatus.CAPTURED
+        },
+        take: 1
+      }
     },
     orderBy: {
       updatedAt: "desc",
@@ -614,6 +627,11 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
 
   if (!subscription) {
     return false
+  }
+
+  // Fallback for new subscribers: if status is still CREATED but we have a CAPTURED charge, grant access.
+  if (subscription.status === InsightsSubscriptionStatus.CREATED) {
+    return subscription.charges.length > 0
   }
 
   if (
