@@ -775,6 +775,14 @@ export async function createInsightsSubscription(params: {
             in: [...OPEN_STATUSES],
           },
         },
+        include: {
+          charges: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
         orderBy: {
           createdAt: "desc",
         },
@@ -783,52 +791,64 @@ export async function createInsightsSubscription(params: {
       if (existing) {
         const ageMs = Date.now() - existing.createdAt.getTime()
 
-        if (
-          existing.status === InsightsSubscriptionStatus.CREATED &&
-          !existing.razorpaySubscriptionId &&
-          ageMs > SUBSCRIPTION_CREATION_STALE_MS
-        ) {
-          await tx.insightsSubscription.update({
-            where: { id: existing.id },
-            data: {
-              status: InsightsSubscriptionStatus.EXPIRED,
-              endedAt: new Date(),
-              lastWebhookAt: new Date(),
-            },
-          })
-
-          await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_CREATION_STALE_EXPIRED", {
-            ageMs,
-          })
-        } else if (
-          existing.status === InsightsSubscriptionStatus.CREATED &&
-          existing.razorpaySubscriptionId &&
-          ageMs > PROVIDER_SUBSCRIPTION_RETRY_STALE_MS
-        ) {
-          await tx.insightsSubscription.update({
-            where: { id: existing.id },
-            data: {
-              status: InsightsSubscriptionStatus.EXPIRED,
-              endedAt: new Date(),
-              lastWebhookAt: new Date(),
-            },
-          })
-
-          await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_PROVIDER_CREATED_STALE_EXPIRED", {
-            ageMs,
-            razorpaySubscriptionId: existing.razorpaySubscriptionId,
-          })
-        } else if (existing.razorpaySubscriptionId) {
+        if (existing.status === InsightsSubscriptionStatus.CREATED) {
+          if (!existing.razorpaySubscriptionId) {
+            if (ageMs > SUBSCRIPTION_CREATION_STALE_MS) {
+              await tx.insightsSubscription.update({
+                where: { id: existing.id },
+                data: {
+                  status: InsightsSubscriptionStatus.EXPIRED,
+                  endedAt: new Date(),
+                  lastWebhookAt: new Date(),
+                },
+              })
+              await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_CREATION_STALE_EXPIRED", {
+                ageMs,
+              })
+            } else {
+              throw new InsightsSubscriptionApiError(
+                409,
+                "SUBSCRIPTION_CREATION_IN_PROGRESS",
+                "An Insights membership is already being created. Retry in a few seconds."
+              )
+            }
+          } else {
+            if (ageMs > PROVIDER_SUBSCRIPTION_RETRY_STALE_MS) {
+              await tx.insightsSubscription.update({
+                where: { id: existing.id },
+                data: {
+                  status: InsightsSubscriptionStatus.EXPIRED,
+                  endedAt: new Date(),
+                  lastWebhookAt: new Date(),
+                },
+              })
+              await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_PROVIDER_CREATED_STALE_EXPIRED", {
+                ageMs,
+                razorpaySubscriptionId: existing.razorpaySubscriptionId,
+              })
+            } else if (existing.planKey === slugToPlanKey(params.plan)) {
+              return { type: "reuse", subscription: existing }
+            } else {
+              await tx.insightsSubscription.update({
+                where: { id: existing.id },
+                data: {
+                  status: InsightsSubscriptionStatus.EXPIRED,
+                  endedAt: new Date(),
+                  lastWebhookAt: new Date(),
+                },
+              })
+              await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_ABANDONED_FOR_NEW_PLAN", {
+                ageMs,
+                razorpaySubscriptionId: existing.razorpaySubscriptionId,
+                newPlan: params.plan,
+              })
+            }
+          }
+        } else {
           throw new InsightsSubscriptionApiError(
             409,
             "ALREADY_SUBSCRIBED",
             "An Insights membership already exists for this account"
-          )
-        } else {
-          throw new InsightsSubscriptionApiError(
-            409,
-            "SUBSCRIPTION_CREATION_IN_PROGRESS",
-            "An Insights membership is already being created. Retry in a few seconds."
           )
         }
       }
@@ -861,12 +881,21 @@ export async function createInsightsSubscription(params: {
         plan: params.plan,
       })
 
-      return localSubscription
+      return { type: "new", subscription: localSubscription }
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     }
   )
+
+  if (prepared.type === "reuse") {
+    return {
+      membership: serializeMembership(prepared.subscription as any),
+      razorpaySubscriptionId: prepared.subscription.razorpaySubscriptionId!,
+      razorpayKeyId: getRazorpaySubscriptionKeyIdOrThrow(),
+      reused: true,
+    }
+  }
 
   const client = getRazorpayClientOrThrow()
 
@@ -880,7 +909,7 @@ export async function createInsightsSubscription(params: {
       expire_by: Math.floor(Date.now() / 1000) + 60 * 30,
       ...(testOffer ? { offer_id: testOffer.offerId } : {}),
       notes: {
-        localSubscriptionId: prepared.id,
+        localSubscriptionId: prepared.subscription.id,
         userId: params.userId,
         userEmail: params.email ?? "",
         plan: params.plan,
@@ -892,15 +921,15 @@ export async function createInsightsSubscription(params: {
     providerSubscription = await client.subscriptions.create(subscriptionCreatePayload)
   } catch {
     await prisma.$transaction(async (tx) => {
-      await acquireLock(tx, `insights-subscription:create-failed:${prepared.id}`)
+      await acquireLock(tx, `insights-subscription:create-failed:${prepared.subscription.id}`)
       await tx.insightsSubscription.update({
-        where: { id: prepared.id },
+        where: { id: prepared.subscription.id },
         data: {
           status: InsightsSubscriptionStatus.EXPIRED,
           endedAt: new Date(),
         },
       })
-      await logSubscriptionAudit(tx, prepared.id, "SUBSCRIPTION_PROVIDER_CREATE_FAILED", {
+      await logSubscriptionAudit(tx, prepared.subscription.id, "SUBSCRIPTION_PROVIDER_CREATE_FAILED", {
         plan: params.plan,
       })
     })
@@ -923,21 +952,21 @@ export async function createInsightsSubscription(params: {
 
   const updated = await prisma.$transaction(
     async (tx) => {
-      await acquireLock(tx, `insights-subscription:finalize-create:${prepared.id}`)
+      await acquireLock(tx, `insights-subscription:finalize-create:${prepared.subscription.id}`)
 
       await applyProviderSubscriptionSnapshot(
         tx,
         {
-          id: prepared.id,
-          status: prepared.status,
-          cancelAtCycleEnd: prepared.cancelAtCycleEnd,
+          id: prepared.subscription.id,
+          status: prepared.subscription.status,
+          cancelAtCycleEnd: prepared.subscription.cancelAtCycleEnd,
         },
         providerEntity,
         "SUBSCRIPTION_CREATED_PROVIDER"
       )
 
       return tx.insightsSubscription.findUniqueOrThrow({
-        where: { id: prepared.id },
+        where: { id: prepared.subscription.id },
         include: {
           charges: {
             orderBy: {
