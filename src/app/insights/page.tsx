@@ -46,7 +46,7 @@ export default async function InsightsPage({
         }
 
         if (featuredPost) {
-            gridPosts = allPosts.filter(p => p.slug.current !== featuredPost?.slug.current)
+            gridPosts = allPosts
         } else {
             gridPosts = allPosts
         }
