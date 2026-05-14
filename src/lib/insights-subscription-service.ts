@@ -477,7 +477,8 @@ function membershipHasAccess(
   const now = Date.now()
   const entitled =
     subscription.status === InsightsSubscriptionStatus.ACTIVE ||
-    subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
+    subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
+    subscription.status === InsightsSubscriptionStatus.AUTHENTICATED
 
   if (!entitled) {
     return false
@@ -591,7 +592,11 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
     where: {
       userId,
       status: {
-        in: [InsightsSubscriptionStatus.ACTIVE, InsightsSubscriptionStatus.CANCEL_REQUESTED],
+        in: [
+          InsightsSubscriptionStatus.ACTIVE,
+          InsightsSubscriptionStatus.CANCEL_REQUESTED,
+          InsightsSubscriptionStatus.AUTHENTICATED,
+        ],
       },
     },
     select: {
@@ -607,8 +612,11 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
     return false
   }
 
-  if (subscription.status !== InsightsSubscriptionStatus.ACTIVE &&
-      subscription.status !== InsightsSubscriptionStatus.CANCEL_REQUESTED) {
+  if (
+    subscription.status !== InsightsSubscriptionStatus.ACTIVE &&
+    subscription.status !== InsightsSubscriptionStatus.CANCEL_REQUESTED &&
+    subscription.status !== InsightsSubscriptionStatus.AUTHENTICATED
+  ) {
     return false
   }
 

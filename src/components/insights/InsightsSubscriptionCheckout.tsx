@@ -156,8 +156,10 @@ export function InsightsSubscriptionCheckout({
             }
 
             setSuccess("Membership activated. Refreshing access...")
-            router.push(callbackUrl)
-            router.refresh()
+            setTimeout(() => {
+              router.push(callbackUrl)
+              router.refresh()
+            }, 1500)
           } catch (verificationError) {
             setError(
               verificationError instanceof Error
