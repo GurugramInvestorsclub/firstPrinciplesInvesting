@@ -220,9 +220,9 @@ export function InsightsSubscriptionCheckout({
         })}
       </div>
 
-      <label className="block space-y-2">
+      <label className="hidden">
         <span className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
-          Test coupon or offer code
+          Offer code
         </span>
         <input
           value={couponCode}
