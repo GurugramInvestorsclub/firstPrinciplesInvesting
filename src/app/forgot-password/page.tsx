@@ -3,7 +3,6 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("")
@@ -60,7 +59,7 @@ export default function ForgotPasswordPage() {
                         Forgot Password?
                     </h1>
                     <p className="text-text-secondary">
-                        Enter your email and we'll send you a link to reset your password.
+                        Enter your email and we&apos;ll send you a link to reset your password.
                     </p>
                 </div>
 

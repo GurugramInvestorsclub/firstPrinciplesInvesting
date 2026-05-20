@@ -10,6 +10,9 @@ import {
 const GENERIC_RESET_MESSAGE =
     "If an account exists with this email, you will receive a password reset link shortly."
 
+const RESET_EMAIL_FAILURE_MESSAGE =
+    "We could not send the password reset email right now. Please try again later."
+
 function acceptedResetResponse() {
     return NextResponse.json({ message: GENERIC_RESET_MESSAGE }, { status: 202 })
 }
@@ -70,14 +73,6 @@ export async function POST(req: Request) {
             return acceptedResetResponse()
         }
 
-        // Only allow password reset for credentials-based users
-        // If they only have OAuth accounts, we shouldn't send a password reset
-        // but for security we still return the generic message.
-        // If user has a password, they are credentials-based.
-        if (!user.password) {
-             return acceptedResetResponse()
-        }
-
         const resetRecord = createResetTokenRecord(email)
 
         await prisma.verificationToken.deleteMany({
@@ -106,9 +101,20 @@ export async function POST(req: Request) {
 
         if (!delivered) {
             console.warn("Password reset email delivery failed for:", email)
+            await prisma.verificationToken.deleteMany({
+                where: {
+                    token: resetRecord.tokenHash,
+                },
+            })
+
             if (process.env.NODE_ENV !== "production") {
                 console.warn("Use this URL to reset in development:", resetUrl)
             }
+
+            return NextResponse.json(
+                { error: RESET_EMAIL_FAILURE_MESSAGE },
+                { status: 502 }
+            )
         }
 
         return acceptedResetResponse()

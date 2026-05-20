@@ -60,7 +60,10 @@ export async function POST(req: Request) {
             // Update the user
             await tx.user.update({
                 where: { email },
-                data: { password: hashedPassword },
+                data: {
+                    password: hashedPassword,
+                    emailVerified: new Date(),
+                },
             })
 
             // Delete the verification token and any other reset tokens for this email

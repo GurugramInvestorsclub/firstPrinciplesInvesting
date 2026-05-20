@@ -4,7 +4,6 @@ import { Suspense, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
-import { motion } from "framer-motion"
 
 function ResetPasswordContent() {
     const searchParams = useSearchParams()
