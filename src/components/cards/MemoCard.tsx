@@ -122,15 +122,15 @@ export function MemoCard({ post }: { post: Post }) {
                 </p>
 
                 {/* Author attribution / Authority Signal */}
-                <div className="flex items-center gap-3 pt-4 border-t border-text-secondary/10 mt-auto mb-6">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 flex-shrink-0">
-                        <BookOpen className="w-4 h-4 text-text-secondary/70" />
+                <div className="flex items-center gap-3 pt-4 border-t border-text-secondary/10 mt-auto mb-6 group/author">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 flex-shrink-0 transition-colors duration-300 group-hover/author:border-gold/30 group-hover:border-gold/30">
+                        <BookOpen className="w-4 h-4 text-text-secondary/70 transition-colors duration-300 group-hover/author:text-gold group-hover:text-gold" />
                     </div>
                     <div className="flex flex-col">
                         <span className="text-xs font-bold text-text-primary">
                             Research Desk
                         </span>
-                        <span className="text-[10px] text-text-secondary/70 uppercase tracking-wide">
+                        <span className="text-[10px] text-gold uppercase tracking-wide">
                             First Principles Investing
                         </span>
                     </div>
