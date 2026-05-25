@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache"
 export async function getComments(postSlug: string) {
     try {
         const comments = await prisma.comment.findMany({
-            where: { postSlug },
+            where: { postSlug, parentId: null },
             orderBy: { createdAt: 'desc' },
             include: {
                 user: {
@@ -15,6 +15,18 @@ export async function getComments(postSlug: string) {
                         id: true,
                         name: true,
                         image: true,
+                    }
+                },
+                replies: {
+                    orderBy: { createdAt: 'asc' },
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            }
+                        }
                     }
                 }
             }
@@ -26,7 +38,7 @@ export async function getComments(postSlug: string) {
     }
 }
 
-export async function addComment(postSlug: string, content: string) {
+export async function addComment(postSlug: string, content: string, parentId?: string) {
     try {
         const session = await auth()
         if (!session?.user?.id) {
@@ -41,7 +53,8 @@ export async function addComment(postSlug: string, content: string) {
             data: {
                 content: content.trim(),
                 postSlug,
-                userId: session.user.id
+                userId: session.user.id,
+                parentId: parentId || null,
             },
             include: {
                 user: {
