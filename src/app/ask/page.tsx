@@ -103,7 +103,7 @@ export default function AskPage() {
                         </span>
 
                         {/* Headline */}
-                        <h1 className="text-6xl md:text-7xl font-serif font-bold text-text-primary mb-6 tracking-tight leading-[1.05]">
+                        <h1 className="text-6xl md:text-7xl font-bold text-text-primary mb-6 tracking-tight leading-[1.05]">
                             Ask a Question.
                         </h1>
 
@@ -133,7 +133,7 @@ export default function AskPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <h3 className="text-[32px] font-serif font-light text-[#F3F0EA] mb-4">Message Received</h3>
+                                <h3 className="text-[32px] font-light text-[#F3F0EA] mb-4">Message Received</h3>
                                 <p className="text-[#B8B3AA] text-[18px] mb-10 font-light max-w-md mx-auto leading-relaxed">
                                     Your question has been sent to our research desk. We will review it shortly.
                                 </p>
@@ -209,7 +209,7 @@ export default function AskPage() {
                                         onBlur={() => setIsFormFocused(false)}
                                         required
                                         maxLength={500}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 font-serif text-text-primary placeholder-text-secondary/40 transition-all duration-300 min-h-[160px] outline-none resize-none focus:border-gold/30 focus:bg-white/[0.07] text-xl leading-relaxed"
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-text-primary placeholder-text-secondary/40 transition-all duration-300 min-h-[160px] outline-none resize-none focus:border-gold/30 focus:bg-white/[0.07] text-xl leading-relaxed"
                                         placeholder="What investing question would you like answered?"
                                     />
                                 </motion.div>
@@ -310,7 +310,7 @@ export default function AskPage() {
                                 "Are chemical companies entering a new cycle?"
                             ].map((q, i) => (
                                 <li key={i} className="flex gap-4 items-start text-text-secondary font-light text-base">
-                                    <span className="text-gold font-serif text-xl leading-none mt-0.5">•</span>
+                                    <span className="text-gold text-xl leading-none mt-0.5">•</span>
                                     <span className="leading-snug">{q}</span>
                                 </li>
                             ))}
