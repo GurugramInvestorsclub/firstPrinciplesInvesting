@@ -5,11 +5,10 @@ import { singlePostQuery } from "@/lib/sanity.queries"
 import { Post } from "@/lib/types"
 import { RichText } from "@/components/sanity/RichText"
 import { auth } from "@/auth"
-import {
-    getInsightsSubscriptionUiState,
-    userHasInsightsAccess,
-} from "@/lib/insights-subscription-service"
+import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { CommentsSection, CommentType } from "@/components/insights/CommentsSection"
+import { getComments } from "@/app/actions/comments"
 import Link from "next/link"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
@@ -34,6 +33,9 @@ export default async function InsightPage({ params }: Props) {
         paywallReady && session?.user?.id
             ? await userHasInsightsAccess(session.user.id)
             : false
+
+    const commentsResult = await getComments(slug)
+    const initialComments = (commentsResult.success ? commentsResult.comments : []) as CommentType[]
 
     if (!post) {
         notFound()
@@ -123,6 +125,12 @@ export default async function InsightPage({ params }: Props) {
                             </div>
                         </section>
                     ) : null}
+
+                    <CommentsSection 
+                        postSlug={slug} 
+                        initialComments={initialComments} 
+                        currentUserId={session?.user?.id}
+                    />
                 </article>
             </main>
             <Footer />

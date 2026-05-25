@@ -51,6 +51,7 @@ model User {
   payments      Payment[]
   redemptions   CouponRedemption[]
   insightsSubscriptions InsightsSubscription[]
+  comments      Comment[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -296,6 +297,21 @@ model InsightsSubscriptionAuditLog {
 
   @@index([subscriptionId, createdAt])
   @@map("insights_subscription_audit_logs")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  postSlug  String   @map("post_slug")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postSlug, createdAt])
+  @@index([userId])
+  @@map("comments")
 }
 
 enum CouponType {
