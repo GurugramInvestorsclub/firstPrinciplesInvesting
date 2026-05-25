@@ -32,12 +32,9 @@ export function FeaturedIn() {
   return (
     <div className="space-y-12 text-center">
       <div className="space-y-2">
-        <h3 className="text-[10px] font-mono uppercase tracking-[0.4em] text-text-secondary/50">
+        <h3 className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold">
           Featured In
         </h3>
-        <p className="font-display italic text-base text-text-secondary/40">
-          Trusted by leading financial publications
-        </p>
       </div>
 
       <motion.div 
