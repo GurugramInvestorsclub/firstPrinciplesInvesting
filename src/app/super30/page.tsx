@@ -41,7 +41,7 @@ export default async function Super30IndexPage() {
                     <div className="grid gap-8 relative z-10">
                         {programs.map((program) => {
                             const deadlineDate = program.applicationDeadline ? new Date(program.applicationDeadline) : null
-                            
+                            const isClosed = deadlineDate ? deadlineDate.getTime() < Date.now() : false
                             return (
                                 <Link 
                                     href={`/super30/${program.slug.current}`} 
@@ -63,10 +63,14 @@ export default async function Super30IndexPage() {
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
                                                             Sold Out
                                                         </span>
+                                                    ) : isClosed ? (
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/10 text-gray-400 border border-gray-500/20">
+                                                            Registration Closed
+                                                        </span>
                                                     ) : program.seatsAvailable ? (
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                            12 seats left
+                                                            {program.seatsAvailable} seats left
                                                         </span>
                                                     ) : null}
                                                     {deadlineDate && !program.isSoldOut && (
