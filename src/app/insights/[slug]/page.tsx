@@ -9,6 +9,7 @@ import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/ins
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import { CommentsSection, CommentType } from "@/components/insights/CommentsSection"
 import { getComments } from "@/app/actions/comments"
+import { ShareButton } from "@/components/insights/ShareButton"
 import Link from "next/link"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
@@ -132,6 +133,7 @@ export default async function InsightPage({ params }: Props) {
                         currentUserId={session?.user?.id}
                     />
                 </article>
+                <ShareButton title={post.title} text={post.excerpt || ""} />
             </main>
             <Footer />
         </div>
