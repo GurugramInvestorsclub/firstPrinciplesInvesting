@@ -44,6 +44,8 @@ export default function AdminSubscriptionsPage() {
   const [webhookReady, setWebhookReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
+  const [reconcilingId, setReconcilingId] = useState<string | null>(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -71,6 +73,52 @@ export default function AdminSubscriptionsPage() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  const reconcilePayment = useCallback(
+    async (row: SubscriptionRow) => {
+      const initialPaymentId = row.latestCharge?.razorpayPaymentId ?? ""
+      const razorpayPaymentId = window.prompt("Razorpay payment ID", initialPaymentId)
+
+      if (!razorpayPaymentId?.trim()) {
+        return
+      }
+
+      if (!window.confirm("Reconcile this captured Razorpay payment and enable the subscription?")) {
+        return
+      }
+
+      setReconcilingId(row.id)
+      setActionMessage(null)
+
+      try {
+        const response = await fetch("/api/admin/subscriptions/manual-activate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subscriptionId: row.id,
+            razorpayPaymentId: razorpayPaymentId.trim(),
+          }),
+        })
+        const payload = await response.json()
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || payload.error || "Unable to reconcile payment")
+        }
+
+        setActionMessage("Payment reconciled and subscription updated.")
+        await loadData()
+      } catch (reconcileError) {
+        setActionMessage(
+          reconcileError instanceof Error ? reconcileError.message : "Unable to reconcile payment"
+        )
+      } finally {
+        setReconcilingId(null)
+      }
+    },
+    [loadData]
+  )
 
   return (
     <div style={{ display: "grid", gap: "24px" }}>
@@ -130,6 +178,17 @@ export default function AdminSubscriptionsPage() {
             {webhookReady ? "Webhook Ready" : "Webhook Not Ready"}
           </span>
         </div>
+        {actionMessage ? (
+          <div
+            style={{
+              marginTop: "16px",
+              color: actionMessage.toLowerCase().includes("unable") ? "#fca5a5" : "#6ee7b7",
+              fontSize: "13px",
+            }}
+          >
+            {actionMessage}
+          </div>
+        ) : null}
       </section>
 
       <section
@@ -150,7 +209,7 @@ export default function AdminSubscriptionsPage() {
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "1100px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "1220px" }}>
               <thead>
                 <tr style={{ background: "rgba(255,255,255,0.03)", textAlign: "left" }}>
                   <th style={tableCellStyle}>User</th>
@@ -159,85 +218,134 @@ export default function AdminSubscriptionsPage() {
                   <th style={tableCellStyle}>Billing Window</th>
                   <th style={tableCellStyle}>Last Charge</th>
                   <th style={tableCellStyle}>Provider IDs</th>
+                  <th style={tableCellStyle}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td style={tableCellStyle}>
-                      <div style={{ fontWeight: 600 }}>{row.userName || "Unknown"}</div>
-                      <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>{row.userEmail || "No email"}</div>
-                    </td>
-                    <td style={tableCellStyle}>
-                      <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.planKey}</div>
-                      <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
-                        Created {formatDate(row.createdAt)}
-                      </div>
-                    </td>
-                    <td style={tableCellStyle}>
-                      <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.status.replace(/_/g, " ")}</div>
-                      {row.cancelAtCycleEnd ? (
-                        <div style={{ color: "#fcd34d", marginTop: "6px" }}>Cycle-end cancellation requested</div>
-                      ) : null}
-                      {row.cancelRequestedAt ? (
-                        <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
-                          Requested {formatDate(row.cancelRequestedAt)}
+                {rows.map((row) => {
+                  const canReconcile = canReconcileSubscription(row)
+                  const isReconciling = reconcilingId === row.id
+
+                  return (
+                    <tr key={row.id}>
+                      <td style={tableCellStyle}>
+                        <div style={{ fontWeight: 600 }}>{row.userName || "Unknown"}</div>
+                        <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>{row.userEmail || "No email"}</div>
+                      </td>
+                      <td style={tableCellStyle}>
+                        <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.planKey}</div>
+                        <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
+                          Created {formatDate(row.createdAt)}
                         </div>
-                      ) : null}
-                    </td>
-                    <td style={tableCellStyle}>
-                      <div>Start: {formatDate(row.currentStartAt)}</div>
-                      <div style={{ marginTop: "6px" }}>End: {formatDate(row.currentEndAt)}</div>
-                      {row.cancelledAt ? (
-                        <div style={{ marginTop: "6px" }}>Cancelled: {formatDate(row.cancelledAt)}</div>
-                      ) : null}
-                      {row.endedAt ? (
-                        <div style={{ marginTop: "6px" }}>Ended: {formatDate(row.endedAt)}</div>
-                      ) : null}
-                    </td>
-                    <td style={tableCellStyle}>
-                      {row.latestCharge ? (
-                        <>
-                          <div>
-                            {row.latestCharge.currency} {(row.latestCharge.amount / 100).toFixed(2)}
+                      </td>
+                      <td style={tableCellStyle}>
+                        <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.status.replace(/_/g, " ")}</div>
+                        {row.cancelAtCycleEnd ? (
+                          <div style={{ color: "#fcd34d", marginTop: "6px" }}>Cycle-end cancellation requested</div>
+                        ) : null}
+                        {row.cancelRequestedAt ? (
+                          <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
+                            Requested {formatDate(row.cancelRequestedAt)}
                           </div>
-                          <div style={{ marginTop: "6px", textTransform: "capitalize" }}>
-                            {row.latestCharge.status}
-                          </div>
-                          {row.latestCharge.chargedAt ? (
-                            <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
-                              {formatDate(row.latestCharge.chargedAt)}
+                        ) : null}
+                      </td>
+                      <td style={tableCellStyle}>
+                        <div>Start: {formatDate(row.currentStartAt)}</div>
+                        <div style={{ marginTop: "6px" }}>End: {formatDate(row.currentEndAt)}</div>
+                        {row.cancelledAt ? (
+                          <div style={{ marginTop: "6px" }}>Cancelled: {formatDate(row.cancelledAt)}</div>
+                        ) : null}
+                        {row.endedAt ? (
+                          <div style={{ marginTop: "6px" }}>Ended: {formatDate(row.endedAt)}</div>
+                        ) : null}
+                      </td>
+                      <td style={tableCellStyle}>
+                        {row.latestCharge ? (
+                          <>
+                            <div>
+                              {row.latestCharge.currency} {(row.latestCharge.amount / 100).toFixed(2)}
                             </div>
-                          ) : null}
-                          {row.latestCharge.failureReason ? (
-                            <div style={{ color: "#fca5a5", marginTop: "6px" }}>
-                              {row.latestCharge.failureReason}
+                            <div style={{ marginTop: "6px", textTransform: "capitalize" }}>
+                              {row.latestCharge.status}
                             </div>
-                          ) : null}
-                        </>
-                      ) : (
-                        <span style={{ color: "var(--text-secondary)" }}>No charge recorded yet</span>
-                      )}
-                    </td>
-                    <td style={tableCellStyle}>
-                      <div style={{ wordBreak: "break-all" }}>{row.razorpaySubscriptionId || "No subscription ID"}</div>
-                      <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
-                        {row.razorpayPlanId}
-                      </div>
-                      {row.latestCharge?.razorpayPaymentId ? (
+                            {row.latestCharge.chargedAt ? (
+                              <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
+                                {formatDate(row.latestCharge.chargedAt)}
+                              </div>
+                            ) : null}
+                            {row.latestCharge.failureReason ? (
+                              <div style={{ color: "#fca5a5", marginTop: "6px" }}>
+                                {row.latestCharge.failureReason}
+                              </div>
+                            ) : null}
+                          </>
+                        ) : (
+                          <span style={{ color: "var(--text-secondary)" }}>No charge recorded yet</span>
+                        )}
+                      </td>
+                      <td style={tableCellStyle}>
+                        <div style={{ wordBreak: "break-all" }}>{row.razorpaySubscriptionId || "No subscription ID"}</div>
                         <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
-                          Payment: {row.latestCharge.razorpayPaymentId}
+                          {row.razorpayPlanId}
                         </div>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
+                        {row.latestCharge?.razorpayPaymentId ? (
+                          <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
+                            Payment: {row.latestCharge.razorpayPaymentId}
+                          </div>
+                        ) : null}
+                      </td>
+                      <td style={tableCellStyle}>
+                        {canReconcile ? (
+                          <button
+                            type="button"
+                            onClick={() => reconcilePayment(row)}
+                            disabled={isReconciling}
+                            style={{
+                              minWidth: "138px",
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              border: "1px solid rgba(250,204,21,0.35)",
+                              background: "rgba(250,204,21,0.12)",
+                              color: "#fde68a",
+                              fontWeight: 700,
+                              cursor: isReconciling ? "wait" : "pointer",
+                              opacity: isReconciling ? 0.7 : 1,
+                            }}
+                          >
+                            {isReconciling ? "Reconciling..." : "Reconcile Payment"}
+                          </button>
+                        ) : (
+                          <span style={{ color: "var(--text-secondary)" }}>-</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
     </div>
+  )
+}
+
+function canReconcileSubscription(row: SubscriptionRow) {
+  if (["active", "authenticated", "cancel_requested"].includes(row.status)) {
+    return false
+  }
+
+  if (!row.razorpaySubscriptionId) {
+    return false
+  }
+
+  if (!row.latestCharge) {
+    return true
+  }
+
+  return (
+    row.latestCharge.status === "failed" ||
+    row.latestCharge.failureReason === "PAYMENT_NOT_CAPTURED"
   )
 }
 

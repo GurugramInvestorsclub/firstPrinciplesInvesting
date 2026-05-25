@@ -69,6 +69,7 @@ interface ProviderSubscriptionEntity {
 interface ProviderPaymentEntity {
   id: string | null
   invoiceId: string | null
+  subscriptionId: string | null
   amount: number | null
   currency: string
   status: string | null
@@ -231,6 +232,22 @@ function planKeyToSlug(planKey: InsightsPlanKey): InsightsPlanSlug {
   return "yearly"
 }
 
+function addPlanInterval(start: Date, planKey: InsightsPlanKey): Date {
+  const end = new Date(start)
+  if (planKey === InsightsPlanKey.MONTHLY) {
+    end.setMonth(end.getMonth() + 1)
+    return end
+  }
+
+  if (planKey === InsightsPlanKey.THREE_MONTHLY) {
+    end.setMonth(end.getMonth() + 3)
+    return end
+  }
+
+  end.setFullYear(end.getFullYear() + 1)
+  return end
+}
+
 function getPlanEntry(plan: InsightsPlanSlug): InsightsPlanCatalogEntry & { planId: string } {
   const definition = getInsightsSubscriptionPlanDefinition(plan)
   const planId = getInsightsSubscriptionPlanId(plan)
@@ -338,6 +355,7 @@ function normalizeProviderPaymentEntity(value: unknown): ProviderPaymentEntity |
   return {
     id,
     invoiceId: asString(raw?.invoice_id),
+    subscriptionId: asString(raw?.subscription_id),
     amount,
     currency: asString(raw?.currency)?.toUpperCase() ?? CURRENCY,
     status,
@@ -665,6 +683,18 @@ async function fetchProviderPayment(
   }
 }
 
+async function fetchProviderSubscription(
+  client: Razorpay,
+  razorpaySubscriptionId: string
+): Promise<ProviderSubscriptionEntity | null> {
+  try {
+    const subscription = await client.subscriptions.fetch(razorpaySubscriptionId)
+    return normalizeProviderSubscriptionEntity(subscription)
+  } catch {
+    return null
+  }
+}
+
 async function upsertChargeFromProvider(
   tx: Prisma.TransactionClient,
   subscriptionId: string,
@@ -708,6 +738,229 @@ async function upsertChargeFromProvider(
       chargedAt: paymentEntity.chargedAt,
     },
   })
+}
+
+export async function manuallyActivateCapturedInsightsSubscription(params: {
+  subscriptionId: string
+  razorpayPaymentId: string
+}): Promise<InsightsMembershipSummary> {
+  ensureCheckoutConfigured()
+
+  const razorpayPaymentId = params.razorpayPaymentId.trim()
+  if (!razorpayPaymentId) {
+    throw new InsightsSubscriptionApiError(400, "INVALID_PAYMENT_ID", "Razorpay payment ID is required")
+  }
+
+  const localSubscription = await prisma.insightsSubscription.findUnique({
+    where: {
+      id: params.subscriptionId,
+    },
+    include: {
+      charges: {
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 1,
+      },
+    },
+  })
+
+  if (!localSubscription) {
+    throw new InsightsSubscriptionApiError(
+      404,
+      "SUBSCRIPTION_NOT_FOUND",
+      "Insights subscription not found"
+    )
+  }
+
+  if (
+    localSubscription.status === InsightsSubscriptionStatus.ACTIVE ||
+    localSubscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+    localSubscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
+  ) {
+    return serializeMembership(localSubscription)
+  }
+
+  const client = getRazorpayClientOrThrow()
+  const providerPayment = await fetchProviderPayment(client, razorpayPaymentId)
+
+  if (!providerPayment?.id || providerPayment.status !== "captured") {
+    throw new InsightsSubscriptionApiError(
+      409,
+      "PAYMENT_NOT_CAPTURED",
+      "Razorpay does not show this payment as captured"
+    )
+  }
+
+  if (providerPayment.currency !== CURRENCY) {
+    throw new InsightsSubscriptionApiError(
+      409,
+      "PAYMENT_CURRENCY_MISMATCH",
+      "Captured payment currency does not match the subscription currency"
+    )
+  }
+
+  const latestCharge = localSubscription.charges[0]
+  if (latestCharge && latestCharge.amount !== providerPayment.amount) {
+    throw new InsightsSubscriptionApiError(
+      409,
+      "PAYMENT_AMOUNT_MISMATCH",
+      "Captured payment amount does not match the recorded subscription charge"
+    )
+  }
+
+  if (
+    providerPayment.subscriptionId &&
+    localSubscription.razorpaySubscriptionId &&
+    providerPayment.subscriptionId !== localSubscription.razorpaySubscriptionId
+  ) {
+    throw new InsightsSubscriptionApiError(
+      409,
+      "PAYMENT_SUBSCRIPTION_MISMATCH",
+      "Captured payment belongs to a different Razorpay subscription"
+    )
+  }
+
+  const providerSubscription = localSubscription.razorpaySubscriptionId
+    ? await fetchProviderSubscription(client, localSubscription.razorpaySubscriptionId)
+    : null
+
+  const updated = await prisma.$transaction(
+    async (tx) => {
+      await acquireLock(tx, `insights-subscription:manual-activate:${localSubscription.id}`)
+
+      const duplicateCharge = await tx.insightsSubscriptionCharge.findFirst({
+        where: {
+          razorpayPaymentId,
+          subscriptionId: {
+            not: localSubscription.id,
+          },
+        },
+        select: {
+          id: true,
+        },
+      })
+
+      if (duplicateCharge) {
+        throw new InsightsSubscriptionApiError(
+          409,
+          "PAYMENT_ALREADY_USED",
+          "This Razorpay payment is already linked to another subscription"
+        )
+      }
+
+      const subscription = await tx.insightsSubscription.findUnique({
+        where: {
+          id: localSubscription.id,
+        },
+      })
+
+      if (!subscription) {
+        throw new InsightsSubscriptionApiError(
+          404,
+          "SUBSCRIPTION_NOT_FOUND",
+          "Insights subscription not found"
+        )
+      }
+
+      if (
+        subscription.status === InsightsSubscriptionStatus.ACTIVE ||
+        subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+        subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
+      ) {
+        return tx.insightsSubscription.findUniqueOrThrow({
+          where: { id: subscription.id },
+          include: {
+            charges: {
+              orderBy: {
+                createdAt: "desc",
+              },
+              take: 1,
+            },
+          },
+        })
+      }
+
+      if (providerSubscription?.id) {
+        await applyProviderSubscriptionSnapshot(
+          tx,
+          {
+            id: subscription.id,
+            status: subscription.status,
+            cancelAtCycleEnd: subscription.cancelAtCycleEnd,
+          },
+          providerSubscription,
+          "SUBSCRIPTION_MANUALLY_ACTIVATED",
+          providerPayment
+        )
+
+        const refreshed = await tx.insightsSubscription.findUniqueOrThrow({
+          where: {
+            id: subscription.id,
+          },
+        })
+
+        if (
+          refreshed.status === InsightsSubscriptionStatus.CREATED ||
+          refreshed.status === InsightsSubscriptionStatus.PENDING
+        ) {
+          const currentStartAt = refreshed.currentStartAt ?? providerPayment.chargedAt ?? new Date()
+          await tx.insightsSubscription.update({
+            where: {
+              id: subscription.id,
+            },
+            data: {
+              status: InsightsSubscriptionStatus.ACTIVE,
+              currentStartAt,
+              currentEndAt: refreshed.currentEndAt ?? addPlanInterval(currentStartAt, refreshed.planKey),
+            },
+          })
+        }
+      } else {
+        await upsertChargeFromProvider(tx, subscription.id, providerPayment)
+
+        const currentStartAt = providerPayment.chargedAt ?? new Date()
+
+        await tx.insightsSubscription.update({
+          where: {
+            id: subscription.id,
+          },
+          data: {
+            status: InsightsSubscriptionStatus.ACTIVE,
+            paidCount: {
+              increment: 1,
+            },
+            currentStartAt,
+            currentEndAt: subscription.currentEndAt ?? addPlanInterval(currentStartAt, subscription.planKey),
+            lastWebhookAt: new Date(),
+          },
+        })
+
+        await logSubscriptionAudit(tx, subscription.id, "SUBSCRIPTION_MANUALLY_ACTIVATED", {
+          razorpayPaymentId,
+          providerPaymentStatus: providerPayment.status,
+          source: "admin",
+        })
+      }
+
+      return tx.insightsSubscription.findUniqueOrThrow({
+        where: { id: subscription.id },
+        include: {
+          charges: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
+      })
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+    }
+  )
+
+  return serializeMembership(updated)
 }
 
 async function applyProviderSubscriptionSnapshot(
@@ -924,7 +1177,7 @@ export async function createInsightsSubscription(params: {
 
   if (prepared.type === "reuse") {
     return {
-      membership: serializeMembership(prepared.subscription as any),
+      membership: serializeMembership(prepared.subscription),
       razorpaySubscriptionId: prepared.subscription.razorpaySubscriptionId!,
       razorpayKeyId: getRazorpaySubscriptionKeyIdOrThrow(),
       reused: true,
