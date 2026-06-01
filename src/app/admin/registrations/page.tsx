@@ -128,11 +128,28 @@ export default function AdminRegistrationsPage() {
                             fontSize: "14px",
                             color: "var(--text-secondary)",
                             marginTop: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
                         }}
                     >
-                        {loading
-                            ? "Loading…"
-                            : `${registrations.length} registration${registrations.length !== 1 ? "s" : ""}`}
+                        <span>
+                            {loading
+                                ? "Loading…"
+                                : `${registrations.length} registration${registrations.length !== 1 ? "s" : ""}`}
+                        </span>
+                        {!loading && registrations.length > 0 && (
+                            <>
+                                <span style={{ color: "rgba(107,107,107,0.4)" }}>•</span>
+                                <span style={{ color: "var(--gold)", fontWeight: 600 }}>
+                                    Total: {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
+                                        registrations
+                                            .filter(r => r.paymentStatus === "paid" && r.amountPaise !== null)
+                                            .reduce((sum, r) => sum + (r.amountPaise || 0), 0) / 100
+                                    )}
+                                </span>
+                            </>
+                        )}
                     </p>
                 </div>
 
