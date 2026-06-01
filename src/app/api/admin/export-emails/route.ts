@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { PaymentStatus } from "@prisma/client"
 import { NextResponse, NextRequest } from "next/server"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 
@@ -25,15 +26,33 @@ export async function GET(request: NextRequest) {
                 phone: true,
                 seminarSlug: true,
                 paymentStatus: true,
-                amountPaise: true,
+                razorpayOrderId: true,
             },
             orderBy: { createdAt: "desc" },
         })
 
+        const orderIds = registrations
+            .map((r) => r.razorpayOrderId)
+            .filter(Boolean) as string[]
+
+        const payments = await prisma.payment.findMany({
+            where: {
+                razorpayOrderId: { in: orderIds },
+                status: PaymentStatus.SUCCESS,
+            },
+            select: {
+                razorpayOrderId: true,
+                amount: true,
+            },
+        })
+
+        const amountMap = new Map(payments.map((p) => [p.razorpayOrderId, p.amount]))
+
         const header = "name,email,phone,seminarSlug,paymentStatus,amount"
         const rows = registrations.map(
-            (r: { name: string; email: string; phone: string | null; seminarSlug: string; paymentStatus: string; amountPaise: number | null }) => {
-                const amount = r.amountPaise !== null ? (r.amountPaise / 100).toString() : ""
+            (r) => {
+                const amountPaise = r.razorpayOrderId ? amountMap.get(r.razorpayOrderId) || null : null
+                const amount = amountPaise !== null ? (amountPaise / 100).toString() : ""
                 return `${toSafeCsvCell(r.name)},${toSafeCsvCell(r.email)},${toSafeCsvCell(r.phone)},${toSafeCsvCell(r.seminarSlug)},${toSafeCsvCell(r.paymentStatus)},${toSafeCsvCell(amount)}`
             }
         )
