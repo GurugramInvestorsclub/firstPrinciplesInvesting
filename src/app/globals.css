@@ -185,13 +185,13 @@
 
 /* ─── Insights Page — Cinematic Research Archive ─── */
 .insights-page {
-  --insights-bg: #080810;
-  --insights-card: #12121A;
-  --insights-card-hover: #1A1A24;
-  --insights-card-featured: #16161F;
-  --insights-text: #F5F5F4;
-  --insights-text-muted: #9CA3AF;
-  --insights-accent: #C9A84C;
+  --insights-bg: var(--background);
+  --insights-card: var(--bg-primary);
+  --insights-card-hover: var(--border);
+  --insights-card-featured: var(--bg-primary);
+  --insights-text: var(--foreground);
+  --insights-text-muted: var(--muted-foreground);
+  --insights-accent: var(--primary);
   background-color: var(--insights-bg);
 }
 
