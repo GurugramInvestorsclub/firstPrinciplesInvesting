@@ -7,7 +7,7 @@ import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
 import { ProcessScrollSection } from "@/components/insights/ProcessScrollSection"
-import { getInsightsSubscriptionUiState } from "@/lib/insights-subscription-service"
+import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import { auth } from "@/auth"
 import Link from "next/link"
@@ -28,6 +28,10 @@ export default async function InsightsPage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
     const session = await auth()
+    const hasSubscriptionAccess =
+        paywallReady && session?.user?.id
+            ? await userHasInsightsAccess(session.user.id)
+            : false
 
     if (search) {
         searchResults = await client.fetch<Post[]>(postQuery, { search })
@@ -220,14 +224,16 @@ export default async function InsightsPage({
                             <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                                 {premiumPosts.slice(0, 3).map((post) => (
                                     <div key={post.slug.current} className="relative group">
-                                        <InsightCard post={post} showSubscriberBadge={false} />
+                                        <InsightCard post={post} showSubscriberBadge={paywallReady} />
                                         {/* Blur Mask Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--insights-bg)] via-[var(--insights-bg)]/80 to-transparent top-1/3 flex flex-col items-center justify-end pb-8 opacity-90 transition-opacity group-hover:opacity-100">
-                                            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-full mb-4">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                        {!hasSubscriptionAccess && (
+                                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--insights-bg)] via-[var(--insights-bg)]/80 to-transparent top-1/3 flex flex-col items-center justify-end pb-8 opacity-90 transition-opacity group-hover:opacity-100">
+                                                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-full mb-4">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                                </div>
+                                                <span className="font-mono text-xs uppercase tracking-widest" style={{ color: "var(--insights-accent)" }}>Members Only</span>
                                             </div>
-                                            <span className="font-mono text-xs uppercase tracking-widest" style={{ color: "var(--insights-accent)" }}>Members Only</span>
-                                        </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
