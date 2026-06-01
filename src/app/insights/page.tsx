@@ -9,6 +9,7 @@ import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
 import { ProcessScrollSection } from "@/components/insights/ProcessScrollSection"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { PhilosophySection } from "@/components/insights/PhilosophySection"
 import { auth } from "@/auth"
 import Link from "next/link"
 
@@ -122,34 +123,7 @@ export default async function InsightsPage({
                     </section>
 
                     {/* SECTION 2 — PHILOSOPHY */}
-                    <section className="py-32 border-y border-white/5" style={{ backgroundColor: "var(--bg-primary)" }}>
-                        <div className="container max-w-5xl mx-auto px-6 text-center">
-                            <h2 className="text-4xl md:text-6xl font-heading font-bold tracking-tight leading-[1.1] mb-20" style={{ color: "var(--insights-text)" }}>
-                                Most investing content optimizes for engagement.<br/>
-                                <span className="italic" style={{ color: "var(--insights-accent)" }}>We optimize for understanding.</span>
-                            </h2>
-                            <div className="grid md:grid-cols-2 gap-x-12 gap-y-16 text-left max-w-4xl mx-auto">
-                                <div className="space-y-6">
-                                    <div className="text-xl font-heading line-through decoration-white/20" style={{ color: "var(--insights-text-muted)" }}>Market Noise</div>
-                                    <ul className="space-y-4 font-mono text-sm uppercase tracking-wider" style={{ color: "rgba(245, 245, 244, 0.5)" }}>
-                                        <li>Fast opinions</li>
-                                        <li>Stock tips</li>
-                                        <li>Momentum narratives</li>
-                                        <li>Quarterly excitement</li>
-                                    </ul>
-                                </div>
-                                <div className="space-y-6">
-                                    <div className="text-xl font-heading" style={{ color: "var(--insights-accent)" }}>First Principles Research</div>
-                                    <ul className="space-y-4 font-mono text-sm uppercase tracking-wider" style={{ color: "rgba(245, 245, 244, 0.9)" }}>
-                                        <li>Deep work</li>
-                                        <li>Business analysis</li>
-                                        <li>Industry structure</li>
-                                        <li>Long-term thinking</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    <PhilosophySection />
 
                     {/* SECTION 3 — RESEARCH PROCESS */}
                     <ProcessScrollSection />
