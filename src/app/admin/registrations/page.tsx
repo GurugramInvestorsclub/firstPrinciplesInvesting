@@ -69,7 +69,7 @@ export default function AdminRegistrationsPage() {
 
     const handleExport = () => {
         const a = document.createElement("a");
-        a.href = "/api/admin/export-emails";
+        a.href = `/api/admin/export-emails${seminarFilter ? `?seminar=${encodeURIComponent(seminarFilter)}` : ""}`;
         a.download = "registrations.csv";
         a.click();
     };
