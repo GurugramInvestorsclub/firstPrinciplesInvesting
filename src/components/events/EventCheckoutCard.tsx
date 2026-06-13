@@ -26,6 +26,7 @@ interface RazorpayCheckoutOptions {
   prefill?: {
     name?: string
     email?: string
+    contact?: string
   }
   modal?: {
     ondismiss?: () => void
@@ -42,6 +43,12 @@ interface PricingState {
   discountAmount: number
   finalAmount: number
   couponCode: string | null
+}
+
+interface GuestCheckoutState {
+  name: string
+  email: string
+  phone: string
 }
 
 let scriptLoaderPromise: Promise<boolean> | null = null
@@ -98,6 +105,12 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
   )
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false)
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
+  const [isCreatingGuestOrder, setIsCreatingGuestOrder] = useState(false)
+  const [guestCheckout, setGuestCheckout] = useState<GuestCheckoutState>({
+    name: "",
+    email: "",
+    phone: "",
+  })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -293,6 +306,149 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
     }
   }
 
+  const updateGuestCheckout = (field: keyof GuestCheckoutState, value: string) => {
+    setGuestCheckout((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  const startGuestPayment = async () => {
+    setError(null)
+    setSuccess(null)
+
+    if (!isRegistrationOpen) {
+      setError("Registration is closed for this event")
+      return
+    }
+
+    if (!event.eventId) {
+      setError("Event payment configuration is missing")
+      return
+    }
+
+    const name = guestCheckout.name.trim()
+    const email = guestCheckout.email.trim().toLowerCase()
+    const phone = guestCheckout.phone.trim()
+
+    if (!name || !email || !phone) {
+      setError("Name, email, and mobile number are required for fast checkout")
+      return
+    }
+
+    setIsCreatingGuestOrder(true)
+
+    try {
+      const orderResponse = await fetch("/api/guest-checkout/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          eventId: event.eventId,
+          couponCode: couponInput.trim() || null,
+        }),
+      })
+
+      const orderPayload = await orderResponse.json()
+      if (!orderResponse.ok || !orderPayload.success) {
+        throw new Error(orderPayload.message ?? "Failed to create order")
+      }
+
+      setPricing({
+        baseAmount: orderPayload.data.amount,
+        discountAmount: 0,
+        finalAmount: orderPayload.data.amount,
+        couponCode: orderPayload.data.couponCode ?? null,
+      })
+
+      const scriptReady = await loadRazorpayCheckoutScript()
+      if (!scriptReady || !window.Razorpay) {
+        throw new Error("Unable to load Razorpay checkout")
+      }
+
+      const checkout = new window.Razorpay({
+        key: orderPayload.data.razorpayKeyId,
+        amount: orderPayload.data.amount,
+        currency: orderPayload.data.currency,
+        name: "First Principles Investing",
+        description: event.title,
+        order_id: orderPayload.data.orderId,
+        notes: {
+          eventId: orderPayload.data.eventId,
+          couponCode: orderPayload.data.couponCode ?? "",
+          checkoutMode: "guest",
+        },
+        prefill: {
+          name,
+          email,
+          contact: phone,
+        },
+        modal: {
+          ondismiss: () => {
+            setError("Checkout was closed before completion")
+          },
+        },
+        handler: async (checkoutResponse) => {
+          try {
+            const verifyResponse = await fetch("/api/guest-checkout/verify-payment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                razorpayOrderId: checkoutResponse.razorpay_order_id,
+                razorpayPaymentId: checkoutResponse.razorpay_payment_id,
+                razorpaySignature: checkoutResponse.razorpay_signature,
+              }),
+            })
+
+            const verifyPayload = await verifyResponse.json()
+            if (!verifyResponse.ok || !verifyPayload.success) {
+              throw new Error(verifyPayload.message ?? "Payment verification failed")
+            }
+
+            const searchParams = new URLSearchParams({
+              type: "event",
+              eventTitle: event.title,
+              eventDate: event.startTime || event.date,
+              email: verifyPayload.data?.email || email,
+              whatsappLink: verifyPayload.data?.whatsappLink || ""
+            })
+            router.push(`/thank-you?${searchParams.toString()}`)
+          } catch (verificationError) {
+            setError(
+              verificationError instanceof Error
+                ? verificationError.message
+                : "Payment verification failed"
+            )
+          }
+        },
+      })
+
+      checkout.on("payment.failed", (failure: unknown) => {
+        const errorMessage =
+          typeof failure === "object" &&
+          failure !== null &&
+          "error" in failure &&
+          typeof (failure as { error?: { description?: string } }).error?.description === "string"
+            ? (failure as { error: { description: string } }).error.description
+            : "Payment failed"
+
+        setError(errorMessage)
+      })
+
+      checkout.open()
+    } catch (checkoutError) {
+      setError(checkoutError instanceof Error ? checkoutError.message : "Unable to complete checkout")
+    } finally {
+      setIsCreatingGuestOrder(false)
+    }
+  }
+
   if (!event.eventId) {
     return (
       <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5 text-sm text-red-300">
@@ -365,9 +521,70 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
             : "Login to Pay"}
       </Button>
 
+      {status !== "authenticated" && (
+        <a
+          href="#fast-checkout"
+          className="mt-3 block text-center text-sm font-medium text-gold transition hover:text-white"
+        >
+          Skip login and use fast checkout
+        </a>
+      )}
+
       {!isRegistrationOpen && (
         <p className="mt-3 text-sm text-gray-500">Registration is closed for this event.</p>
       )}
+
+      <div id="fast-checkout" className="mt-8 border-t border-white/10 pt-6">
+        <div className="mb-4">
+          <p className="text-xs uppercase tracking-[0.18em] text-gray-400">Fast Checkout</p>
+          <h4 className="mt-1 text-lg font-semibold text-white">Pay without logging in</h4>
+          <p className="mt-1 text-sm text-gray-400">
+            Enter your details and we will capture your registration in admin after payment.
+          </p>
+        </div>
+
+        <div className="grid gap-3">
+          <input
+            type="text"
+            placeholder="Full name"
+            value={guestCheckout.name}
+            onChange={(e) => updateGuestCheckout("name", e.target.value)}
+            className="h-12 rounded-xl border border-white/15 bg-black/20 px-4 text-sm text-white outline-none transition focus:border-gold"
+            autoComplete="name"
+            maxLength={120}
+            disabled={isCreatingGuestOrder || isCreatingOrder}
+          />
+          <input
+            type="email"
+            placeholder="Email address"
+            value={guestCheckout.email}
+            onChange={(e) => updateGuestCheckout("email", e.target.value)}
+            className="h-12 rounded-xl border border-white/15 bg-black/20 px-4 text-sm text-white outline-none transition focus:border-gold"
+            autoComplete="email"
+            maxLength={254}
+            disabled={isCreatingGuestOrder || isCreatingOrder}
+          />
+          <input
+            type="tel"
+            placeholder="Mobile number"
+            value={guestCheckout.phone}
+            onChange={(e) => updateGuestCheckout("phone", e.target.value)}
+            className="h-12 rounded-xl border border-white/15 bg-black/20 px-4 text-sm text-white outline-none transition focus:border-gold"
+            autoComplete="tel"
+            maxLength={32}
+            disabled={isCreatingGuestOrder || isCreatingOrder}
+          />
+        </div>
+
+        <Button
+          type="button"
+          onClick={startGuestPayment}
+          disabled={isCreatingGuestOrder || isCreatingOrder || !isRegistrationOpen}
+          className="mt-4 h-12 w-full rounded-xl bg-white text-[#0b0b0c] hover:bg-white/90"
+        >
+          {isCreatingGuestOrder ? "Preparing fast checkout..." : "Fast Checkout Without Login"}
+        </Button>
+      </div>
     </div>
   )
 }

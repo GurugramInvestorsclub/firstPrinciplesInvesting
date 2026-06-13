@@ -114,6 +114,45 @@ export function normalizeCouponCode(value: unknown): string | null {
   return normalized
 }
 
+export function normalizeGuestName(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new PaymentApiError(400, "INVALID_NAME", "Name is required")
+  }
+
+  const name = value.trim().replace(/\s+/g, " ").slice(0, 120)
+  if (name.length < 2) {
+    throw new PaymentApiError(400, "INVALID_NAME", "Name is required")
+  }
+
+  return name
+}
+
+export function normalizeGuestEmail(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new PaymentApiError(400, "INVALID_EMAIL", "Email is required")
+  }
+
+  const email = value.trim().toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new PaymentApiError(400, "INVALID_EMAIL", "Invalid email format")
+  }
+
+  return email
+}
+
+export function normalizeGuestPhone(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new PaymentApiError(400, "INVALID_PHONE", "Mobile number is required")
+  }
+
+  const phone = value.trim().replace(/[\s()-]/g, "").slice(0, 32)
+  if (!/^\+?[0-9]{7,15}$/.test(phone)) {
+    throw new PaymentApiError(400, "INVALID_PHONE", "Invalid mobile number")
+  }
+
+  return phone
+}
+
 export function normalizeCouponValue(value: unknown): number {
   if (typeof value === "number") {
     if (!Number.isFinite(value)) {
@@ -709,7 +748,7 @@ export async function createOrReuseOrder(params: {
         paymentId: prepared.paymentId,
       },
     })
-  } catch (error) {
+  } catch {
     await prisma.$transaction(async (tx) => {
       await acquireLock(tx, `payment-order:${prepared.paymentId}`)
       await tx.payment.update({
@@ -1256,7 +1295,7 @@ export async function initiateCompensatingRefund(params: {
         source: params.source,
       },
     })
-  } catch (error) {
+  } catch {
     await prisma.$transaction(async (tx) => {
       await acquireLock(tx, `refund-failed:${params.paymentId}`)
       await tx.payment.update({
