@@ -6,19 +6,19 @@ const steps = [
     {
         id: "01",
         title: "Radical. Positive. Change.",
-        desc: "Radical. Positive. Change. That’s what we’re after.\n\nOur newsletter - First Principles Deep-Dives - covers listed companies undergoing such a transformation.\n\nForget value, growth, momentum, GARP, and other industry buzzwords. We seek change. Radical. Big. Positive. Change!",
+        desc: "Radical. Positive. Change. That’s what we’re after.\n\nOur newsletter, First Principles Deep-Dives, covers listed companies undergoing such a transformation.\n\nForget value, growth, momentum, GARP, and other industry buzzwords. We seek change. Radical. Big. Positive. Change!",
         keywords: ["First Principles", "Style Agnostic", "Deep-Dives", "Hunting Change"]
     },
     {
         id: "02",
         title: "Garware Hi-Tech Films",
-        desc: "On 8th July 2023, we spotted Garware Hi-tech films at a 13X PE. EPS growth was flat, but it was the only player in the sector that was moving.\n\nThe margin profile change was supported by a new winning product (Paint Protection Films). With hard work and some good fortune, we were in the right company at the right time—blessed with a 4X return.\n\nToday it trades at 42X.",
+        desc: "On 8th July 2023, we spotted Garware Hi-tech films at a 13X PE. EPS growth was flat, but it was the only player in the sector that was moving.\n\nThe margin profile change was supported by a new winning product (Paint Protection Films). With hard work and some good fortune, we were in the right company at the right time, blessed with a 4X return.\n\nToday it trades at 42X.",
         keywords: ["Spotted: July 2023", "4X Return", "Margin Shift", "Paint Protection"]
     },
     {
         id: "03",
         title: "Corporate Restructuring",
-        desc: "Let’s take another example - John Cockerill India Ltd.\n\nWe discovered the company on 8th August 2025. It was undergoing a change so radical it would completely reshape the size, shape, and margin profile of the Indian unit.\n\nJohn Cockerill is a Belgian technology leader in the downstream steel value chain. The entire global metals/non-ferrous business was shoved into the Indian unit, giving it access to highly promising proprietary technologies.\n\nNot value, not growth, not mo-mo, not moats. Radical. Positive. Change. Is what we’re hunting for.",
+        desc: "Let’s take another example: John Cockerill India Ltd.\n\nWe discovered the company on 8th August 2025. It was undergoing a change so radical it would completely reshape the size, shape, and margin profile of the Indian unit.\n\nJohn Cockerill is a Belgian technology leader in the downstream steel value chain. The entire global metals/non-ferrous business was shoved into the Indian unit, giving it access to highly promising proprietary technologies.\n\nNot value, not growth, not mo-mo, not moats. Radical. Positive. Change. Is what we’re hunting for.",
         keywords: ["John Cockerill", "Restructuring", "Asset Integration", "Margin Shift"]
     },
     {
@@ -30,13 +30,13 @@ const steps = [
     {
         id: "05",
         title: "Capacity Expansion & Realities",
-        desc: "Another one from the CDMO space—Ami Organics (now Acutaas Chemicals), identified in March 2024.\n\nBeneath negative market sentiment, the company was commissioning a massive capex programme to expand capacity and reshape the business scale.\n\nCrucially, nearly 30% of this upcoming capacity was pre-booked by a single customer, providing demand visibility and reducing risk. The stock is up 5.4X since.\n\nWe will make mistakes, but managing execution realities is part of the game.",
+        desc: "Another one from the CDMO space is Ami Organics (now Acutaas Chemicals), identified in March 2024.\n\nBeneath negative market sentiment, the company was commissioning a massive capex programme to expand capacity and reshape the business scale.\n\nCrucially, nearly 30% of this upcoming capacity was pre-booked by a single customer, providing demand visibility and reducing risk. The stock is up 5.4X since.\n\nWe will make mistakes, but managing execution realities is part of the game.",
         keywords: ["Ami Organics", "5.4X Return", "Pre-booked Capex", "Managing Mistakes"]
     },
     {
         id: "06",
         title: "Special Situations",
-        desc: "Special Situations is the second mental model we cover—specifically demergers (like Triveni Engineering, Inox Green) and promoter changes (Restaurant Brands Asia).\n\nWhile our weekly free articles outline these situations well, in First Principles Deep-Dives we go one step further.\n\nWe recognize the 2-3 key levers that drive any investment thesis, watch them like a hawk, and assess their probabilities relative to market expectations.",
+        desc: "Special Situations is the second mental model we cover, specifically demergers (like Triveni Engineering, Inox Green) and promoter changes (Restaurant Brands Asia).\n\nWhile our weekly free articles outline these situations well, in First Principles Deep-Dives we go one step further.\n\nWe recognize the 2-3 key levers that drive any investment thesis, watch them like a hawk, and assess their probabilities relative to market expectations.",
         keywords: ["Demergers", "Promoter Changes", "Key Levers", "Value Unlocking"]
     }
 ]
@@ -134,7 +134,7 @@ function StepItem({ step, index }: { step: any, index: number }) {
                     
                     <div className="relative z-10">
                         <div className="text-gold font-mono text-sm md:text-base mb-4 tracking-widest flex items-center justify-between">
-                            <span>Step {step.id}</span>
+                            <span>{step.id}</span>
                             <span className="w-1.5 h-1.5 rounded-full bg-gold/40 group-hover:bg-gold transition-colors duration-300" />
                         </div>
                         
