@@ -35,7 +35,7 @@ export function PhilosophySection() {
                 {/* Headline Section */}
                 <div className="text-center mb-32 max-w-5xl">
                     <h2 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight leading-[1.1] text-white">
-                        Most investing content optimizes for engagement.
+                        Most investing research optimizes for engagement.
                     </h2>
                     <h3 className="text-3xl md:text-5xl lg:text-6xl font-heading italic tracking-tight leading-[1.2] mt-6" style={{ color: "var(--insights-accent)" }}>
                         We optimize for understanding.
