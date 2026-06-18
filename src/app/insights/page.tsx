@@ -67,7 +67,7 @@ export default async function InsightsPage({
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     <Link href="#membership" className="inline-flex items-center justify-center rounded-sm px-8 py-4 font-bold tracking-wide transition-colors duration-300" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
-                                        Become a Member
+                                        Subscribe Now
                                     </Link>
                                     <Link href="#free-research" className="inline-flex items-center justify-center rounded-sm border border-white/20 bg-transparent px-8 py-4 font-medium transition-colors duration-300 hover:bg-white/5" style={{ color: "var(--insights-text)" }}>
                                         Read Free Research
@@ -267,7 +267,7 @@ export default async function InsightsPage({
                             The best investment ideas begin with <span className="italic" style={{ color: "var(--insights-accent)" }}>understanding.</span>
                         </h2>
                         <Link href="#membership" className="inline-flex items-center justify-center rounded-sm bg-white px-10 py-5 font-bold tracking-wide transition-colors duration-300" style={{ color: "#080810" }}>
-                            Become a Member
+                            Subscribe Now
                         </Link>
                     </section>
 
