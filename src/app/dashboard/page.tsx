@@ -180,11 +180,19 @@ export default async function DashboardPage() {
                                                 </span>
                                             </p>
                                         ) : null}
-                                        {insightsMembership.hasAccess ? (
-                                            <p className="text-sm text-emerald-300">
-                                                Your account can read subscriber-only Insights.
-                                            </p>
-                                        ) : (
+                                         {insightsMembership.hasAccess ? (
+                                             <div className="space-y-3">
+                                                 <p className="text-sm text-emerald-300">
+                                                     Your account can read subscriber-only Insights.
+                                                 </p>
+                                                 <Link
+                                                     href="/insights"
+                                                     className="inline-flex items-center text-gold font-medium hover:gap-2 transition-all gap-1 text-sm"
+                                                 >
+                                                     Read Premium Insights <span className="text-base">-&gt;</span>
+                                                 </Link>
+                                             </div>
+                                         ) : (
                                             <p className="text-sm text-amber-300">
                                                 Your membership is recorded, but access is not active yet.
                                             </p>
