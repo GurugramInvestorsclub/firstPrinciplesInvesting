@@ -44,6 +44,7 @@ export default async function DashboardPage() {
         insightsMembership.status === InsightsSubscriptionStatus.EXPIRED
     const canCancelMembership =
         Boolean(insightsMembership?.razorpaySubscriptionId) &&
+        insightsMembership?.status !== InsightsSubscriptionStatus.CREATED &&
         !insightsMembership?.cancelAtCycleEnd &&
         !canStartNewMembership
 

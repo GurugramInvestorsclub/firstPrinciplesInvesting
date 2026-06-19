@@ -623,6 +623,7 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
         razorpaySubscriptionId: true,
         status: true,
         cancelAtCycleEnd: true,
+        createdAt: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -630,6 +631,32 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
     })
 
     if (!subscription || !subscription.razorpaySubscriptionId) {
+      return
+    }
+
+    // If the local subscription is older than the stale threshold, expire it locally
+    const ageMs = Date.now() - subscription.createdAt.getTime()
+    if (ageMs > PROVIDER_SUBSCRIPTION_RETRY_STALE_MS) {
+      await prisma.$transaction(async (tx) => {
+        await acquireLock(tx, `insights-subscription:auto-sync:${subscription.id}`)
+        const current = await tx.insightsSubscription.findUnique({
+          where: { id: subscription.id },
+          select: { status: true },
+        })
+        if (current && current.status === InsightsSubscriptionStatus.CREATED) {
+          await tx.insightsSubscription.update({
+            where: { id: subscription.id },
+            data: {
+              status: InsightsSubscriptionStatus.EXPIRED,
+              endedAt: new Date(),
+              lastWebhookAt: new Date(),
+            },
+          })
+          await logSubscriptionAudit(tx, subscription.id, "SUBSCRIPTION_AUTO_SYNC_STALE_EXPIRED", {
+            ageMs,
+          })
+        }
+      })
       return
     }
 
@@ -641,19 +668,21 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
 
     const providerEntity = normalizeProviderSubscriptionEntity(providerSubscription)
 
-    if (providerEntity.status === "active") {
-      const invoicesResult = await client.invoices.all({
-        subscription_id: subscription.razorpaySubscriptionId,
-      })
-
-      const invoices = (invoicesResult?.items || invoicesResult || []) as unknown as Array<any>
-      const paidInvoice = invoices.find(
-        (inv) => (inv.status === "paid" || inv.status === "issued") && inv.payment_id
-      )
-
+    if (providerEntity.status !== "created") {
       let providerPayment: ProviderPaymentEntity | null = null
-      if (paidInvoice?.payment_id) {
-        providerPayment = await fetchProviderPayment(client, paidInvoice.payment_id as string)
+      if (providerEntity.status === "active") {
+        const invoicesResult = await client.invoices.all({
+          subscription_id: subscription.razorpaySubscriptionId,
+        })
+
+        const invoices = (invoicesResult?.items || invoicesResult || []) as unknown as Array<any>
+        const paidInvoice = invoices.find(
+          (inv) => (inv.status === "paid" || inv.status === "issued") && inv.payment_id
+        )
+
+        if (paidInvoice?.payment_id) {
+          providerPayment = await fetchProviderPayment(client, paidInvoice.payment_id as string)
+        }
       }
 
       await prisma.$transaction(
