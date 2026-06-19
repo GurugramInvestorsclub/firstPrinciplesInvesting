@@ -608,14 +608,99 @@ async function findCurrentMembershipRecord(userId: string): Promise<Subscription
   })
 }
 
+export async function autoSyncCreatedSubscriptionForUser(userId: string): Promise<void> {
+  try {
+    const subscription = await prisma.insightsSubscription.findFirst({
+      where: {
+        userId,
+        status: InsightsSubscriptionStatus.CREATED,
+        razorpaySubscriptionId: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        razorpaySubscriptionId: true,
+        status: true,
+        cancelAtCycleEnd: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    if (!subscription || !subscription.razorpaySubscriptionId) {
+      return
+    }
+
+    const client = getRazorpayClientOrThrow()
+    const providerSubscription = await client.subscriptions.fetch(subscription.razorpaySubscriptionId)
+    if (!providerSubscription) {
+      return
+    }
+
+    const providerEntity = normalizeProviderSubscriptionEntity(providerSubscription)
+
+    if (providerEntity.status === "active") {
+      const invoicesResult = await client.invoices.all({
+        subscription_id: subscription.razorpaySubscriptionId,
+      })
+
+      const invoices = (invoicesResult?.items || invoicesResult || []) as unknown as Array<any>
+      const paidInvoice = invoices.find(
+        (inv) => (inv.status === "paid" || inv.status === "issued") && inv.payment_id
+      )
+
+      let providerPayment: ProviderPaymentEntity | null = null
+      if (paidInvoice?.payment_id) {
+        providerPayment = await fetchProviderPayment(client, paidInvoice.payment_id as string)
+      }
+
+      await prisma.$transaction(
+        async (tx) => {
+          await acquireLock(tx, `insights-subscription:auto-sync:${subscription.id}`)
+
+          const current = await tx.insightsSubscription.findUnique({
+            where: { id: subscription.id },
+            select: { status: true, cancelAtCycleEnd: true },
+          })
+
+          if (!current || current.status !== InsightsSubscriptionStatus.CREATED) {
+            return
+          }
+
+          await applyProviderSubscriptionSnapshot(
+            tx,
+            {
+              id: subscription.id,
+              status: current.status,
+              cancelAtCycleEnd: current.cancelAtCycleEnd,
+            },
+            providerEntity,
+            "SUBSCRIPTION_AUTO_SYNC_HEALED",
+            providerPayment
+          )
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        }
+      )
+    }
+  } catch (error) {
+    console.error("Error during autoSyncCreatedSubscriptionForUser:", error)
+  }
+}
+
 export async function getCurrentInsightsMembershipForUser(
   userId: string
 ): Promise<InsightsMembershipSummary | null> {
+  await autoSyncCreatedSubscriptionForUser(userId)
   const subscription = await findCurrentMembershipRecord(userId)
   return subscription ? serializeMembership(subscription) : null
 }
 
 export async function userHasInsightsAccess(userId: string): Promise<boolean> {
+  await autoSyncCreatedSubscriptionForUser(userId)
   const subscription = await prisma.insightsSubscription.findFirst({
     where: {
       userId,

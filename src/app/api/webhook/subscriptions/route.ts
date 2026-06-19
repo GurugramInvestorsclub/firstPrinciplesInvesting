@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-razorpay-signature")
 
     if (!signature) {
+      console.warn("[Webhook Warning] Missing x-razorpay-signature header on incoming subscription webhook request.")
       return NextResponse.json(
         { success: false, code: "MISSING_SIGNATURE", message: "Missing webhook signature" },
         { status: 400 }
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!verifyInsightsSubscriptionWebhookSignature(rawBody, signature)) {
+      console.warn("[Webhook Warning] Signature verification failed for incoming subscription webhook request. Check if RAZORPAY_SUBSCRIPTIONS_WEBHOOK_SECRET is correct.")
       return NextResponse.json(
         {
           success: false,
