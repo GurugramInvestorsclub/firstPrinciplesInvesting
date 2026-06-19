@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       userId,
       eventId,
       couponCode,
+      isGuest: true,
     })
 
     await prisma.registration.upsert({

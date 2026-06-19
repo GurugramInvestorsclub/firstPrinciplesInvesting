@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Event } from "@/lib/types"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 declare global {
   interface Window {
@@ -113,8 +113,61 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [isSubscriber, setIsSubscriber] = useState(false)
+  const [isPricingLoading, setIsPricingLoading] = useState(false)
 
   const isRegistrationOpen = eventIsOpen(event.date)
+
+  useEffect(() => {
+    if (status === "loading") {
+      setIsPricingLoading(true)
+      return
+    }
+
+    if (status === "authenticated" && event.eventId) {
+      setIsPricingLoading(true)
+      const fetchInitialPricing = async () => {
+        try {
+          const response = await fetch("/api/validate-coupon", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              eventId: event.eventId,
+              couponCode: null,
+            }),
+          })
+          const payload = await response.json()
+          if (response.ok && payload.success) {
+            setPricing({
+              baseAmount: payload.data.baseAmount,
+              discountAmount: payload.data.discountAmount,
+              finalAmount: payload.data.finalAmount,
+              couponCode: payload.data.coupon?.code ?? null,
+            })
+            setIsSubscriber(!!payload.data.isSubscriber)
+          }
+        } catch (e) {
+          console.error("Failed to fetch initial pricing preview", e)
+        } finally {
+          setIsPricingLoading(false)
+        }
+      }
+      fetchInitialPricing()
+    } else {
+      setIsSubscriber(false)
+      setIsPricingLoading(false)
+      if (cmsDisplayPricePaise) {
+        setPricing({
+          baseAmount: cmsDisplayPricePaise,
+          discountAmount: 0,
+          finalAmount: cmsDisplayPricePaise,
+          couponCode: null,
+        })
+      }
+    }
+  }, [status, event.eventId, cmsDisplayPricePaise])
 
   const navigateToLogin = () => {
     const callbackUrl = `/events/${event.slug.current}`
@@ -463,9 +516,29 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
         <p className="text-xs uppercase tracking-[0.18em] text-gray-400">Secure Checkout</p>
         <div className="flex items-center justify-between gap-4">
           <span className="text-sm text-gray-400">Secure Your Spot</span>
-          <span className="text-lg font-semibold text-white">
-            {pricing ? formatInrFromPaise(pricing.baseAmount) : (cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "Not configured")}
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            {isPricingLoading ? (
+              <span className="text-sm text-gray-500 animate-pulse">Calculating price...</span>
+            ) : isSubscriber ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500 line-through">
+                  {cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : ""}
+                </span>
+                <span className="text-lg font-semibold text-gold">
+                  {pricing ? formatInrFromPaise(pricing.finalAmount) : ""}
+                </span>
+              </div>
+            ) : (
+              <span className="text-lg font-semibold text-white">
+                {pricing ? formatInrFromPaise(pricing.baseAmount) : (cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "Not configured")}
+              </span>
+            )}
+            {isSubscriber && !isPricingLoading && (
+              <span className="text-[10px] uppercase tracking-wider text-gold font-semibold bg-gold/10 px-2.5 py-0.5 rounded-full border border-gold/20">
+                Subscriber Discount
+              </span>
+            )}
+          </div>
         </div>
 
         {pricing && (
@@ -478,7 +551,7 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
             )}
             <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-3 text-base font-semibold text-white">
               <span>Payable now</span>
-              <span>{formatInrFromPaise(pricing.finalAmount)}</span>
+              <span className={isSubscriber ? "text-gold" : ""}>{formatInrFromPaise(pricing.finalAmount)}</span>
             </div>
           </>
         )}
@@ -487,23 +560,29 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
       <div className="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
         <input
           type="text"
-          placeholder="Coupon code"
+          placeholder={isSubscriber ? "Coupons disabled for subscribers" : "Coupon code"}
           value={couponInput}
           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-          className="h-12 rounded-xl border border-white/15 bg-black/20 px-4 text-sm text-white outline-none transition focus:border-gold"
+          className="h-12 rounded-xl border border-white/15 bg-black/20 px-4 text-sm text-white outline-none transition focus:border-gold disabled:opacity-40 disabled:cursor-not-allowed"
           autoComplete="off"
           maxLength={32}
-          disabled={isApplyingCoupon || isCreatingOrder}
+          disabled={isApplyingCoupon || isCreatingOrder || isSubscriber || isPricingLoading}
         />
         <Button
           type="button"
           onClick={applyCoupon}
-          disabled={isApplyingCoupon || isCreatingOrder || couponInput.trim().length === 0 || !isRegistrationOpen}
-          className="h-12 rounded-xl bg-white/10 text-white hover:bg-white/20"
+          disabled={isApplyingCoupon || isCreatingOrder || couponInput.trim().length === 0 || !isRegistrationOpen || isSubscriber || isPricingLoading}
+          className="h-12 rounded-xl bg-white/10 text-white hover:bg-white/20 disabled:cursor-not-allowed"
         >
           {isApplyingCoupon ? "Validating..." : "Apply"}
         </Button>
       </div>
+
+      {isSubscriber && !isPricingLoading && (
+        <p className="mt-2 text-xs text-gold/80 italic font-medium">
+          ★ Subscriber discount applied automatically. Coupon codes cannot be combined with subscriber pricing.
+        </p>
+      )}
 
       {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
       {success && <p className="mt-3 text-sm text-emerald-300">{success}</p>}

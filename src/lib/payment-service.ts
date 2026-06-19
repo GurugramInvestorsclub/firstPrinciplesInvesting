@@ -2,6 +2,7 @@ import { CouponType, PaymentStatus, Prisma, PrismaClient } from "@prisma/client"
 import crypto from "crypto"
 import { prisma } from "@/lib/prisma"
 import { razorpay } from "@/lib/razorpay"
+import { userHasInsightsAccess } from "@/lib/insights-subscription-service"
 
 const MIN_PAYABLE_PAISE = 100
 const CURRENCY = "INR"
@@ -20,6 +21,7 @@ interface BasePricing {
 }
 
 export interface PricingPreview extends BasePricing {
+  isSubscriber: boolean
   coupon: {
     id: string
     code: string
@@ -464,18 +466,21 @@ export async function computePricingPreview(params: {
   userId: string
   couponCode?: string | null
   now?: Date
+  isGuest?: boolean
 }): Promise<PricingPreview> {
   const now = params.now ?? new Date()
   const event = await ensureEventPricing(params.db, params.eventId)
-  const baseAmount = ensureAmount(event.price, "Event price")
+  const isSubscriber = params.isGuest ? false : await userHasInsightsAccess(params.userId)
+  const baseAmount = isSubscriber ? 74900 : ensureAmount(event.price, "Event price")
 
-  if (!params.couponCode) {
+  if (isSubscriber || !params.couponCode) {
     return {
       eventId: params.eventId,
       baseAmount,
       discountAmount: 0,
       finalAmount: baseAmount,
       coupon: null,
+      isSubscriber,
     }
   }
 
@@ -493,6 +498,7 @@ export async function computePricingPreview(params: {
     baseAmount,
     discountAmount: couponPreview.discountAmount,
     finalAmount: couponPreview.finalAmount,
+    isSubscriber,
     coupon: {
       id: couponPreview.id,
       code: couponPreview.code,
@@ -565,12 +571,14 @@ export async function createOrReuseOrder(params: {
   userId: string
   eventId: string
   couponCode: string | null
+  isGuest?: boolean
 }): Promise<CreateOrderResult> {
   const pricing = await computePricingPreview({
     db: prisma,
     eventId: params.eventId,
     userId: params.userId,
     couponCode: params.couponCode,
+    isGuest: params.isGuest,
   })
 
   const prepared = await prisma.$transaction(

@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
         baseAmountRupees: paiseToRupees(pricing.baseAmount),
         discountAmountRupees: paiseToRupees(pricing.discountAmount),
         finalAmountRupees: paiseToRupees(pricing.finalAmount),
+        isSubscriber: pricing.isSubscriber,
         coupon: pricing.coupon
           ? {
               code: pricing.coupon.code,
