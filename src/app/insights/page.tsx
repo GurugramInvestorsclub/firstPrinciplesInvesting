@@ -66,9 +66,15 @@ export default async function InsightsPage({
                                     Deep investment memos, industry research, capital allocation analysis, and first-principles thinking.
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <Link href="#membership" className="inline-flex items-center justify-center rounded-sm px-8 py-4 font-bold tracking-wide transition-colors duration-300" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
-                                        Subscribe Now
-                                    </Link>
+                                    {hasSubscriptionAccess ? (
+                                        <Link href="#premium-research" className="inline-flex items-center justify-center rounded-sm px-8 py-4 font-bold tracking-wide transition-colors duration-300" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
+                                            Read Premium Research
+                                        </Link>
+                                    ) : (
+                                        <Link href="#membership" className="inline-flex items-center justify-center rounded-sm px-8 py-4 font-bold tracking-wide transition-colors duration-300" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
+                                            Subscribe Now
+                                        </Link>
+                                    )}
                                     <Link href="#free-research" className="inline-flex items-center justify-center rounded-sm border border-white/20 bg-transparent px-8 py-4 font-medium transition-colors duration-300 hover:bg-white/5" style={{ color: "var(--insights-text)" }}>
                                         Read Free Research
                                     </Link>
@@ -183,15 +189,21 @@ export default async function InsightsPage({
                     </section>
 
                     {/* SECTION 5 — SAMPLE RESEARCH (Premium Preview) */}
-                    <section className="container max-w-7xl mx-auto px-6 py-32">
+                    <section id="premium-research" className="container max-w-7xl mx-auto px-6 py-32">
                         <div className="mb-16 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/10 pb-8">
                             <div>
                                 <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-4" style={{ color: "var(--insights-text)" }}>Premium Research Preview</h2>
                                 <p className="text-lg max-w-2xl" style={{ color: "var(--insights-text-muted)" }}>Member-only memos covering specialized situations and fundamental deep-dives.</p>
                             </div>
-                            <Link href="#membership" className="font-mono text-sm tracking-widest uppercase hover:text-white transition-colors" style={{ color: "var(--insights-accent)" }}>
-                                Unlock All →
-                            </Link>
+                            {hasSubscriptionAccess ? (
+                                <Link href="#premium-research" className="font-mono text-sm tracking-widest uppercase hover:text-white transition-colors" style={{ color: "var(--insights-accent)" }}>
+                                    View All →
+                                </Link>
+                            ) : (
+                                <Link href="#membership" className="font-mono text-sm tracking-widest uppercase hover:text-white transition-colors" style={{ color: "var(--insights-accent)" }}>
+                                    Unlock All →
+                                </Link>
+                            )}
                         </div>
 
                         {premiumPosts.length > 0 ? (
@@ -229,7 +241,20 @@ export default async function InsightsPage({
                             <div className="max-w-2xl mx-auto p-1 bg-gradient-to-br from-white/10 to-white/0 rounded-xl">
                                 <div className="p-8 md:p-12 rounded-lg" style={{ backgroundColor: "var(--insights-bg)" }}>
                                     {paywallReady ? (
-                                        session?.user?.id ? (
+                                        hasSubscriptionAccess ? (
+                                            <div className="text-center space-y-6 py-4">
+                                                <div className="inline-flex items-center justify-center p-4 rounded-full" style={{ backgroundColor: "rgba(201, 168, 76, 0.08)", border: "1px solid var(--insights-accent)", color: "var(--insights-accent)" }}>
+                                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                                </div>
+                                                <h3 className="text-2xl font-bold text-white font-heading">Active Insights Membership</h3>
+                                                <p className="text-white/70 max-w-md mx-auto leading-relaxed text-sm">
+                                                    Thank you for supporting First Principles Investing. You have full access to all subscriber-only memos and the complete research archive.
+                                                </p>
+                                                <Link href="#premium-research" className="inline-flex items-center justify-center rounded-sm px-8 py-3.5 font-bold tracking-wide transition-all" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
+                                                    Access Premium Research
+                                                </Link>
+                                            </div>
+                                        ) : session?.user?.id ? (
                                             <InsightsSubscriptionCheckout
                                                 callbackUrl="/insights"
                                                 userName={session.user.name}
@@ -266,9 +291,15 @@ export default async function InsightsPage({
                         <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tighter leading-tight mb-12" style={{ color: "var(--insights-text)" }}>
                             The best investment ideas begin with <span className="italic" style={{ color: "var(--insights-accent)" }}>understanding.</span>
                         </h2>
-                        <Link href="#membership" className="inline-flex items-center justify-center rounded-sm bg-white px-10 py-5 font-bold tracking-wide transition-colors duration-300" style={{ color: "#080810" }}>
-                            Subscribe Now
-                        </Link>
+                        {hasSubscriptionAccess ? (
+                            <Link href="#premium-research" className="inline-flex items-center justify-center rounded-sm bg-white px-10 py-5 font-bold tracking-wide transition-colors duration-300" style={{ color: "#080810" }}>
+                                Read Premium Research
+                            </Link>
+                        ) : (
+                            <Link href="#membership" className="inline-flex items-center justify-center rounded-sm bg-white px-10 py-5 font-bold tracking-wide transition-colors duration-300" style={{ color: "#080810" }}>
+                                Subscribe Now
+                            </Link>
+                        )}
                     </section>
 
                 </InsightsAnimations>
