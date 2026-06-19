@@ -39,6 +39,7 @@ const tableCellStyle: CSSProperties = {
 
 export default function AdminSubscriptionsPage() {
   const [rows, setRows] = useState<SubscriptionRow[]>([])
+  const [statusFilter, setStatusFilter] = useState<string>("ALL")
   const [enabled, setEnabled] = useState(false)
   const [checkoutReady, setCheckoutReady] = useState(false)
   const [webhookReady, setWebhookReady] = useState(false)
@@ -119,6 +120,13 @@ export default function AdminSubscriptionsPage() {
     },
     [loadData]
   )
+
+  const uniqueStatuses = Array.from(new Set(rows.map((row) => row.status)))
+
+  const filteredRows = rows.filter((row) => {
+    if (statusFilter === "ALL") return true
+    return row.status.toUpperCase() === statusFilter.toUpperCase()
+  })
 
   return (
     <div style={{ display: "grid", gap: "24px" }}>
@@ -208,21 +216,70 @@ export default function AdminSubscriptionsPage() {
             No Insights subscriptions recorded yet.
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "1220px" }}>
-              <thead>
-                <tr style={{ background: "rgba(255,255,255,0.03)", textAlign: "left" }}>
-                  <th style={tableCellStyle}>User</th>
-                  <th style={tableCellStyle}>Plan</th>
-                  <th style={tableCellStyle}>Status</th>
-                  <th style={tableCellStyle}>Billing Window</th>
-                  <th style={tableCellStyle}>Last Charge</th>
-                  <th style={tableCellStyle}>Provider IDs</th>
-                  <th style={tableCellStyle}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => {
+          <>
+            <div
+              style={{
+                padding: "16px 24px",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "12px",
+              }}
+            >
+              <h2 style={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>
+                Records ({filteredRows.length} shown of {rows.length})
+              </h2>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label htmlFor="status-filter" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                  Filter Status:
+                </label>
+                <select
+                  id="status-filter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: "8px",
+                    color: "#fff",
+                    padding: "6px 12px",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    outline: "none",
+                  }}
+                >
+                  <option value="ALL">All Statuses</option>
+                  {uniqueStatuses.sort().map((status) => (
+                    <option key={status} value={status}>
+                      {status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {filteredRows.length === 0 ? (
+              <div style={{ padding: "48px 32px", color: "var(--text-secondary)", textAlign: "center" }}>
+                No subscriptions match the status filter &ldquo;{statusFilter.toLowerCase().replace(/_/g, " ")}&rdquo;.
+              </div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "1220px" }}>
+                  <thead>
+                    <tr style={{ background: "rgba(255,255,255,0.03)", textAlign: "left" }}>
+                      <th style={tableCellStyle}>User</th>
+                      <th style={tableCellStyle}>Plan</th>
+                      <th style={tableCellStyle}>Status</th>
+                      <th style={tableCellStyle}>Billing Window</th>
+                      <th style={tableCellStyle}>Last Charge</th>
+                      <th style={tableCellStyle}>Provider IDs</th>
+                      <th style={tableCellStyle}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRows.map((row) => {
                   const canReconcile = canReconcileSubscription(row)
                   const isReconciling = reconcilingId === row.id
 
@@ -325,7 +382,9 @@ export default function AdminSubscriptionsPage() {
             </table>
           </div>
         )}
-      </section>
+      </>
+    )}
+  </section>
     </div>
   )
 }
