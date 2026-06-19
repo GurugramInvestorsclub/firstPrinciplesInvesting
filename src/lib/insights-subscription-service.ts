@@ -502,7 +502,8 @@ function membershipHasAccess(
   const entitled =
     subscription.status === InsightsSubscriptionStatus.ACTIVE ||
     subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
-    subscription.status === InsightsSubscriptionStatus.AUTHENTICATED
+    subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+    subscription.status === InsightsSubscriptionStatus.CANCELLED
 
   if (!entitled) {
     return false
@@ -730,7 +731,7 @@ export async function getCurrentInsightsMembershipForUser(
 
 export async function userHasInsightsAccess(userId: string): Promise<boolean> {
   await autoSyncCreatedSubscriptionForUser(userId)
-  const subscription = await prisma.insightsSubscription.findFirst({
+  const subscriptions = await prisma.insightsSubscription.findMany({
     where: {
       userId,
       status: {
@@ -739,6 +740,7 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
           InsightsSubscriptionStatus.CANCEL_REQUESTED,
           InsightsSubscriptionStatus.AUTHENTICATED,
           InsightsSubscriptionStatus.CREATED,
+          InsightsSubscriptionStatus.CANCELLED,
         ],
       },
     },
@@ -749,7 +751,9 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
         where: {
           status: InsightsSubscriptionChargeStatus.CAPTURED
         },
-        take: 1
+        select: {
+          id: true
+        }
       }
     },
     orderBy: {
@@ -757,32 +761,42 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
     },
   })
 
-  if (!subscription) {
+  if (subscriptions.length === 0) {
     return false
   }
 
-  // Fallback for new subscribers: if status is still CREATED but we have a CAPTURED charge, grant access.
-  if (subscription.status === InsightsSubscriptionStatus.CREATED) {
-    return subscription.charges.length > 0
+  const now = Date.now()
+
+  for (const subscription of subscriptions) {
+    // If it's a CREATED subscription, they have access if there's a captured charge
+    if (subscription.status === InsightsSubscriptionStatus.CREATED) {
+      if (subscription.charges.length > 0) {
+        return true
+      }
+      continue
+    }
+
+    if (
+      subscription.status === InsightsSubscriptionStatus.ACTIVE ||
+      subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
+      subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+      subscription.status === InsightsSubscriptionStatus.CANCELLED
+    ) {
+      if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
+        return true
+      }
+
+      if (!subscription.currentEndAt) {
+        return true
+      }
+
+      if (subscription.currentEndAt.getTime() > now) {
+        return true
+      }
+    }
   }
 
-  if (
-    subscription.status !== InsightsSubscriptionStatus.ACTIVE &&
-    subscription.status !== InsightsSubscriptionStatus.CANCEL_REQUESTED &&
-    subscription.status !== InsightsSubscriptionStatus.AUTHENTICATED
-  ) {
-    return false
-  }
-
-  if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
-    return true
-  }
-
-  if (!subscription.currentEndAt) {
-    return true
-  }
-
-  return subscription.currentEndAt.getTime() > Date.now()
+  return false
 }
 
 async function fetchProviderPayment(
