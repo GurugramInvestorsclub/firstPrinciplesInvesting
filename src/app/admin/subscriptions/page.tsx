@@ -390,10 +390,6 @@ export default function AdminSubscriptionsPage() {
 }
 
 function canReconcileSubscription(row: SubscriptionRow) {
-  if (["active", "authenticated", "cancel_requested"].includes(row.status)) {
-    return false
-  }
-
   if (!row.razorpaySubscriptionId) {
     return false
   }
@@ -403,7 +399,7 @@ function canReconcileSubscription(row: SubscriptionRow) {
   }
 
   return (
-    row.latestCharge.status === "failed" ||
+    row.latestCharge.status !== "captured" ||
     row.latestCharge.failureReason === "PAYMENT_NOT_CAPTURED"
   )
 }

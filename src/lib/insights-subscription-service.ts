@@ -858,10 +858,14 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
     )
   }
 
+  const latestCharge = localSubscription.charges[0]
+  const isLatestChargeCaptured = latestCharge?.status === InsightsSubscriptionChargeStatus.CAPTURED
+
   if (
-    localSubscription.status === InsightsSubscriptionStatus.ACTIVE ||
-    localSubscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
-    localSubscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
+    (localSubscription.status === InsightsSubscriptionStatus.ACTIVE ||
+      localSubscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+      localSubscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED) &&
+    isLatestChargeCaptured
   ) {
     return serializeMembership(localSubscription)
   }
@@ -885,7 +889,6 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
     )
   }
 
-  const latestCharge = localSubscription.charges[0]
   if (latestCharge && latestCharge.amount !== providerPayment.amount) {
     throw new InsightsSubscriptionApiError(
       409,
@@ -938,6 +941,14 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
         where: {
           id: localSubscription.id,
         },
+        include: {
+          charges: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
       })
 
       if (!subscription) {
@@ -948,10 +959,14 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
         )
       }
 
+      const txLatestCharge = subscription.charges[0]
+      const isTxLatestChargeCaptured = txLatestCharge?.status === InsightsSubscriptionChargeStatus.CAPTURED
+
       if (
-        subscription.status === InsightsSubscriptionStatus.ACTIVE ||
-        subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
-        subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
+        (subscription.status === InsightsSubscriptionStatus.ACTIVE ||
+          subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+          subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED) &&
+        isTxLatestChargeCaptured
       ) {
         return tx.insightsSubscription.findUniqueOrThrow({
           where: { id: subscription.id },
