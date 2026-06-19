@@ -23,7 +23,7 @@ const structuredConcepts = [
 
 export function PhilosophySection() {
     return (
-        <section className="relative py-32 md:py-48 border-y border-white/5 overflow-hidden bg-[#080810]">
+        <section id="philosophy" className="relative py-32 md:py-48 border-y border-white/5 overflow-hidden bg-[#080810]">
             {/* Background images for subtle research visuals */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-luminosity">
                 <img src="/images/annual_report.png" alt="" className="absolute top-[-10%] left-[-10%] w-[60%] h-[120%] object-cover transform -rotate-6" />

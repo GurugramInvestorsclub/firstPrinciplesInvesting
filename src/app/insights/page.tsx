@@ -94,6 +94,53 @@ export default async function InsightsPage({
                         </div>
                     </section>
 
+                    {/* TWO CLICKABLE WINDOWS SECTION */}
+                    <section className="container max-w-7xl mx-auto px-6 pb-24" aria-label="Navigation Shortcuts">
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <Link href="#premium-research" className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.01] hover:bg-white/[0.03] p-10 flex flex-col justify-between min-h-[240px] transition-all duration-500 hover:border-[var(--insights-accent)]/40 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--insights-accent)]">
+                                {/* Decorative subtle glow in the background */}
+                                <div className="absolute -right-20 -bottom-20 w-48 h-48 bg-[var(--insights-accent)]/5 rounded-full blur-3xl group-hover:bg-[var(--insights-accent)]/10 transition-all duration-500" />
+                                
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "var(--insights-accent)" }} />
+                                        <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/50">Exclusive Content</span>
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-heading font-bold text-white tracking-tight leading-tight">
+                                        Access the subscriber-only articles
+                                    </h3>
+                                    <p className="text-sm leading-relaxed text-white/60 max-w-md">
+                                        Unlock deep-dive investment memos, fundamental valuations, and exclusive structural industry research.
+                                    </p>
+                                </div>
+                                <div className="mt-8 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--insights-accent)] group-hover:translate-x-2 transition-transform duration-300">
+                                    Explore Memos <span className="text-sm">→</span>
+                                </div>
+                            </Link>
+
+                            <Link href="#philosophy" className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.01] hover:bg-white/[0.03] p-10 flex flex-col justify-between min-h-[240px] transition-all duration-500 hover:border-[var(--insights-accent)]/40 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--insights-accent)]">
+                                {/* Decorative subtle glow in the background */}
+                                <div className="absolute -right-20 -bottom-20 w-48 h-48 bg-[var(--insights-accent)]/5 rounded-full blur-3xl group-hover:bg-[var(--insights-accent)]/10 transition-all duration-500" />
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--insights-accent)" }} />
+                                        <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/50">Our Approach</span>
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-heading font-bold text-white tracking-tight leading-tight">
+                                        Know more on our investment process
+                                    </h3>
+                                    <p className="text-sm leading-relaxed text-white/60 max-w-md">
+                                        Learn how we filter market noise and focus entirely on business fundamentals, management incentives, and long-term structures.
+                                    </p>
+                                </div>
+                                <div className="mt-8 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--insights-accent)] group-hover:translate-x-2 transition-transform duration-300">
+                                    Our Philosophy <span className="text-sm">→</span>
+                                </div>
+                            </Link>
+                        </div>
+                    </section>
+
                     {/* SEARCH BLOCK */}
                     <div className="container max-w-7xl mx-auto px-6 mb-12">
                         <div className="flex justify-end border-b border-white/10 pb-6">

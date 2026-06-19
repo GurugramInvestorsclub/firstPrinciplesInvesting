@@ -23,6 +23,7 @@
     "@sanity/vision": "^5.9.0",
     "@studio-freight/lenis": "^1.0.42",
     "@types/three": "^0.183.1",
+    "@vercel/analytics": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

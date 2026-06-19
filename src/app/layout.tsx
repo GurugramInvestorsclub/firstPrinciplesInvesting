@@ -7,6 +7,7 @@ import "./globals.css";
 import { ThemeProvider } from "./providers";
 import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,6 +80,7 @@ export default function RootLayout({
           {children}
           <NoiseOverlay />
           <SmoothScroll />
+          <Analytics />
         </ThemeProvider>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ""} />
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
