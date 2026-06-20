@@ -35,12 +35,12 @@ export default async function InsightsPage({
             : false
 
     if (search) {
-        searchResults = await client.fetch<Post[]>(postQuery, { search })
+        searchResults = await client.fetch<Post[]>(postQuery, { search }, { next: { revalidate: 60 } })
         gridPosts = searchResults
     } else {
         const [explicitFeatured, allPosts] = await Promise.all([
-            client.fetch<Post | null>(featuredPostQuery),
-            client.fetch<Post[]>(allPostsQuery)
+            client.fetch<Post | null>(featuredPostQuery, {}, { next: { revalidate: 60 } }),
+            client.fetch<Post[]>(allPostsQuery, {}, { next: { revalidate: 60 } })
         ])
         gridPosts = allPosts
     }

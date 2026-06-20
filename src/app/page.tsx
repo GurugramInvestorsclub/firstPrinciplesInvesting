@@ -15,9 +15,9 @@ import { Testimonial } from "@/lib/types"
 export const revalidate = 60 // revalidate every minute
 
 export default async function Home() {
-  const posts = await client.fetch(recentPostsQuery)
-  const events = await client.fetch(upcomingEventsHomeQuery)
-  const testimonials = await client.fetch<Testimonial[]>(testimonialsQuery)
+  const posts = await client.fetch(recentPostsQuery, {}, { next: { revalidate: 60 } })
+  const events = await client.fetch(upcomingEventsHomeQuery, {}, { next: { revalidate: 60 } })
+  const testimonials = await client.fetch<Testimonial[]>(testimonialsQuery, {}, { next: { revalidate: 60 } })
 
   return (
     <div className="flex flex-col min-h-screen">

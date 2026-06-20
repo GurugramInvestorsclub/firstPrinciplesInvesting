@@ -10,7 +10,7 @@ import { urlForImage } from "@/lib/sanity.image"
 export const revalidate = 60
 
 export default async function Super30IndexPage() {
-    const programs = await client.fetch<Super30Program[]>(allSuper30ProgramsQuery)
+    const programs = await client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } })
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0E0E11] text-text-primary selection:bg-gold/20 selection:text-gold super30-page">

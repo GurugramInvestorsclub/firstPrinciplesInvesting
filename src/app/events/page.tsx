@@ -8,8 +8,8 @@ import { EventCarousel } from "@/components/events/EventCarousel"
 export const revalidate = 60
 
 export default async function EventsPage() {
-    const upcomingEvents = await client.fetch<Event[]>(eventsQuery)
-    const pastEvents = await client.fetch<Event[]>(pastEventsQuery)
+    const upcomingEvents = await client.fetch<Event[]>(eventsQuery, {}, { next: { revalidate: 60 } })
+    const pastEvents = await client.fetch<Event[]>(pastEventsQuery, {}, { next: { revalidate: 60 } })
 
     return (
         <div className="flex flex-col min-h-screen bg-bg-deep text-text-primary selection:bg-gold/20 selection:text-gold">

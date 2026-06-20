@@ -35,7 +35,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
     const { slug } = await params
-    const program = await client.fetch<Super30Program>(singleSuper30Query, { slug })
+    const program = await client.fetch<Super30Program>(singleSuper30Query, { slug }, { next: { revalidate: 60 } })
 
     if (!program) {
         return {
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function Super30Page({ params }: Props) {
     const { slug } = await params
-    const program = await client.fetch<Super30Program>(singleSuper30Query, { slug })
+    const program = await client.fetch<Super30Program>(singleSuper30Query, { slug }, { next: { revalidate: 60 } })
 
     if (!program || program.isActive === false) {
         notFound()

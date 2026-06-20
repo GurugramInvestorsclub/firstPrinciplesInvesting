@@ -73,7 +73,8 @@ export default async function DashboardPage() {
                 slug,
                 shortDescription
             }`,
-            { eventIds }
+            { eventIds },
+            { next: { revalidate: 300 } }
         )
         : []
 

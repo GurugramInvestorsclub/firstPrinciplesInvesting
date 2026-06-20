@@ -32,7 +32,7 @@ interface Props {
 
 export default async function EventPage({ params }: Props) {
     const { slug } = await params
-    const event = await client.fetch<Event>(singleEventQuery, { slug })
+    const event = await client.fetch<Event>(singleEventQuery, { slug }, { next: { revalidate: 60 } })
 
     if (!event) {
         notFound()

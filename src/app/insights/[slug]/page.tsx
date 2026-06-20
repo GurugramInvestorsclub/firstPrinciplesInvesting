@@ -25,7 +25,7 @@ interface Props {
 
 export default async function InsightPage({ params }: Props) {
     const { slug } = await params
-    const post = await client.fetch<Post | null>(singlePostQuery, { slug })
+    const post = await client.fetch<Post | null>(singlePostQuery, { slug }, { next: { revalidate: 60 } })
     const session = await auth()
     const subscriptionUi = getInsightsSubscriptionUiState()
     const paywallReady =
