@@ -128,6 +128,41 @@ export default function AdminSubscriptionsPage() {
     return row.status.toUpperCase() === statusFilter.toUpperCase()
   })
 
+  const exportToCsv = useCallback(() => {
+    if (filteredRows.length === 0) {
+      window.alert("No records to export.")
+      return
+    }
+
+    const escapeCsv = (val: string) => `"${val.replace(/"/g, '""')}"`
+
+    const csvContent =
+      "\uFEFF" +
+      [
+        ["User Name", "Email", "Billing Window Start", "Billing Window End"].map(escapeCsv).join(","),
+        ...filteredRows.map((row) =>
+          [
+            row.userName || "Unknown",
+            row.userEmail || "No email",
+            formatDate(row.currentStartAt),
+            formatDate(row.currentEndAt),
+          ]
+            .map(escapeCsv)
+            .join(",")
+        ),
+      ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", `subscriptions_${statusFilter.toLowerCase()}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }, [filteredRows, statusFilter])
+
   return (
     <div style={{ display: "grid", gap: "24px" }}>
       <section
@@ -257,6 +292,31 @@ export default function AdminSubscriptionsPage() {
                     </option>
                   ))}
                 </select>
+                <button
+                  type="button"
+                  onClick={exportToCsv}
+                  style={{
+                    marginLeft: "8px",
+                    padding: "6px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(250,204,21,0.35)",
+                    background: "rgba(250,204,21,0.12)",
+                    color: "#fde68a",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    outline: "none",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = "rgba(250,204,21,0.2)"
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = "rgba(250,204,21,0.12)"
+                  }}
+                >
+                  Export to Excel
+                </button>
               </div>
             </div>
 
