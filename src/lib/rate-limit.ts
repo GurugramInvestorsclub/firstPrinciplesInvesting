@@ -209,6 +209,8 @@ export async function consumeRateLimit(params: ConsumeRateLimitParams): Promise<
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 }

@@ -707,6 +707,8 @@ export async function createOrReuseOrder(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -770,6 +772,9 @@ export async function createOrReuseOrder(params: {
         eventId: params.eventId,
         couponCode: pricing.coupon?.code ?? null,
       })
+    }, {
+      maxWait: 15000,
+      timeout: 30000,
     })
 
     throw new PaymentApiError(
@@ -836,6 +841,8 @@ export async function createOrReuseOrder(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 }
@@ -1132,6 +1139,8 @@ export async function finalizeCapturedPayment(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 }
@@ -1213,6 +1222,8 @@ export async function markOrderFailed(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 }
@@ -1274,6 +1285,8 @@ export async function initiateCompensatingRefund(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -1318,6 +1331,9 @@ export async function initiateCompensatingRefund(params: {
         reason: params.reason,
         source: params.source,
       })
+    }, {
+      maxWait: 15000,
+      timeout: 30000,
     })
 
     throw new PaymentApiError(
@@ -1345,6 +1361,9 @@ export async function initiateCompensatingRefund(params: {
         reason: params.reason,
         source: params.source,
       })
+    }, {
+      maxWait: 15000,
+      timeout: 30000,
     })
   } catch (recordingError) {
     console.error(

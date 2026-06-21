@@ -657,6 +657,9 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
             ageMs,
           })
         }
+      }, {
+        maxWait: 15000,
+        timeout: 30000,
       })
       return
     }
@@ -713,6 +716,8 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
         },
         {
           isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+          maxWait: 15000,
+          timeout: 30000,
         }
       )
     }
@@ -1100,6 +1105,8 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -1315,6 +1322,8 @@ export async function createInsightsSubscription(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -1362,6 +1371,9 @@ export async function createInsightsSubscription(params: {
       await logSubscriptionAudit(tx, prepared.subscription.id, "SUBSCRIPTION_PROVIDER_CREATE_FAILED", {
         plan: params.plan,
       })
+    }, {
+      maxWait: 15000,
+      timeout: 30000,
     })
 
     throw new InsightsSubscriptionApiError(
@@ -1409,6 +1421,8 @@ export async function createInsightsSubscription(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -1541,6 +1555,8 @@ export async function verifyInsightsCheckoutAndSync(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -1662,6 +1678,8 @@ export async function cancelInsightsMembership(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
@@ -1846,6 +1864,8 @@ export async function processInsightsSubscriptionWebhook(params: {
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
     }
   )
 
