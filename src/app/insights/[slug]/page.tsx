@@ -10,6 +10,7 @@ import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubs
 import { CommentsSection, CommentType } from "@/components/insights/CommentsSection"
 import { getComments } from "@/app/actions/comments"
 import { ShareButton } from "@/components/insights/ShareButton"
+import { CopyProtection } from "@/components/insights/CopyProtection"
 import Link from "next/link"
 import Image from "next/image"
 import Script from "next/script"
@@ -50,6 +51,7 @@ export default async function InsightPage({ params }: Props) {
 
     return (
         <div className="flex flex-col min-h-screen">
+            {isSubscriberOnly && <CopyProtection />}
             <Script 
                 src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
                 strategy="afterInteractive" 
