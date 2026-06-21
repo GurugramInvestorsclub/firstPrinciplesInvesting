@@ -1,6 +1,7 @@
 import { auth, signOut } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import Script from "next/script"
 import { InsightsSubscriptionStatus } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { client } from "@/lib/sanity.client"
@@ -90,6 +91,10 @@ export default async function DashboardPage() {
 
     return (
         <div className="flex flex-col min-h-screen">
+            <Script 
+                src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
+                strategy="afterInteractive" 
+            />
             <Navbar />
             <main className="flex-1 bg-bg-deep pt-32 pb-20 px-4 md:px-8">
                 <div className="max-w-4xl mx-auto">

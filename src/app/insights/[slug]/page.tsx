@@ -12,6 +12,7 @@ import { getComments } from "@/app/actions/comments"
 import { ShareButton } from "@/components/insights/ShareButton"
 import Link from "next/link"
 import Image from "next/image"
+import Script from "next/script"
 import { urlForImage } from "@/lib/sanity.image"
 import { notFound } from "next/navigation"
 
@@ -49,6 +50,10 @@ export default async function InsightPage({ params }: Props) {
 
     return (
         <div className="flex flex-col min-h-screen">
+            <Script 
+                src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
+                strategy="afterInteractive" 
+            />
             <Navbar />
             <main className="flex-1">
                 <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto">

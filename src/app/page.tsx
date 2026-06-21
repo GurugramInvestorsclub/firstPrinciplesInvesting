@@ -12,6 +12,8 @@ import { client } from "@/lib/sanity.client"
 import { recentPostsQuery, upcomingEventsHomeQuery, testimonialsQuery } from "@/lib/sanity.queries"
 import { Testimonial } from "@/lib/types"
 
+import Script from "next/script"
+
 export const revalidate = 60 // revalidate every minute
 
 export default async function Home() {
@@ -21,6 +23,10 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Script 
+        src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
+        strategy="afterInteractive" 
+      />
       <Navbar />
       <main className="flex-1">
         <CinematicHero />

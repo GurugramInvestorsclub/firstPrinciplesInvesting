@@ -86,10 +86,6 @@ export default function RootLayout({
         </ThemeProvider>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || ""} />
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
-        <Script 
-          src="https://t.contentsquare.net/uxa/20a3622711501.js" 
-          strategy="afterInteractive" 
-        />
       </body>
     </html>
   );

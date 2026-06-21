@@ -12,6 +12,7 @@ import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubs
 import { PhilosophySection } from "@/components/insights/PhilosophySection"
 import { auth } from "@/auth"
 import Link from "next/link"
+import Script from "next/script"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -50,6 +51,10 @@ export default async function InsightsPage({
 
     return (
         <div className="flex flex-col min-h-screen insights-page font-sans">
+            <Script 
+                src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
+                strategy="afterInteractive" 
+            />
             <Navbar />
 
             <main className="flex-1 w-full overflow-hidden">
