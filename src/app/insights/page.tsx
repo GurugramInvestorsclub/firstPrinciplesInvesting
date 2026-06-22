@@ -170,7 +170,7 @@ export default async function InsightsPage({
                         {publicPosts.length > 0 ? (
                             <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                                 {publicPosts.map((post) => (
-                                    <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} />
+                                    <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
                                 ))}
                             </div>
                         ) : (
@@ -262,7 +262,7 @@ export default async function InsightsPage({
                             <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                                 {premiumPosts.slice(0, 3).map((post) => (
                                     <div key={post.slug.current} className="relative group">
-                                        <InsightCard post={post} showSubscriberBadge={paywallReady} />
+                                        <InsightCard post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
                                         {/* Blur Mask Overlay */}
                                         {!hasSubscriptionAccess && (
                                             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--insights-bg)] via-[var(--insights-bg)]/80 to-transparent top-1/3 flex flex-col items-center justify-end pb-8 opacity-90 transition-opacity group-hover:opacity-100">

@@ -13,6 +13,7 @@ export interface Post {
     previewBody?: PortableTextBlock[]
     paywallHeadline?: string
     paywallCtaText?: string
+    disclaimer?: PortableTextBlock[]
 }
 
 export interface Event {

@@ -59,17 +59,36 @@ export default async function InsightPage({ params }: Props) {
             <Navbar />
             <main className="flex-1">
                 <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto">
-                    <header className="mb-12 text-center">
-                        <div className="text-sm text-muted-foreground mb-4">
-                            {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+                    <header className="mb-12 text-left">
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
+                            {post.title}
+                        </h1>
+                        <div className="text-sm text-muted-foreground mb-6">
+                            Published at {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
                             }) : "Date not available"}
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
-                            {post.title}
-                        </h1>
+
+                        {/* Disclaimer Section */}
+                        <div className="my-8 p-6 rounded-xl border border-gold/50 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_30px_rgba(245,184,0,0.15)]">
+                            {post.disclaimer ? (
+                                <div className="prose-sm dark:prose-invert italic text-text-secondary/90 space-y-4">
+                                    <RichText value={post.disclaimer} />
+                                </div>
+                            ) : (
+                                <div className="text-sm text-text-secondary/90 italic space-y-3 leading-relaxed">
+                                    <p>
+                                        <strong className="font-bold not-italic text-text-primary mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
+                                    </p>
+                                    <p>
+                                        First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
                         {post.excerpt && (
                             <p className="text-xl text-muted-foreground leading-relaxed">
                                 {post.excerpt}

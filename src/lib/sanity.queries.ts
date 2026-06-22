@@ -60,7 +60,8 @@ export const singlePostQuery = groq`
     body,
     previewBody,
     paywallHeadline,
-    paywallCtaText
+    paywallCtaText,
+    disclaimer
   }
 `
 

@@ -60,6 +60,13 @@ export default defineType({
             type: 'datetime',
         }),
         defineField({
+            name: 'disclaimer',
+            title: 'Disclaimer',
+            type: 'array',
+            description: 'Optional custom disclaimer shown below the date. If left empty, the standard default SEBI educational disclaimer is shown.',
+            of: [{ type: 'block' }],
+        }),
+        defineField({
             name: 'body',
             title: 'Body',
             type: 'array',

@@ -7,9 +7,10 @@ import { urlForImage } from "@/lib/sanity.image"
 interface InsightCardProps {
     post: Post
     showSubscriberBadge?: boolean
+    hasSubscriptionAccess?: boolean
 }
 
-export function InsightCard({ post, showSubscriberBadge }: InsightCardProps) {
+export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess }: InsightCardProps) {
     return (
         <div
             data-gsap="grid-card"
@@ -63,7 +64,11 @@ export function InsightCard({ post, showSubscriberBadge }: InsightCardProps) {
                         href={`/insights/${post.slug.current}`}
                         className="insight-cta flex items-center justify-between text-xs font-bold uppercase tracking-[0.15em] transition-colors duration-[250ms]"
                     >
-                        <span>{showSubscriberBadge && post.access === "subscriber" ? "Open Teaser" : "Access Note"}</span>
+                        <span>
+                            {showSubscriberBadge && post.access === "subscriber"
+                                ? (hasSubscriptionAccess ? "Read Now" : "Open Teaser")
+                                : "Access Note"}
+                        </span>
                         <ArrowRight className="insight-arrow h-3.5 w-3.5 transition-transform duration-[250ms]" />
                     </Link>
                 </div>
