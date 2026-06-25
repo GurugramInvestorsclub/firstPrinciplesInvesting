@@ -1050,7 +1050,8 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
 
         if (
           refreshed.status === InsightsSubscriptionStatus.CREATED ||
-          refreshed.status === InsightsSubscriptionStatus.PENDING
+          refreshed.status === InsightsSubscriptionStatus.PENDING ||
+          refreshed.status === InsightsSubscriptionStatus.EXPIRED
         ) {
           const currentStartAt = refreshed.currentStartAt ?? providerPayment.chargedAt ?? new Date()
           await tx.insightsSubscription.update({
