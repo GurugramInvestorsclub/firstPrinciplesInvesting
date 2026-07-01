@@ -36,8 +36,25 @@ export default async function DashboardPage() {
     const subscriptionUi = getInsightsSubscriptionUiState()
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
-    const insightsMembership =
-        paywallReady ? await getCurrentInsightsMembershipForUser(userId) : null
+
+    // Fetch membership and payments in parallel
+    const [insightsMembership, payments] = await Promise.all([
+        paywallReady ? getCurrentInsightsMembershipForUser(userId) : Promise.resolve(null),
+        prisma.payment.findMany({
+            where: {
+                userId,
+                status: "SUCCESS"
+            },
+            select: {
+                eventId: true,
+                paidAt: true
+            },
+            orderBy: {
+                paidAt: 'desc'
+            }
+        })
+    ])
+
     const canStartNewMembership =
         !insightsMembership ||
         insightsMembership.status === InsightsSubscriptionStatus.CANCELLED ||
@@ -48,21 +65,6 @@ export default async function DashboardPage() {
         insightsMembership?.status !== InsightsSubscriptionStatus.CREATED &&
         !insightsMembership?.cancelAtCycleEnd &&
         !canStartNewMembership
-
-    // Fetch registered events
-    const payments = await prisma.payment.findMany({
-        where: {
-            userId,
-            status: "SUCCESS"
-        },
-        select: {
-            eventId: true,
-            paidAt: true
-        },
-        orderBy: {
-            paidAt: 'desc'
-        }
-    })
 
     const eventIds = payments.map(p => p.eventId)
     const registeredEvents = eventIds.length > 0

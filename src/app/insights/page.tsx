@@ -24,27 +24,29 @@ export default async function InsightsPage({
 }) {
     const { search } = await searchParams
 
-    let gridPosts: Post[] = []
-    let searchResults: Post[] = []
     const subscriptionUi = getInsightsSubscriptionUiState()
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
-    const session = await auth()
+
+    // Run auth check and Sanity content fetching in parallel
+    const sessionPromise = auth()
+    const sanityPromise = search
+        ? client.fetch<Post[]>(postQuery, { search }, { next: { revalidate: 60 } })
+        : Promise.all([
+            client.fetch<Post | null>(featuredPostQuery, {}, { next: { revalidate: 60 } }),
+            client.fetch<Post[]>(allPostsQuery, {}, { next: { revalidate: 60 } })
+          ])
+
+    const [session, sanityResult] = await Promise.all([sessionPromise, sanityPromise])
+
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
             ? await userHasInsightsAccess(session.user.id)
             : false
 
-    if (search) {
-        searchResults = await client.fetch<Post[]>(postQuery, { search }, { next: { revalidate: 60 } })
-        gridPosts = searchResults
-    } else {
-        const [explicitFeatured, allPosts] = await Promise.all([
-            client.fetch<Post | null>(featuredPostQuery, {}, { next: { revalidate: 60 } }),
-            client.fetch<Post[]>(allPostsQuery, {}, { next: { revalidate: 60 } })
-        ])
-        gridPosts = allPosts
-    }
+    const gridPosts = search
+        ? (sanityResult as Post[])
+        : (sanityResult as [Post | null, Post[]])[1]
 
     const premiumPosts = gridPosts.filter((p) => p.access === "subscriber")
     const publicPosts = gridPosts.filter((p) => p.access !== "subscriber")

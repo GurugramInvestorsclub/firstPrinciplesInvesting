@@ -1,8 +1,8 @@
 "use client"
 
 import { signIn } from "next-auth/react"
-import { Suspense, useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -16,16 +16,16 @@ function LoginContent() {
     const [error, setError] = useState("")
     const [notice, setNotice] = useState("")
     const router = useRouter()
-    const searchParams = useSearchParams()
 
     useEffect(() => {
-        const errorState = searchParams.get("error")
+        const params = new URLSearchParams(window.location.search)
+        const errorState = params.get("error")
         if (errorState === "OAuthAccountNotLinked") {
             setError("An account with this email already exists using a different sign-in method. Please log in with your email and password.")
             return
         }
 
-        const verificationState = searchParams.get("verification")
+        const verificationState = params.get("verification")
         if (verificationState === "success") {
             setNotice("Email verified. You can sign in now.")
             setError("")
@@ -43,7 +43,7 @@ function LoginContent() {
             setNotice("")
             setIsLogin(true)
         }
-    }, [searchParams])
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -268,9 +268,5 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen bg-bg-deep" />}>
-            <LoginContent />
-        </Suspense>
-    )
+    return <LoginContent />
 }

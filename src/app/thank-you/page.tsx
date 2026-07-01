@@ -1,22 +1,43 @@
 "use client"
 
-import { useEffect, Suspense } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle2, Calendar, BookOpen, ExternalLink, Home, Zap, TrendingUp } from "lucide-react"
 import { motion } from "framer-motion"
 
+interface QueryParams {
+    email: string | null
+    source: string | null
+    type: string | null
+    eventTitle: string | null
+    eventDateRaw: string | null
+    whatsappLink: string | null
+}
+
 function ThankYouContent() {
-    const searchParams = useSearchParams()
-    const email = searchParams.get("email")
-    const source = searchParams.get("source")
-    const type = searchParams.get("type")
-    const eventTitle = searchParams.get("eventTitle")
-    const eventDateRaw = searchParams.get("eventDate")
-    const whatsappLink = searchParams.get("whatsappLink")
+    const [params, setParams] = useState<QueryParams | null>(null)
+
+    useEffect(() => {
+        const search = new URLSearchParams(window.location.search)
+        setParams({
+            email: search.get("email"),
+            source: search.get("source"),
+            type: search.get("type"),
+            eventTitle: search.get("eventTitle"),
+            eventDateRaw: search.get("eventDate"),
+            whatsappLink: search.get("whatsappLink"),
+        })
+    }, [])
+
+    const email = params?.email ?? null
+    const source = params?.source ?? null
+    const type = params?.type ?? null
+    const eventTitle = params?.eventTitle ?? null
+    const eventDateRaw = params?.eventDateRaw ?? null
+    const whatsappLink = params?.whatsappLink ?? null
 
     const formattedDate = eventDateRaw ? new Date(eventDateRaw).toLocaleDateString("en-IN", {
         weekday: 'long',
@@ -28,6 +49,8 @@ function ThankYouContent() {
     }) + " IST" : null
 
     useEffect(() => {
+        if (!params) return
+
         // Fire tracking event: thank_you_view
         console.log("Tracking event: thank_you_view", { source, type, hasEmail: !!email })
         if (typeof window !== "undefined" && (window as any).gtag) {
@@ -52,7 +75,7 @@ function ThankYouContent() {
             })
         }
         initGSAP()
-    }, [source, type, email])
+    }, [params, source, type, email])
 
     const trackClick = (label: string) => {
         console.log(`Tracking click: ${label}`)
@@ -270,9 +293,7 @@ export default function ThankYouPage() {
     return (
         <div className="flex flex-col min-h-screen bg-bg-deep text-text-primary selection:bg-gold/20 selection:text-gold">
             <Navbar />
-            <Suspense fallback={<div className="flex-1 flex items-center justify-center pt-20"><div className="w-8 h-8 rounded-full border-2 border-gold border-t-transparent animate-spin" /></div>}>
-                <ThankYouContent />
-            </Suspense>
+            <ThankYouContent />
             <Footer />
         </div>
     )

@@ -27,10 +27,17 @@ import { Super30NewDesign } from "@/components/super30/Super30NewDesign"
 
 export const revalidate = 60
 
+export async function generateStaticParams() {
+    const slugs = await client.fetch<string[]>(
+        `*[_type == "super30Program" && defined(slug.current)].slug.current`
+    )
+    return slugs.map((slug) => ({ slug }))
+}
+
 interface Props {
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
 
 export async function generateMetadata({ params }: Props) {

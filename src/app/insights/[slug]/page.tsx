@@ -27,17 +27,22 @@ interface Props {
 
 export default async function InsightPage({ params }: Props) {
     const { slug } = await params
-    const post = await client.fetch<Post | null>(singlePostQuery, { slug }, { next: { revalidate: 60 } })
-    const session = await auth()
     const subscriptionUi = getInsightsSubscriptionUiState()
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
+
+    // Fetch the post contents, auth session, and comments in parallel
+    const [post, session, commentsResult] = await Promise.all([
+        client.fetch<Post | null>(singlePostQuery, { slug }, { next: { revalidate: 60 } }),
+        auth(),
+        getComments(slug)
+    ])
+
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
             ? await userHasInsightsAccess(session.user.id)
             : false
 
-    const commentsResult = await getComments(slug)
     const initialComments = (commentsResult.success ? commentsResult.comments : []) as CommentType[]
 
     if (!post) {

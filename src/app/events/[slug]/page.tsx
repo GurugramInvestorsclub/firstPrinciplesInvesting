@@ -24,10 +24,17 @@ import { LogoMarquee } from "@/components/events/LogoMarquee"
 
 export const revalidate = 60
 
+export async function generateStaticParams() {
+    const slugs = await client.fetch<string[]>(
+        `*[_type == "event" && defined(slug.current)].slug.current`
+    )
+    return slugs.map((slug) => ({ slug }))
+}
+
 interface Props {
-    params: {
+    params: Promise<{
         slug: string
-    }
+    }>
 }
 
 export default async function EventPage({ params }: Props) {
