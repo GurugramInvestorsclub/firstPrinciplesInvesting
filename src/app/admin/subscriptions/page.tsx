@@ -40,6 +40,8 @@ const tableCellStyle: CSSProperties = {
 export default function AdminSubscriptionsPage() {
   const [rows, setRows] = useState<SubscriptionRow[]>([])
   const [statusFilter, setStatusFilter] = useState<string>("ALL")
+  const [startDate, setStartDate] = useState<string>("")
+  const [endDate, setEndDate] = useState<string>("")
   const [enabled, setEnabled] = useState(false)
   const [checkoutReady, setCheckoutReady] = useState(false)
   const [webhookReady, setWebhookReady] = useState(false)
@@ -124,8 +126,17 @@ export default function AdminSubscriptionsPage() {
   const uniqueStatuses = Array.from(new Set(rows.map((row) => row.status)))
 
   const filteredRows = rows.filter((row) => {
-    if (statusFilter === "ALL") return true
-    return row.status.toUpperCase() === statusFilter.toUpperCase()
+    if (statusFilter !== "ALL" && row.status.toUpperCase() !== statusFilter.toUpperCase()) {
+      return false
+    }
+
+    if (startDate || endDate) {
+      const rowLocalDate = getLocalDateString(row.createdAt)
+      if (startDate && rowLocalDate < startDate) return false
+      if (endDate && rowLocalDate > endDate) return false
+    }
+
+    return true
   })
 
   const exportToCsv = useCallback(() => {
@@ -266,37 +277,113 @@ export default function AdminSubscriptionsPage() {
               <h2 style={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>
                 Records ({filteredRows.length} shown of {rows.length})
               </h2>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label htmlFor="status-filter" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-                  Filter Status:
-                </label>
-                <select
-                  id="status-filter"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: "8px",
-                    color: "#fff",
-                    padding: "6px 12px",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    outline: "none",
-                  }}
-                >
-                  <option value="ALL">All Statuses</option>
-                  {uniqueStatuses.sort().map((status) => (
-                    <option key={status} value={status}>
-                      {status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </option>
-                  ))}
-                </select>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <label htmlFor="status-filter" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    Status:
+                  </label>
+                  <select
+                    id="status-filter"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      padding: "6px 12px",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      outline: "none",
+                    }}
+                  >
+                    <option value="ALL">All Statuses</option>
+                    {uniqueStatuses.sort().map((status) => (
+                      <option key={status} value={status}>
+                        {status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <label htmlFor="start-date" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    From:
+                  </label>
+                  <input
+                    type="date"
+                    id="start-date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      padding: "5px 12px",
+                      fontSize: "13px",
+                      outline: "none",
+                      colorScheme: "dark",
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <label htmlFor="end-date" style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    To:
+                  </label>
+                  <input
+                    type="date"
+                    id="end-date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      borderRadius: "8px",
+                      color: "#fff",
+                      padding: "5px 12px",
+                      fontSize: "13px",
+                      outline: "none",
+                      colorScheme: "dark",
+                    }}
+                  />
+                </div>
+
+                {(startDate || endDate) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStartDate("")
+                      setEndDate("")
+                    }}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#e2e8f0",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      outline: "none",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.12)"
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.06)"
+                    }}
+                  >
+                    Clear Dates
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={exportToCsv}
                   style={{
-                    marginLeft: "8px",
+                    marginLeft: "4px",
                     padding: "6px 12px",
                     borderRadius: "8px",
                     border: "1px solid rgba(250,204,21,0.35)",
@@ -322,7 +409,7 @@ export default function AdminSubscriptionsPage() {
 
             {filteredRows.length === 0 ? (
               <div style={{ padding: "48px 32px", color: "var(--text-secondary)", textAlign: "center" }}>
-                No subscriptions match the status filter &ldquo;{statusFilter.toLowerCase().replace(/_/g, " ")}&rdquo;.
+                No subscriptions match the selected filters.
               </div>
             ) : (
               <div style={{ overflowX: "auto" }}>
@@ -476,5 +563,13 @@ function formatDate(value: string | null) {
     hour: "numeric",
     minute: "2-digit",
   })
+}
+
+function getLocalDateString(dateStr: string) {
+  const d = new Date(dateStr)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
 }
 
