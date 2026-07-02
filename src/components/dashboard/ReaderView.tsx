@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { ArrowLeft, Eye, EyeOff, Bookmark, Highlighter, MessageSquare, Lock } from "lucide-react"
 import { RichText } from "../sanity/RichText"
+import { CopyProtection } from "../insights/CopyProtection"
+
 
 interface ReaderViewProps {
     slug: string
@@ -164,16 +166,15 @@ export function ReaderView({
     const handleExport = () => {
         if (shouldLockContent) return
         const text = savedNotes
-            .map(n => {
-                const quoteText = getBlockText(bodyBlocks[n.paragraphIdx])
-                return `[PARAGRAPH]: "${quoteText}"\n${n.isHighlighted ? "[HIGHLIGHTED]\n" : ""}${n.note ? `[NOTE]: ${n.note}\n` : ""}`
-            })
-            .join("\n---\n\n")
+            .filter(n => n.note && n.note.trim().length > 0)
+            .map(n => `[NOTE ON PARAGRAPH ${n.paragraphIdx + 1}]: ${n.note}`)
+            .join("\n\n")
         
-        navigator.clipboard.writeText(`Notes for: ${report.title}\n\n${text}`)
+        navigator.clipboard.writeText(`My Notes for: ${report.title}\n\n${text}`)
         setShowExportSuccess(true)
         setTimeout(() => setShowExportSuccess(false), 2000)
     }
+
 
     // Keyboard Shortcuts
     useEffect(() => {
@@ -192,6 +193,8 @@ export function ReaderView({
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto font-sans relative">
+            <CopyProtection />
+
             
             {/* Top Toolbar */}
             <div className="flex items-center justify-between border-b border-white/5 pb-4 select-none">
