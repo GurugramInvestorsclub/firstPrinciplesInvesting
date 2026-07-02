@@ -1,11 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Video, Download } from "lucide-react"
+import { Calendar, Video, Download, Lock } from "lucide-react"
 
 interface EventsViewProps {
     upcomingEvents: any[]
     pastEvents: any[]
+    hasSubscriptionAccess?: boolean
+    onNavigate?: (tab: string, arg?: string) => void
 }
 
 function formatDate(dateStr: string): string {
@@ -20,7 +22,7 @@ function formatDate(dateStr: string): string {
     }
 }
 
-export function EventsView({ upcomingEvents, pastEvents }: EventsViewProps) {
+export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess = false, onNavigate }: EventsViewProps) {
     const [registeredIds, setRegisteredIds] = useState<string[]>([])
 
     const toggleRegister = (id: string) => {
@@ -131,20 +133,33 @@ export function EventsView({ upcomingEvents, pastEvents }: EventsViewProps) {
                                 </div>
 
                                 <div className="flex items-center gap-3 shrink-0 font-mono text-[10px] font-bold">
-                                    <button
-                                        onClick={() => alert("Slides PDF download initiated.")}
-                                        className="px-4 py-2 border border-white/5 hover:border-gold/30 hover:bg-gold/10 hover:text-gold text-neutral-400 bg-[#1E1E1E] rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-                                    >
-                                        <Download className="w-3.5 h-3.5" />
-                                        <span>Slides PDF</span>
-                                    </button>
-                                    <button
-                                        onClick={() => alert("Playing replay video...")}
-                                        className="px-4 py-2 bg-gold hover:bg-[#E0A800] text-bg-deep rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
-                                    >
-                                        <Video className="w-3.5 h-3.5 text-bg-deep" />
-                                        <span>Replay Video</span>
-                                    </button>
+                                    {hasSubscriptionAccess ? (
+                                        <>
+                                            <button
+                                                onClick={() => alert("Slides PDF download initiated.")}
+                                                className="px-4 py-2 border border-white/5 hover:border-gold/30 hover:bg-gold/10 hover:text-gold text-neutral-400 bg-[#1E1E1E] rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                                            >
+                                                <Download className="w-3.5 h-3.5" />
+                                                <span>Slides PDF</span>
+                                            </button>
+                                            <button
+                                                onClick={() => alert("Playing replay video...")}
+                                                className="px-4 py-2 bg-gold hover:bg-[#E0A800] text-bg-deep rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
+                                            >
+                                                <Video className="w-3.5 h-3.5 text-bg-deep" />
+                                                <span>Replay Video</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => onNavigate?.("profile")}
+                                            className="px-4 py-2 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-gold/10 text-neutral-500 hover:text-gold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors"
+                                            title="Subscriber access required"
+                                        >
+                                            <Lock className="w-3.5 h-3.5" />
+                                            <span>Locked Replay (Upgrade)</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}

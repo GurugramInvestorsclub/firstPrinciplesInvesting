@@ -62,8 +62,10 @@ export default async function DashboardPage() {
             initialPosts={sanityPosts}
             initialUpcomingEvents={upcomingEvents}
             initialPastEvents={pastEvents}
+            hasSubscriptionAccess={insightsMembership?.hasAccess || false}
         />
     )
 }
+
 
 

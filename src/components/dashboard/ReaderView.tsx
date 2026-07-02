@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Eye, EyeOff, Bookmark, Highlighter, MessageSquare } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff, Bookmark, Highlighter, MessageSquare, Lock } from "lucide-react"
 import { RichText } from "../sanity/RichText"
 
 interface ReaderViewProps {
@@ -10,6 +10,8 @@ interface ReaderViewProps {
     isBookmarked: boolean
     onToggleBookmark: (slug: string) => void
     posts: any[]
+    hasSubscriptionAccess?: boolean
+    onNavigate?: (tab: string, arg?: string) => void
 }
 
 interface SavedNote {
@@ -56,7 +58,15 @@ function formatDate(dateStr: string): string {
     }
 }
 
-export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts }: ReaderViewProps) {
+export function ReaderView({ 
+    slug, 
+    onBack, 
+    isBookmarked, 
+    onToggleBookmark, 
+    posts, 
+    hasSubscriptionAccess = false,
+    onNavigate
+}: ReaderViewProps) {
     const report = posts.find(r => r.slug?.current === slug)
     const [distractionFree, setDistractionFree] = useState(false)
     const [fontSize, setFontSize] = useState<"sm" | "base" | "lg">("base")
@@ -74,10 +84,27 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
         )
     }
 
-    const bodyBlocks = report.body || []
+    const isSubscriberOnly = report.access === "subscriber"
+    const shouldLockContent = isSubscriberOnly && !hasSubscriptionAccess
+
+    // Helper to get 10% preview if user doesn't have access
+    const getPreviewBlocks = (blocks: any[]) => {
+        if (report.previewBody && report.previewBody.length > 0) {
+            return report.previewBody
+        }
+        if (!blocks || blocks.length === 0) {
+            return []
+        }
+        const previewCount = Math.max(1, Math.ceil(blocks.length * 0.1))
+        return blocks.slice(0, previewCount)
+    }
+
+    const rawBlocks = report.body || []
+    const bodyBlocks = shouldLockContent ? getPreviewBlocks(rawBlocks) : rawBlocks
 
     // Load notes & highlights from localStorage
     useEffect(() => {
+        if (shouldLockContent) return // Don't track progress for locked teaser
         const key = `fpi-notes-${slug}`
         const localData = localStorage.getItem(key)
         if (localData) {
@@ -88,9 +115,9 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
             }
         }
 
-        // Save last read report for dashboard "Continue Reading" widget
+        // Save last read report progress
         localStorage.setItem("fpi-reader-progress", JSON.stringify({ slug, percent: 55 }))
-    }, [slug])
+    }, [slug, shouldLockContent])
 
     // Save notes to localStorage
     const saveNotesToLocal = (updated: SavedNote[]) => {
@@ -99,6 +126,7 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
     }
 
     const toggleHighlight = (idx: number) => {
+        if (shouldLockContent) return
         const existing = savedNotes.find(n => n.paragraphIdx === idx)
         let updated: SavedNote[] = []
         if (existing) {
@@ -112,6 +140,7 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
     }
 
     const openNoteBox = (idx: number) => {
+        if (shouldLockContent) return
         setActiveNoteIdx(idx)
         const existing = savedNotes.find(n => n.paragraphIdx === idx)
         setNoteInput(existing?.note || "")
@@ -133,6 +162,7 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
     }
 
     const handleExport = () => {
+        if (shouldLockContent) return
         const text = savedNotes
             .map(n => {
                 const quoteText = getBlockText(bodyBlocks[n.paragraphIdx])
@@ -190,15 +220,17 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                     </div>
 
                     {/* Bookmark */}
-                    <button
-                        onClick={() => onToggleBookmark(slug)}
-                        className={`p-2 rounded-xl border border-white/5 bg-[#1E1E1E] hover:border-gold/30 hover:bg-gold/10 transition-colors flex items-center gap-1.5 cursor-pointer ${
-                            isBookmarked ? "text-gold" : "text-neutral-400"
-                        }`}
-                    >
-                        <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? "fill-gold/10" : ""}`} />
-                        <span>{isBookmarked ? "Saved" : "Save"}</span>
-                    </button>
+                    {!shouldLockContent && (
+                        <button
+                            onClick={() => onToggleBookmark(slug)}
+                            className={`p-2 rounded-xl border border-white/5 bg-[#1E1E1E] hover:border-gold/30 hover:bg-gold/10 transition-colors flex items-center gap-1.5 cursor-pointer ${
+                                isBookmarked ? "text-gold" : "text-neutral-400"
+                            }`}
+                        >
+                            <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? "fill-gold/10" : ""}`} />
+                            <span>{isBookmarked ? "Saved" : "Save"}</span>
+                        </button>
+                    )}
 
                     {/* Focus Toggle */}
                     <button
@@ -222,28 +254,32 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                                 Navigation
                             </span>
                             <p className="text-neutral-500 text-[11px] leading-relaxed">
-                                Use the scrollbar to navigate the deep dive. Section highlights and figures are displayed inline.
+                                {shouldLockContent 
+                                    ? "This preview covers introductory sectors. Subscribe to unlock chapters." 
+                                    : "Use the scrollbar to navigate the deep dive. Section highlights and figures are displayed inline."}
                             </p>
                         </div>
 
-                        <div className="border border-white/5 bg-black/10 rounded-2xl p-6 space-y-4 text-xs font-mono">
-                            <span className="text-[10px] text-neutral-500 uppercase tracking-widest block font-bold border-b border-white/5 pb-2">
-                                Study Tools
-                            </span>
-                            <p className="text-neutral-500 leading-relaxed font-light text-[11px]">
-                                Double-click or click comment icons next to paragraphs to highlight sections and add notes.
-                            </p>
-                            <button
-                                onClick={handleExport}
-                                className="w-full py-2 bg-white/5 hover:bg-gold/10 hover:border-gold/30 hover:text-gold text-text-primary rounded-xl border border-white/5 text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                            >
-                                {showExportSuccess ? (
-                                    <span>Notes Copied!</span>
-                                ) : (
-                                    <span>Copy Study Memo</span>
-                                )}
-                            </button>
-                        </div>
+                        {!shouldLockContent && (
+                            <div className="border border-white/5 bg-black/10 rounded-2xl p-6 space-y-4 text-xs font-mono">
+                                <span className="text-[10px] text-neutral-500 uppercase tracking-widest block font-bold border-b border-white/5 pb-2">
+                                    Study Tools
+                                </span>
+                                <p className="text-neutral-500 leading-relaxed font-light text-[11px]">
+                                    Double-click or click comment icons next to paragraphs to highlight sections and add notes.
+                                </p>
+                                <button
+                                    onClick={handleExport}
+                                    className="w-full py-2 bg-white/5 hover:bg-gold/10 hover:border-gold/30 hover:text-gold text-text-primary rounded-xl border border-white/5 text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                                >
+                                    {showExportSuccess ? (
+                                        <span>Notes Copied!</span>
+                                    ) : (
+                                        <span>Copy Study Memo</span>
+                                    )}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -253,7 +289,7 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                     {/* Title Metadata */}
                     <div className="space-y-4 text-left border-b border-white/5 pb-8">
                         <span className="text-xs font-mono text-gold font-bold uppercase tracking-wider bg-gold/10 px-3 py-1 rounded-full">
-                            {report.access === "subscriber" ? "Members Only" : "Free Access"}
+                            {isSubscriberOnly ? "Members Only" : "Free Access"}
                         </span>
                         <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary leading-[1.1] font-sans">
                             {report.title}
@@ -261,7 +297,7 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                         <div className="flex items-center gap-4 text-xs font-mono text-neutral-500">
                             <span>PUBLISHED: {formatDate(report.publishedAt)}</span>
                             <span className="w-1.5 h-1.5 rounded-full bg-neutral-700" />
-                            <span>{calculateReadingTime(bodyBlocks)}</span>
+                            <span>{calculateReadingTime(rawBlocks)}</span>
                         </div>
                     </div>
 
@@ -284,27 +320,29 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
 
                             return (
                                 <div key={paragraphKey} className="relative group/p flex items-start gap-4">
-                                    {/* Action Buttons next to paragraphs (shown on hover) */}
-                                    <div className="absolute left-[-45px] top-1 flex flex-col gap-1 opacity-0 group-hover/p:opacity-100 transition-opacity duration-300 select-none">
-                                        <button 
-                                            onClick={() => toggleHighlight(idx)}
-                                            className={`p-1.5 rounded-lg border border-[#2E2E2E] hover:border-gold/30 hover:bg-gold/10 transition-colors ${
-                                                isHighlighted ? "bg-gold text-bg-deep border-gold" : "bg-bg-deep text-neutral-400"
-                                            }`}
-                                            title="Highlight paragraph"
-                                        >
-                                            <Highlighter className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button 
-                                            onClick={() => openNoteBox(idx)}
-                                            className={`p-1.5 rounded-lg border border-[#2E2E2E] hover:border-gold/30 hover:bg-gold/10 transition-colors ${
-                                                hasNote ? "bg-gold/10 border-gold/30 text-gold" : "bg-bg-deep text-neutral-400"
-                                            }`}
-                                            title="Add study note"
-                                        >
-                                            <MessageSquare className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
+                                    {/* Action Buttons next to paragraphs (shown on hover) - Hidden in lock content mode */}
+                                    {!shouldLockContent && (
+                                        <div className="absolute left-[-45px] top-1 flex flex-col gap-1 opacity-0 group-hover/p:opacity-100 transition-opacity duration-300 select-none">
+                                            <button 
+                                                onClick={() => toggleHighlight(idx)}
+                                                className={`p-1.5 rounded-lg border border-[#2E2E2E] hover:border-gold/30 hover:bg-gold/10 transition-colors ${
+                                                    isHighlighted ? "bg-gold text-bg-deep border-gold" : "bg-bg-deep text-neutral-400"
+                                                }`}
+                                                title="Highlight paragraph"
+                                            >
+                                                <Highlighter className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button 
+                                                onClick={() => openNoteBox(idx)}
+                                                className={`p-1.5 rounded-lg border border-[#2E2E2E] hover:border-gold/30 hover:bg-gold/10 transition-colors ${
+                                                    hasNote ? "bg-gold/10 border-gold/30 text-gold" : "bg-bg-deep text-neutral-400"
+                                                }`}
+                                                title="Add study note"
+                                            >
+                                                <MessageSquare className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    )}
 
                                     {/* Paragraph text */}
                                     <div className="flex-1 space-y-4">
@@ -318,7 +356,7 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                                         </div>
 
                                         {/* Show inline note if exists */}
-                                        {hasNote && (
+                                        {hasNote && !shouldLockContent && (
                                             <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-xs text-neutral-300 font-mono flex items-start gap-2 max-w-xl">
                                                 <div>
                                                     <span className="text-neutral-500 font-bold">MY RESEARCH NOTE:</span>
@@ -328,12 +366,12 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                                         )}
 
                                         {/* Note editing box */}
-                                        {activeNoteIdx === idx && (
+                                        {activeNoteIdx === idx && !shouldLockContent && (
                                             <div className="p-4 rounded-xl border border-gold/30 bg-[#2E2E2E] space-y-3 max-w-lg mt-2 relative z-10">
                                                 <textarea
                                                     value={noteInput}
                                                     onChange={(e) => setNoteInput(e.target.value)}
-                                                    placeholder="Type your study note or thesis comment..."
+                                                    placeholder="Type your study note..."
                                                     className="w-full bg-bg-deep border border-[#2E2E2E] rounded-lg p-2 text-xs text-text-primary outline-none focus:border-gold/40 h-20"
                                                     autoFocus
                                                 />
@@ -357,19 +395,48 @@ export function ReaderView({ slug, onBack, isBookmarked, onToggleBookmark, posts
                                 </div>
                             )
                         })}
+
+                        {/* Paywall locked box for non-subscribers */}
+                        {shouldLockContent && (
+                            <section className="mt-12 rounded-3xl border border-gold/20 bg-[radial-gradient(circle_at_top_right,rgba(245,184,0,0.12),transparent_45%),rgba(255,255,255,0.03)] p-6 md:p-8 space-y-6">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-1.5 text-gold/80 text-[10px] font-mono font-bold uppercase tracking-widest">
+                                        <Lock className="w-3.5 h-3.5" />
+                                        <span>Subscriber Insight</span>
+                                    </div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+                                        {report.paywallHeadline ?? "Unlock the full memo with an Insights membership"}
+                                    </h2>
+                                    <p className="text-xs leading-relaxed text-white/60">
+                                        Read the complete analysis, future member-only notes, and our full historical archive with an active Insights membership.
+                                    </p>
+                                </div>
+
+                                <div className="pt-2">
+                                    <button
+                                        onClick={() => onNavigate?.("profile")}
+                                        className="px-6 py-3 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-full text-xs transition-transform active:scale-[0.98]"
+                                    >
+                                        {report.paywallCtaText ?? "Upgrade to Subscriber Access"}
+                                    </button>
+                                </div>
+                            </section>
+                        )}
                     </div>
 
                     {/* Disclaimer Footnote */}
-                    {report.disclaimer ? (
-                        <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left max-w-[65ch] mx-auto">
-                            <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
-                            <RichText value={report.disclaimer} />
-                        </div>
-                    ) : (
-                        <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left max-w-[65ch] mx-auto">
-                            <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
-                            First Principles Investing is an independent research house. We do not provide personalized stock recommendations or advisory calls. This research is for educational and learning purposes. All investments are subject to capital risk.
-                        </div>
+                    {!shouldLockContent && (
+                        report.disclaimer ? (
+                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left max-w-[65ch] mx-auto">
+                                <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
+                                <RichText value={report.disclaimer} />
+                            </div>
+                        ) : (
+                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left max-w-[65ch] mx-auto">
+                                <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
+                                First Principles Investing is an independent research house. We do not provide personalized stock recommendations or advisory calls. This research is for educational and learning purposes. All investments are subject to capital risk.
+                            </div>
+                        )
                     )}
 
                 </div>

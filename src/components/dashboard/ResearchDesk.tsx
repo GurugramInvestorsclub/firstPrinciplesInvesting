@@ -24,6 +24,7 @@ interface ResearchDeskProps {
     initialPosts?: any[]
     initialUpcomingEvents?: any[]
     initialPastEvents?: any[]
+    hasSubscriptionAccess?: boolean
 }
 
 export function ResearchDesk({ 
@@ -34,7 +35,8 @@ export function ResearchDesk({
     onSignOut,
     initialPosts = [],
     initialUpcomingEvents = [],
-    initialPastEvents = []
+    initialPastEvents = [],
+    hasSubscriptionAccess = false
 }: ResearchDeskProps) {
     const [activeTab, setActiveTab] = useState("home")
     const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -184,6 +186,8 @@ export function ResearchDesk({
                                 isBookmarked={savedSlugs.includes(selectedId)}
                                 onToggleBookmark={toggleBookmark}
                                 posts={posts}
+                                hasSubscriptionAccess={hasSubscriptionAccess}
+                                onNavigate={handleNavigate}
                             />
                         ) : activeTab === "members-only" ? (
                             <MembersOnlyView 
@@ -199,8 +203,9 @@ export function ResearchDesk({
                     )}
 
                     {activeTab === "events" && (
-                        <EventsView upcomingEvents={upcomingEvents} pastEvents={pastEvents} />
+                        <EventsView upcomingEvents={upcomingEvents} pastEvents={pastEvents} hasSubscriptionAccess={hasSubscriptionAccess} onNavigate={handleNavigate} />
                     )}
+
 
                     {activeTab === "industry-research" && (
                         <IndustryResearchView />
