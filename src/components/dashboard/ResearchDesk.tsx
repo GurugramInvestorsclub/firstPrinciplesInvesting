@@ -5,6 +5,7 @@ import {
     Home, FileText, Layers, Calendar, 
     User, LogOut, Star, Sparkles, BookOpen
 } from "lucide-react"
+import Link from "next/link"
 import { mockReports, mockEvents } from "./mockData"
 import { HomeView } from "./HomeView"
 import { MembersOnlyView } from "./MembersOnlyView"
@@ -13,7 +14,6 @@ import { ReaderView } from "./ReaderView"
 import { EventsView } from "./EventsView"
 import { IndustryResearchView } from "./IndustryResearchView"
 import { ProfileView } from "./ProfileView"
-
 
 interface ResearchDeskProps {
     userName: string
@@ -42,14 +42,12 @@ export function ResearchDesk({
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [savedSlugs, setSavedSlugs] = useState<string[]>([])
 
-    // Fallback merge
+    // Use actual sanity events first. Only fall back to mock data if Sanity is completely empty.
+    const hasSanityEvents = initialUpcomingEvents.length > 0 || initialPastEvents.length > 0
     const posts = initialPosts.length > 0 ? initialPosts : mockReports
-    const upcomingEvents = initialUpcomingEvents.length > 0 
-        ? initialUpcomingEvents 
-        : mockEvents.filter(e => !e.recordingUrl)
-    const pastEvents = initialPastEvents.length > 0 
-        ? initialPastEvents 
-        : mockEvents.filter(e => e.recordingUrl)
+    const upcomingEvents = hasSanityEvents ? initialUpcomingEvents : mockEvents.filter(e => !e.recordingUrl)
+    const pastEvents = hasSanityEvents ? initialPastEvents : mockEvents.filter(e => e.recordingUrl)
+
 
     // Load bookmarks from local storage
     useEffect(() => {
@@ -162,15 +160,44 @@ export function ResearchDesk({
 
             {/* 2. Main Content Frame (padded on left for desktop sidebar, bottom for mobile nav) */}
             <div className="flex-1 lg:pl-64 pb-20 lg:pb-0 min-h-screen flex flex-col">
-                {/* Desktop top header banner */}
-                <header className="h-16 border-b border-white/5 bg-bg-deep/80 backdrop-blur-md sticky top-0 z-20 px-8 hidden lg:flex items-center justify-between select-none font-mono text-[10px] text-neutral-500">
-                    <span className="uppercase tracking-widest">
-                        First Principles Investing
-                    </span>
-                    <span className="uppercase">
-                        MEMBERS AREA
-                    </span>
+                {/* Desktop top header banner / navbar */}
+                <header className="h-16 border-b border-white/5 bg-bg-deep/85 backdrop-blur-md sticky top-0 z-20 px-8 hidden lg:flex items-center justify-between select-none font-mono text-[10px]">
+                    <div className="flex items-center gap-6">
+                        <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white transition-colors">
+                            FIRST PRINCIPLES INVESTING
+                        </Link>
+                        <span className="text-neutral-700">|</span>
+                        <nav className="flex items-center gap-5 text-neutral-400">
+                            <Link href="/insights" className="hover:text-gold transition-colors">INSIGHTS</Link>
+                            <Link href="/events" className="hover:text-gold transition-colors">PUBLIC EVENTS</Link>
+                            <Link href="/super30" className="hover:text-gold transition-colors">SUPER 30</Link>
+                        </nav>
+                    </div>
+                    <div className="flex items-center gap-4 text-neutral-400">
+                        <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-0.5 rounded text-[8px]">
+                            {subscriptionStatus} Member
+                        </span>
+                        <span className="text-neutral-700">|</span>
+                        <span className="uppercase tracking-widest text-neutral-500 font-bold">
+                            MEMBERS AREA
+                        </span>
+                    </div>
                 </header>
+
+                {/* Mobile top header banner / navbar */}
+                <header className="h-14 border-b border-white/5 bg-bg-deep/90 backdrop-blur-md sticky top-0 z-20 px-6 lg:hidden flex items-center justify-between font-mono text-[10px] select-none">
+                    <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white">
+                        FP INVESTING
+                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link href="/insights" className="text-neutral-400 hover:text-gold">INSIGHTS</Link>
+                        <span className="text-neutral-700">|</span>
+                        <span className="text-emerald-400 font-bold text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded uppercase">
+                            MEMBER
+                        </span>
+                    </div>
+                </header>
+
 
                 {/* Tab Render Area */}
                 <main className="flex-1 p-6 md:p-10 max-w-5xl w-full mx-auto">
