@@ -26,12 +26,23 @@ function formatDate(dateStr: string): string {
 
 export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess = false, onNavigate }: EventsViewProps) {
     const [registeredIds, setRegisteredIds] = useState<string[]>([])
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+    const [selectedEventName, setSelectedEventName] = useState("")
 
     const toggleRegister = (id: string) => {
         if (registeredIds.includes(id)) {
             setRegisteredIds(registeredIds.filter(item => item !== id))
         } else {
             setRegisteredIds([...registeredIds, id])
+        }
+    }
+
+    const handleReplayClick = (event: any) => {
+        if (hasSubscriptionAccess) {
+            window.open(event.superProfileLink || "https://superprofile.bio/firstprinciplesacademy", "_blank")
+        } else {
+            setSelectedEventName(event.title)
+            setShowUpgradeModal(true)
         }
     }
 
@@ -284,26 +295,13 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
 
                                             {/* Action Replay Link */}
                                             <div className="pt-2">
-                                                {hasSubscriptionAccess ? (
-                                                    <a 
-                                                        href={event.superProfileLink || "https://superprofile.bio/firstprinciplesacademy"}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="flex items-center justify-center w-full py-3 rounded-xl bg-gradient-to-r from-gold to-[#C89B3C] text-[#0b0b0c] font-bold text-xs shadow-lg shadow-gold/15 hover:brightness-110 transition-all duration-500 font-mono tracking-wider uppercase cursor-pointer"
-                                                    >
-                                                        Watch Replay
-                                                        <Play className="ml-2 w-3.5 h-3.5 fill-current" />
-                                                    </a>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => onNavigate?.("profile")}
-                                                        className="flex items-center justify-center w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-gold/10 text-neutral-500 hover:text-gold font-bold text-xs transition-colors font-mono tracking-wider uppercase cursor-pointer"
-                                                        title="Subscriber access required"
-                                                    >
-                                                        Locked Replay (Upgrade)
-                                                        <Lock className="ml-2 w-3.5 h-3.5" />
-                                                    </button>
-                                                )}
+                                                <button
+                                                    onClick={() => handleReplayClick(event)}
+                                                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gold hover:bg-[#E0A800] text-bg-deep font-bold text-xs shadow-lg shadow-gold/15 active:scale-[0.98] transition-all duration-300 font-mono tracking-wider uppercase cursor-pointer"
+                                                >
+                                                    <span>Watch Replay</span>
+                                                    <Play className="w-3.5 h-3.5 fill-bg-deep text-bg-deep" />
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -317,6 +315,44 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
                     </div>
                 )}
             </div>
+
+            {/* Custom Premium Access Modal */}
+            {showUpgradeModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+                    <div className="w-full max-w-md bg-[#1E1E1E] border border-white/10 rounded-3xl p-6 md:p-8 space-y-6 text-center shadow-2xl relative">
+                        <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto">
+                            <Lock className="w-5 h-5 text-gold" />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <h3 className="text-xl font-bold text-white tracking-tight">
+                                Subscriber Access Required
+                            </h3>
+                            <p className="text-xs text-neutral-400 leading-relaxed font-light">
+                                The video replay for <strong className="text-text-primary font-bold">"{selectedEventName}"</strong> is reserved for active members. Upgrade your membership to get instant access to all past session recordings, slides, and premium research.
+                            </p>
+                        </div>
+
+                        <div className="pt-2 flex flex-col gap-2 font-mono text-[10px]">
+                            <button
+                                onClick={() => {
+                                    setShowUpgradeModal(false)
+                                    onNavigate?.("profile")
+                                }}
+                                className="w-full py-3 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-xl text-xs transition-transform active:scale-[0.98] cursor-pointer"
+                            >
+                                Upgrade Membership
+                            </button>
+                            <button
+                                onClick={() => setShowUpgradeModal(false)}
+                                className="w-full py-3 bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-text-primary rounded-xl text-xs transition-colors cursor-pointer"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     )
