@@ -8,6 +8,7 @@ import { RecentInsights } from "@/components/homepage/RecentInsights"
 import { UpcomingEvents } from "@/components/homepage/UpcomingEvents"
 import { Testimonials } from "@/components/homepage/Testimonials"
 import { LogoMarquee } from "@/components/events/LogoMarquee"
+import { MembershipPromoSection } from "@/components/homepage/MembershipPromoSection"
 import { client } from "@/lib/sanity.client"
 import { recentPostsQuery, upcomingEventsHomeQuery, testimonialsQuery } from "@/lib/sanity.queries"
 import { Testimonial } from "@/lib/types"
@@ -34,6 +35,7 @@ export default async function Home() {
         <Manifesto />
         <Method />
         <ProofStats />
+        <MembershipPromoSection />
         <Testimonials testimonials={testimonials} />
         <UpcomingEvents events={events} />
         <RecentInsights posts={posts} />
