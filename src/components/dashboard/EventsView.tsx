@@ -1,10 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Video, Download, Check } from "lucide-react"
-import { mockEvents } from "./mockData"
+import { Calendar, Video, Download } from "lucide-react"
 
-export function EventsView() {
+interface EventsViewProps {
+    upcomingEvents: any[]
+    pastEvents: any[]
+}
+
+function formatDate(dateStr: string): string {
+    try {
+        return new Date(dateStr).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        })
+    } catch (e) {
+        return dateStr
+    }
+}
+
+export function EventsView({ upcomingEvents, pastEvents }: EventsViewProps) {
     const [registeredIds, setRegisteredIds] = useState<string[]>([])
 
     const toggleRegister = (id: string) => {
@@ -14,9 +30,6 @@ export function EventsView() {
             setRegisteredIds([...registeredIds, id])
         }
     }
-
-    const upcomingEvents = mockEvents.filter(e => !e.recordingUrl)
-    const pastEvents = mockEvents.filter(e => e.recordingUrl)
 
     return (
         <div className="space-y-12 text-left max-w-4xl mx-auto py-4">
@@ -40,35 +53,46 @@ export function EventsView() {
                 {upcomingEvents.length > 0 ? (
                     <div className="grid md:grid-cols-2 gap-6">
                         {upcomingEvents.map((event) => {
-                            const isReg = registeredIds.includes(event.id)
+                            const isReg = registeredIds.includes(event.eventId || event.id)
                             return (
                                 <div 
-                                    key={event.id}
+                                    key={event.eventId || event.id}
                                     className="p-6 rounded-2xl border border-white/5 bg-[#1E1E1E] flex flex-col justify-between min-h-[200px]"
                                 >
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                            <span>{event.type}</span>
-                                            <span>{event.date} · {event.time}</span>
+                                            <span>{event.location || "ZOOM WEBINAR"}</span>
+                                            <span>{formatDate(event.date)}</span>
                                         </div>
                                         <h3 className="text-base font-bold text-text-primary leading-snug">{event.title}</h3>
                                         <p className="text-xs text-neutral-400 font-light leading-relaxed">
-                                            {event.description}
+                                            {event.shortDescription}
                                         </p>
                                     </div>
 
                                     <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[10px] font-mono text-neutral-500">
                                         <span>ZOOM WEBINAR</span>
-                                        <button
-                                            onClick={() => toggleRegister(event.id)}
-                                            className={`px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
-                                                isReg 
-                                                    ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" 
-                                                    : "bg-gold text-bg-deep hover:bg-[#E0A800] active:scale-[0.98]"
-                                            }`}
-                                        >
-                                            {isReg ? "Seat Reserved" : "Reserve Seat"}
-                                        </button>
+                                        {event.superProfileLink || event.registrationLink ? (
+                                            <a
+                                                href={event.superProfileLink || event.registrationLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="px-4 py-2 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-full text-xs active:scale-[0.98] transition-transform"
+                                            >
+                                                Register Seat
+                                            </a>
+                                        ) : (
+                                            <button
+                                                onClick={() => toggleRegister(event.eventId || event.id)}
+                                                className={`px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                                                    isReg 
+                                                        ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" 
+                                                        : "bg-gold text-bg-deep hover:bg-[#E0A800] active:scale-[0.98]"
+                                                }`}
+                                            >
+                                                {isReg ? "Seat Reserved" : "Reserve Seat"}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )
@@ -91,18 +115,18 @@ export function EventsView() {
                     <div className="border border-white/5 rounded-2xl bg-black/10 overflow-hidden divide-y divide-white/5">
                         {pastEvents.map((event) => (
                             <div 
-                                key={event.id}
+                                key={event.eventId || event.id}
                                 className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/5 transition-colors duration-300"
                             >
                                 <div className="space-y-2 flex-1">
                                     <div className="flex items-center gap-3 text-[10px] font-mono text-neutral-500 uppercase">
-                                        <span>{event.type}</span>
+                                        <span>{event.location || "ZOOM REPLAY"}</span>
                                         <span className="w-1 h-1 rounded-full bg-neutral-600" />
-                                        <span>RECORDED ON {event.date}</span>
+                                        <span>RECORDED ON {formatDate(event.date)}</span>
                                     </div>
                                     <h3 className="text-base font-bold text-text-primary">{event.title}</h3>
                                     <p className="text-xs text-neutral-400 font-light leading-relaxed max-w-xl">
-                                        {event.description}
+                                        {event.shortDescription}
                                     </p>
                                 </div>
 

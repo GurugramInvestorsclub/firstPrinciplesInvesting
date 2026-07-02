@@ -5,7 +5,7 @@ import {
     Home, FileText, Layers, Calendar, 
     User, LogOut, Star, Sparkles, BookOpen
 } from "lucide-react"
-import { mockReports } from "./mockData"
+import { mockReports, mockEvents } from "./mockData"
 import { HomeView } from "./HomeView"
 import { MembersOnlyView } from "./MembersOnlyView"
 import { FreeResearchView } from "./FreeResearchView"
@@ -14,18 +14,40 @@ import { EventsView } from "./EventsView"
 import { IndustryResearchView } from "./IndustryResearchView"
 import { ProfileView } from "./ProfileView"
 
+
 interface ResearchDeskProps {
     userName: string
     userEmail: string
     subscriptionStatus: string
     subscriptionEnd?: string
     onSignOut: () => void
+    initialPosts?: any[]
+    initialUpcomingEvents?: any[]
+    initialPastEvents?: any[]
 }
 
-export function ResearchDesk({ userName, userEmail, subscriptionStatus, subscriptionEnd, onSignOut }: ResearchDeskProps) {
+export function ResearchDesk({ 
+    userName, 
+    userEmail, 
+    subscriptionStatus, 
+    subscriptionEnd, 
+    onSignOut,
+    initialPosts = [],
+    initialUpcomingEvents = [],
+    initialPastEvents = []
+}: ResearchDeskProps) {
     const [activeTab, setActiveTab] = useState("home")
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [savedSlugs, setSavedSlugs] = useState<string[]>([])
+
+    // Fallback merge
+    const posts = initialPosts.length > 0 ? initialPosts : mockReports
+    const upcomingEvents = initialUpcomingEvents.length > 0 
+        ? initialUpcomingEvents 
+        : mockEvents.filter(e => !e.recordingUrl)
+    const pastEvents = initialPastEvents.length > 0 
+        ? initialPastEvents 
+        : mockEvents.filter(e => e.recordingUrl)
 
     // Load bookmarks from local storage
     useEffect(() => {
@@ -151,7 +173,7 @@ export function ResearchDesk({ userName, userEmail, subscriptionStatus, subscrip
                 {/* Tab Render Area */}
                 <main className="flex-1 p-6 md:p-10 max-w-5xl w-full mx-auto">
                     {activeTab === "home" && (
-                        <HomeView userName={userName} onNavigate={handleNavigate} />
+                        <HomeView userName={userName} onNavigate={handleNavigate} posts={posts} upcomingEvents={upcomingEvents} />
                     )}
 
                     {(activeTab === "members-only" || activeTab === "free-research") && (
@@ -161,20 +183,23 @@ export function ResearchDesk({ userName, userEmail, subscriptionStatus, subscrip
                                 onBack={() => setSelectedId(null)} 
                                 isBookmarked={savedSlugs.includes(selectedId)}
                                 onToggleBookmark={toggleBookmark}
+                                posts={posts}
                             />
                         ) : activeTab === "members-only" ? (
                             <MembersOnlyView 
                                 onSelectReport={(slug) => handleNavigate("members-only", slug)}
+                                posts={posts}
                             />
                         ) : (
                             <FreeResearchView 
                                 onSelectReport={(slug) => handleNavigate("free-research", slug)}
+                                posts={posts}
                             />
                         )
                     )}
 
                     {activeTab === "events" && (
-                        <EventsView />
+                        <EventsView upcomingEvents={upcomingEvents} pastEvents={pastEvents} />
                     )}
 
                     {activeTab === "industry-research" && (
@@ -227,3 +252,4 @@ export function ResearchDesk({ userName, userEmail, subscriptionStatus, subscrip
         </div>
     )
 }
+

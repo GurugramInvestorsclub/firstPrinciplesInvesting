@@ -1,15 +1,48 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, ArrowRight, Calendar, Star, FileText } from "lucide-react"
-import { mockReports, mockEvents } from "./mockData"
+import { Clock, ArrowRight, Star } from "lucide-react"
+import Image from "next/image"
+import { urlForImage } from "@/lib/sanity.image"
 
 interface HomeViewProps {
     userName: string
     onNavigate: (tab: string, arg?: string) => void
+    posts: any[]
+    upcomingEvents: any[]
 }
 
-export function HomeView({ userName, onNavigate }: HomeViewProps) {
+function calculateReadingTime(body: any[] | undefined): string {
+    if (!body || !Array.isArray(body)) return "15 min read"
+    let text = ""
+    body.forEach((block: any) => {
+        if (block._type === "block" && block.children) {
+            block.children.forEach((child: any) => {
+                if (child.text) {
+                    text += " " + child.text
+                }
+            })
+        }
+    })
+    const wordCount = text.trim().split(/\s+/).filter(Boolean).length
+    if (wordCount === 0) return "15 min read"
+    const min = Math.ceil(wordCount / 220)
+    return `${min} min read`
+}
+
+function formatDate(dateStr: string): string {
+    try {
+        return new Date(dateStr).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        })
+    } catch (e) {
+        return dateStr
+    }
+}
+
+export function HomeView({ userName, onNavigate, posts, upcomingEvents }: HomeViewProps) {
     const [lastRead, setLastRead] = useState<{ title: string; slug: string; progress: number; readTime: string } | null>(null)
 
     // Load actual reading progress from localStorage if available
@@ -18,33 +51,27 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
         if (savedProgress) {
             try {
                 const parsed = JSON.parse(savedProgress)
-                const report = mockReports.find(r => r.slug === parsed.slug)
+                const report = posts.find(r => r.slug?.current === parsed.slug)
                 if (report) {
                     setLastRead({
                         title: report.title,
-                        slug: report.slug,
+                        slug: report.slug?.current,
                         progress: Math.round(parsed.percent),
-                        readTime: report.readTime
+                        readTime: calculateReadingTime(report.body)
                     })
                 }
             } catch (e) {
                 console.error(e)
             }
         }
-    }, [])
+    }, [posts])
 
     // Filter premium (subscriber) and free (public) articles
-    const premiumArticles = mockReports.filter(r => r.access === "subscriber").slice(0, 3)
-    const freeArticles = mockReports.filter(r => r.access === "public").slice(0, 3)
+    const premiumArticles = posts.filter(r => r.access === "subscriber").slice(0, 3)
+    const freeArticles = posts.filter(r => r.access !== "subscriber").slice(0, 3)
 
     // Latest premium article to show as fallback for continue reading
-    const latestPremium = mockReports.find(r => r.access === "subscriber") || mockReports[0]
-
-    // Check if there are upcoming events (date >= now)
-    const upcomingEvents = mockEvents.filter(e => {
-        // Normally compares date, let's treat all mock events without recordings as upcoming
-        return !e.recordingUrl
-    })
+    const latestPremium = posts.find(r => r.access === "subscriber") || posts[0]
 
     return (
         <div className="space-y-16 text-left max-w-4xl mx-auto py-4">
@@ -91,13 +118,13 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
                 ) : (
                     latestPremium && (
                         <div 
-                            onClick={() => onNavigate("members-only", latestPremium.slug)}
+                            onClick={() => onNavigate("members-only", latestPremium.slug?.current)}
                             className="p-6 md:p-8 rounded-2xl border border-white/5 bg-[#1E1E1E] hover:border-gold/30 hover:bg-[#2E2E2E]/40 transition-all duration-300 cursor-pointer flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
                         >
                             <div className="space-y-3 max-w-xl">
                                 <div className="flex items-center gap-2 text-xs font-mono text-neutral-500">
                                     <Clock className="w-3.5 h-3.5" />
-                                    <span>{latestPremium.readTime}</span>
+                                    <span>{calculateReadingTime(latestPremium.body)}</span>
                                     <span className="w-1 h-1 rounded-full bg-neutral-700" />
                                     <span className="text-gold uppercase font-bold text-[9px] tracking-wider bg-gold/10 px-2 py-0.5 rounded">PREMIUM</span>
                                 </div>
@@ -136,18 +163,30 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
                 <div className="grid md:grid-cols-3 gap-6">
                     {premiumArticles.map((report) => (
                         <div 
-                            key={report.id}
-                            onClick={() => onNavigate("members-only", report.slug)}
+                            key={report._id || report.id}
+                            onClick={() => onNavigate("members-only", report.slug?.current)}
                             className="flex flex-col border border-white/5 hover:border-gold/25 bg-[#1E1E1E] rounded-2xl overflow-hidden hover:bg-white/5 transition-all duration-300 cursor-pointer group"
                         >
+                            {/* Cover image if available */}
+                            {report.mainImage && (
+                                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                    <Image
+                                        src={urlForImage(report.mainImage).width(400).height(225).fit("crop").url()}
+                                        alt={report.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                    />
+                                </div>
+                            )}
+
                             {/* Card Details */}
                             <div className="p-6 flex flex-col justify-between flex-grow min-h-[220px]">
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                        <span>{report.publishedAt}</span>
+                                        <span>{formatDate(report.publishedAt)}</span>
                                         <span className="text-gold bg-gold/10 px-2 py-0.5 rounded font-bold">PREMIUM</span>
                                     </div>
-                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug">
+                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2">
                                         {report.title}
                                     </h3>
                                     <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
@@ -156,7 +195,7 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
                                 </div>
 
                                 <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
-                                    <span>{report.readTime}</span>
+                                    <span>{calculateReadingTime(report.body)}</span>
                                     <span className="text-gold">Read Article ↗</span>
                                 </div>
                             </div>
@@ -182,18 +221,30 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
                 <div className="grid md:grid-cols-3 gap-6">
                     {freeArticles.map((report) => (
                         <div 
-                            key={report.id}
-                            onClick={() => onNavigate("free-research", report.slug)}
+                            key={report._id || report.id}
+                            onClick={() => onNavigate("free-research", report.slug?.current)}
                             className="flex flex-col border border-white/5 hover:border-gold/25 bg-[#1E1E1E] rounded-2xl overflow-hidden hover:bg-white/5 transition-all duration-300 cursor-pointer group"
                         >
+                            {/* Cover image if available */}
+                            {report.mainImage && (
+                                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                    <Image
+                                        src={urlForImage(report.mainImage).width(400).height(225).fit("crop").url()}
+                                        alt={report.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                    />
+                                </div>
+                            )}
+
                             {/* Card Details */}
                             <div className="p-6 flex flex-col justify-between flex-grow min-h-[220px]">
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                        <span>{report.publishedAt}</span>
+                                        <span>{formatDate(report.publishedAt)}</span>
                                         <span className="text-neutral-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded font-bold">FREE</span>
                                     </div>
-                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug">
+                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2">
                                         {report.title}
                                     </h3>
                                     <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
@@ -202,7 +253,7 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
                                 </div>
 
                                 <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
-                                    <span>{report.readTime}</span>
+                                    <span>{calculateReadingTime(report.body)}</span>
                                     <span className="text-gold">Read Article ↗</span>
                                 </div>
                             </div>
@@ -221,17 +272,19 @@ export function HomeView({ userName, onNavigate }: HomeViewProps) {
                     <div className="grid md:grid-cols-2 gap-6">
                         {upcomingEvents.slice(0, 2).map((event) => (
                             <div 
-                                key={event.id}
-                                className="p-6 rounded-2xl border border-white/5 bg-[#1E1E1E] space-y-4"
+                                key={event.eventId || event.id}
+                                className="p-6 rounded-2xl border border-white/5 bg-[#1E1E1E] flex flex-col justify-between min-h-[200px]"
                             >
-                                <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                    <span>{event.type}</span>
-                                    <span>{event.date} · {event.time}</span>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
+                                        <span>{event.location || "WEBINAR"}</span>
+                                        <span>{formatDate(event.date)}</span>
+                                    </div>
+                                    <h3 className="text-base font-bold text-text-primary leading-snug">{event.title}</h3>
+                                    <p className="text-xs text-neutral-400 font-light leading-relaxed">
+                                        {event.shortDescription}
+                                    </p>
                                 </div>
-                                <h3 className="text-base font-bold text-text-primary leading-snug">{event.title}</h3>
-                                <p className="text-xs text-neutral-400 font-light leading-relaxed">
-                                    {event.description}
-                                </p>
                                 <div className="pt-2 border-t border-white/5 flex justify-end">
                                     <button
                                         onClick={() => onNavigate("events")}

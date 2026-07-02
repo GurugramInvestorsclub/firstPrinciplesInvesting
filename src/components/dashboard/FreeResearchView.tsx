@@ -2,28 +2,56 @@
 
 import { useState } from "react"
 import { Search, Clock, ArrowUpDown, Filter } from "lucide-react"
-import { mockReports } from "./mockData"
+import Image from "next/image"
+import { urlForImage } from "@/lib/sanity.image"
 
 interface FreeResearchViewProps {
     onSelectReport: (slug: string) => void
+    posts: any[]
 }
 
-export function FreeResearchView({ onSelectReport }: FreeResearchViewProps) {
+function calculateReadingTime(body: any[] | undefined): string {
+    if (!body || !Array.isArray(body)) return "15 min read"
+    let text = ""
+    body.forEach((block: any) => {
+        if (block._type === "block" && block.children) {
+            block.children.forEach((child: any) => {
+                if (child.text) {
+                    text += " " + child.text
+                }
+            })
+        }
+    })
+    const wordCount = text.trim().split(/\s+/).filter(Boolean).length
+    if (wordCount === 0) return "15 min read"
+    const min = Math.ceil(wordCount / 220)
+    return `${min} min read`
+}
+
+function formatDate(dateStr: string): string {
+    try {
+        return new Date(dateStr).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        })
+    } catch (e) {
+        return dateStr
+    }
+}
+
+export function FreeResearchView({ onSelectReport, posts }: FreeResearchViewProps) {
     const [searchQuery, setSearchQuery] = useState("")
-    const [categoryFilter, setCategoryFilter] = useState("All")
     const [sortBy, setSortBy] = useState("newest")
 
-    // Filter reports (access === "public" only)
-    const filteredReports = mockReports.filter(report => {
-        if (report.access !== "public") return false
+    // Filter reports (access !== "subscriber" only)
+    const filteredReports = posts.filter(report => {
+        if (report.access === "subscriber") return false
 
         const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              report.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              report.industry.toLowerCase().includes(searchQuery.toLowerCase())
-        
-        const matchesCategory = categoryFilter === "All" || report.industry === categoryFilter
+                              report.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
 
-        return matchesSearch && matchesCategory
+        return matchesSearch
     }).sort((a, b) => {
         if (sortBy === "newest") {
             return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
@@ -32,12 +60,10 @@ export function FreeResearchView({ onSelectReport }: FreeResearchViewProps) {
             return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
         }
         if (sortBy === "readTime") {
-            return parseInt(a.readTime) - parseInt(b.readTime)
+            return parseInt(calculateReadingTime(a.body)) - parseInt(calculateReadingTime(b.body))
         }
         return 0
     })
-
-    const categories = ["All", ...Array.from(new Set(mockReports.filter(r => r.access === "public").map(r => r.industry)))]
 
     return (
         <div className="space-y-8 text-left max-w-4xl mx-auto py-4">
@@ -70,20 +96,6 @@ export function FreeResearchView({ onSelectReport }: FreeResearchViewProps) {
                 {/* Filters */}
                 <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
                     
-                    {/* Industry Category */}
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-3.5 h-3.5 text-neutral-500" />
-                        <select
-                            value={categoryFilter}
-                            onChange={(e) => setCategoryFilter(e.target.value)}
-                            className="bg-bg-deep border border-white/5 rounded-lg px-3 py-2 text-neutral-400 focus:border-gold/30 outline-none cursor-pointer"
-                        >
-                            {categories.map((cat) => (
-                                <option key={cat} value={cat}>{cat === "All" ? "All Categories" : cat}</option>
-                            ))}
-                        </select>
-                    </div>
-
                     {/* Sorting */}
                     <div className="flex items-center gap-2">
                         <ArrowUpDown className="w-3.5 h-3.5 text-neutral-500" />
@@ -106,17 +118,29 @@ export function FreeResearchView({ onSelectReport }: FreeResearchViewProps) {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredReports.map((report) => (
                         <div 
-                            key={report.id}
-                            onClick={() => onSelectReport(report.slug)}
+                            key={report._id || report.id}
+                            onClick={() => onSelectReport(report.slug?.current)}
                             className="flex flex-col border border-white/5 hover:border-gold/25 bg-[#1E1E1E] rounded-2xl overflow-hidden hover:bg-white/5 transition-all duration-300 cursor-pointer group"
                         >
+                            {/* Cover image if available */}
+                            {report.mainImage && (
+                                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                    <Image
+                                        src={urlForImage(report.mainImage).width(400).height(225).fit("crop").url()}
+                                        alt={report.title}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                    />
+                                </div>
+                            )}
+
                             <div className="p-6 flex flex-col justify-between flex-grow min-h-[220px]">
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                        <span>{report.publishedAt}</span>
+                                        <span>{formatDate(report.publishedAt)}</span>
                                         <span className="text-neutral-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded font-bold">FREE</span>
                                     </div>
-                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug">
+                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2">
                                         {report.title}
                                     </h3>
                                     <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
@@ -127,7 +151,7 @@ export function FreeResearchView({ onSelectReport }: FreeResearchViewProps) {
                                 <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
                                     <div className="flex items-center gap-1">
                                         <Clock className="w-3 h-3 text-neutral-500" />
-                                        <span>{report.readTime}</span>
+                                        <span>{calculateReadingTime(report.body)}</span>
                                     </div>
                                     <span className="text-gold">Read Article ↗</span>
                                 </div>
