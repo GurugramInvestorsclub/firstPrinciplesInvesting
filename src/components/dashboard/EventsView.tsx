@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Video, Download, Lock } from "lucide-react"
+import { Calendar, MapPin, User, ArrowRight, Play, Lock } from "lucide-react"
+import Image from "next/image"
+import { urlForImage } from "@/lib/sanity.image"
 
 interface EventsViewProps {
     upcomingEvents: any[]
@@ -41,132 +43,277 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
                 <h1 className="text-3xl font-bold text-text-primary tracking-tight font-sans">
                     Events & Meetups
                 </h1>
-                <p className="text-sm text-neutral-400 font-light mt-1">
+                <p className="text-sm text-neutral-400 font-light mt-1 font-mono">
                     Register for upcoming webinars and access the complete video replay library with slides.
                 </p>
             </div>
 
             {/* Upcoming Live Sessions */}
             <div className="space-y-6">
-                <h2 className="text-lg font-bold text-text-primary border-b border-white/5 pb-3 font-mono uppercase tracking-wider">
+                <h2 className="text-sm font-bold text-neutral-500 border-b border-white/5 pb-3 font-mono uppercase tracking-wider">
                     Upcoming Live Sessions
                 </h2>
 
                 {upcomingEvents.length > 0 ? (
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-8">
                         {upcomingEvents.map((event) => {
                             const isReg = registeredIds.includes(event.eventId || event.id)
+                            const eventDate = new Date(event.date)
+                            const month = eventDate.toLocaleDateString("en-US", { month: "short" })
+                            const day = eventDate.toLocaleDateString("en-US", { day: "2-digit" })
+                            const dateStr = formatDate(event.date)
+
                             return (
                                 <div 
                                     key={event.eventId || event.id}
-                                    className="p-6 rounded-2xl border border-white/5 bg-[#1E1E1E] flex flex-col justify-between min-h-[200px]"
+                                    className="flex flex-col rounded-[24px] border border-white/5 bg-[#111113]/40 backdrop-blur-xl overflow-hidden hover:border-gold/35 hover:shadow-[0_20px_60px_rgba(255,199,44,0.15)] transition-all duration-500 group"
                                 >
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                            <span>{event.location || "ZOOM WEBINAR"}</span>
-                                            <span>{formatDate(event.date)}</span>
+                                    {/* Poster Container */}
+                                    <div className="h-[200px] relative overflow-hidden bg-[#0A0A0A] border-b border-white/5 flex-shrink-0">
+                                        {event.image ? (
+                                            <>
+                                                <Image
+                                                    src={urlForImage(event.image).width(800).height(400).url()}
+                                                    alt={event.title}
+                                                    fill
+                                                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="absolute inset-0 bg-gradient-to-br from-bg-primary via-bg-deep to-gold/10 opacity-80" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                                            </>
+                                        )}
+                                        {/* Date Badge */}
+                                        <div className="absolute bottom-4 left-4 z-20">
+                                            <div className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-gold/20 backdrop-blur-md border border-gold/30 text-[10px] font-bold text-gold tracking-wider uppercase font-mono">
+                                                {month} {day}
+                                            </div>
                                         </div>
-                                        <h3 className="text-base font-bold text-text-primary leading-snug">{event.title}</h3>
-                                        <p className="text-xs text-neutral-400 font-light leading-relaxed">
-                                            {event.shortDescription}
-                                        </p>
                                     </div>
 
-                                    <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[10px] font-mono text-neutral-500">
-                                        <span>ZOOM WEBINAR</span>
-                                        {event.superProfileLink || event.registrationLink ? (
-                                            <a
-                                                href={event.superProfileLink || event.registrationLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="px-4 py-2 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-full text-xs active:scale-[0.98] transition-transform"
-                                            >
-                                                Register Seat
-                                            </a>
-                                        ) : (
-                                            <button
-                                                onClick={() => toggleRegister(event.eventId || event.id)}
-                                                className={`px-4 py-2 rounded-full font-bold text-xs transition-all cursor-pointer ${
-                                                    isReg 
-                                                        ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" 
-                                                        : "bg-gold text-bg-deep hover:bg-[#E0A800] active:scale-[0.98]"
-                                                }`}
-                                            >
-                                                {isReg ? "Seat Reserved" : "Reserve Seat"}
-                                            </button>
-                                        )}
+                                    {/* Content Area */}
+                                    <div className="flex-grow p-6 flex flex-col justify-between min-h-[300px]">
+                                        <div>
+                                            {/* Metadata */}
+                                            <div className="flex items-center gap-3 text-[9px] font-bold tracking-[0.2em] text-neutral-500 mb-4 uppercase font-mono">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Calendar className="w-3.5 h-3.5 text-gold" />
+                                                    <span>{dateStr}</span>
+                                                </div>
+                                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                                                <div className="flex items-center gap-1.5">
+                                                    <MapPin className="w-3.5 h-3.5 text-gold" />
+                                                    <span className="truncate max-w-[120px]">{event.location || "Virtual"}</span>
+                                                </div>
+                                            </div>
+
+                                            <h3 className="text-xl font-bold text-white mb-3 leading-snug group-hover:text-gold transition-colors duration-300">
+                                                {event.title}
+                                            </h3>
+                                            
+                                            <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light line-clamp-3">
+                                                {event.shortDescription}
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-4 mt-auto">
+                                            {/* Speaker Info */}
+                                            {event.speaker && (
+                                                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5 group-hover:border-gold/15 transition-colors">
+                                                    <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0">
+                                                        {event.speaker.image ? (
+                                                            <Image
+                                                                src={urlForImage(event.speaker.image).width(80).height(80).fit("crop").url()}
+                                                                alt={event.speaker.name}
+                                                                fill
+                                                                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                                            />
+                                                        ) : (
+                                                            <User className="absolute inset-0 m-auto w-4 h-4 text-gray-500" />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-bold text-white truncate leading-tight">
+                                                            {event.speaker.name}
+                                                        </p>
+                                                        <p className="text-[10px] text-gray-500 truncate leading-none mt-0.5">
+                                                            {event.speaker.credentials?.[0] || "Expert Speaker"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Action Button */}
+                                            <div className="pt-2">
+                                                {event.superProfileLink || event.registrationLink ? (
+                                                    <a 
+                                                        href={event.superProfileLink || event.registrationLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center justify-center w-full py-3 rounded-xl bg-gradient-to-r from-gold/15 to-gold/5 border border-gold/20 text-gold font-bold text-xs hover:from-gold hover:to-[#C89B3C] hover:text-[#0b0b0c] hover:border-transparent transition-all duration-500 font-mono tracking-wider uppercase cursor-pointer"
+                                                    >
+                                                        Reserve Seat
+                                                        <ArrowRight className="ml-2 w-3.5 h-3.5" />
+                                                    </a>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => toggleRegister(event.eventId || event.id)}
+                                                        className={`flex items-center justify-center w-full py-3 rounded-xl font-bold text-xs transition-all duration-300 font-mono tracking-wider uppercase cursor-pointer ${
+                                                            isReg 
+                                                                ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" 
+                                                                : "bg-gradient-to-r from-gold/15 to-gold/5 border border-gold/20 text-gold hover:from-gold hover:to-[#C89B3C] hover:text-[#0b0b0c] hover:border-transparent"
+                                                        }`}
+                                                    >
+                                                        {isReg ? "Seat Reserved" : "Reserve Seat"}
+                                                        {!isReg && <ArrowRight className="ml-2 w-3.5 h-3.5" />}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )
                         })}
                     </div>
                 ) : (
-                    <div className="p-8 border border-dashed border-white/10 rounded-2xl text-center text-xs text-neutral-500">
-                        No upcoming events.
+                    <div className="p-8 border border-dashed border-white/10 rounded-2xl text-center text-xs text-neutral-500 font-mono">
+                        No upcoming events scheduled.
                     </div>
                 )}
             </div>
 
             {/* Past Recording Replays */}
             <div className="space-y-6">
-                <h2 className="text-lg font-bold text-text-primary border-b border-white/5 pb-3 font-mono uppercase tracking-wider">
+                <h2 className="text-sm font-bold text-neutral-500 border-b border-white/5 pb-3 font-mono uppercase tracking-wider">
                     Past Session Replays
                 </h2>
 
                 {pastEvents.length > 0 ? (
-                    <div className="border border-white/5 rounded-2xl bg-black/10 overflow-hidden divide-y divide-white/5">
-                        {pastEvents.map((event) => (
-                            <div 
-                                key={event.eventId || event.id}
-                                className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white/5 transition-colors duration-300"
-                            >
-                                <div className="space-y-2 flex-1">
-                                    <div className="flex items-center gap-3 text-[10px] font-mono text-neutral-500 uppercase">
-                                        <span>{event.location || "ZOOM REPLAY"}</span>
-                                        <span className="w-1 h-1 rounded-full bg-neutral-600" />
-                                        <span>RECORDED ON {formatDate(event.date)}</span>
-                                    </div>
-                                    <h3 className="text-base font-bold text-text-primary">{event.title}</h3>
-                                    <p className="text-xs text-neutral-400 font-light leading-relaxed max-w-xl">
-                                        {event.shortDescription}
-                                    </p>
-                                </div>
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {pastEvents.map((event) => {
+                            const eventDate = new Date(event.date)
+                            const month = eventDate.toLocaleDateString("en-US", { month: "short" })
+                            const day = eventDate.toLocaleDateString("en-US", { day: "2-digit" })
+                            const dateStr = formatDate(event.date)
 
-                                <div className="flex items-center gap-3 shrink-0 font-mono text-[10px] font-bold">
-                                    {hasSubscriptionAccess ? (
-                                        <>
-                                            <button
-                                                onClick={() => alert("Slides PDF download initiated.")}
-                                                className="px-4 py-2 border border-white/5 hover:border-gold/30 hover:bg-gold/10 hover:text-gold text-neutral-400 bg-[#1E1E1E] rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-                                            >
-                                                <Download className="w-3.5 h-3.5" />
-                                                <span>Slides PDF</span>
-                                            </button>
-                                            <button
-                                                onClick={() => alert("Playing replay video...")}
-                                                className="px-4 py-2 bg-gold hover:bg-[#E0A800] text-bg-deep rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer active:scale-[0.98]"
-                                            >
-                                                <Video className="w-3.5 h-3.5 text-bg-deep" />
-                                                <span>Replay Video</span>
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            onClick={() => onNavigate?.("profile")}
-                                            className="px-4 py-2 bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-gold/10 text-neutral-500 hover:text-gold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors"
-                                            title="Subscriber access required"
-                                        >
-                                            <Lock className="w-3.5 h-3.5" />
-                                            <span>Locked Replay (Upgrade)</span>
-                                        </button>
-                                    )}
+                            return (
+                                <div 
+                                    key={event.eventId || event.id}
+                                    className="flex flex-col rounded-[24px] border border-white/5 bg-[#111113]/40 backdrop-blur-xl overflow-hidden hover:border-gold/35 hover:shadow-[0_20px_60px_rgba(255,199,44,0.15)] transition-all duration-500 group"
+                                >
+                                    {/* Poster Container */}
+                                    <div className="h-[200px] relative overflow-hidden bg-[#0A0A0A] border-b border-white/5 flex-shrink-0">
+                                        {event.image ? (
+                                            <>
+                                                <Image
+                                                    src={urlForImage(event.image).width(800).height(400).url()}
+                                                    alt={event.title}
+                                                    fill
+                                                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="absolute inset-0 bg-gradient-to-br from-bg-primary via-bg-deep to-gold/10 opacity-80" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                                            </>
+                                        )}
+                                        {/* Date Badge */}
+                                        <div className="absolute bottom-4 left-4 z-20">
+                                            <div className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-gold/10 backdrop-blur-md border border-white/10 text-[10px] font-bold text-neutral-300 tracking-wider uppercase font-mono">
+                                                {month} {day}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Content Area */}
+                                    <div className="flex-grow p-6 flex flex-col justify-between min-h-[300px]">
+                                        <div>
+                                            {/* Metadata */}
+                                            <div className="flex items-center gap-3 text-[9px] font-bold tracking-[0.2em] text-neutral-500 mb-4 uppercase font-mono">
+                                                <div className="flex items-center gap-1.5">
+                                                    <Calendar className="w-3.5 h-3.5 text-gold" />
+                                                    <span>RECORDED ON {dateStr}</span>
+                                                </div>
+                                                <span className="w-1 h-1 rounded-full bg-white/10" />
+                                                <div className="flex items-center gap-1.5">
+                                                    <MapPin className="w-3.5 h-3.5 text-gold" />
+                                                    <span className="truncate max-w-[120px]">{event.location || "Virtual"}</span>
+                                                </div>
+                                            </div>
+
+                                            <h3 className="text-xl font-bold text-white mb-3 leading-snug group-hover:text-gold transition-colors duration-300">
+                                                {event.title}
+                                            </h3>
+                                            
+                                            <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light line-clamp-3">
+                                                {event.shortDescription}
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-4 mt-auto">
+                                            {/* Speaker Info */}
+                                            {event.speaker && (
+                                                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5 group-hover:border-gold/15 transition-colors">
+                                                    <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0">
+                                                        {event.speaker.image ? (
+                                                            <Image
+                                                                src={urlForImage(event.speaker.image).width(80).height(80).fit("crop").url()}
+                                                                alt={event.speaker.name}
+                                                                fill
+                                                                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                                            />
+                                                        ) : (
+                                                            <User className="absolute inset-0 m-auto w-4 h-4 text-gray-500" />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-bold text-white truncate leading-tight">
+                                                            {event.speaker.name}
+                                                        </p>
+                                                        <p className="text-[10px] text-gray-500 truncate leading-none mt-0.5">
+                                                            {event.speaker.credentials?.[0] || "Expert Speaker"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Action Replay Link */}
+                                            <div className="pt-2">
+                                                {hasSubscriptionAccess ? (
+                                                    <a 
+                                                        href={event.superProfileLink || "https://superprofile.bio/firstprinciplesacademy"}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center justify-center w-full py-3 rounded-xl bg-gradient-to-r from-gold to-[#C89B3C] text-[#0b0b0c] font-bold text-xs shadow-lg shadow-gold/15 hover:brightness-110 transition-all duration-500 font-mono tracking-wider uppercase cursor-pointer"
+                                                    >
+                                                        Watch Replay
+                                                        <Play className="ml-2 w-3.5 h-3.5 fill-current" />
+                                                    </a>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => onNavigate?.("profile")}
+                                                        className="flex items-center justify-center w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:border-gold/30 hover:bg-gold/10 text-neutral-500 hover:text-gold font-bold text-xs transition-colors font-mono tracking-wider uppercase cursor-pointer"
+                                                        title="Subscriber access required"
+                                                    >
+                                                        Locked Replay (Upgrade)
+                                                        <Lock className="ml-2 w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 ) : (
-                    <div className="p-8 border border-dashed border-white/10 rounded-2xl text-center text-xs text-neutral-500">
-                        No past replays available.
+                    <div className="p-8 border border-dashed border-white/10 rounded-2xl text-center text-xs text-neutral-500 font-mono">
+                        No past event recordings available.
                     </div>
                 )}
             </div>

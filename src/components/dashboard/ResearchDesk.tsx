@@ -6,6 +6,7 @@ import {
     User, LogOut, Star, Sparkles, BookOpen
 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { mockReports, mockEvents } from "./mockData"
 import { HomeView } from "./HomeView"
 import { MembersOnlyView } from "./MembersOnlyView"
@@ -161,42 +162,60 @@ export function ResearchDesk({
             {/* 2. Main Content Frame (padded on left for desktop sidebar, bottom for mobile nav) */}
             <div className="flex-1 lg:pl-64 pb-20 lg:pb-0 min-h-screen flex flex-col">
                 {/* Desktop top header banner / navbar */}
-                <header className="h-16 border-b border-white/5 bg-bg-deep/85 backdrop-blur-md sticky top-0 z-20 px-8 hidden lg:flex items-center justify-between select-none font-mono text-[10px]">
-                    <div className="flex items-center gap-6">
-                        <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white transition-colors">
-                            FIRST PRINCIPLES INVESTING
-                        </Link>
-                        <span className="text-neutral-700">|</span>
-                        <nav className="flex items-center gap-5 text-neutral-400">
-                            <Link href="/insights" className="hover:text-gold transition-colors">INSIGHTS</Link>
-                            <Link href="/events" className="hover:text-gold transition-colors">PUBLIC EVENTS</Link>
-                            <Link href="/super30" className="hover:text-gold transition-colors">SUPER 30</Link>
-                        </nav>
-                    </div>
-                    <div className="flex items-center gap-4 text-neutral-400">
-                        <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-0.5 rounded text-[8px]">
-                            {subscriptionStatus} Member
-                        </span>
-                        <span className="text-neutral-700">|</span>
-                        <span className="uppercase tracking-widest text-neutral-500 font-bold">
-                            MEMBERS AREA
-                        </span>
+                <header className="sticky top-[10px] z-20 flex flex-col items-center transition-all duration-500 px-6 py-2 select-none w-full max-w-5xl mx-auto">
+                    <div className="w-full h-14 md:h-16 rounded-full border border-white/10 bg-bg-deep/90 backdrop-blur-xl shadow-lg flex items-center justify-between px-6 font-mono text-[10px]">
+                        <div className="flex items-center gap-6">
+                            <Link href="/" className="font-bold tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2">
+                                <div className="relative w-8 h-8">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="First Principles Investing Logo"
+                                        fill
+                                        className="object-contain"
+                                        priority
+                                    />
+                                </div>
+                                <span className="text-text-primary hidden xl:inline text-xs font-bold uppercase tracking-wider">First Principles <span className="text-gold">Investing</span></span>
+                                <span className="text-text-primary xl:hidden text-xs font-bold uppercase tracking-wider">FP <span className="text-gold">Investing</span></span>
+                            </Link>
+                            <span className="text-neutral-700">|</span>
+                            <nav className="flex items-center gap-5 text-neutral-400">
+                                <Link href="/insights" className="hover:text-gold transition-colors">INSIGHTS</Link>
+                                <Link href="/events" className="hover:text-gold transition-colors">PUBLIC EVENTS</Link>
+                                <Link href="/super30" className="hover:text-gold transition-colors">SUPER 30</Link>
+                            </nav>
+                        </div>
+                        <div className="flex items-center gap-4 text-neutral-400">
+                            <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full text-[8px] border border-emerald-500/20">
+                                {subscriptionStatus} Member
+                            </span>
+                            <span className="text-neutral-700">|</span>
+                            <span className="uppercase tracking-widest text-neutral-400 font-bold bg-[#2E2E2E] px-3.5 py-1.5 rounded-full border border-white/5">
+                                MEMBERS AREA
+                            </span>
+                        </div>
                     </div>
                 </header>
 
                 {/* Mobile top header banner / navbar */}
-                <header className="h-14 border-b border-white/5 bg-bg-deep/90 backdrop-blur-md sticky top-0 z-20 px-6 lg:hidden flex items-center justify-between font-mono text-[10px] select-none">
-                    <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white">
-                        FP INVESTING
-                    </Link>
-                    <div className="flex items-center gap-3">
-                        <Link href="/insights" className="text-neutral-400 hover:text-gold">INSIGHTS</Link>
-                        <span className="text-neutral-700">|</span>
-                        <span className="text-emerald-400 font-bold text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded uppercase">
-                            MEMBER
-                        </span>
+                <header className="sticky top-[10px] z-20 flex flex-col items-center transition-all duration-500 px-4 py-2 select-none lg:hidden w-full">
+                    <div className="w-full h-12 rounded-full border border-white/10 bg-bg-deep/90 backdrop-blur-xl shadow-lg flex items-center justify-between px-4 font-mono text-[9px]">
+                        <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white flex items-center gap-1.5">
+                            <div className="relative w-5 h-5">
+                                <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+                            </div>
+                            <span>FP <span className="text-gold">INVESTING</span></span>
+                        </Link>
+                        <div className="flex items-center gap-3">
+                            <Link href="/insights" className="text-neutral-400 hover:text-gold font-bold">INSIGHTS</Link>
+                            <span className="text-neutral-700">|</span>
+                            <span className="text-emerald-400 font-bold text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded uppercase">
+                                MEMBER
+                            </span>
+                        </div>
                     </div>
                 </header>
+
 
 
                 {/* Tab Render Area */}
