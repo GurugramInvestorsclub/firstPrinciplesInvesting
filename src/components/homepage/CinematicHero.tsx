@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, Suspense, lazy } from "react"
+import { useEffect, useState, Suspense, lazy } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
@@ -8,53 +8,19 @@ import { ArrowRight } from "lucide-react"
 const HeroCanvas = lazy(() => import("./HeroCanvas"))
 
 export function CinematicHero() {
-    const sectionRef = useRef<HTMLElement>(null)
-    const contentRef = useRef<HTMLDivElement>(null)
     const [canvasVisible, setCanvasVisible] = useState(false)
 
     useEffect(() => {
-        // Lazy-show canvas after mount
+        // Only load and show Three.js canvas on desktop screens (width >= 768px)
+        const isMobile = window.innerWidth < 768
+        if (isMobile) return
+
         const timer = setTimeout(() => setCanvasVisible(true), 100)
-
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-        ).matches
-
-        if (prefersReducedMotion) return () => clearTimeout(timer)
-
-        let ctx: any = null
-
-        async function initGSAP() {
-            const gsap = (await import("gsap")).default
-
-            const children = contentRef.current?.children
-            if (!children) return
-
-            ctx = gsap.context(() => {
-                gsap.set(Array.from(children), { opacity: 0, y: 30 })
-
-                gsap.to(Array.from(children), {
-                    opacity: 1,
-                    y: 0,
-                    duration: 1,
-                    stagger: 0.12,
-                    ease: "power2.out",
-                    delay: 0.3,
-                })
-            }, sectionRef)
-        }
-
-        initGSAP()
-
-        return () => {
-            clearTimeout(timer)
-            ctx?.revert()
-        }
+        return () => clearTimeout(timer)
     }, [])
 
     return (
         <section
-            ref={sectionRef}
             className="relative w-full min-h-[100dvh] flex items-end md:items-end justify-center md:justify-start overflow-hidden bg-bg-deep"
         >
             {/* Three.js Canvas */}
@@ -72,11 +38,10 @@ export function CinematicHero() {
 
             {/* Content */}
             <div
-                ref={contentRef}
                 className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pb-16 md:pb-24 pt-32 flex flex-col items-center md:items-start text-center md:text-left gap-6"
             >
                 {/* Line 1 — Sans */}
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-text-primary"
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-text-primary animate-fade-in-up"
                     style={{ fontFamily: "var(--font-heading)" }}
                 >
                     Invest with Clarity.
@@ -84,7 +49,7 @@ export function CinematicHero() {
 
                 {/* Line 2 — Serif dramatic */}
                 <p
-                    className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl italic text-text-primary leading-[1.05] tracking-tight"
+                    className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl italic text-text-primary leading-[1.05] tracking-tight animate-fade-in-up delay-100"
                     style={{ fontFamily: "var(--font-display)" }}
                 >
                     Think in{" "}
@@ -92,12 +57,12 @@ export function CinematicHero() {
                 </p>
 
                 {/* Subtext */}
-                <p className="text-base md:text-lg text-text-secondary max-w-lg leading-relaxed">
+                <p className="text-base md:text-lg text-text-secondary max-w-lg leading-relaxed animate-fade-in-up delay-200">
                     A structured approach to understanding businesses, building conviction, and compounding wealth over decades.
                 </p>
 
                 {/* CTAs */}
-                <div className="flex flex-col sm:flex-row items-center md:items-start gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row items-center md:items-start gap-4 pt-4 animate-fade-in-up delay-300">
                     <Button
                         asChild
                         size="lg"

@@ -1,7 +1,3 @@
-"use client"
-
-import { useEffect, useRef } from "react"
-
 const paragraphs = [
     {
         intro: "Tactics expire. Frameworks endure.",
@@ -18,74 +14,12 @@ const paragraphs = [
 ]
 
 export function Manifesto() {
-    const sectionRef = useRef<HTMLElement>(null)
-    const headlineRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-        ).matches
-        if (prefersReducedMotion) return
-
-        let ctx: any = null
-
-        async function init() {
-            const gsap = (await import("gsap")).default
-            const { ScrollTrigger } = await import("gsap/ScrollTrigger")
-            gsap.registerPlugin(ScrollTrigger)
-
-            ctx = gsap.context(() => {
-                // Animate the headline words
-                const headlineEl = headlineRef.current
-                if (!headlineEl) return
-
-                const words = headlineEl.querySelectorAll(".word")
-                gsap.set(words, { opacity: 0, y: 12 })
-
-                gsap.to(words, {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    stagger: 0.04,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: "top 75%",
-                        once: true,
-                    },
-                })
-
-                // Animate paragraphs
-                const paras = sectionRef.current?.querySelectorAll(".manifesto-para")
-                if (paras) {
-                    gsap.set(paras, { opacity: 0, y: 20 })
-                    gsap.to(paras, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.8,
-                        stagger: 0.15,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: sectionRef.current,
-                            start: "top 60%",
-                            once: true,
-                        },
-                    })
-                }
-            }, sectionRef)
-        }
-
-        init()
-        return () => ctx?.revert()
-    }, [])
-
     // Split the headline into individually wrapped words
     const headlineText = "We focus on foundations."
     const headlineWords = headlineText.split(" ")
 
     return (
         <section
-            ref={sectionRef}
             className="relative py-28 md:py-40 bg-bg-deep overflow-hidden border-t border-white/5"
         >
             {/* Subtle grain */}
@@ -103,8 +37,8 @@ export function Manifesto() {
                     Most investing education focuses on tactics.
                 </p>
 
-                {/* Large serif headline with word-by-word reveal */}
-                <div ref={headlineRef} className="mb-12 md:mb-16">
+                {/* Large serif headline */}
+                <div className="mb-12 md:mb-16">
                     <h2
                         className="text-3xl md:text-5xl lg:text-6xl leading-[1.15] tracking-tight"
                         style={{ fontFamily: "var(--font-display)" }}
