@@ -6,7 +6,6 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle2, Calendar, BookOpen, ExternalLink, Home, Zap, TrendingUp } from "lucide-react"
-import { motion } from "framer-motion"
 
 interface QueryParams {
     email: string | null
@@ -84,35 +83,14 @@ function ThankYouContent() {
         }
     }
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.15,
-                delayChildren: 0.2
-            }
-        }
-    }
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1, y: 0,
-            transition: { duration: 0.6 }
-        }
-    }
 
     return (
         <main className="flex-1 flex flex-col items-center justify-center py-20 md:py-32 pt-40 px-4">
-            <motion.div 
-                className="max-w-3xl w-full text-center space-y-12"
-                initial="hidden"
-                animate="visible"
-                variants={containerVariants}
+            <div 
+                className="max-w-3xl w-full text-center space-y-12 animate-fade-in"
             >
                 {/* SECTION 1: Confirmation */}
-                <motion.div variants={itemVariants} className="space-y-6">
+                <div className="space-y-6">
                     <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gold/10 text-gold mb-4 mx-auto">
                         <CheckCircle2 className="w-10 h-10" />
                     </div>
@@ -157,12 +135,11 @@ function ThankYouContent() {
                             </>
                         )}
                     </div>
-                </motion.div>
+                </div>
                 
                 {/* SECTION 1.5: WhatsApp Community (Conditional) */}
                 {whatsappLink && (
-                    <motion.div 
-                        variants={itemVariants} 
+                    <div 
                         className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-8 space-y-6 relative overflow-hidden group"
                     >
                         {/* Decorative glow */}
@@ -184,11 +161,11 @@ function ThankYouContent() {
                                 <ExternalLink className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                             </a>
                         </Button>
-                    </motion.div>
+                    </div>
                 )}
 
                 {/* SECTION 3: Primary CTA */}
-                <motion.div variants={itemVariants} className="pt-8 relative">
+                <div className="pt-8 relative">
                     {/* Premium Pulse Glow */}
                     <div className="primary-btn-glow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[60px] bg-gold/30 blur-2xl rounded-full pointer-events-none opacity-0" />
                     
@@ -203,11 +180,10 @@ function ThankYouContent() {
                             <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                         </Link>
                     </Button>
-                </motion.div>
+                </div>
 
                 {/* SECTION 2: Value Reinforcement (Redesigned as Pillars) */}
-                <motion.div 
-                    variants={itemVariants} 
+                <div 
                     className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 text-left"
                 >
                     {[
@@ -244,10 +220,10 @@ function ThankYouContent() {
                             </div>
                         )
                     })}
-                </motion.div>
+                </div>
 
                 {/* SECTION 4: Secondary CTA (Events) */}
-                <motion.div variants={itemVariants} className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6">
+                <div className="p-8 rounded-3xl bg-white/5 border border-white/10 space-y-6">
                     <div className="space-y-2">
                         {email ? (
                             <div className="flex flex-col items-center gap-1">
@@ -272,10 +248,10 @@ function ThankYouContent() {
                             <Calendar className="w-4 h-4" /> Check Out Upcoming Events
                         </Link>
                     </Button>
-                </motion.div>
+                </div>
 
                 {/* SECTION 6: Exit Options */}
-                <motion.div variants={itemVariants} className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-text-secondary">
+                <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm text-text-secondary">
                     <Link href="/" className="flex items-center gap-2 hover:text-text-primary transition-colors">
                         <Home className="w-4 h-4" /> Back to Home
                     </Link>
@@ -283,8 +259,8 @@ function ThankYouContent() {
                     <Link href="/insights" className="flex items-center gap-2 hover:text-text-primary transition-colors">
                         <BookOpen className="w-4 h-4" /> Browse Previous Content
                     </Link>
-                </motion.div>
-            </motion.div>
+                </div>
+            </div>
         </main>
     )
 }

@@ -18,23 +18,6 @@ export function InsightsAnimations({ children }: { children: React.ReactNode }) 
         if (!container) return
 
         const ctx = gsap.context(() => {
-            // Header strip entrance
-            const header = container.querySelector("[data-gsap='header']")
-            if (header) {
-                gsap.fromTo(header,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
-                )
-            }
-
-            // Featured memo entrance (staggered after header)
-            const featured = container.querySelector("[data-gsap='featured']")
-            if (featured) {
-                gsap.fromTo(featured,
-                    { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", delay: 0.3 }
-                )
-            }
 
             // Grid cards — scroll-triggered stagger
             const gridCards = gsap.utils.toArray<HTMLElement>(container.querySelectorAll("[data-gsap='grid-card']"))

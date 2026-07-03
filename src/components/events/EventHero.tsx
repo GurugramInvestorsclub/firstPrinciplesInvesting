@@ -33,11 +33,8 @@ export function EventHero({ event }: EventHeroProps) {
             
             <div className="w-[80%] mx-auto max-w-screen-2xl relative z-10">
                 <div className="flex flex-col items-center text-center gap-16 lg:gap-24">
-                    <motion.div 
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                        className="w-full max-w-6xl flex flex-col items-center gap-8"
+                    <div 
+                        className="w-full max-w-6xl flex flex-col items-center gap-8 animate-fade-in-up"
                     >
                         <div className="flex flex-wrap justify-center items-center gap-3">
                             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-gold/10 text-gold border border-gold/20 backdrop-blur-sm">
@@ -59,7 +56,7 @@ export function EventHero({ event }: EventHeroProps) {
                                 {event.subHeading}
                             </p>
                         )}
-                    </motion.div>
+                    </div>
 
                     <EventActionSection event={event} />
                 </div>

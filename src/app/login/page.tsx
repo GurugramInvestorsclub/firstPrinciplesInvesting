@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
 
 function LoginContent() {
     const [isLogin, setIsLogin] = useState(true)
@@ -122,13 +121,7 @@ function LoginContent() {
                 </div>
 
                 <div className="bg-bg-primary/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden relative">
-                    <AnimatePresence mode="wait">
-                        <motion.form
-                            key={isLogin ? "login" : "signup"}
-                            initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
-                            transition={{ duration: 0.3 }}
+                        <form
                             onSubmit={handleSubmit}
                             className="space-y-4"
                         >
@@ -208,8 +201,7 @@ function LoginContent() {
                             >
                                 {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
                             </button>
-                        </motion.form>
-                    </AnimatePresence>
+                        </form>
 
                     <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center">

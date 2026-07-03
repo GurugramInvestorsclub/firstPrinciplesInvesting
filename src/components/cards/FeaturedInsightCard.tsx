@@ -14,7 +14,6 @@ interface FeaturedInsightCardProps {
 export function FeaturedInsightCard({ post, className, showSubscriberBadge, hasSubscriptionAccess }: FeaturedInsightCardProps) {
     return (
         <div
-            data-gsap="featured"
             className={`featured-card group grid items-stretch gap-0 overflow-hidden rounded-2xl transition-all duration-[250ms] ease-in-out md:grid-cols-12 ${className || ""}`}
         >
             <div className="relative aspect-video w-full overflow-hidden md:col-span-7 md:aspect-auto">

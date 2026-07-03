@@ -55,7 +55,7 @@ export default async function InsightsPage({
         <div className="flex flex-col min-h-screen insights-page font-sans">
             <Script 
                 src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
-                strategy="afterInteractive" 
+                strategy="lazyOnload" 
             />
             <Navbar />
 

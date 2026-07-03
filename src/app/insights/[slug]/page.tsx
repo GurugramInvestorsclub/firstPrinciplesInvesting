@@ -59,7 +59,7 @@ export default async function InsightPage({ params }: Props) {
             {isSubscriberOnly && <CopyProtection />}
             <Script 
                 src="https://t.contentsquare.net/uxa/48bd02eb02770.js" 
-                strategy="afterInteractive" 
+                strategy="lazyOnload" 
             />
             <Navbar />
             <main className="flex-1">
