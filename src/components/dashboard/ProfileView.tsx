@@ -65,12 +65,6 @@ export function ProfileView({ subscriptionStatus, subscriptionEnd, onSignOut }: 
                                 <div className="text-text-primary font-bold">₹2,100 MEMB #74</div>
                                 <div>PAID: SUCCESS</div>
                             </div>
-                            <button 
-                                onClick={() => alert("Invoice PDF download initiated.")}
-                                className="text-gold hover:underline cursor-pointer"
-                            >
-                                Invoice PDF ↗
-                            </button>
                         </div>
                     </div>
                 </div>
