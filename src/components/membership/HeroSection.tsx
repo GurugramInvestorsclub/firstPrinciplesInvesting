@@ -82,14 +82,6 @@ export function HeroSection() {
                         <div className="pt-8 border-t border-[#2E2E2E] flex flex-wrap gap-x-8 gap-y-3 text-xs text-neutral-500">
                             <div className="flex items-center gap-2">
                                 <span className="w-1 h-1 rounded-full bg-gold" />
-                                <span>12,000+ Serious Investors</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-1 h-1 rounded-full bg-gold" />
-                                <span>14-day cancellation policy</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="w-1 h-1 rounded-full bg-gold" />
                                 <span>Direct Support with Analysts</span>
                             </div>
                         </div>

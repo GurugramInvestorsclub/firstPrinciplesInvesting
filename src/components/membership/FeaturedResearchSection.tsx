@@ -62,7 +62,7 @@ export function FeaturedResearchSection() {
                         Our Featured Research Deep Dives.
                     </h2>
                     <p className="text-neutral-400 mt-4 text-lg font-light">
-                        Unlock our active archive. Below are the key sectors we have mapped. Hover over any report to inspect details, and join to unlock.
+                        Preview our upcoming research deep dives. Below are the key sectors we are currently mapping. Hover over any report to inspect details, and join to get access on release.
                     </p>
                 </div>
 
@@ -91,7 +91,7 @@ export function FeaturedResearchSection() {
                                             {report.sector}
                                         </span>
                                         <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 group-hover:bg-gold/10 group-hover:border-gold/30 group-hover:text-gold transition-colors duration-300">
-                                            <Lock className="w-3 h-3" />
+                                            <Clock className="w-3 h-3" />
                                         </div>
                                     </div>
 
@@ -120,7 +120,7 @@ export function FeaturedResearchSection() {
                                         <Clock className="w-3.5 h-3.5" />
                                         <span>{report.readTime}</span>
                                     </div>
-                                    <span className="text-gold group-hover:underline">Unlock Memo ↗</span>
+                                    <span className="text-gold group-hover:underline">Upcoming</span>
                                 </div>
                             </div>
                         </div>
