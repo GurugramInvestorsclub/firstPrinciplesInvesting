@@ -65,8 +65,8 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
         return 0
     })
 
-    const upcomingTitle = "Case Study: Fluid Power & Industrial Transmission Systems"
-    const upcomingExcerpt = "An in-depth analysis of the engineering moats, high switching costs, and capital allocation strategies of market-leading monopolies in mechanical power transmission."
+    const upcomingTitle = "Upcoming Premium Deep Dive"
+    const upcomingExcerpt = "We are currently conducting detailed in-depth equity analysis on our next high-conviction company. Full research briefing and valuation model coming soon."
     const isUpcomingVisible = !searchQuery || 
         upcomingTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         upcomingExcerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -175,8 +175,8 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
                             {/* Card Cover image */}
                             <div className="relative aspect-[16/9] w-full overflow-hidden">
                                 <Image
-                                    src="/images/fluid_transmission.png"
-                                    alt="Upcoming Case Study: Fluid Power & Transmission Systems"
+                                    src="/images/upcoming_research.png"
+                                    alt="Upcoming Premium Deep Dive"
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                                 />
@@ -190,21 +190,21 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
                                         <span className="text-gold/80 bg-gold/5 border border-gold/10 px-2 py-0.5 rounded font-mono font-bold tracking-wider text-[9px]">PREMIUM</span>
                                     </div>
                                     <h3 className="text-base font-bold text-neutral-300 leading-snug line-clamp-2">
-                                        Case Study: Fluid Power & Industrial Transmission Systems
+                                        Upcoming Premium Deep Dive
                                     </h3>
                                     <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
-                                        An in-depth analysis of the engineering moats, high switching costs, and capital allocation strategies of market-leading monopolies in mechanical power transmission.
+                                        Our research team is currently conducting detailed in-depth equity analysis on our next high-conviction company.
                                     </p>
                                 </div>
 
                                 <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
                                     <div className="flex items-center gap-1">
                                         <Clock className="w-3 h-3 text-neutral-500" />
-                                        <span>Upcoming Deep Dive</span>
+                                        <span>Research In Progress</span>
                                     </div>
                                     <span className="text-neutral-500 flex items-center gap-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                                        Research In Progress
+                                        Drafting Phase
                                     </span>
                                 </div>
                             </div>
