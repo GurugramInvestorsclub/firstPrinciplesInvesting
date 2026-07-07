@@ -65,6 +65,14 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
         return 0
     })
 
+    const upcomingTitle = "Case Study: Fluid Power & Industrial Transmission Systems"
+    const upcomingExcerpt = "An in-depth analysis of the engineering moats, high switching costs, and capital allocation strategies of market-leading monopolies in mechanical power transmission."
+    const isUpcomingVisible = !searchQuery || 
+        upcomingTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        upcomingExcerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        "upcoming".includes(searchQuery.toLowerCase()) ||
+        "coming soon".includes(searchQuery.toLowerCase())
+
     return (
         <div className="space-y-8 text-left max-w-4xl mx-auto py-4">
             
@@ -114,7 +122,7 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
             </div>
 
             {/* Results Grid */}
-            {filteredReports.length > 0 ? (
+            {(filteredReports.length > 0 || isUpcomingVisible) ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredReports.map((report) => (
                         <div 
@@ -158,6 +166,50 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
                             </div>
                         </div>
                     ))}
+
+                    {/* Upcoming Case Study Card */}
+                    {isUpcomingVisible && (
+                        <div 
+                            className="flex flex-col border border-white/5 hover:border-gold/15 bg-[#1E1E1E]/50 rounded-2xl overflow-hidden relative group opacity-90 hover:opacity-100 transition-all duration-300 select-none"
+                        >
+                            {/* Card Cover image */}
+                            <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                <Image
+                                    src="/images/fluid_transmission.png"
+                                    alt="Upcoming Case Study: Fluid Power & Transmission Systems"
+                                    fill
+                                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/40 to-transparent opacity-80" />
+                            </div>
+
+                            <div className="p-6 flex flex-col justify-between flex-grow min-h-[220px]">
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center text-[10px] font-mono text-neutral-400 uppercase">
+                                        <span>COMING SOON</span>
+                                        <span className="text-gold/80 bg-gold/5 border border-gold/10 px-2 py-0.5 rounded font-mono font-bold tracking-wider text-[9px]">PREMIUM</span>
+                                    </div>
+                                    <h3 className="text-base font-bold text-neutral-300 leading-snug line-clamp-2">
+                                        Case Study: Fluid Power & Industrial Transmission Systems
+                                    </h3>
+                                    <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
+                                        An in-depth analysis of the engineering moats, high switching costs, and capital allocation strategies of market-leading monopolies in mechanical power transmission.
+                                    </p>
+                                </div>
+
+                                <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="w-3 h-3 text-neutral-500" />
+                                        <span>Upcoming Deep Dive</span>
+                                    </div>
+                                    <span className="text-neutral-500 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                                        Research In Progress
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="p-16 border border-dashed border-[#2E2E2E] rounded-2xl text-center text-xs text-neutral-500">
