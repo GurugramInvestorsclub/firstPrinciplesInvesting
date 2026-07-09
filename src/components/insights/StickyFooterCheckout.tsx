@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import { AlertCircle, CheckCircle } from "lucide-react"
 
 type PlanKey = "monthly" | "three_monthly" | "yearly"
 
@@ -223,28 +223,43 @@ export function StickyFooterCheckout({
     }
   }, [session, paywallReady, router, selectedPlan, targetPlanKey])
 
-  // Listen for #membership hash to trigger checkout automatically
+  // Global click interceptor to catch clicks on any CTA anchor and trigger Razorpay directly without jumps/scrolls
   useEffect(() => {
     if (typeof window === "undefined" || hasSubscriptionAccess) return
 
-    const handleHashChange = () => {
-      if (window.location.hash === "#membership") {
-        window.history.replaceState(null, "", window.location.pathname)
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const anchor = target.closest('a[href="#membership"]')
+      if (anchor) {
+        e.preventDefault() // Prevent native hash jump / page scroll
         handleCheckout()
       }
     }
 
-    handleHashChange()
-
-    window.addEventListener("hashchange", handleHashChange)
-    return () => window.removeEventListener("hashchange", handleHashChange)
-  }, [session, paywallReady, hasSubscriptionAccess, handleCheckout])
+    document.addEventListener("click", handleGlobalClick)
+    return () => document.removeEventListener("click", handleGlobalClick)
+  }, [hasSubscriptionAccess, handleCheckout])
 
   // Hide the footer completely if the user already has full subscription access
   if (hasSubscriptionAccess) return null
 
   return (
     <>
+      {/* Golden Brand Loading Overlay */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-[#0C0C0E]/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-4 transition-all duration-300">
+          <div className="relative flex items-center justify-center">
+            {/* Pulsing Backglow */}
+            <div className="absolute w-20 h-20 bg-gold/10 rounded-full blur-xl animate-pulse" />
+            {/* Custom Golden Spinning Loader Ring */}
+            <div className="w-14 h-14 rounded-full border-4 border-gold/10 border-t-gold animate-spin" />
+          </div>
+          <span className="text-white text-sm font-sans font-bold tracking-wider uppercase">
+            Preparing Secure Checkout...
+          </span>
+        </div>
+      )}
+
       {/* Toast Notification Container for Errors & Success */}
       {(error || success) && (
         <div className="fixed bottom-24 left-6 right-6 md:left-auto md:right-8 z-50 max-w-sm w-full mx-auto">
@@ -264,20 +279,13 @@ export function StickyFooterCheckout({
       )}
 
       {/* Floating Bottom Sticky Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-40 py-4 px-6 flex items-center justify-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
+      <div className={`fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-45 py-4 px-6 flex items-center justify-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
         <button
           onClick={handleCheckout}
           disabled={isSubmitting}
           className="w-full sm:w-auto min-w-[280px] sm:min-w-[340px] inline-flex items-center justify-center gap-3 rounded-[10px] bg-gold text-[#16161C] px-8 py-3.5 font-sans font-bold tracking-wide hover:brightness-[1.06] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/10"
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin text-[#16161C]" />
-              <span>Preparing checkout...</span>
-            </>
-          ) : (
-            <span>Subscribe Quarterly (₹23/day)</span>
-          )}
+          <span>Subscribe Quarterly (₹23/day)</span>
         </button>
       </div>
     </>
