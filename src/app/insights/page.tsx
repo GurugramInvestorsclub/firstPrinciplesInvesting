@@ -63,21 +63,16 @@ export default async function InsightsPage({
                         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                             {/* Left Text Block */}
                             <div className="lg:col-span-7 space-y-6 text-left">
-                                {/* Inflection & Stock Discovery Badges */}
-                                <div className="flex flex-wrap items-center gap-3">
-                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-sans">
-                                        <Flame className="w-3.5 h-3.5 text-white/50" />
-                                        #1 Deep-Dives on businesses at Inflection points
-                                    </span>
-                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-sans">
-                                        <Award className="w-3.5 h-3.5 text-white/50" />
-                                        #2 Discover winning stocks. Early.
+                                {/* Inflection Badge */}
+                                <div>
+                                    <span className="text-white text-sm md:text-[15px] font-semibold uppercase tracking-wider font-sans">
+                                        Deep-Dives on businesses at Inflection points
                                     </span>
                                 </div>
 
                                 {/* Primary Headline */}
                                 <h1 className="text-[clamp(1.75rem,3.8vw,2.75rem)] font-sans font-semibold tracking-[-0.02em] leading-[1.15] text-text-primary">
-                                    Read two deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change</span>, and companies undergoing <span className="font-display italic text-gold font-normal">radical positive change.</span>
+                                    Read two deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change.</span>
                                 </h1>
 
                                 {/* Bonus section */}
