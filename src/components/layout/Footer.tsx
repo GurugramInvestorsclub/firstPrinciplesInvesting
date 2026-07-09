@@ -11,7 +11,7 @@ export function Footer() {
                             <div className="flex items-center gap-2">
                                 <div className="relative w-8 h-8">
                                     <Image
-                                        src="/logo.svg"
+                                        src="/logo.png"
                                         alt="FPI Logo"
                                         fill
                                         className="object-contain"

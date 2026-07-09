@@ -82,7 +82,7 @@ export function Navbar() {
                 <Link href="/" className="font-bold text-lg tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2">
                     <div className="relative w-10 h-10">
                         <Image
-                            src="/logo.svg"
+                            src="/logo.png"
                             alt="First Principles Investing Logo"
                             fill
                             className="object-contain"

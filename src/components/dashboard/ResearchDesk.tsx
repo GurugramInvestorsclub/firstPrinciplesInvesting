@@ -168,7 +168,7 @@ export function ResearchDesk({
                             <Link href="/" className="font-bold tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2">
                                 <div className="relative w-8 h-8">
                                     <Image
-                                        src="/logo.svg"
+                                        src="/logo.png"
                                         alt="First Principles Investing Logo"
                                         fill
                                         className="object-contain"
@@ -202,7 +202,7 @@ export function ResearchDesk({
                     <div className="w-full h-12 rounded-full border border-white/10 bg-bg-deep/90 backdrop-blur-xl shadow-lg flex items-center justify-between px-4 font-mono text-[9px]">
                         <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white flex items-center gap-1.5">
                             <div className="relative w-5 h-5">
-                                <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+                                <Image src="/logo.png" alt="Logo" fill className="object-contain" />
                             </div>
                             <span>FP <span className="text-gold">INVESTING</span></span>
                         </Link>

@@ -57,40 +57,40 @@ export default async function InsightsPage({
                 <InsightsAnimations>
 
                     {/* SECTION 1 — HERO */}
-                    <section className="container max-w-7xl mx-auto px-6 pt-32 pb-24 md:pt-48 md:pb-20 min-h-[90vh] flex flex-col justify-center">
-                        <div className="grid lg:grid-cols-12 gap-16 items-center">
+                    <section className="container max-w-7xl mx-auto px-6 pt-24 pb-16 md:pt-36 md:pb-20 min-h-[90vh] flex flex-col justify-center bg-[radial-gradient(circle_at_right_50%_top_50%,rgba(245,184,0,0.04),transparent_60%)]">
+                        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                             {/* Left Text Block */}
-                            <div className="lg:col-span-7 space-y-8 text-left">
+                            <div className="lg:col-span-7 space-y-6 text-left">
                                 {/* Inflection & Stock Discovery Badges */}
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                                    <span className="inline-flex items-center gap-2 bg-gold/10 border border-gold/20 text-gold px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-mono">
-                                        <Flame className="w-3.5 h-3.5" />
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-space-grotesk">
+                                        <Flame className="w-3.5 h-3.5 text-white/50" />
                                         #1 Deep-Dives on businesses at Inflection points
                                     </span>
-                                    <span className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white/80 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-mono">
-                                        <Award className="w-3.5 h-3.5 text-gold" />
+                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-space-grotesk">
+                                        <Award className="w-3.5 h-3.5 text-white/50" />
                                         #2 Discover winning stocks. Early.
                                     </span>
                                 </div>
 
                                 {/* Primary Headline */}
-                                <h1 className="text-4xl md:text-5xl lg:text-[4rem] font-heading font-bold tracking-tight leading-[1.1] text-text-primary">
-                                    Read two deep-dives a month, on businesses undergoing <span className="text-gold italic font-display font-medium">big positive change</span>, and companies undergoing <span className="text-gold italic font-display font-medium">radical positive change.</span>
+                                <h1 className="text-[clamp(2.5rem,5.5vw,4.25rem)] font-space-grotesk font-semibold tracking-[-0.02em] leading-[1.08] text-text-primary">
+                                    Read two deep-dives a month, on businesses undergoing <span className="font-instrument-serif italic text-gold text-[1.05em] font-normal">big positive change</span>, and companies undergoing <span className="font-instrument-serif italic text-gold text-[1.05em] font-normal">radical positive change.</span>
                                 </h1>
 
                                 {/* Bonus section */}
-                                <div className="space-y-3 pt-2">
-                                    <p className="font-mono text-xs text-text-secondary uppercase tracking-[0.2em] font-bold">Exclusive Subscriber Bonuses:</p>
-                                    <ul className="grid sm:grid-cols-2 gap-3 text-sm text-text-primary/95">
+                                <div className="space-y-3 pt-1">
+                                    <p className="font-space-grotesk text-[0.75rem] font-semibold text-white/70 uppercase tracking-[0.12em]">Exclusive Subscriber Bonuses</p>
+                                    <ul className="grid sm:grid-cols-2 gap-3 text-sm text-white/70 font-space-grotesk font-medium">
                                         <li className="flex items-center gap-3">
-                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-gold" />
+                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-white/70" />
                                             </span>
                                             <span>50% off on our Sectoral workshops</span>
                                         </li>
                                         <li className="flex items-center gap-3">
-                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-gold" />
+                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-white/70" />
                                             </span>
                                             <span>Monthly Meetups</span>
                                         </li>
@@ -98,26 +98,29 @@ export default async function InsightsPage({
                                 </div>
 
                                 {/* CTA Area */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-4">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-2">
                                     <Link 
                                         href="#membership" 
-                                        className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-8 py-4 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center shadow-lg shadow-gold/10"
+                                        className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
                                     >
                                         Subscribe for ₹27/day
                                     </Link>
-                                    <div className="flex flex-col justify-center text-xs text-text-secondary font-mono">
-                                        <div className="flex items-center gap-2 text-gold">
-                                            <Users className="w-3.5 h-3.5 animate-pulse" />
+                                    <div className="flex flex-col justify-center text-xs text-white/70 font-space-grotesk font-medium">
+                                        <div className="flex items-center gap-2 text-white/70">
+                                            <Users className="w-3.5 h-3.5 text-white/50" />
                                             <span className="font-bold">Social Proof</span>
                                         </div>
-                                        <span>More than 50 people signed up in the last 1 month</span>
+                                        <span className="text-white/60">More than 50 people signed up in the last 1 month</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Right Video Mockup */}
-                            <div className="lg:col-span-5 relative w-full aspect-video md:aspect-[4/3] lg:aspect-square flex items-center justify-center p-1 bg-gradient-to-br from-white/10 to-white/0 rounded-2xl shadow-2xl">
-                                <div className="w-full h-full bg-[#16161C] border border-white/10 rounded-2xl overflow-hidden relative flex flex-col justify-between group">
+                            <div className="lg:col-span-5 relative w-full aspect-video md:aspect-[4/3] lg:aspect-square flex items-center justify-center p-1">
+                                {/* Glow behind card */}
+                                <div className="absolute inset-0 bg-gold/5 rounded-full blur-[80px] w-[80%] h-[80%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0" />
+                                
+                                <div className="w-full h-full bg-[#16161C] border border-white/8 rounded-[16px] overflow-hidden relative flex flex-col justify-between group z-10 motion-safe:hover:-translate-y-[2px] transition-transform duration-200 ease-out">
                                     {/* Video Placeholder Header */}
                                     <div className="p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 flex justify-between items-center text-[10px] font-mono text-white/50 tracking-wider">
                                         <span>EXPLAINER VIDEO</span>
@@ -126,22 +129,22 @@ export default async function InsightsPage({
 
                                     {/* Thumbnail background/art */}
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,184,0,0.08),transparent_60%)]" />
-                                        <div className="relative w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-gold/20 transition-all duration-500 shadow-xl shadow-gold/5 cursor-pointer z-10">
-                                            <Play className="w-6 h-6 text-gold fill-gold ml-1" />
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent_60%)]" />
+                                        <div className="relative w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover:scale-105 group-hover:bg-white/20 transition-all duration-300 shadow-xl cursor-pointer z-10">
+                                            <Play className="w-6 h-6 text-white fill-white ml-1" />
                                         </div>
                                     </div>
 
                                     {/* Video Title Card Overlay */}
                                     <div className="p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent absolute bottom-0 left-0 right-0 space-y-2">
-                                        <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-gold/80 block">First Principles Investing</span>
-                                        <h4 className="text-sm font-bold text-white font-heading">Cutting through financial noise to compound wealth</h4>
+                                        <span className="text-[10px] font-space-grotesk uppercase tracking-[0.25em] text-white/50 block">First Principles Investing</span>
+                                        <h4 className="text-sm font-semibold text-white font-space-grotesk">Cutting through financial noise to compound wealth</h4>
                                         <div className="flex items-center gap-3 pt-2 text-[9px] font-mono text-white/40">
                                             <div className="flex-1 h-[2px] bg-white/20 rounded-full overflow-hidden">
-                                                <div className="w-1/3 h-full bg-gold rounded-full" />
+                                                <div className="w-1/3 h-full bg-white/80 rounded-full" />
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Volume2 className="w-3.5 h-3.5" />
+                                                <Volume2 className="w-3.5 h-3.5 text-white/40" />
                                                 <span>0:17 / 0:51</span>
                                             </div>
                                         </div>
@@ -151,7 +154,7 @@ export default async function InsightsPage({
                         </div>
 
                         {/* Featured On logos */}
-                        <div className="mt-24 pt-10 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 select-none">
+                        <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 select-none">
                             <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-text-secondary/70">Featured On</span>
                             <div className="flex flex-wrap items-center gap-10 md:gap-16 opacity-40 hover:opacity-70 transition-opacity duration-500">
                                 <div className="relative h-6 w-36">
@@ -460,17 +463,22 @@ export default async function InsightsPage({
                                 <div className="p-8 md:p-12 rounded-lg" style={{ backgroundColor: "var(--insights-bg)" }}>
                                     {paywallReady ? (
                                         hasSubscriptionAccess ? (
-                                            <div className="text-center space-y-6 py-4">
-                                                <div className="inline-flex items-center justify-center p-4 rounded-full" style={{ backgroundColor: "rgba(201, 168, 76, 0.08)", border: "1px solid var(--insights-accent)", color: "var(--insights-accent)" }}>
-                                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                            <div className="space-y-8">
+                                                <div className="text-center py-4 border-b border-white/5">
+                                                    <div className="inline-flex items-center justify-center p-3 rounded-full mb-3" style={{ backgroundColor: "rgba(201, 168, 76, 0.08)", border: "1px solid var(--insights-accent)", color: "var(--insights-accent)" }}>
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-white font-heading">Active Insights Membership</h3>
+                                                    <p className="text-white/70 max-w-md mx-auto leading-relaxed text-xs">
+                                                        Thank you for supporting First Principles Investing. You have full access to all subscriber-only memos and the complete research archive.
+                                                    </p>
                                                 </div>
-                                                <h3 className="text-2xl font-bold text-white font-heading">Active Insights Membership</h3>
-                                                <p className="text-white/70 max-w-md mx-auto leading-relaxed text-sm">
-                                                    Thank you for supporting First Principles Investing. You have full access to all subscriber-only memos and the complete research archive.
-                                                </p>
-                                                <Link href="#free-research" className="inline-flex items-center justify-center rounded-sm px-8 py-3.5 font-bold tracking-wide transition-all" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
-                                                    Access Free Research
-                                                </Link>
+                                                <InsightsSubscriptionCheckout
+                                                    callbackUrl="/insights"
+                                                    userName={session?.user?.name}
+                                                    userEmail={session?.user?.email}
+                                                    plans={subscriptionUi.plans}
+                                                />
                                             </div>
                                         ) : session?.user?.id ? (
                                             <InsightsSubscriptionCheckout

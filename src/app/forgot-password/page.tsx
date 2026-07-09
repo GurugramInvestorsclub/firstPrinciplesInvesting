@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
                     <div className="relative w-16 h-16 mx-auto mb-4">
                         <Link href="/">
                             <Image
-                                src="/logo.svg"
+                                src="/logo.png"
                                 alt="Logo"
                                 fill
                                 className="object-contain"
