@@ -2,12 +2,12 @@ import type { NextConfig } from "next";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://*.sanity.io",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://*.sanity.io https://*.contentsquare.net https://*.contentsquare.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://www.google-analytics.com",
+  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://www.google-analytics.com https://*.contentsquare.net",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.sanity.io wss://*.sanity.io",
-  "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com",
+  "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.sanity.io wss://*.sanity.io https://*.contentsquare.net https://*.contentsquare.com",
+  "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://*.contentsquare.net",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
