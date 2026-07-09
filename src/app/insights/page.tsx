@@ -104,15 +104,8 @@ export default async function InsightsPage({
                                         href="#membership" 
                                         className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
                                     >
-                                        Subscribe for ₹27/day
+                                        Subscribe for ₹23/day
                                     </Link>
-                                    <div className="flex flex-col justify-center text-xs text-white/70 font-sans font-medium">
-                                        <div className="flex items-center gap-2 text-white/70">
-                                            <Users className="w-3.5 h-3.5 text-white/50" />
-                                            <span className="font-bold">Social Proof</span>
-                                        </div>
-                                        <span className="text-white/60">More than 50 people signed up in the last 1 month</span>
-                                    </div>
                                 </div>
                             </div>
 
@@ -228,29 +221,23 @@ export default async function InsightsPage({
 
                     {/* SECTION 3 — READ OUR FREE INSIGHTS */}
                     <section id="free-research" className="container max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-                            <div>
-                                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">PUBLIC ARCHIVE</span>
-                                <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">Read our Free Insights</h2>
-                            </div>
-                            <div className="w-full md:w-[320px]">
-                                <SearchInput className="w-full bg-transparent border-white/10" />
-                            </div>
+                        <div className="mb-16 text-center md:text-left">
+                            <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">PUBLIC ARCHIVE</span>
+                            <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">Read our Free Insights</h2>
                         </div>
 
-                        {search && (
-                            <div className="mb-12">
-                                <div className="text-base text-text-secondary">
-                                    {postsSummary(gridPosts.length, search)}
-                                </div>
-                            </div>
-                        )}
-
                         {publicPosts.length > 0 ? (
-                            <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-                                {publicPosts.map((post) => (
-                                    <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
-                                ))}
+                            <div className="space-y-16">
+                                <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+                                    {publicPosts.slice(0, 3).map((post) => (
+                                        <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
+                                    ))}
+                                </div>
+                                <div className="flex justify-center">
+                                    <Link href="/insights/archive" className="inline-flex items-center justify-center rounded-[10px] border border-white/10 hover:border-gold/30 bg-[#16161C]/50 hover:bg-[#1A1A22] text-white hover:text-gold px-8 py-4 font-semibold tracking-wide transition-all duration-300 shadow-md">
+                                        Explore Full Archive &rarr;
+                                    </Link>
+                                </div>
                             </div>
                         ) : (
                             <div className="py-24 text-center border border-white/10 rounded-xl bg-white/[0.01]">
@@ -433,7 +420,7 @@ export default async function InsightsPage({
                                             href="#membership" 
                                             className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center"
                                         >
-                                            Subscribe now for just ₹27 per day
+                                            Subscribe now for just ₹23 per day
                                         </Link>
                                     </div>
                                 </div>
