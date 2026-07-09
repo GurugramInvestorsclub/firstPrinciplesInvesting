@@ -306,15 +306,6 @@ export default async function InsightsPage({
 
                             {/* Editorial quotes and trigger blocks */}
                             <div className="mt-32 max-w-4xl mx-auto text-center space-y-16">
-                                {/* Quote 1 */}
-                                <blockquote className="p-8 border border-white/5 bg-[#16161D]/20 rounded-2xl relative">
-                                    <div className="absolute top-0 left-10 transform -translate-y-1/2 text-gold font-serif text-5xl">“</div>
-                                    <p className="text-2xl md:text-3xl font-heading font-semibold text-text-primary leading-snug">
-                                        Anyone with an active income but no clear plan to grow, protect, or multiply it
-                                    </p>
-                                    <div className="absolute bottom-0 right-10 transform translate-y-1/3 text-gold font-serif text-5xl">”</div>
-                                </blockquote>
-
                                 {/* Quote 2 */}
                                 <blockquote className="p-8 border border-white/5 bg-[#16161D]/20 rounded-2xl relative">
                                     <div className="absolute top-0 left-10 transform -translate-y-1/2 text-gold font-serif text-5xl">“</div>
