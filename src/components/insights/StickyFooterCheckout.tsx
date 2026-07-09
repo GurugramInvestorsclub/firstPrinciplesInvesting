@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Clock, Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react"
 
 type PlanKey = "monthly" | "three_monthly" | "yearly"
 
@@ -85,7 +85,6 @@ export function StickyFooterCheckout({
   plans,
 }: StickyFooterCheckoutProps) {
   const router = useRouter()
-  const [timeLeft, setTimeLeft] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -224,37 +223,6 @@ export function StickyFooterCheckout({
     }
   }, [session, paywallReady, router, selectedPlan, targetPlanKey])
 
-  // Countdown timer logic (persistent in sessionStorage)
-  useEffect(() => {
-    if (typeof window === "undefined" || hasSubscriptionAccess) return
-
-    const SESSION_KEY = "insights_timer_end"
-    const targetTimeStr = sessionStorage.getItem(SESSION_KEY)
-    let targetTime = targetTimeStr ? parseInt(targetTimeStr, 10) : 0
-
-    const now = Date.now()
-    if (!targetTime || targetTime < now) {
-      // Set a fresh 15-minute countdown (900 seconds)
-      targetTime = now + 15 * 60 * 1000
-      sessionStorage.setItem(SESSION_KEY, targetTime.toString())
-    }
-
-    const updateTimer = () => {
-      const currentTime = Date.now()
-      const remaining = Math.max(0, Math.floor((targetTime - currentTime) / 1000))
-      setTimeLeft(remaining)
-
-      if (remaining <= 0) {
-        clearInterval(intervalId)
-      }
-    }
-
-    updateTimer()
-    const intervalId = setInterval(updateTimer, 1000)
-
-    return () => clearInterval(intervalId)
-  }, [hasSubscriptionAccess])
-
   // Listen for #membership hash to trigger checkout automatically
   useEffect(() => {
     if (typeof window === "undefined" || hasSubscriptionAccess) return
@@ -274,17 +242,6 @@ export function StickyFooterCheckout({
 
   // Hide the footer completely if the user already has full subscription access
   if (hasSubscriptionAccess) return null
-
-  // Format timer seconds into MM mins SS secs
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    const minsStr = mins < 10 ? `0${mins}` : `${mins}`
-    const secsStr = secs < 10 ? `0${secs}` : `${secs}`
-    return { minsStr, secsStr }
-  }
-
-  const timerDisplay = timeLeft !== null ? formatTime(timeLeft) : { minsStr: "15", secsStr: "00" }
 
   return (
     <>
@@ -307,37 +264,21 @@ export function StickyFooterCheckout({
       )}
 
       {/* Floating Bottom Sticky Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-40 py-4 px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
-        {/* Left Side: Timer & Promo Text */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
-            <Clock className="w-4 h-4 text-gold animate-pulse" />
-          </div>
-          <div className="text-sm font-sans text-white/90">
-            <span>Free Access Ends in </span>
-            <span className="font-mono font-bold text-gold text-base">
-              {timerDisplay.minsStr} mins {timerDisplay.secsStr} secs
-            </span>
-          </div>
-        </div>
-
-        {/* Right Side: Subscribe Button */}
-        <div>
-          <button
-            onClick={handleCheckout}
-            disabled={isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-[10px] bg-gold text-[#16161C] px-8 py-3.5 font-sans font-bold tracking-wide hover:brightness-[1.06] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/10"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-[#16161C]" />
-                <span>Preparing checkout...</span>
-              </>
-            ) : (
-              <span>Subscribe Quarterly (₹23/day)</span>
-            )}
-          </button>
-        </div>
+      <div className={`fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-40 py-4 px-6 flex items-center justify-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
+        <button
+          onClick={handleCheckout}
+          disabled={isSubmitting}
+          className="w-full sm:w-auto min-w-[280px] sm:min-w-[340px] inline-flex items-center justify-center gap-3 rounded-[10px] bg-gold text-[#16161C] px-8 py-3.5 font-sans font-bold tracking-wide hover:brightness-[1.06] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/10"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-[#16161C]" />
+              <span>Preparing checkout...</span>
+            </>
+          ) : (
+            <span>Subscribe Quarterly (₹23/day)</span>
+          )}
+        </button>
       </div>
     </>
   )
