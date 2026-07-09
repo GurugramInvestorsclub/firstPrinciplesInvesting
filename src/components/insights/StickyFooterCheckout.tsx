@@ -1,0 +1,325 @@
+"use client"
+
+import { useEffect, useState, useCallback } from "react"
+import { useRouter } from "next/navigation"
+import { Clock, Loader2, AlertCircle, CheckCircle } from "lucide-react"
+
+type PlanKey = "monthly" | "three_monthly" | "yearly"
+
+interface PlanOption {
+  key: PlanKey
+  label: string
+  description: string
+  cadence: string
+  priceLabel: string
+  badge: string | null
+}
+
+interface RazorpaySubscriptionCheckoutOptions {
+  key: string
+  subscription_id: string
+  name: string
+  description: string
+  recurring?: boolean
+  prefill?: {
+    name?: string
+    email?: string
+  }
+  modal?: {
+    ondismiss?: () => void
+  }
+  handler: (response: {
+    razorpay_payment_id: string
+    razorpay_subscription_id: string
+    razorpay_signature: string
+  }) => void | Promise<void>
+}
+
+type RazorpaySubscriptionCheckoutInstance = {
+  open: () => void
+  on: (event: string, handler: (response: unknown) => void) => void
+}
+
+type RazorpaySubscriptionCheckoutConstructor = new (
+  options: RazorpaySubscriptionCheckoutOptions
+) => RazorpaySubscriptionCheckoutInstance
+
+interface StickyFooterCheckoutProps {
+  paywallReady: boolean
+  hasSubscriptionAccess: boolean
+  session: {
+    user?: {
+      id?: string | null
+      name?: string | null
+      email?: string | null
+    } | null
+  } | null
+  plans: PlanOption[]
+}
+
+let scriptLoaderPromise: Promise<boolean> | null = null
+
+function loadRazorpayCheckoutScript(): Promise<boolean> {
+  if (typeof window === "undefined") return Promise.resolve(false)
+  const razorpayWindow = window as unknown as { Razorpay?: RazorpaySubscriptionCheckoutConstructor }
+  if (razorpayWindow.Razorpay) return Promise.resolve(true)
+
+  if (!scriptLoaderPromise) {
+    scriptLoaderPromise = new Promise((resolve) => {
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js"
+      script.async = true
+      script.onload = () => resolve(true)
+      script.onerror = () => resolve(false)
+      document.body.appendChild(script)
+    })
+  }
+
+  return scriptLoaderPromise
+}
+
+export function StickyFooterCheckout({
+  paywallReady,
+  hasSubscriptionAccess,
+  session,
+  plans,
+}: StickyFooterCheckoutProps) {
+  const router = useRouter()
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  // Only target the active plan (three_monthly)
+  const targetPlanKey: PlanKey = "three_monthly"
+  const selectedPlan = plans.find((entry) => entry.key === targetPlanKey) ?? plans[0]
+
+  const handleCheckout = useCallback(async () => {
+    setError(null)
+    setSuccess(null)
+
+    // Redirect to login if user is not authenticated
+    if (!session?.user?.id) {
+      router.push(`/login?callbackUrl=${encodeURIComponent("/insights")}`)
+      return
+    }
+
+    if (!paywallReady) {
+      setError("Subscriptions are currently disabled.")
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const createResponse = await fetch("/api/subscriptions/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan: targetPlanKey,
+          couponCode: null,
+        }),
+      })
+
+      const createPayload = await createResponse.json()
+      if (!createResponse.ok || !createPayload.success) {
+        throw new Error(createPayload.message ?? "Unable to create subscription")
+      }
+
+      const scriptReady = await loadRazorpayCheckoutScript()
+      const RazorpayConstructor = (window as unknown as {
+        Razorpay?: RazorpaySubscriptionCheckoutConstructor
+      }).Razorpay
+
+      if (!scriptReady || !RazorpayConstructor) {
+        throw new Error("Unable to load Razorpay checkout script")
+      }
+
+      const checkout = new RazorpayConstructor({
+        key: createPayload.data.razorpayKeyId,
+        subscription_id: createPayload.data.subscriptionId,
+        name: "First Principles Investing",
+        description: `Insights ${selectedPlan?.label ?? "Quarterly"} Membership`,
+        recurring: true,
+        prefill: {
+          name: session.user.name ?? undefined,
+          email: session.user.email ?? undefined,
+        },
+        modal: {
+          ondismiss: () => {
+            setError("Checkout was closed before completion")
+          },
+        },
+        handler: async (checkoutResponse) => {
+          try {
+            const verifyResponse = await fetch("/api/subscriptions/verify", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                razorpaySubscriptionId: checkoutResponse.razorpay_subscription_id,
+                razorpayPaymentId: checkoutResponse.razorpay_payment_id,
+                razorpaySignature: checkoutResponse.razorpay_signature,
+              }),
+            })
+
+            const verifyPayload = await verifyResponse.json()
+            if (!verifyResponse.ok || !verifyPayload.success) {
+              throw new Error(verifyPayload.message ?? "Subscription verification failed")
+            }
+
+            setSuccess("Membership activated. Refreshing access...")
+            setTimeout(() => {
+              router.refresh()
+            }, 1500)
+          } catch (verificationError) {
+            setError(
+              verificationError instanceof Error
+                ? verificationError.message
+                : "Subscription verification failed"
+            )
+          }
+        },
+      })
+
+      checkout.on("payment.failed", (failure: unknown) => {
+        const errorMessage =
+          typeof failure === "object" &&
+          failure !== null &&
+          "error" in failure &&
+          typeof (failure as { error?: { description?: string } }).error?.description === "string"
+            ? (failure as { error: { description: string } }).error.description
+            : "Subscription payment failed"
+
+        setError(errorMessage)
+      })
+
+      checkout.open()
+    } catch (checkoutError) {
+      setError(checkoutError instanceof Error ? checkoutError.message : "Unable to start checkout")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [session, paywallReady, router, selectedPlan, targetPlanKey])
+
+  // Countdown timer logic (persistent in sessionStorage)
+  useEffect(() => {
+    if (typeof window === "undefined" || hasSubscriptionAccess) return
+
+    const SESSION_KEY = "insights_timer_end"
+    const targetTimeStr = sessionStorage.getItem(SESSION_KEY)
+    let targetTime = targetTimeStr ? parseInt(targetTimeStr, 10) : 0
+
+    const now = Date.now()
+    if (!targetTime || targetTime < now) {
+      // Set a fresh 15-minute countdown (900 seconds)
+      targetTime = now + 15 * 60 * 1000
+      sessionStorage.setItem(SESSION_KEY, targetTime.toString())
+    }
+
+    const updateTimer = () => {
+      const currentTime = Date.now()
+      const remaining = Math.max(0, Math.floor((targetTime - currentTime) / 1000))
+      setTimeLeft(remaining)
+
+      if (remaining <= 0) {
+        clearInterval(intervalId)
+      }
+    }
+
+    updateTimer()
+    const intervalId = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(intervalId)
+  }, [hasSubscriptionAccess])
+
+  // Listen for #membership hash to trigger checkout automatically
+  useEffect(() => {
+    if (typeof window === "undefined" || hasSubscriptionAccess) return
+
+    const handleHashChange = () => {
+      if (window.location.hash === "#membership") {
+        window.history.replaceState(null, "", window.location.pathname)
+        handleCheckout()
+      }
+    }
+
+    handleHashChange()
+
+    window.addEventListener("hashchange", handleHashChange)
+    return () => window.removeEventListener("hashchange", handleHashChange)
+  }, [session, paywallReady, hasSubscriptionAccess, handleCheckout])
+
+  // Hide the footer completely if the user already has full subscription access
+  if (hasSubscriptionAccess) return null
+
+  // Format timer seconds into MM mins SS secs
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    const minsStr = mins < 10 ? `0${mins}` : `${mins}`
+    const secsStr = secs < 10 ? `0${secs}` : `${secs}`
+    return { minsStr, secsStr }
+  }
+
+  const timerDisplay = timeLeft !== null ? formatTime(timeLeft) : { minsStr: "15", secsStr: "00" }
+
+  return (
+    <>
+      {/* Toast Notification Container for Errors & Success */}
+      {(error || success) && (
+        <div className="fixed bottom-24 left-6 right-6 md:left-auto md:right-8 z-50 max-w-sm w-full mx-auto">
+          {error && (
+            <div className="flex items-center gap-3 bg-red-950/90 border border-red-500/30 p-4 rounded-xl text-red-200 text-sm shadow-2xl backdrop-blur-md">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+          {success && (
+            <div className="flex items-center gap-3 bg-emerald-950/90 border border-emerald-500/30 p-4 rounded-xl text-emerald-200 text-sm shadow-2xl backdrop-blur-md">
+              <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+              <span>{success}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Floating Bottom Sticky Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-40 py-4 px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        {/* Left Side: Timer & Promo Text */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
+            <Clock className="w-4 h-4 text-gold animate-pulse" />
+          </div>
+          <div className="text-sm font-sans text-white/90">
+            <span>Free Access Ends in </span>
+            <span className="font-mono font-bold text-gold text-base">
+              {timerDisplay.minsStr} mins {timerDisplay.secsStr} secs
+            </span>
+          </div>
+        </div>
+
+        {/* Right Side: Subscribe Button */}
+        <div>
+          <button
+            onClick={handleCheckout}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-[10px] bg-gold text-[#16161C] px-8 py-3.5 font-sans font-bold tracking-wide hover:brightness-[1.06] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/10"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-[#16161C]" />
+                <span>Preparing checkout...</span>
+              </>
+            ) : (
+              <span>Subscribe Quarterly (₹23/day)</span>
+            )}
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
