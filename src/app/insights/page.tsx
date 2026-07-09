@@ -154,7 +154,7 @@ export default async function InsightsPage({
                                         <BookOpen className="w-5 h-5 text-gold" />
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-3">2 Deep-Dives per month</h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">Research depth you won’t find anywhere else.</p>
+                                    <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">Research depth you won’t find anywhere else.</p>
                                 </div>
 
                                 {/* Card 2 */}
@@ -163,7 +163,7 @@ export default async function InsightsPage({
                                         <BarChart2 className="w-5 h-5 text-gold" />
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-3">2 Wealth creation Investing frameworks</h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">Radical positive change & Special situations</p>
+                                    <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">Radical positive change & Special situations</p>
                                 </div>
 
                                 {/* Card 3 */}
@@ -172,7 +172,7 @@ export default async function InsightsPage({
                                         <Calendar className="w-5 h-5 text-gold" />
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-3">50% off on our Monthly Sectoral Webinars</h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">Access our upcoming webinars at 50% discount</p>
+                                    <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">Access our upcoming webinars at 50% discount</p>
                                 </div>
 
                                 {/* Card 4 */}
@@ -181,7 +181,7 @@ export default async function InsightsPage({
                                         <Users className="w-5 h-5 text-gold" />
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-3">Monthly community Meetups</h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">Discuss ideas, connect & clear your doubts</p>
+                                    <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">Discuss ideas, connect & clear your doubts</p>
                                 </div>
 
                                 {/* Card 5 */}
@@ -190,7 +190,7 @@ export default async function InsightsPage({
                                         <FileCheck2 className="w-5 h-5 text-gold" />
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-3">Review the Valuation Model behind each deep-dive</h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">Stress Test assumptions behind the investment thesis</p>
+                                    <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">Stress Test assumptions behind the investment thesis</p>
                                 </div>
 
                                 {/* Card 6 */}
@@ -199,7 +199,7 @@ export default async function InsightsPage({
                                         <Award className="w-5 h-5 text-gold" />
                                     </div>
                                     <h3 className="text-xl font-bold text-white mb-3">Discover Event - Driven special situations</h3>
-                                    <p className="text-sm text-text-secondary leading-relaxed">De-mergers & Promoter change</p>
+                                    <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">De-mergers & Promoter change</p>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +227,7 @@ export default async function InsightsPage({
                             </div>
                         ) : (
                             <div className="py-24 text-center border border-white/10 rounded-xl bg-white/[0.01]">
-                                <p className="text-lg text-text-secondary">No public research memos found.</p>
+                                <p className="text-lg text-white/70">No public research memos found.</p>
                             </div>
                         )}
                     </section>
@@ -329,7 +329,7 @@ export default async function InsightsPage({
                                 <div className="md:col-span-7 space-y-6">
                                     <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block">OUR TEAM</span>
                                     <h2 className="text-3xl md:text-5xl font-heading font-bold text-white tracking-tight">Meet Rahul Rao, CFA</h2>
-                                    <div className="prose prose-invert prose-lg text-text-secondary leading-relaxed space-y-6">
+                                    <div className="prose prose-invert prose-lg text-white/80 leading-relaxed space-y-6">
                                         <p>
                                             Rahul Rao is a CFA charterholder with over a decade of experience in corporate valuation, equity research, and macroeconomic analysis. Specializing in first-principles research, he focuses on discovering high-quality businesses undergoing structural inflection points and compounding capital over long horizons.
                                         </p>
@@ -338,7 +338,7 @@ export default async function InsightsPage({
                                         </p>
                                     </div>
                                     <div className="pt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6 border-t border-white/5">
-                                        <div className="text-left font-mono text-[10px] text-text-secondary">
+                                        <div className="text-left font-mono text-[10px] text-white/60">
                                             <span className="text-gold font-bold">Research focus:</span>
                                             <p className="uppercase tracking-wider mt-1 text-white/95">First Principles Deep-Dives</p>
                                         </div>
