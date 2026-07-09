@@ -12,6 +12,7 @@ import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubs
 import { PhilosophySection } from "@/components/insights/PhilosophySection"
 import { auth } from "@/auth"
 import Link from "next/link"
+import Image from "next/image"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -86,11 +87,11 @@ export default async function InsightsPage({
                             <div className="relative h-[500px] w-full hidden md:block">
                                 {/* Back card */}
                                 <div className="absolute top-10 right-10 w-[80%] h-[70%] bg-bg-primary border border-border rounded-sm shadow-2xl overflow-hidden opacity-40">
-                                    <img src="/images/annual_report.png" className="w-full h-full object-cover mix-blend-luminosity" alt="Annual Report" />
+                                    <Image src="/images/annual_report.png" alt="Annual Report" fill className="object-cover mix-blend-luminosity" sizes="(max-width: 768px) 100vw, 40vw" />
                                 </div>
                                 {/* Front card */}
                                 <div className="absolute bottom-10 left-10 w-[75%] h-[65%] bg-bg-deep border border-gold/20 rounded-sm shadow-2xl overflow-hidden z-10">
-                                    <img src="/images/valuation_model.png" className="w-full h-full object-cover mix-blend-luminosity opacity-80" alt="Valuation Model" />
+                                    <Image src="/images/valuation_model.png" alt="Valuation Model" fill className="object-cover mix-blend-luminosity opacity-80" sizes="(max-width: 768px) 100vw, 40vw" />
                                 </div>
                             </div>
                         </div>
@@ -193,8 +194,8 @@ export default async function InsightsPage({
                             <div className="space-y-32">
                                 {/* Block 1 */}
                                 <div className="grid md:grid-cols-2 gap-16 items-center">
-                                    <div className="aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <img src="/images/research_memo.png" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" alt="Deep Dive Memo" />
+                                    <div className="relative aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
+                                        <Image src="/images/research_memo.png" alt="Deep Dive Memo" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
                                     </div>
                                     <div className="space-y-6">
                                         <h3 className="text-3xl font-heading font-bold" style={{ color: "var(--insights-text)" }}>2 Deep-Dive Research Memos Every Month</h3>
@@ -207,15 +208,15 @@ export default async function InsightsPage({
                                         <h3 className="text-3xl font-heading font-bold text-text-primary">Monthly Meetup with Subscribers</h3>
                                         <p className="text-lg leading-relaxed text-text-primary/80">Live Q&A and structural breakdown of our latest research with the community.</p>
                                     </div>
-                                    <div className="order-1 md:order-2 aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <img src="/images/monthly_meetup.png" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" alt="Monthly Meetup" />
+                                    <div className="relative order-1 md:order-2 aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
+                                        <Image src="/images/monthly_meetup.png" alt="Monthly Meetup" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
                                     </div>
                                 </div>
 
                                 {/* Block 3 */}
                                 <div className="grid md:grid-cols-2 gap-16 items-center">
-                                    <div className="aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <img src="/images/research_archive.png" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" alt="Archive" />
+                                    <div className="relative aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
+                                        <Image src="/images/research_archive.png" alt="Archive" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
                                     </div>
                                     <div className="space-y-6">
                                         <h3 className="text-3xl font-heading font-bold text-text-primary">Full Research Archive Access</h3>
@@ -229,8 +230,8 @@ export default async function InsightsPage({
                                         <h3 className="text-3xl font-heading font-bold text-text-primary">Exclusive Webinar Discounts</h3>
                                         <p className="text-lg leading-relaxed text-text-primary/80">Receive a 50% discount on all future sector-focused webinars and masterclasses.</p>
                                     </div>
-                                    <div className="order-1 md:order-2 aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <img src="/images/webinar_discount.png" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" alt="Webinar Discount" />
+                                    <div className="relative order-1 md:order-2 aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
+                                        <Image src="/images/webinar_discount.png" alt="Webinar Discount" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
                                     </div>
                                 </div>    
                             </div>

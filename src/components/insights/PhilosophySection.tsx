@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 const noisePhrases = [
     { text: "Multibagger", left: "15%", top: "20%", blur: 4, duration: 18, delay: -5 },
@@ -26,8 +27,12 @@ export function PhilosophySection() {
         <section id="philosophy" className="relative py-32 md:py-48 border-y border-white/5 overflow-hidden bg-[#080810]">
             {/* Background images for subtle research visuals */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-luminosity">
-                <img src="/images/annual_report.png" alt="" className="absolute top-[-10%] left-[-10%] w-[60%] h-[120%] object-cover transform -rotate-6" />
-                <img src="/images/valuation_model.png" alt="" className="absolute top-[-10%] right-[-10%] w-[60%] h-[120%] object-cover transform rotate-3" />
+                <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[120%] transform -rotate-6">
+                    <Image src="/images/annual_report.png" alt="" fill className="object-cover" sizes="50vw" loading="lazy" />
+                </div>
+                <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[120%] transform rotate-3">
+                    <Image src="/images/valuation_model.png" alt="" fill className="object-cover" sizes="50vw" loading="lazy" />
+                </div>
             </div>
 
             <div className="container max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
