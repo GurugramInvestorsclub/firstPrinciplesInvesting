@@ -13,6 +13,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { CheckCircle2, Play, Volume2, Users, Flame, BookOpen, FileCheck2, Award, Calendar, BarChart2 } from "lucide-react"
 import { LogoMarquee } from "@/components/events/LogoMarquee"
+import { StickyFooterCheckout } from "@/components/insights/StickyFooterCheckout"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -368,66 +369,13 @@ export default async function InsightsPage({
                         </div>
                     </section>
 
-                    {/* SECTION 6 — MEMBERSHIP CHECKOUT */}
-                    <section id="membership" className="py-32 border-t border-white/5" style={{ backgroundColor: "var(--bg-primary)" }}>
-                        <div className="container max-w-4xl mx-auto px-6">
-                            <div className="text-center mb-16">
-                                <h2 className="text-4xl md:text-6xl font-heading font-bold tracking-tight mb-6" style={{ color: "var(--insights-text)" }}>Join a community built around deep research.</h2>
-                                <p className="text-lg max-w-2xl mx-auto" style={{ color: "var(--insights-text-muted)" }}>Start with a quarterly Insights membership for full access to the archive and new publications.</p>
-                            </div>
-
-                            <div className="max-w-2xl mx-auto p-1 bg-gradient-to-br from-white/10 to-white/0 rounded-xl">
-                                <div className="p-8 md:p-12 rounded-lg" style={{ backgroundColor: "var(--insights-bg)" }}>
-                                    {paywallReady ? (
-                                        hasSubscriptionAccess ? (
-                                            <div className="space-y-8">
-                                                <div className="text-center py-4 border-b border-white/5">
-                                                    <div className="inline-flex items-center justify-center p-3 rounded-full mb-3" style={{ backgroundColor: "rgba(201, 168, 76, 0.08)", border: "1px solid var(--insights-accent)", color: "var(--insights-accent)" }}>
-                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                                    </div>
-                                                    <h3 className="text-xl font-bold text-white font-heading">Active Insights Membership</h3>
-                                                    <p className="text-white/70 max-w-md mx-auto leading-relaxed text-xs">
-                                                        Thank you for supporting First Principles Investing. You have full access to all subscriber-only memos and the complete research archive.
-                                                    </p>
-                                                </div>
-                                                <InsightsSubscriptionCheckout
-                                                    callbackUrl="/insights"
-                                                    userName={session?.user?.name}
-                                                    userEmail={session?.user?.email}
-                                                    plans={subscriptionUi.plans}
-                                                />
-                                            </div>
-                                        ) : session?.user?.id ? (
-                                            <InsightsSubscriptionCheckout
-                                                callbackUrl="/insights"
-                                                userName={session.user.name}
-                                                userEmail={session.user.email}
-                                                plans={subscriptionUi.plans}
-                                            />
-                                        ) : (
-                                            <div className="space-y-8">
-                                                <PlanPreview plans={subscriptionUi.plans} />
-                                                <Link
-                                                    href={`/login?callbackUrl=${encodeURIComponent("/insights")}`}
-                                                    className="flex w-full items-center justify-center rounded-sm px-6 py-4 text-sm font-bold tracking-wider uppercase transition hover:bg-white"
-                                                    style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}
-                                                >
-                                                    Log in to subscribe
-                                                </Link>
-                                            </div>
-                                        )
-                                    ) : (
-                                        <div className="space-y-8 text-center">
-                                            <PlanPreview plans={subscriptionUi.plans} />
-                                            <p className="text-sm leading-6 text-white/60">
-                                                Subscriptions will be available here once the Razorpay plan is configured.
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    {/* Sticky Footer Conversion Bar */}
+                    <StickyFooterCheckout
+                        paywallReady={paywallReady}
+                        hasSubscriptionAccess={hasSubscriptionAccess}
+                        session={session}
+                        plans={subscriptionUi.plans}
+                    />
 
                 </InsightsAnimations>
             </main>

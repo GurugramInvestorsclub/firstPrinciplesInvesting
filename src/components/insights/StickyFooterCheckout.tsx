@@ -89,10 +89,29 @@ export function StickyFooterCheckout({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   // Only target the active plan (three_monthly)
   const targetPlanKey: PlanKey = "three_monthly"
   const selectedPlan = plans.find((entry) => entry.key === targetPlanKey) ?? plans[0]
+
+  // Show footer only after scrolling past the hero section (~600px)
+  useEffect(() => {
+    if (typeof window === "undefined" || hasSubscriptionAccess) return
+
+    const handleScroll = () => {
+      if (window.scrollY > 600) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll() // Check immediately on mount
+
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [hasSubscriptionAccess])
 
   const handleCheckout = useCallback(async () => {
     setError(null)
@@ -288,7 +307,7 @@ export function StickyFooterCheckout({
       )}
 
       {/* Floating Bottom Sticky Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-40 py-4 px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+      <div className={`fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-40 py-4 px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
         {/* Left Side: Timer & Promo Text */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
