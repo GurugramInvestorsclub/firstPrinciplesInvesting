@@ -246,79 +246,61 @@ export default async function InsightsPage({
                         )}
                     </section>
 
-                    {/* SECTION 4 — WHO SHOULD ATTEND */}
+                    {/* SECTION 4 — YOU SHOULD SUBSCRIBE NOW, IF: */}
                     <section className="py-32 border-y border-white/5 bg-[#07070C]">
                         <div className="container max-w-7xl mx-auto px-6">
                             <div className="text-center mb-20">
                                 <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">TARGET AUDIENCE</span>
-                                <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">Who should Attend</h2>
+                                <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">You should subscribe NOW, if:</h2>
                             </div>
 
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {/* Card 1 */}
-                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
-                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <div className="bg-[#16161D]/50 border border-white/5 p-8 rounded-xl flex gap-4 items-start hover:border-gold/20 transition-all duration-300">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mt-1">
+                                        <span className="text-gold font-bold font-sans text-sm">1</span>
                                     </span>
-                                    <div>
-                                        <h4 className="font-bold text-white text-base mb-1">Young Professionals (25–35)</h4>
-                                        <p className="text-sm text-text-secondary leading-relaxed">Learn how to grow your salary into wealth and avoid costly money mistakes.</p>
-                                    </div>
+                                    <h4 className="font-bold text-white text-base tracking-wide leading-snug">YOU MANAGE YOUR PORTFOLIO YOURSELF</h4>
                                 </div>
 
                                 {/* Card 2 */}
-                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
-                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <div className="bg-[#16161D]/50 border border-white/5 p-8 rounded-xl flex gap-4 items-start hover:border-gold/20 transition-all duration-300">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mt-1">
+                                        <span className="text-gold font-bold font-sans text-sm">2</span>
                                     </span>
-                                    <div>
-                                        <h4 className="font-bold text-white text-base mb-1">Mid-Career Individuals (35–45)</h4>
-                                        <p className="text-sm text-text-secondary leading-relaxed">Build and protect wealth, plan for your family&apos;s future, and accelerate financial freedom.</p>
-                                    </div>
+                                    <h4 className="font-bold text-white text-base tracking-wide leading-snug">YOU&apos;RE A DOMAIN EXPERT WITH A PASSION FOR INVESTING</h4>
                                 </div>
 
                                 {/* Card 3 */}
-                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
-                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <div className="bg-[#16161D]/50 border border-white/5 p-8 rounded-xl flex gap-4 items-start hover:border-gold/20 transition-all duration-300">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mt-1">
+                                        <span className="text-gold font-bold font-sans text-sm">3</span>
                                     </span>
-                                    <div>
-                                        <h4 className="font-bold text-white text-base mb-1">Business Owners & Entrepreneurs</h4>
-                                        <p className="text-sm text-text-secondary leading-relaxed">Invest surplus wisely and learn frameworks to maximize returns.</p>
-                                    </div>
+                                    <h4 className="font-bold text-white text-base tracking-wide leading-snug">HNI, ANALYST, FUND MANAGER</h4>
                                 </div>
 
                                 {/* Card 4 */}
-                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
-                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <div className="bg-[#16161D]/50 border border-white/5 p-8 rounded-xl flex gap-4 items-start hover:border-gold/20 transition-all duration-300">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mt-1">
+                                        <span className="text-gold font-bold font-sans text-sm">4</span>
                                     </span>
-                                    <div>
-                                        <h4 className="font-bold text-white text-base mb-1">NRIs</h4>
-                                        <p className="text-sm text-text-secondary leading-relaxed">Discover how to invest in India with confidence and achieve higher returns.</p>
-                                    </div>
+                                    <h4 className="font-bold text-white text-base tracking-wide leading-snug">BUDDING ANALYST LOOKING TO UPSKILL</h4>
                                 </div>
 
                                 {/* Card 5 */}
-                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
-                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <div className="bg-[#16161D]/50 border border-white/5 p-8 rounded-xl flex gap-4 items-start hover:border-gold/20 transition-all duration-300">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mt-1">
+                                        <span className="text-gold font-bold font-sans text-sm">5</span>
                                     </span>
-                                    <div>
-                                        <h4 className="font-bold text-white text-base mb-1">Homemakers</h4>
-                                        <p className="text-sm text-text-secondary leading-relaxed">Gain financial independence and confidence to manage money smartly.</p>
-                                    </div>
+                                    <h4 className="font-bold text-white text-base tracking-wide leading-snug">FULL-TIME INVESTOR</h4>
                                 </div>
 
                                 {/* Card 6 */}
-                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
-                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <div className="bg-[#16161D]/50 border border-white/5 p-8 rounded-xl flex gap-4 items-start hover:border-gold/20 transition-all duration-300">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mt-1">
+                                        <span className="text-gold font-bold font-sans text-sm">6</span>
                                     </span>
-                                    <div>
-                                        <h4 className="font-bold text-white text-base mb-1">Retirees & Pre-Retirees</h4>
-                                        <p className="text-sm text-text-secondary leading-relaxed">Learn how to manage your retirement corpus and plan a stress-free, secure life.</p>
-                                    </div>
+                                    <h4 className="font-bold text-white text-base tracking-wide leading-snug">YOU LIKE TO THINK THROUGH YOUR INVESTMENTS</h4>
                                 </div>
                             </div>
 
@@ -332,39 +314,6 @@ export default async function InsightsPage({
                                     </p>
                                     <div className="absolute bottom-0 right-10 transform translate-y-1/3 text-gold font-serif text-5xl">”</div>
                                 </blockquote>
-
-                                {/* Trigger List */}
-                                <div className="text-left bg-[#16161D]/30 border border-white/5 p-8 md:p-12 rounded-3xl space-y-8">
-                                    <h3 className="text-2xl font-bold text-white tracking-tight border-b border-white/5 pb-4">
-                                        You should subscribe NOW, if:
-                                    </h3>
-                                    <ol className="grid md:grid-cols-2 gap-x-12 gap-y-4 font-mono text-xs uppercase tracking-wider text-text-primary/90">
-                                        <li className="flex items-center gap-4">
-                                            <span className="text-gold font-bold font-sans text-sm">1.</span>
-                                            <span>You manage your portfolio yourself</span>
-                                        </li>
-                                        <li className="flex items-center gap-4">
-                                            <span className="text-gold font-bold font-sans text-sm">2.</span>
-                                            <span>You’re a domain expert with a passion for Investing</span>
-                                        </li>
-                                        <li className="flex items-center gap-4">
-                                            <span className="text-gold font-bold font-sans text-sm">3.</span>
-                                            <span>HNI, Analyst, Fund manager</span>
-                                        </li>
-                                        <li className="flex items-center gap-4">
-                                            <span className="text-gold font-bold font-sans text-sm">4.</span>
-                                            <span>Budding Analyst looking to upskill</span>
-                                        </li>
-                                        <li className="flex items-center gap-4">
-                                            <span className="text-gold font-bold font-sans text-sm">5.</span>
-                                            <span>Full-time Investor</span>
-                                        </li>
-                                        <li className="flex items-center gap-4">
-                                            <span className="text-gold font-bold font-sans text-sm">6.</span>
-                                            <span>You like to think through your Investments</span>
-                                        </li>
-                                    </ol>
-                                </div>
 
                                 {/* Quote 2 */}
                                 <blockquote className="p-8 border border-white/5 bg-[#16161D]/20 rounded-2xl relative">
