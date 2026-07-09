@@ -12,6 +12,7 @@ import { auth } from "@/auth"
 import Link from "next/link"
 import Image from "next/image"
 import { CheckCircle2, Play, Volume2, Users, Flame, BookOpen, FileCheck2, Award, Calendar, BarChart2 } from "lucide-react"
+import { LogoMarquee } from "@/components/events/LogoMarquee"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -153,20 +154,9 @@ export default async function InsightsPage({
                             </div>
                         </div>
 
-                        {/* Featured On logos */}
-                        <div className="mt-20 pt-10 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 select-none">
-                            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-text-secondary/70">Featured On</span>
-                            <div className="flex flex-wrap items-center gap-10 md:gap-16 opacity-40 hover:opacity-70 transition-opacity duration-500">
-                                <div className="relative h-6 w-36">
-                                    <Image src="/logos/mint.svg" alt="Mint" fill className="object-contain brightness-0 invert" />
-                                </div>
-                                <div className="relative h-5 w-48">
-                                    <Image src="/logos/ie.svg" alt="The Indian Express" fill className="object-contain brightness-0 invert" />
-                                </div>
-                                <div className="relative h-6 w-48">
-                                    <Image src="/logos/fe.svg" alt="Financial Express" fill className="object-contain brightness-0 invert" />
-                                </div>
-                            </div>
+                        {/* Featured On sliding logos */}
+                        <div className="mt-12 border-t border-white/5 pt-4">
+                            <LogoMarquee />
                         </div>
                     </section>
 
@@ -405,18 +395,18 @@ export default async function InsightsPage({
                     <section className="py-32 bg-bg-deep relative">
                         <div className="container max-w-6xl mx-auto px-6">
                             <div className="grid md:grid-cols-12 gap-16 items-center">
-                                {/* Profile Headshot Placeholder / Art */}
+                                {/* Profile Headshot */}
                                 <div className="md:col-span-5 flex justify-center">
-                                    <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 bg-[#16161C] p-4 shadow-2xl group flex flex-col justify-between items-center text-center">
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,184,0,0.1),transparent_70%)]" />
-                                        
-                                        {/* Stylized vector representation of a professional profile */}
-                                        <div className="w-32 h-32 rounded-full border-2 border-gold bg-bg-deep flex items-center justify-center text-gold/30 mt-6 relative shadow-lg">
-                                            <Users className="w-16 h-16 text-gold" />
-                                        </div>
-
-                                        <div className="relative z-10 pb-4">
-                                            <h4 className="font-heading font-bold text-white text-lg">Rahul Rao, CFA</h4>
+                                    <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 bg-[#16161C] shadow-2xl group flex flex-col justify-end">
+                                        <Image
+                                            src="/founder.png"
+                                            alt="Rahul Rao, CFA"
+                                            fill
+                                            className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 opacity-90 group-hover:opacity-100"
+                                            sizes="(max-width: 768px) 288px, 320px"
+                                        />
+                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-6 z-10 text-center">
+                                            <h4 className="font-sans font-bold text-white text-lg">Rahul Rao, CFA</h4>
                                             <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-gold/80 block mt-1">Head of Fundamental Research</span>
                                         </div>
                                     </div>
