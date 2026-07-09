@@ -6,13 +6,12 @@ import { Post } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
-import { ProcessScrollSection } from "@/components/insights/ProcessScrollSection"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
-import { PhilosophySection } from "@/components/insights/PhilosophySection"
 import { auth } from "@/auth"
 import Link from "next/link"
 import Image from "next/image"
+import { CheckCircle2, Play, Volume2, Users, Flame, BookOpen, FileCheck2, Award, Calendar, BarChart2 } from "lucide-react"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -48,123 +47,212 @@ export default async function InsightsPage({
         ? (sanityResult as Post[])
         : (sanityResult as [Post | null, Post[]])[1]
 
-    const premiumPosts = gridPosts.filter((p) => p.access === "subscriber")
     const publicPosts = gridPosts.filter((p) => p.access !== "subscriber")
 
     return (
-        <div className="flex flex-col min-h-screen insights-page font-sans">
+        <div className="flex flex-col min-h-screen insights-page font-sans bg-bg-deep text-text-primary selection:bg-gold/20 selection:text-gold">
             <Navbar />
 
             <main className="flex-1 w-full overflow-hidden">
                 <InsightsAnimations>
 
                     {/* SECTION 1 — HERO */}
-                    <section className="container max-w-7xl mx-auto px-6 pt-32 pb-24 md:pt-48 md:pb-32 min-h-[90vh] flex flex-col justify-center">
-                        <div className="grid md:grid-cols-2 gap-16 items-center">
-                            <div className="space-y-10">
-                                <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-heading font-bold tracking-tighter leading-[1.05]" style={{ color: "var(--insights-text)" }}>
-                                    Research for investors who want understanding, <span style={{ color: "var(--insights-accent)" }} className="italic">not tips.</span>
+                    <section className="container max-w-7xl mx-auto px-6 pt-32 pb-24 md:pt-48 md:pb-20 min-h-[90vh] flex flex-col justify-center">
+                        <div className="grid lg:grid-cols-12 gap-16 items-center">
+                            {/* Left Text Block */}
+                            <div className="lg:col-span-7 space-y-8 text-left">
+                                {/* Inflection & Stock Discovery Badges */}
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                    <span className="inline-flex items-center gap-2 bg-gold/10 border border-gold/20 text-gold px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-mono">
+                                        <Flame className="w-3.5 h-3.5" />
+                                        #1 Deep-Dives on businesses at Inflection points
+                                    </span>
+                                    <span className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white/80 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-mono">
+                                        <Award className="w-3.5 h-3.5 text-gold" />
+                                        #2 Discover winning stocks. Early.
+                                    </span>
+                                </div>
+
+                                {/* Primary Headline */}
+                                <h1 className="text-4xl md:text-5xl lg:text-[4rem] font-heading font-bold tracking-tight leading-[1.1] text-text-primary">
+                                    Read two deep-dives a month, on businesses undergoing <span className="text-gold italic font-display font-medium">big positive change</span>, and companies undergoing <span className="text-gold italic font-display font-medium">radical positive change.</span>
                                 </h1>
-                                <p className="text-lg md:text-xl max-w-lg leading-relaxed" style={{ color: "var(--insights-text-muted)" }}>
-                                    Deep investment memos, industry research, capital allocation analysis, and first-principles thinking.
-                                </p>
-                                <div className="flex flex-wrap gap-4">
-                                    {hasSubscriptionAccess ? (
-                                        <Link href="#premium-research" className="inline-flex items-center justify-center rounded-sm px-8 py-4 font-bold tracking-wide transition-colors duration-300" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
-                                            Read Premium Research
-                                        </Link>
-                                    ) : (
-                                        <Link href="#membership" className="inline-flex items-center justify-center rounded-sm px-8 py-4 font-bold tracking-wide transition-colors duration-300" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
-                                            Subscribe Now
-                                        </Link>
-                                    )}
-                                    <Link href="#free-research" className="inline-flex items-center justify-center rounded-sm border border-white/20 bg-transparent px-8 py-4 font-medium transition-colors duration-300 hover:bg-white/5" style={{ color: "var(--insights-text)" }}>
-                                        Read Free Research
+
+                                {/* Bonus section */}
+                                <div className="space-y-3 pt-2">
+                                    <p className="font-mono text-xs text-text-secondary uppercase tracking-[0.2em] font-bold">Exclusive Subscriber Bonuses:</p>
+                                    <ul className="grid sm:grid-cols-2 gap-3 text-sm text-text-primary/95">
+                                        <li className="flex items-center gap-3">
+                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-gold" />
+                                            </span>
+                                            <span>50% off on our Sectoral workshops</span>
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-gold" />
+                                            </span>
+                                            <span>Monthly Meetups</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                {/* CTA Area */}
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-4">
+                                    <Link 
+                                        href="#membership" 
+                                        className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-8 py-4 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center shadow-lg shadow-gold/10"
+                                    >
+                                        Subscribe for ₹27/day
                                     </Link>
+                                    <div className="flex flex-col justify-center text-xs text-text-secondary font-mono">
+                                        <div className="flex items-center gap-2 text-gold">
+                                            <Users className="w-3.5 h-3.5 animate-pulse" />
+                                            <span className="font-bold">Social Proof</span>
+                                        </div>
+                                        <span>More than 50 people signed up in the last 1 month</span>
+                                    </div>
                                 </div>
                             </div>
-                            {/* Editorial Collage Mockup */}
-                            <div className="relative h-[500px] w-full hidden md:block">
-                                {/* Back card */}
-                                <div className="absolute top-10 right-10 w-[80%] h-[70%] bg-bg-primary border border-border rounded-sm shadow-2xl overflow-hidden opacity-40">
-                                    <Image src="/images/annual_report.png" alt="Annual Report" fill className="object-cover mix-blend-luminosity" sizes="(max-width: 768px) 100vw, 40vw" />
+
+                            {/* Right Video Mockup */}
+                            <div className="lg:col-span-5 relative w-full aspect-video md:aspect-[4/3] lg:aspect-square flex items-center justify-center p-1 bg-gradient-to-br from-white/10 to-white/0 rounded-2xl shadow-2xl">
+                                <div className="w-full h-full bg-[#16161C] border border-white/10 rounded-2xl overflow-hidden relative flex flex-col justify-between group">
+                                    {/* Video Placeholder Header */}
+                                    <div className="p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 flex justify-between items-center text-[10px] font-mono text-white/50 tracking-wider">
+                                        <span>EXPLAINER VIDEO</span>
+                                        <span>0:51</span>
+                                    </div>
+
+                                    {/* Thumbnail background/art */}
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,184,0,0.08),transparent_60%)]" />
+                                        <div className="relative w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-gold/20 transition-all duration-500 shadow-xl shadow-gold/5 cursor-pointer z-10">
+                                            <Play className="w-6 h-6 text-gold fill-gold ml-1" />
+                                        </div>
+                                    </div>
+
+                                    {/* Video Title Card Overlay */}
+                                    <div className="p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent absolute bottom-0 left-0 right-0 space-y-2">
+                                        <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-gold/80 block">First Principles Investing</span>
+                                        <h4 className="text-sm font-bold text-white font-heading">Cutting through financial noise to compound wealth</h4>
+                                        <div className="flex items-center gap-3 pt-2 text-[9px] font-mono text-white/40">
+                                            <div className="flex-1 h-[2px] bg-white/20 rounded-full overflow-hidden">
+                                                <div className="w-1/3 h-full bg-gold rounded-full" />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Volume2 className="w-3.5 h-3.5" />
+                                                <span>0:17 / 0:51</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                {/* Front card */}
-                                <div className="absolute bottom-10 left-10 w-[75%] h-[65%] bg-bg-deep border border-gold/20 rounded-sm shadow-2xl overflow-hidden z-10">
-                                    <Image src="/images/valuation_model.png" alt="Valuation Model" fill className="object-cover mix-blend-luminosity opacity-80" sizes="(max-width: 768px) 100vw, 40vw" />
+                            </div>
+                        </div>
+
+                        {/* Featured On logos */}
+                        <div className="mt-24 pt-10 border-t border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-8 select-none">
+                            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-text-secondary/70">Featured On</span>
+                            <div className="flex flex-wrap items-center gap-10 md:gap-16 opacity-40 hover:opacity-70 transition-opacity duration-500">
+                                <div className="relative h-6 w-36">
+                                    <Image src="/logos/mint.svg" alt="Mint" fill className="object-contain brightness-0 invert" />
+                                </div>
+                                <div className="relative h-5 w-48">
+                                    <Image src="/logos/ie.svg" alt="The Indian Express" fill className="object-contain brightness-0 invert" />
+                                </div>
+                                <div className="relative h-6 w-48">
+                                    <Image src="/logos/fe.svg" alt="Financial Express" fill className="object-contain brightness-0 invert" />
                                 </div>
                             </div>
                         </div>
                     </section>
 
-                    {/* TWO CLICKABLE WINDOWS SECTION */}
-                    <section className="container max-w-7xl mx-auto px-6 pb-24" aria-label="Navigation Shortcuts">
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <Link href="#premium-research" className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.01] hover:bg-white/[0.03] p-10 flex flex-col justify-between min-h-[240px] transition-all duration-500 hover:border-[var(--insights-accent)]/40 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--insights-accent)]">
-                                {/* Decorative subtle glow in the background */}
-                                <div className="absolute -right-20 -bottom-20 w-48 h-48 bg-[var(--insights-accent)]/5 rounded-full blur-3xl group-hover:bg-[var(--insights-accent)]/10 transition-all duration-500" />
-                                
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "var(--insights-accent)" }} />
-                                        <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/50">Exclusive Content</span>
-                                    </div>
-                                    <h3 className="text-2xl md:text-3xl font-heading font-bold text-white tracking-tight leading-tight">
-                                        Access the subscriber-only articles
-                                    </h3>
-                                    <p className="text-sm leading-relaxed text-white/60 max-w-md">
-                                        Unlock deep-dive investment memos, fundamental valuations, and exclusive structural industry research.
-                                    </p>
-                                </div>
-                                <div className="mt-8 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--insights-accent)] group-hover:translate-x-2 transition-transform duration-300">
-                                    Explore Memos <span className="text-sm">→</span>
-                                </div>
-                            </Link>
+                    {/* SECTION 2 — WHAT YOU GET AS A SUBSCRIBER */}
+                    <section className="py-24 border-t border-white/5 bg-[#0A0A0F]">
+                        <div className="container max-w-7xl mx-auto px-6">
+                            <div className="mb-16 text-center md:text-left">
+                                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">MEMBERSHIP DETAILS</span>
+                                <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">What you get as a Subscriber</h2>
+                            </div>
 
-                            <Link href="#philosophy" className="group relative overflow-hidden rounded-lg border border-white/10 bg-white/[0.01] hover:bg-white/[0.03] p-10 flex flex-col justify-between min-h-[240px] transition-all duration-500 hover:border-[var(--insights-accent)]/40 shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--insights-accent)]">
-                                {/* Decorative subtle glow in the background */}
-                                <div className="absolute -right-20 -bottom-20 w-48 h-48 bg-[var(--insights-accent)]/5 rounded-full blur-3xl group-hover:bg-[var(--insights-accent)]/10 transition-all duration-500" />
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--insights-accent)" }} />
-                                        <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/50">Our Approach</span>
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {/* Card 1 */}
+                                <div className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 hover:border-gold/20 p-8 rounded-xl shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                                    <div className="w-12 h-12 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center mb-6 group-hover:bg-gold/20 transition-colors">
+                                        <BookOpen className="w-5 h-5 text-gold" />
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-heading font-bold text-white tracking-tight leading-tight">
-                                        Know more on our investment process
-                                    </h3>
-                                    <p className="text-sm leading-relaxed text-white/60 max-w-md">
-                                        Learn how we filter market noise and focus entirely on business fundamentals, management incentives, and long-term structures.
-                                    </p>
+                                    <h3 className="text-xl font-bold text-white mb-3">2 Deep-Dives per month</h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">Research depth you won’t find anywhere else.</p>
                                 </div>
-                                <div className="mt-8 flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-[var(--insights-accent)] group-hover:translate-x-2 transition-transform duration-300">
-                                    Our Philosophy <span className="text-sm">→</span>
+
+                                {/* Card 2 */}
+                                <div className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 hover:border-gold/20 p-8 rounded-xl shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                                    <div className="w-12 h-12 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center mb-6 group-hover:bg-gold/20 transition-colors">
+                                        <BarChart2 className="w-5 h-5 text-gold" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-3">2 Wealth creation Investing frameworks</h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">Radical positive change & Special situations</p>
                                 </div>
-                            </Link>
+
+                                {/* Card 3 */}
+                                <div className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 hover:border-gold/20 p-8 rounded-xl shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                                    <div className="w-12 h-12 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center mb-6 group-hover:bg-gold/20 transition-colors">
+                                        <Calendar className="w-5 h-5 text-gold" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-3">50% off on our Monthly Sectoral Webinars</h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">Access our upcoming webinars at 50% discount</p>
+                                </div>
+
+                                {/* Card 4 */}
+                                <div className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 hover:border-gold/20 p-8 rounded-xl shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                                    <div className="w-12 h-12 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center mb-6 group-hover:bg-gold/20 transition-colors">
+                                        <Users className="w-5 h-5 text-gold" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-3">Monthly community Meetups</h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">Discuss ideas, connect & clear your doubts</p>
+                                </div>
+
+                                {/* Card 5 */}
+                                <div className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 hover:border-gold/20 p-8 rounded-xl shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                                    <div className="w-12 h-12 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center mb-6 group-hover:bg-gold/20 transition-colors">
+                                        <FileCheck2 className="w-5 h-5 text-gold" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-3">Review the Valuation Model behind each deep-dive</h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">Stress Test assumptions behind the investment thesis</p>
+                                </div>
+
+                                {/* Card 6 */}
+                                <div className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 hover:border-gold/20 p-8 rounded-xl shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                                    <div className="w-12 h-12 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center mb-6 group-hover:bg-gold/20 transition-colors">
+                                        <Award className="w-5 h-5 text-gold" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white mb-3">Discover Event - Driven special situations</h3>
+                                    <p className="text-sm text-text-secondary leading-relaxed">De-mergers & Promoter change</p>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
-                    {/* SEARCH BLOCK */}
-                    <div className="container max-w-7xl mx-auto px-6 mb-12">
-                        <div className="flex justify-end border-b border-white/10 pb-6">
-                            <SearchInput className="w-full md:w-[400px] bg-transparent border-white/20" />
+                    {/* SECTION 3 — READ OUR FREE INSIGHTS */}
+                    <section id="free-research" className="container max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                            <div>
+                                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">PUBLIC ARCHIVE</span>
+                                <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">Read our Free Insights</h2>
+                            </div>
+                            <div className="w-full md:w-[320px]">
+                                <SearchInput className="w-full bg-transparent border-white/10" />
+                            </div>
                         </div>
+
                         {search && (
-                            <div className="mt-8 mb-12">
-                                <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: "var(--insights-text)" }}>Search Results</h2>
-                                <div className="text-base" style={{ color: "var(--insights-text-muted)" }}>
+                            <div className="mb-12">
+                                <div className="text-base text-text-secondary">
                                     {postsSummary(gridPosts.length, search)}
                                 </div>
                             </div>
                         )}
-                    </div>
 
-                    {/* FEATURED INSIGHTS (FREE) */}
-                    <section id="free-research" className="container max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-                        <div className="mb-16">
-                            <span className="text-[11px] font-mono uppercase tracking-[0.2em] mb-4 block" style={{ color: "var(--insights-text-muted)" }}>Public Archive</span>
-                            <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight" style={{ color: "var(--insights-text)" }}>Featured Insights</h2>
-                        </div>
                         {publicPosts.length > 0 ? (
                             <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                                 {publicPosts.map((post) => (
@@ -172,115 +260,195 @@ export default async function InsightsPage({
                                 ))}
                             </div>
                         ) : (
-                            <div className="py-24 text-center border border-white/10 rounded-sm">
-                                <p className="text-lg" style={{ color: "var(--insights-text-muted)" }}>No public memos found.</p>
+                            <div className="py-24 text-center border border-white/10 rounded-xl bg-white/[0.01]">
+                                <p className="text-lg text-text-secondary">No public research memos found.</p>
                             </div>
                         )}
                     </section>
 
-                    {/* SECTION 2 — PHILOSOPHY */}
-                    <PhilosophySection />
+                    {/* SECTION 4 — WHO SHOULD ATTEND */}
+                    <section className="py-32 border-y border-white/5 bg-[#07070C]">
+                        <div className="container max-w-7xl mx-auto px-6">
+                            <div className="text-center mb-20">
+                                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">TARGET AUDIENCE</span>
+                                <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">Who should Attend</h2>
+                            </div>
 
-                    {/* SECTION 3 — RESEARCH PROCESS */}
-                    <ProcessScrollSection />
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {/* Card 1 */}
+                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-white text-base mb-1">Young Professionals (25–35)</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed">Learn how to grow your salary into wealth and avoid costly money mistakes.</p>
+                                    </div>
+                                </div>
 
-                    {/* SECTION 4 — WHAT MEMBERS RECEIVE */}
-                    <section className="py-32 border-y border-white/5" style={{ backgroundColor: "var(--bg-deep)" }}>
+                                {/* Card 2 */}
+                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-white text-base mb-1">Mid-Career Individuals (35–45)</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed">Build and protect wealth, plan for your family&apos;s future, and accelerate financial freedom.</p>
+                                    </div>
+                                </div>
+
+                                {/* Card 3 */}
+                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-white text-base mb-1">Business Owners & Entrepreneurs</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed">Invest surplus wisely and learn frameworks to maximize returns.</p>
+                                    </div>
+                                </div>
+
+                                {/* Card 4 */}
+                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-white text-base mb-1">NRIs</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed">Discover how to invest in India with confidence and achieve higher returns.</p>
+                                    </div>
+                                </div>
+
+                                {/* Card 5 */}
+                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-white text-base mb-1">Homemakers</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed">Gain financial independence and confidence to manage money smartly.</p>
+                                    </div>
+                                </div>
+
+                                {/* Card 6 */}
+                                <div className="bg-[#16161D]/50 border border-white/5 p-6 rounded-xl flex gap-4 items-start">
+                                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mt-1">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    </span>
+                                    <div>
+                                        <h4 className="font-bold text-white text-base mb-1">Retirees & Pre-Retirees</h4>
+                                        <p className="text-sm text-text-secondary leading-relaxed">Learn how to manage your retirement corpus and plan a stress-free, secure life.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Editorial quotes and trigger blocks */}
+                            <div className="mt-32 max-w-4xl mx-auto text-center space-y-16">
+                                {/* Quote 1 */}
+                                <blockquote className="p-8 border border-white/5 bg-[#16161D]/20 rounded-2xl relative">
+                                    <div className="absolute top-0 left-10 transform -translate-y-1/2 text-gold font-serif text-5xl">“</div>
+                                    <p className="text-2xl md:text-3xl font-heading font-semibold text-text-primary leading-snug">
+                                        Anyone with an active income but no clear plan to grow, protect, or multiply it
+                                    </p>
+                                    <div className="absolute bottom-0 right-10 transform translate-y-1/3 text-gold font-serif text-5xl">”</div>
+                                </blockquote>
+
+                                {/* Trigger List */}
+                                <div className="text-left bg-[#16161D]/30 border border-white/5 p-8 md:p-12 rounded-3xl space-y-8">
+                                    <h3 className="text-2xl font-bold text-white tracking-tight border-b border-white/5 pb-4">
+                                        You should subscribe NOW, if:
+                                    </h3>
+                                    <ol className="grid md:grid-cols-2 gap-x-12 gap-y-4 font-mono text-xs uppercase tracking-wider text-text-primary/90">
+                                        <li className="flex items-center gap-4">
+                                            <span className="text-gold font-bold font-sans text-sm">1.</span>
+                                            <span>You manage your portfolio yourself</span>
+                                        </li>
+                                        <li className="flex items-center gap-4">
+                                            <span className="text-gold font-bold font-sans text-sm">2.</span>
+                                            <span>You’re a domain expert with a passion for Investing</span>
+                                        </li>
+                                        <li className="flex items-center gap-4">
+                                            <span className="text-gold font-bold font-sans text-sm">3.</span>
+                                            <span>HNI, Analyst, Fund manager</span>
+                                        </li>
+                                        <li className="flex items-center gap-4">
+                                            <span className="text-gold font-bold font-sans text-sm">4.</span>
+                                            <span>Budding Analyst looking to upskill</span>
+                                        </li>
+                                        <li className="flex items-center gap-4">
+                                            <span className="text-gold font-bold font-sans text-sm">5.</span>
+                                            <span>Full-time Investor</span>
+                                        </li>
+                                        <li className="flex items-center gap-4">
+                                            <span className="text-gold font-bold font-sans text-sm">6.</span>
+                                            <span>You like to think through your Investments</span>
+                                        </li>
+                                    </ol>
+                                </div>
+
+                                {/* Quote 2 */}
+                                <blockquote className="p-8 border border-white/5 bg-[#16161D]/20 rounded-2xl relative">
+                                    <div className="absolute top-0 left-10 transform -translate-y-1/2 text-gold font-serif text-5xl">“</div>
+                                    <p className="text-2xl md:text-3xl font-heading font-semibold text-text-primary leading-snug">
+                                        Anyone who is tired of information overload looking for reliable source of high quality research on relatively undiscovered stocks
+                                    </p>
+                                    <div className="absolute bottom-0 right-10 transform translate-y-1/3 text-gold font-serif text-5xl">”</div>
+                                </blockquote>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* SECTION 5 — MEET RAHUL RAO, CFA */}
+                    <section className="py-32 bg-bg-deep relative">
                         <div className="container max-w-6xl mx-auto px-6">
-                            <div className="mb-24">
-                                <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight" style={{ color: "var(--insights-text)" }}>What Members Receive</h2>
-                            </div>
-                            
-                            <div className="space-y-32">
-                                {/* Block 1 */}
-                                <div className="grid md:grid-cols-2 gap-16 items-center">
-                                    <div className="relative aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <Image src="/images/research_memo.png" alt="Deep Dive Memo" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
-                                    </div>
-                                    <div className="space-y-6">
-                                        <h3 className="text-3xl font-heading font-bold" style={{ color: "var(--insights-text)" }}>2 Deep-Dive Research Memos Every Month</h3>
-                                        <p className="text-lg leading-relaxed" style={{ color: "var(--insights-text-muted)" }}>Comprehensive structural analysis on high-quality businesses. We dissect unit economics, capital allocation, and competitive advantages.</p>
-                                    </div>
-                                </div>
-                                {/* Block 2 */}
-                                <div className="grid md:grid-cols-2 gap-16 items-center">
-                                    <div className="order-2 md:order-1 space-y-6">
-                                        <h3 className="text-3xl font-heading font-bold text-text-primary">Monthly Meetup with Subscribers</h3>
-                                        <p className="text-lg leading-relaxed text-text-primary/80">Live Q&A and structural breakdown of our latest research with the community.</p>
-                                    </div>
-                                    <div className="relative order-1 md:order-2 aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <Image src="/images/monthly_meetup.png" alt="Monthly Meetup" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
+                            <div className="grid md:grid-cols-12 gap-16 items-center">
+                                {/* Profile Headshot Placeholder / Art */}
+                                <div className="md:col-span-5 flex justify-center">
+                                    <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden border border-white/10 bg-[#16161C] p-4 shadow-2xl group flex flex-col justify-between items-center text-center">
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,184,0,0.1),transparent_70%)]" />
+                                        
+                                        {/* Stylized vector representation of a professional profile */}
+                                        <div className="w-32 h-32 rounded-full border-2 border-gold bg-bg-deep flex items-center justify-center text-gold/30 mt-6 relative shadow-lg">
+                                            <Users className="w-16 h-16 text-gold" />
+                                        </div>
+
+                                        <div className="relative z-10 pb-4">
+                                            <h4 className="font-heading font-bold text-white text-lg">Rahul Rao, CFA</h4>
+                                            <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-gold/80 block mt-1">Head of Fundamental Research</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Block 3 */}
-                                <div className="grid md:grid-cols-2 gap-16 items-center">
-                                    <div className="relative aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <Image src="/images/research_archive.png" alt="Archive" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
+                                {/* Profile Bio Text */}
+                                <div className="md:col-span-7 space-y-6">
+                                    <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block">OUR TEAM</span>
+                                    <h2 className="text-3xl md:text-5xl font-heading font-bold text-white tracking-tight">Meet Rahul Rao, CFA</h2>
+                                    <div className="prose prose-invert prose-lg text-text-secondary leading-relaxed space-y-6">
+                                        <p>
+                                            Rahul Rao is a CFA charterholder with over a decade of experience in corporate valuation, equity research, and macroeconomic analysis. Specializing in first-principles research, he focuses on discovering high-quality businesses undergoing structural inflection points and compounding capital over long horizons.
+                                        </p>
+                                        <p>
+                                            Previously, he managed portfolios at leading family offices and financial institutions, helping investors cut through market noise to build high-conviction equity portfolios.
+                                        </p>
                                     </div>
-                                    <div className="space-y-6">
-                                        <h3 className="text-3xl font-heading font-bold text-text-primary">Full Research Archive Access</h3>
-                                        <p className="text-lg leading-relaxed text-text-primary/80">Unlock our entire history of investment frameworks, post-mortems, and sector deep-dives from day one.</p>
+                                    <div className="pt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6 border-t border-white/5">
+                                        <div className="text-left font-mono text-[10px] text-text-secondary">
+                                            <span className="text-gold font-bold">Research focus:</span>
+                                            <p className="uppercase tracking-wider mt-1 text-white/95">First Principles Deep-Dives</p>
+                                        </div>
+                                        <Link 
+                                            href="#membership" 
+                                            className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center"
+                                        >
+                                            Subscribe now for just ₹27 per day
+                                        </Link>
                                     </div>
                                 </div>
-
-                                {/* Block 4 */}
-                                <div className="grid md:grid-cols-2 gap-16 items-center">
-                                    <div className="order-2 md:order-1 space-y-6">
-                                        <h3 className="text-3xl font-heading font-bold text-text-primary">Exclusive Webinar Discounts</h3>
-                                        <p className="text-lg leading-relaxed text-text-primary/80">Receive a 50% discount on all future sector-focused webinars and masterclasses.</p>
-                                    </div>
-                                    <div className="relative order-1 md:order-2 aspect-[4/3] bg-bg-primary rounded-sm overflow-hidden border border-border">
-                                        <Image src="/images/webinar_discount.png" alt="Webinar Discount" fill className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500" sizes="(max-width: 768px) 100vw, 40vw" />
-                                    </div>
-                                </div>    
                             </div>
                         </div>
                     </section>
 
-                    {/* SECTION 5 — SAMPLE RESEARCH (Premium Preview) */}
-                    <section id="premium-research" className="container max-w-7xl mx-auto px-6 py-32">
-                        <div className="mb-16 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/10 pb-8">
-                            <div>
-                                <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-4" style={{ color: "var(--insights-text)" }}>Premium Research Preview</h2>
-                                <p className="text-lg max-w-2xl" style={{ color: "var(--insights-text-muted)" }}>Member-only memos covering specialized situations and fundamental deep-dives.</p>
-                            </div>
-                            {hasSubscriptionAccess ? (
-                                <Link href="#premium-research" className="font-mono text-sm tracking-widest uppercase hover:text-white transition-colors" style={{ color: "var(--insights-accent)" }}>
-                                    View All →
-                                </Link>
-                            ) : (
-                                <Link href="#membership" className="font-mono text-sm tracking-widest uppercase hover:text-white transition-colors" style={{ color: "var(--insights-accent)" }}>
-                                    Unlock All →
-                                </Link>
-                            )}
-                        </div>
-
-                        {premiumPosts.length > 0 ? (
-                            <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-                                {premiumPosts.slice(0, 3).map((post) => (
-                                    <div key={post.slug.current} className="relative group">
-                                        <InsightCard post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
-                                        {/* Blur Mask Overlay */}
-                                        {!hasSubscriptionAccess && (
-                                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--insights-bg)] via-[var(--insights-bg)]/80 to-transparent top-1/3 flex flex-col items-center justify-end pb-8 opacity-90 transition-opacity group-hover:opacity-100">
-                                                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-full mb-4">
-                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                                </div>
-                                                <span className="font-mono text-xs uppercase tracking-widest" style={{ color: "var(--insights-accent)" }}>Members Only</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="py-24 text-center border border-white/10 rounded-sm">
-                                <p className="text-lg" style={{ color: "var(--insights-text-muted)" }}>No premium memos found.</p>
-                            </div>
-                        )}
-                    </section>
-
-                    {/* SECTION 7 — MEMBERSHIP */}
+                    {/* SECTION 6 — MEMBERSHIP CHECKOUT */}
                     <section id="membership" className="py-32 border-t border-white/5" style={{ backgroundColor: "var(--bg-primary)" }}>
                         <div className="container max-w-4xl mx-auto px-6">
                             <div className="text-center mb-16">
@@ -300,8 +468,8 @@ export default async function InsightsPage({
                                                 <p className="text-white/70 max-w-md mx-auto leading-relaxed text-sm">
                                                     Thank you for supporting First Principles Investing. You have full access to all subscriber-only memos and the complete research archive.
                                                 </p>
-                                                <Link href="#premium-research" className="inline-flex items-center justify-center rounded-sm px-8 py-3.5 font-bold tracking-wide transition-all" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
-                                                    Access Premium Research
+                                                <Link href="#free-research" className="inline-flex items-center justify-center rounded-sm px-8 py-3.5 font-bold tracking-wide transition-all" style={{ backgroundColor: "var(--insights-accent)", color: "#080810" }}>
+                                                    Access Free Research
                                                 </Link>
                                             </div>
                                         ) : session?.user?.id ? (
@@ -334,22 +502,6 @@ export default async function InsightsPage({
                                 </div>
                             </div>
                         </div>
-                    </section>
-
-                    {/* SECTION 8 — FINAL CTA */}
-                    <section className="container max-w-5xl mx-auto px-6 py-40 text-center">
-                        <h2 className="text-5xl md:text-7xl font-heading font-bold tracking-tighter leading-tight mb-12" style={{ color: "var(--insights-text)" }}>
-                            The best investment ideas begin with <span className="italic" style={{ color: "var(--insights-accent)" }}>understanding.</span>
-                        </h2>
-                        {hasSubscriptionAccess ? (
-                            <Link href="#premium-research" className="inline-flex items-center justify-center rounded-sm bg-white px-10 py-5 font-bold tracking-wide transition-colors duration-300" style={{ color: "#080810" }}>
-                                Read Premium Research
-                            </Link>
-                        ) : (
-                            <Link href="#membership" className="inline-flex items-center justify-center rounded-sm bg-white px-10 py-5 font-bold tracking-wide transition-colors duration-300" style={{ color: "#080810" }}>
-                                Subscribe Now
-                            </Link>
-                        )}
                     </section>
 
                 </InsightsAnimations>
