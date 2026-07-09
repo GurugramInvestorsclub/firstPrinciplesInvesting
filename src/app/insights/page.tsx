@@ -63,25 +63,25 @@ export default async function InsightsPage({
                             <div className="lg:col-span-7 space-y-6 text-left">
                                 {/* Inflection & Stock Discovery Badges */}
                                 <div className="flex flex-wrap items-center gap-3">
-                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-space-grotesk">
+                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-sans">
                                         <Flame className="w-3.5 h-3.5 text-white/50" />
                                         #1 Deep-Dives on businesses at Inflection points
                                     </span>
-                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-space-grotesk">
+                                    <span className="inline-flex items-center gap-2 bg-white/[0.02] border border-white/12 text-white/70 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider font-sans">
                                         <Award className="w-3.5 h-3.5 text-white/50" />
                                         #2 Discover winning stocks. Early.
                                     </span>
                                 </div>
 
                                 {/* Primary Headline */}
-                                <h1 className="text-[clamp(2.5rem,5.5vw,4.25rem)] font-space-grotesk font-semibold tracking-[-0.02em] leading-[1.08] text-text-primary">
-                                    Read two deep-dives a month, on businesses undergoing <span className="font-instrument-serif italic text-gold text-[1.05em] font-normal">big positive change</span>, and companies undergoing <span className="font-instrument-serif italic text-gold text-[1.05em] font-normal">radical positive change.</span>
+                                <h1 className="text-[clamp(1.75rem,3.8vw,2.75rem)] font-sans font-semibold tracking-[-0.02em] leading-[1.15] text-text-primary">
+                                    Read two deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change</span>, and companies undergoing <span className="font-display italic text-gold font-normal">radical positive change.</span>
                                 </h1>
 
                                 {/* Bonus section */}
                                 <div className="space-y-3 pt-1">
-                                    <p className="font-space-grotesk text-[0.75rem] font-semibold text-white/70 uppercase tracking-[0.12em]">Exclusive Subscriber Bonuses</p>
-                                    <ul className="grid sm:grid-cols-2 gap-3 text-sm text-white/70 font-space-grotesk font-medium">
+                                    <p className="font-sans text-[0.75rem] font-semibold text-white/70 uppercase tracking-[0.12em]">Exclusive Subscriber Bonuses</p>
+                                    <ul className="grid sm:grid-cols-2 gap-3 text-sm text-white/70 font-sans font-medium">
                                         <li className="flex items-center gap-3">
                                             <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
                                                 <CheckCircle2 className="w-3.5 h-3.5 text-white/70" />
@@ -105,7 +105,7 @@ export default async function InsightsPage({
                                     >
                                         Subscribe for ₹27/day
                                     </Link>
-                                    <div className="flex flex-col justify-center text-xs text-white/70 font-space-grotesk font-medium">
+                                    <div className="flex flex-col justify-center text-xs text-white/70 font-sans font-medium">
                                         <div className="flex items-center gap-2 text-white/70">
                                             <Users className="w-3.5 h-3.5 text-white/50" />
                                             <span className="font-bold">Social Proof</span>
@@ -137,8 +137,8 @@ export default async function InsightsPage({
 
                                     {/* Video Title Card Overlay */}
                                     <div className="p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent absolute bottom-0 left-0 right-0 space-y-2">
-                                        <span className="text-[10px] font-space-grotesk uppercase tracking-[0.25em] text-white/50 block">First Principles Investing</span>
-                                        <h4 className="text-sm font-semibold text-white font-space-grotesk">Cutting through financial noise to compound wealth</h4>
+                                        <span className="text-[10px] font-sans uppercase tracking-[0.25em] text-white/50 block">First Principles Investing</span>
+                                        <h4 className="text-sm font-semibold text-white font-sans">Cutting through financial noise to compound wealth</h4>
                                         <div className="flex items-center gap-3 pt-2 text-[9px] font-mono text-white/40">
                                             <div className="flex-1 h-[2px] bg-white/20 rounded-full overflow-hidden">
                                                 <div className="w-1/3 h-full bg-white/80 rounded-full" />

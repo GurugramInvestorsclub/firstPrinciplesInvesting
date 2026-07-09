@@ -6,8 +6,6 @@
   --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
   --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono-code: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
-  --font-space-grotesk: var(--font-space-grotesk), sans-serif;
-  --font-instrument-serif: var(--font-instrument-serif), serif;
 
   /* Extend colors with brand variables */
   --color-gold: var(--gold);
