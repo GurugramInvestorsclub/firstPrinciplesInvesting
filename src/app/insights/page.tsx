@@ -14,6 +14,7 @@ import Image from "next/image"
 import { CheckCircle2, Play, Volume2, Users, Flame, BookOpen, FileCheck2, Award, Calendar, BarChart2 } from "lucide-react"
 import { LogoMarquee } from "@/components/events/LogoMarquee"
 import { StickyFooterCheckout } from "@/components/insights/StickyFooterCheckout"
+import { BonusMarquee } from "@/components/insights/BonusMarquee"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
 export const revalidate = 0
@@ -76,23 +77,7 @@ export default async function InsightsPage({
                                 </h1>
 
                                 {/* Bonus section */}
-                                <div className="space-y-3 pt-1">
-                                    <p className="font-sans text-[0.75rem] font-semibold text-white/70 uppercase tracking-[0.12em]">Exclusive Subscriber Bonuses</p>
-                                    <ul className="grid sm:grid-cols-2 gap-3 text-sm text-white/70 font-sans font-medium">
-                                        <li className="flex items-center gap-3">
-                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-white/70" />
-                                            </span>
-                                            <span>50% off on our Sectoral workshops</span>
-                                        </li>
-                                        <li className="flex items-center gap-3">
-                                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-white/70" />
-                                            </span>
-                                            <span>Monthly Meetups</span>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <BonusMarquee />
 
                                 {/* CTA Area */}
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-2">
@@ -102,6 +87,10 @@ export default async function InsightsPage({
                                     >
                                         Subscribe for ₹23/day
                                     </Link>
+                                    <span className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                                        50+ members have joined in the last month
+                                    </span>
                                 </div>
                             </div>
 
