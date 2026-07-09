@@ -132,14 +132,15 @@ export default async function InsightsPage({
                             </div>
                         </div>
 
-                        {/* Featured On sliding logos */}
-                        <div className="mt-12 border-t border-white/5 pt-4">
-                            <LogoMarquee />
-                        </div>
                     </section>
 
+                    {/* Featured On sliding logos - Full screen width */}
+                    <div className="w-full border-t border-white/5 bg-[#0C0C0E]/40">
+                        <LogoMarquee />
+                    </div>
+
                     {/* SECTION 2 — WHAT YOU GET AS A SUBSCRIBER */}
-                    <section className="py-24 border-t border-white/5 bg-[#0A0A0F]">
+                    <section className="py-24 bg-[#0A0A0F]">
                         <div className="container max-w-7xl mx-auto px-6">
                             <div className="mb-16 text-center md:text-left">
                                 <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">MEMBERSHIP DETAILS</span>
