@@ -189,8 +189,9 @@ export function StickyFooterCheckout({
               throw new Error(verifyPayload.message ?? "Subscription verification failed")
             }
 
-            setSuccess("Membership activated. Refreshing access...")
+            setSuccess("Membership activated. Redirecting to members portal...")
             setTimeout(() => {
+              router.push("/insights/members-only")
               router.refresh()
             }, 1500)
           } catch (verificationError) {
