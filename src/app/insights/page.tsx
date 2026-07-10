@@ -80,17 +80,23 @@ export default async function InsightsPage({
                                 <BonusMarquee />
 
                                 {/* CTA Area */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-2">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                                     <Link 
                                         href="#membership" 
                                         className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
                                     >
                                         Subscribe for ₹23/day
                                     </Link>
-                                    <span className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-                                        50+ members have joined in the last month
-                                    </span>
+                                    <Link 
+                                        href="/insights/members-only" 
+                                        className="inline-flex items-center justify-center rounded-[10px] border border-white/10 hover:border-gold/30 bg-[#16161C]/50 hover:bg-[#1A1A22] text-white hover:text-gold px-7 py-3.5 font-semibold tracking-wide motion-safe:hover:-translate-y-[1px] transition-all duration-150 text-center shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+                                    >
+                                        Members Portal &rarr;
+                                    </Link>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium pt-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                                    50+ members have joined in the last month
                                 </div>
                             </div>
 
