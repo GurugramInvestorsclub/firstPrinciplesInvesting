@@ -61,9 +61,9 @@ export default async function InsightsPage({
 
                     {/* SECTION 1 — HERO */}
                     <section className="container max-w-7xl mx-auto px-6 pt-24 pb-16 md:pt-36 md:pb-20 min-h-[90vh] flex flex-col justify-center bg-[radial-gradient(circle_at_right_50%_top_50%,rgba(245,184,0,0.04),transparent_60%)]">
-                        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                             {/* Left Text Block */}
-                            <div className="lg:col-span-7 space-y-6 text-left">
+                            <div className="lg:col-span-7 min-w-0 space-y-6 text-left">
                                 {/* Inflection Badge */}
                                 <div>
                                     <span className="text-white text-sm md:text-[15px] font-semibold uppercase tracking-wider font-sans">
