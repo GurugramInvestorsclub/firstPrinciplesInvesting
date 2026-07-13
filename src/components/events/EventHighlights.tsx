@@ -67,7 +67,7 @@ export function EventHighlights({ event }: { event: Event }) {
     if (!event.highlightStat) return null;
 
     return (
-        <section id="highlights" className="py-24 relative overflow-hidden">
+        <section id="highlights" className="py-20 md:py-24 relative overflow-hidden">
             <div className="absolute inset-0 bg-gold/5 opacity-5 pointer-events-none" />
             <div className="w-[80%] mx-auto max-w-4xl relative z-10">
                 <motion.div
@@ -75,15 +75,20 @@ export function EventHighlights({ event }: { event: Event }) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    whileHover={{ 
-                        y: -8, 
-                        scale: 1.02,
+                    whileHover={{
+                        y: -8,
                         transition: { duration: 0.4 }
                     }}
-                    className="p-12 md:p-20 rounded-[32px] text-center bg-[#111113]/40 backdrop-blur-2xl border border-white/5 hover:border-gold/30 hover:shadow-[0_40_100px_rgba(255,199,44,0.15)] transition-all duration-500 cursor-default group relative overflow-hidden"
+                    className="p-10 md:p-16 rounded-[32px] text-center bg-[#111113]/40 backdrop-blur-2xl border border-white/5 hover:border-gold/30 hover:shadow-[0_40px_100px_rgba(255,199,44,0.15)] transition-all duration-500 cursor-default group relative overflow-hidden"
                 >
+                    {/* Gold hairline accent along the top edge */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                    <h2 className="relative z-10 text-4xl md:text-6xl md:leading-tight font-bold text-white drop-shadow-2xl">
+
+                    <span className="relative z-10 block text-[10px] font-mono uppercase tracking-[0.4em] text-text-secondary/70 mb-8">
+                        Why Now
+                    </span>
+                    <h2 className="relative z-10 text-2xl md:text-4xl leading-snug md:leading-snug font-semibold text-white drop-shadow-2xl max-w-3xl mx-auto">
                         <AnimatedTextWithNumbers text={event.highlightStat} />
                     </h2>
                 </motion.div>

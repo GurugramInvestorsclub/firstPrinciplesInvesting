@@ -11,18 +11,15 @@ export function EventLearning({ event }: { event: Event }) {
         <section id="learning" className="py-24 md:py-32 bg-[#0E0E11] border-y border-white/5 relative z-10">
             <div className="w-[80%] mx-auto max-w-screen-2xl">
                 <motion.div
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="max-w-3xl mx-auto mb-20 text-center"
+                    className="flex items-center justify-center mb-16"
                 >
-                    <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white uppercase tracking-tight">
-                        Master the Market Cycle <span className="text-gold">Framework</span>
-                    </h2>
-                    <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto">
-                        This isn't just information. It's a systematic approach to gaining a decisive market edge.
-                    </p>
+                    <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-text-secondary/70">
+                        What You&apos;ll Learn
+                    </span>
                 </motion.div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -45,6 +42,11 @@ export function EventLearning({ event }: { event: Event }) {
                                 {/* Subtle background glow */}
                                 <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold/5 rounded-full blur-[80px] group-hover:bg-gold/10 transition-all duration-700" />
 
+                                {/* Faint index number */}
+                                <span className="absolute top-8 right-8 font-mono text-4xl font-bold text-white/5 group-hover:text-gold/10 transition-colors duration-500 select-none">
+                                    {String(idx + 1).padStart(2, '0')}
+                                </span>
+
                                 <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center shrink-0 border border-gold/20 mb-10 group-hover:scale-110 group-hover:bg-gold/20 transition-all duration-500">
                                     <CheckCircle2 className="w-7 h-7 text-gold" />
                                 </div>
@@ -53,18 +55,14 @@ export function EventLearning({ event }: { event: Event }) {
                                     {point.title}
                                 </h3>
 
-                                {payoff ? (
-                                    <p className="text-gray-300 font-medium mb-8 leading-relaxed italic border-l-2 border-gold/30 pl-4">
+                                {payoff && (
+                                    <p className="text-gray-300 font-light leading-relaxed border-l-2 border-gold/30 pl-4">
                                         {payoff}
-                                    </p>
-                                ) : (
-                                    <p className="text-gray-400 leading-relaxed font-light mb-8 italic">
-                                        Outcome-driven transformation.
                                     </p>
                                 )}
 
-                                {bullets.length > 0 ? (
-                                    <ul className="space-y-4 mt-auto">
+                                {bullets.length > 0 && (
+                                    <ul className="space-y-4 mt-8">
                                         {bullets.map((bullet, i) => (
                                             <li key={i} className="flex items-start gap-3 text-sm text-gray-400 leading-relaxed">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
@@ -72,17 +70,6 @@ export function EventLearning({ event }: { event: Event }) {
                                             </li>
                                         ))}
                                     </ul>
-                                ) : (
-                                    <div className="space-y-4 mt-auto">
-                                        <div className="flex items-start gap-3 text-sm text-gray-400 leading-relaxed">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
-                                            Systematize your decision-making process
-                                        </div>
-                                        <div className="flex items-start gap-3 text-sm text-gray-400 leading-relaxed">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
-                                            Eliminate emotional bias with first-principles
-                                        </div>
-                                    </div>
                                 )}
                             </motion.div>
                         );
