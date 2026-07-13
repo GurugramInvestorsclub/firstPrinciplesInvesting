@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
 import { Event } from "@/lib/types"
-import { urlForImage } from "@/lib/sanity.image"
+import { urlForImage, getImageDimensions } from "@/lib/sanity.image"
 
 import { EventActionSection } from "./EventActionSection"
 
@@ -16,6 +16,8 @@ interface EventHeroProps {
 
 export function EventHero({ event }: EventHeroProps) {
     const eventDate = new Date(event.startTime || event.date)
+    const dimensions = event.image ? getImageDimensions(event.image) : null
+    const imageAspect = dimensions ? dimensions.width / dimensions.height : 1
 
     return (
         <section id="overview" className="relative pt-32 pb-20 md:pt-40 md:pb-32 lg:pt-48 lg:pb-40 overflow-hidden min-h-[90vh] flex items-center bg-[#0E0E11]">
@@ -51,7 +53,7 @@ export function EventHero({ event }: EventHeroProps) {
                 <div className={`grid grid-cols-1 ${event.image ? 'lg:grid-cols-12' : ''} gap-12 lg:gap-16 items-center text-center lg:text-left`}>
                     
                     {/* Left Column: Badges, Title, Subtitle, and Payment Card */}
-                    <div className={`flex flex-col items-center lg:items-start gap-8 ${event.image ? 'lg:col-span-7' : 'w-full max-w-4xl mx-auto'} animate-fade-in-up`}>
+                    <div className={`flex flex-col items-center lg:items-start gap-8 ${event.image ? 'lg:col-span-5' : 'w-full max-w-4xl mx-auto'} animate-fade-in-up`}>
                         <div className="flex flex-wrap justify-center lg:justify-start items-center gap-3">
                             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-gold/10 text-gold border border-gold/20 backdrop-blur-sm">
                                 <Calendar className="w-3.5 h-3.5" />
@@ -80,14 +82,15 @@ export function EventHero({ event }: EventHeroProps) {
 
                     {/* Right Column: Event Poster Image */}
                     {event.image && (
-                        <div className="lg:col-span-5 w-full flex justify-center animate-fade-in-up delay-200">
+                        <div className="lg:col-span-7 w-full flex justify-center animate-fade-in-up delay-200">
                             <motion.div 
                                 whileHover={{ scale: 1.01, y: -4 }}
                                 transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-                                className="relative aspect-[16/10] lg:aspect-[4/5] w-full max-w-md lg:max-w-none rounded-3xl overflow-hidden border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.7)] group/poster"
+                                className="relative w-full max-w-md lg:max-w-2xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.7)] group/poster"
+                                style={{ aspectRatio: imageAspect }}
                             >
                                 <Image
-                                    src={urlForImage(event.image).width(1000).height(1250).url()}
+                                    src={urlForImage(event.image).width(1200).url()}
                                     alt={event.title}
                                     fill
                                     priority
