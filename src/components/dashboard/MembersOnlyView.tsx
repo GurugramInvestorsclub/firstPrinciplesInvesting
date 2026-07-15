@@ -8,6 +8,7 @@ import { urlForImage } from "@/lib/sanity.image"
 interface MembersOnlyViewProps {
     onSelectReport: (slug: string) => void
     posts: any[]
+    hasSubscriptionAccess?: boolean
 }
 
 function calculateReadingTime(body: any[] | undefined): string {
@@ -40,7 +41,7 @@ function formatDate(dateStr: string): string {
     }
 }
 
-export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps) {
+export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess = false }: MembersOnlyViewProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [sortBy, setSortBy] = useState("newest")
 
@@ -85,6 +86,41 @@ export function MembersOnlyView({ onSelectReport, posts }: MembersOnlyViewProps)
                     Access our detailed in-depth equity analysis memos built from first principles.
                 </p>
             </div>
+
+            {/* WhatsApp Invite Banner for Active Members */}
+            {hasSubscriptionAccess && (
+                <div className="p-[1px] bg-gradient-to-r from-emerald-500/30 via-gold/20 to-emerald-500/30 rounded-2xl shadow-[0_8px_32px_0_rgba(16,185,129,0.05)]">
+                    <div className="bg-[#1E1E1E] p-6 rounded-[15px] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="space-y-3 max-w-xl text-left">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[9px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-[0.15em] font-mono font-bold">
+                                    Member Benefit
+                                </span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            </div>
+                            <h2 className="text-xl font-bold text-text-primary tracking-tight font-sans">
+                                Join the Exclusive WhatsApp Group
+                            </h2>
+                            <p className="text-xs text-neutral-400 leading-relaxed font-light">
+                                Connect with fellow members in our private community. Get instant notifications when new deep dives are published and discuss investment opportunities in real-time.
+                            </p>
+                        </div>
+                        <a
+                            href="https://chat.whatsapp.com/EmjQIzJjtQ26PPrqqpKFOI"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group inline-flex items-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-xs px-5 py-3 rounded-full transition-all duration-500 shadow-[0_4px_20px_0_rgba(16,185,129,0.2)] hover:shadow-[0_4px_25px_0_rgba(16,185,129,0.3)] shrink-0 active:scale-[0.98] ease-[cubic-bezier(0.32,0.72,0,1)]"
+                        >
+                            <span>Join WhatsApp Group</span>
+                            <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center transition-all duration-500 group-hover:translate-x-1 group-hover:scale-105 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.852.002-2.63-1.023-5.101-2.887-6.968C16.58 1.966 14.11 .941 11.48.941 6.046.941 1.62 5.362 1.616 10.793c-.001 1.639.499 3.23 1.448 4.82l-.995 3.648 3.743-.982zm12.5-3.327c-.273-.137-1.619-.8-1.867-.89-.248-.09-.43-.137-.61.137-.18.273-.7.89-.858 1.07-.158.18-.315.2-.588.064-.273-.137-1.155-.426-2.202-1.36-0.815-.727-1.366-1.624-1.526-1.897-.16-.273-.017-.42.12-.556.123-.122.273-.32.41-.48.137-.16.183-.273.273-.455.09-.18.045-.34-.022-.48-.067-.137-.61-1.468-.836-2.01-.22-.53-.44-.46-.61-.46-.16 0-.34-.02-.52-.02-.18 0-.48.07-.73.34-.25.27-.95.93-.95 2.27s.98 2.62 1.11 2.8c.14.18 1.94 2.96 4.69 4.15 1.8.78 2.45.63 2.92.56.5-.07 1.62-.66 1.85-1.3.23-.64.23-1.18.16-1.3-.07-.12-.25-.2-.53-.34z" />
+                                </svg>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            )}
 
             {/* Filter and Search Bar */}
             <div className="p-4 rounded-xl border border-white/5 bg-[#1E1E1E] flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
