@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Calendar, MapPin, User, ArrowRight, Play, Lock } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { urlForImage } from "@/lib/sanity.image"
 
 interface EventsViewProps {
@@ -159,7 +160,15 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
 
                                             {/* Action Button */}
                                             <div className="pt-2">
-                                                {event.superProfileLink || event.registrationLink ? (
+                                                {event.slug?.current ? (
+                                                    <Link 
+                                                        href={`/events/${event.slug.current}`}
+                                                        className="flex items-center justify-center w-full py-3 rounded-xl bg-gradient-to-r from-gold/15 to-gold/5 border border-gold/20 text-gold font-bold text-xs hover:from-gold hover:to-[#C89B3C] hover:text-[#0b0b0c] hover:border-transparent transition-all duration-500 font-mono tracking-wider uppercase cursor-pointer"
+                                                    >
+                                                        Reserve Seat
+                                                        <ArrowRight className="ml-2 w-3.5 h-3.5" />
+                                                    </Link>
+                                                ) : event.superProfileLink || event.registrationLink ? (
                                                     <a 
                                                         href={event.superProfileLink || event.registrationLink}
                                                         target="_blank"
