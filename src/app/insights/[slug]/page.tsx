@@ -61,11 +61,11 @@ export default async function InsightPage({ params }: Props) {
         <div className="flex flex-col min-h-screen">
             {isSubscriberOnly && <CopyProtection />}
             <Navbar />
-            <main className={`flex-1 ${liveWebinar ? "pt-16 md:pt-20" : ""}`}>
+            <main className="flex-1 blog-main-container">
                 {liveWebinar && (
                     <AnnouncementBar event={liveWebinar} isSubscriber={hasSubscriptionAccess} />
                 )}
-                <article className={`container max-w-3xl px-4 sm:px-8 mx-auto ${liveWebinar ? "py-8 md:py-12" : "py-12 md:py-20"}`}>
+                <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto blog-article-container">
                     <header className="mb-12 text-left">
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
                             {post.title}
