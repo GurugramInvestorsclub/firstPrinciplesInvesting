@@ -1,8 +1,9 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { singlePostQuery } from "@/lib/sanity.queries"
-import { Post } from "@/lib/types"
+import { singlePostQuery, eventsQuery } from "@/lib/sanity.queries"
+import { Post, Event } from "@/lib/types"
+import { AnnouncementBar } from "@/components/insights/AnnouncementBar"
 import { RichText } from "@/components/sanity/RichText"
 import { auth } from "@/auth"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
@@ -30,12 +31,15 @@ export default async function InsightPage({ params }: Props) {
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    // Fetch the post contents, auth session, and comments in parallel
-    const [post, session, commentsResult] = await Promise.all([
+    // Fetch the post contents, auth session, comments, and events in parallel
+    const [post, session, commentsResult, upcomingEvents] = await Promise.all([
         client.fetch<Post | null>(singlePostQuery, { slug }, { next: { revalidate: 60 } }),
         auth(),
-        getComments(slug)
+        getComments(slug),
+        client.fetch<Event[]>(eventsQuery, {}, { next: { revalidate: 60 } })
     ])
+
+    const liveWebinar = upcomingEvents?.[0]
 
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
@@ -57,8 +61,11 @@ export default async function InsightPage({ params }: Props) {
         <div className="flex flex-col min-h-screen">
             {isSubscriberOnly && <CopyProtection />}
             <Navbar />
-            <main className="flex-1">
-                <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto">
+            <main className={`flex-1 ${liveWebinar ? "pt-16 md:pt-20" : ""}`}>
+                {liveWebinar && (
+                    <AnnouncementBar event={liveWebinar} isSubscriber={hasSubscriptionAccess} />
+                )}
+                <article className={`container max-w-3xl px-4 sm:px-8 mx-auto ${liveWebinar ? "py-8 md:py-12" : "py-12 md:py-20"}`}>
                     <header className="mb-12 text-left">
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
                             {post.title}
