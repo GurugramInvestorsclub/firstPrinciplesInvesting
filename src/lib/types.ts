@@ -94,3 +94,14 @@ export interface Super30Program {
     isActive?: boolean
     isSoldOut?: boolean
 }
+
+export interface Recording {
+    _id: string
+    title: string
+    date: string
+    recordingUrl: string
+    description?: string
+    thumbnail?: any
+    duration?: string
+}
+

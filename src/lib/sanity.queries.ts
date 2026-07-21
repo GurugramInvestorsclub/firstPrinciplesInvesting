@@ -199,3 +199,16 @@ export const singleSuper30Query = groq`
     isSoldOut
   }
 `
+
+export const recordingsQuery = groq`
+  *[_type == "recording" && (!defined($search) || title match $search + "*" || description match $search + "*")] | order(date desc) {
+    _id,
+    title,
+    date,
+    recordingUrl,
+    description,
+    thumbnail,
+    duration
+  }
+`
+

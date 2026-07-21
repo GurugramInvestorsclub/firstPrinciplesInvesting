@@ -25,6 +25,7 @@ interface ResearchDeskProps {
     initialPosts?: any[]
     initialUpcomingEvents?: any[]
     initialPastEvents?: any[]
+    initialRecordings?: any[]
     hasSubscriptionAccess?: boolean
 }
 
@@ -37,6 +38,7 @@ export function ResearchDesk({
     initialPosts = [],
     initialUpcomingEvents = [],
     initialPastEvents = [],
+    initialRecordings = [],
     hasSubscriptionAccess = false
 }: ResearchDeskProps) {
     const [activeTab, setActiveTab] = useState("home")
@@ -240,6 +242,7 @@ export function ResearchDesk({
                                 onSelectReport={(slug) => handleNavigate("members-only", slug)}
                                 posts={posts}
                                 hasSubscriptionAccess={hasSubscriptionAccess}
+                                recordings={initialRecordings}
                             />
                         ) : (
                             <FreeResearchView 
