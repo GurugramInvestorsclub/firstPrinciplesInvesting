@@ -1,11 +1,12 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { Post } from "@/lib/types"
+import { Post, Recording } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
 import { auth } from "@/auth"
 import Link from "next/link"
 import { groq } from "next-sanity"
@@ -26,6 +27,18 @@ const subscriberPostsQuery = groq`
   }
 `
 
+const subscriberRecordingsQuery = groq`
+  *[_type == "recording" && (!defined($search) || title match $search + "*" || description match $search + "*")] | order(date desc) {
+    _id,
+    title,
+    date,
+    recordingUrl,
+    description,
+    thumbnail,
+    duration
+  }
+`
+
 export default async function MembersOnlyArchivePage({
     searchParams,
 }: {
@@ -43,9 +56,10 @@ export default async function MembersOnlyArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    const [hasSubscriptionAccess, premiumPosts] = await Promise.all([
+    const [hasSubscriptionAccess, premiumPosts, recordings] = await Promise.all([
         paywallReady ? userHasInsightsAccess(session.user.id) : Promise.resolve(false),
-        client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } })
+        client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } }),
+        client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } })
     ])
 
     return (
@@ -74,16 +88,16 @@ export default async function MembersOnlyArchivePage({
                         )}
                     </div>
 
-                    {/* Paywall locked state: Display active subscription form if they do not have access */}
+                    {/* Non-members view: Access locked & subscription form */}
                     {!hasSubscriptionAccess ? (
-                        <div className="max-w-4xl mx-auto mb-20 space-y-12">
+                        <div className="max-w-4xl mx-auto mb-20 space-y-16">
                             <div className="p-8 md:p-12 rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/[0.03] to-transparent text-center space-y-6">
                                 <div className="inline-flex items-center justify-center p-4 rounded-full bg-gold/10 border border-gold/25 text-gold mb-2">
                                     <Lock className="w-6 h-6" />
                                 </div>
                                 <h2 className="text-2xl md:text-4xl font-sans font-bold text-white tracking-tight">Access Locked</h2>
                                 <p className="text-white/70 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
-                                    This portal houses our high-conviction fundamental equity research deep-dives and valuation models. Unlock full access by starting a quarterly membership below.
+                                    This portal houses our high-conviction fundamental equity research deep-dives, valuation models, and session recordings archive. Unlock full access by starting a quarterly membership below.
                                 </p>
                                 <div className="max-w-md mx-auto pt-6 text-left">
                                     <InsightsSubscriptionCheckout
@@ -95,7 +109,7 @@ export default async function MembersOnlyArchivePage({
                                 </div>
                             </div>
 
-                            {/* Locked articles preview */}
+                            {/* Locked research notes preview */}
                             <div className="space-y-6">
                                 <div className="flex items-center gap-2 pb-4 border-b border-white/5">
                                     <FileKey className="w-4 h-4 text-white/40" />
@@ -115,28 +129,34 @@ export default async function MembersOnlyArchivePage({
                             </div>
                         </div>
                     ) : (
-                        // Active subscription state: Display full grid
-                        <>
+                        // Active subscribers view: Premium Research Notes & Recordings Carousel
+                        <div className="space-y-20">
                             {search && (
-                                <div className="mb-12">
+                                <div className="mb-8">
                                     <div className="text-base text-text-secondary font-sans">
-                                        {postsSummary(premiumPosts.length, search)}
+                                        {resultsSummary(premiumPosts.length, recordings.length, search)}
                                     </div>
                                 </div>
                             )}
 
-                            {premiumPosts.length > 0 ? (
-                                <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
-                                    {premiumPosts.map((post) => (
-                                        <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={true} />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="py-24 text-center border border-white/10 rounded-xl bg-white/[0.01]">
-                                    <p className="text-lg text-text-secondary font-sans">No premium research memos found.</p>
-                                </div>
-                            )}
-                        </>
+                            {/* Section 1: Premium Research Notes */}
+                            <section className="space-y-8">
+                                {premiumPosts.length > 0 ? (
+                                    <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
+                                        {premiumPosts.map((post) => (
+                                            <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={true} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-16 text-center border border-white/10 rounded-xl bg-white/[0.01]">
+                                        <p className="text-base text-text-secondary font-sans">No premium research memos found.</p>
+                                    </div>
+                                )}
+                            </section>
+
+                            {/* Section 2: Recordings Archive Carousel (Members Only) */}
+                            <RecordingsCarousel recordings={recordings} />
+                        </div>
                     )}
                 </div>
             </main>
@@ -146,9 +166,14 @@ export default async function MembersOnlyArchivePage({
     )
 }
 
-function postsSummary(count: number, search: string) {
-    if (count === 0) {
+function resultsSummary(postsCount: number, recordingsCount: number, search: string) {
+    const total = postsCount + recordingsCount
+    if (total === 0) {
         return <p>No results found for <span className="font-semibold text-white">&quot;{search}&quot;</span></p>
     }
-    return <p>Showing {count} result{count === 1 ? "" : "s"} for <span className="font-semibold text-white">&quot;{search}&quot;</span></p>
+    return (
+        <p>
+            Showing {total} result{total === 1 ? "" : "s"} ({postsCount} note{postsCount === 1 ? "" : "s"}, {recordingsCount} recording{recordingsCount === 1 ? "" : "s"}) for <span className="font-semibold text-white">&quot;{search}&quot;</span>
+        </p>
+    )
 }

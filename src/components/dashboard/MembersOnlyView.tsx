@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Clock, ArrowUpDown, Filter, Video, Play, ExternalLink, Calendar } from "lucide-react"
+import { Search, Clock, ArrowUpDown, Filter } from "lucide-react"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
+import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
+
 
 interface MembersOnlyViewProps {
     onSelectReport: (slug: string) => void
@@ -263,86 +265,11 @@ export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess =
                 </div>
             )}
 
-            {/* Session Recordings Archive Section */}
-            <div className="pt-12 border-t border-white/5 space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-bold text-text-primary font-sans flex items-center gap-2">
-                            <Video className="w-5 h-5 text-gold" />
-                            Recordings Archive
-                        </h2>
-                        <p className="text-xs text-neutral-400 font-light mt-0.5">
-                            Watch recorded sessions, webinars, and masterclass replays.
-                        </p>
-                    </div>
-                    <span className="text-xs font-mono text-neutral-500 bg-white/5 px-3 py-1 rounded-full">
-                        {filteredRecordings.length} {filteredRecordings.length === 1 ? "Recording" : "Recordings"}
-                    </span>
-                </div>
-
-                {filteredRecordings.length > 0 ? (
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {filteredRecordings.map((recording) => (
-                            <div
-                                key={recording._id}
-                                className="flex flex-col border border-white/5 hover:border-gold/25 bg-[#1E1E1E] rounded-2xl overflow-hidden transition-all duration-300 group justify-between"
-                            >
-                                {recording.thumbnail ? (
-                                    <div className="relative aspect-[16/9] w-full overflow-hidden">
-                                        <Image
-                                            src={urlForImage(recording.thumbnail).width(400).height(225).fit("crop").url()}
-                                            alt={recording.title}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="aspect-[16/9] w-full bg-gradient-to-br from-gold/10 via-neutral-900 to-black flex items-center justify-center p-6 text-center">
-                                        <div className="w-10 h-10 rounded-full bg-gold/20 border border-gold/30 flex items-center justify-center text-gold">
-                                            <Play className="w-4 h-4 fill-gold/40 ml-0.5" />
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                            <span>{formatDate(recording.date)}</span>
-                                            {recording.duration && <span>{recording.duration}</span>}
-                                        </div>
-                                        <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug">
-                                            {recording.title}
-                                        </h3>
-                                        {recording.description && (
-                                            <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
-                                                {recording.description}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="pt-4 border-t border-white/5">
-                                        <a
-                                            href={recording.recordingUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center justify-center w-full gap-2 px-4 py-2.5 rounded-xl bg-gold/10 hover:bg-gold text-gold hover:text-black font-semibold text-xs transition-all duration-300 border border-gold/25 hover:border-gold"
-                                        >
-                                            <span>Watch Recording</span>
-                                            <ExternalLink className="w-3 h-3" />
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="p-12 border border-dashed border-[#2E2E2E] rounded-2xl text-center text-xs text-neutral-500">
-                        No session recordings found in the archive.
-                    </div>
-                )}
-            </div>
+            {/* Session Recordings Archive Carousel */}
+            <RecordingsCarousel recordings={filteredRecordings} />
 
         </div>
     )
 }
+
 
