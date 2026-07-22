@@ -212,3 +212,13 @@ export const recordingsQuery = groq`
   }
 `
 
+export const notesQuery = groq`
+  *[_type == "note" && (!defined($search) || title match $search + "*")] | order(date desc) {
+    _id,
+    title,
+    date,
+    content
+  }
+`
+
+

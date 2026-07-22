@@ -26,6 +26,7 @@ interface ResearchDeskProps {
     initialUpcomingEvents?: any[]
     initialPastEvents?: any[]
     initialRecordings?: any[]
+    initialNotes?: any[]
     hasSubscriptionAccess?: boolean
 }
 
@@ -39,6 +40,7 @@ export function ResearchDesk({
     initialUpcomingEvents = [],
     initialPastEvents = [],
     initialRecordings = [],
+    initialNotes = [],
     hasSubscriptionAccess = false
 }: ResearchDeskProps) {
     const [activeTab, setActiveTab] = useState("home")
@@ -243,6 +245,7 @@ export function ResearchDesk({
                                 posts={posts}
                                 hasSubscriptionAccess={hasSubscriptionAccess}
                                 recordings={initialRecordings}
+                                notes={initialNotes}
                             />
                         ) : (
                             <FreeResearchView 

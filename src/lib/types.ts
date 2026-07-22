@@ -105,3 +105,11 @@ export interface Recording {
     duration?: string
 }
 
+export interface Note {
+    _id: string
+    title: string
+    date: string
+    content: any[] // PortableTextBlock[] or any[] for flexibility with portable text renderer
+}
+
+
