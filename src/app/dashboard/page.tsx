@@ -36,8 +36,8 @@ export default async function DashboardPage() {
         client.fetch<any[]>(dashboardPostsQuery, {}, { next: { revalidate: 60 } }),
         client.fetch<any[]>(eventsQuery, {}, { next: { revalidate: 60 } }),
         client.fetch<any[]>(pastEventsQuery, {}, { next: { revalidate: 60 } }),
-        client.fetch<any[]>(recordingsQuery, {}, { next: { revalidate: 60 } }),
-        client.fetch<any[]>(notesQuery, {}, { next: { revalidate: 60 } })
+        client.fetch<any[]>(recordingsQuery, { search: null }, { next: { revalidate: 60 } }),
+        client.fetch<any[]>(notesQuery, { search: null }, { next: { revalidate: 60 } })
     ])
 
     const subscriptionStatus = insightsMembership?.statusLabel || "Inactive"
