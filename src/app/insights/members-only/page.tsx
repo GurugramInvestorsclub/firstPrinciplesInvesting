@@ -7,6 +7,7 @@ import { SearchInput } from "@/components/ui/search-input"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
+import { NotesSection } from "@/components/insights/NotesSection"
 import { auth } from "@/auth"
 import Link from "next/link"
 import { groq } from "next-sanity"
@@ -39,6 +40,15 @@ const subscriberRecordingsQuery = groq`
   }
 `
 
+const subscriberNotesQuery = groq`
+  *[_type == "note" && (!defined($search) || title match $search + "*")] | order(date desc) {
+    _id,
+    title,
+    date,
+    content
+  }
+`
+
 export default async function MembersOnlyArchivePage({
     searchParams,
 }: {
@@ -56,10 +66,11 @@ export default async function MembersOnlyArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    const [hasSubscriptionAccess, premiumPosts, recordings] = await Promise.all([
+    const [hasSubscriptionAccess, premiumPosts, recordings, notes] = await Promise.all([
         paywallReady ? userHasInsightsAccess(session.user.id) : Promise.resolve(false),
         client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } }),
-        client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } })
+        client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } }),
+        client.fetch<any[]>(subscriberNotesQuery, { search: search || null }, { next: { revalidate: 60 } })
     ])
 
     return (
@@ -134,7 +145,7 @@ export default async function MembersOnlyArchivePage({
                             {search && (
                                 <div className="mb-8">
                                     <div className="text-base text-text-secondary font-sans">
-                                        {resultsSummary(premiumPosts.length, recordings.length, search)}
+                                        {resultsSummary(premiumPosts.length, recordings.length, notes.length, search)}
                                     </div>
                                 </div>
                             )}
@@ -156,6 +167,9 @@ export default async function MembersOnlyArchivePage({
 
                             {/* Section 2: Recordings Archive Carousel (Members Only) */}
                             <RecordingsCarousel recordings={recordings} />
+
+                            {/* Section 3: Notes (Members Only) */}
+                            <NotesSection notes={notes} />
                         </div>
                     )}
                 </div>
@@ -166,14 +180,14 @@ export default async function MembersOnlyArchivePage({
     )
 }
 
-function resultsSummary(postsCount: number, recordingsCount: number, search: string) {
-    const total = postsCount + recordingsCount
+function resultsSummary(postsCount: number, recordingsCount: number, notesCount: number, search: string) {
+    const total = postsCount + recordingsCount + notesCount
     if (total === 0) {
         return <p>No results found for <span className="font-semibold text-white">&quot;{search}&quot;</span></p>
     }
     return (
         <p>
-            Showing {total} result{total === 1 ? "" : "s"} ({postsCount} note{postsCount === 1 ? "" : "s"}, {recordingsCount} recording{recordingsCount === 1 ? "" : "s"}) for <span className="font-semibold text-white">&quot;{search}&quot;</span>
+            Showing {total} result{total === 1 ? "" : "s"} ({postsCount} report{postsCount === 1 ? "" : "s"}, {notesCount} note{notesCount === 1 ? "" : "s"}, {recordingsCount} recording{recordingsCount === 1 ? "" : "s"}) for <span className="font-semibold text-white">&quot;{search}&quot;</span>
         </p>
     )
 }
