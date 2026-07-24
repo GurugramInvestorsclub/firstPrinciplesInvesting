@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Clock, ArrowUpDown, Filter } from "lucide-react"
+import { Search, Clock, ArrowUpDown, Filter, Lock } from "lucide-react"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
@@ -65,6 +65,47 @@ function getNotePreview(content: any[] | undefined): string {
 export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess = false, recordings = [], notes = [] }: MembersOnlyViewProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [sortBy, setSortBy] = useState("newest")
+
+    if (!hasSubscriptionAccess) {
+        return (
+            <div className="space-y-8 text-left max-w-4xl mx-auto py-4">
+                {/* Header */}
+                <div>
+                    <h1 className="text-3xl font-bold text-text-primary tracking-tight font-sans">
+                        Members Only Research
+                    </h1>
+                    <p className="text-sm text-neutral-400 font-light mt-1">
+                        Access our detailed in-depth equity analysis memos built from first principles.
+                    </p>
+                </div>
+
+                {/* Locked Card */}
+                <div className="p-8 md:p-12 rounded-3xl border border-gold/20 bg-[radial-gradient(circle_at_top_right,rgba(245,184,0,0.06),transparent_45%),rgba(255,255,255,0.02)] text-center space-y-6 shadow-xl relative overflow-hidden py-16">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,199,44,0.02),transparent_40%)] pointer-events-none" />
+                    
+                    <div className="inline-flex items-center justify-center p-4.5 rounded-2xl bg-gold/10 border border-gold/20 text-gold mb-2 shadow-inner">
+                        <Lock className="w-8 h-8" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                        <h2 className="text-2xl md:text-3xl font-sans font-bold text-white tracking-tight">Access Locked</h2>
+                        <p className="text-neutral-400 max-w-lg mx-auto leading-relaxed text-xs md:text-sm font-light">
+                            This exclusive section contains our private institutional-quality research memos, deep-dive valuation models, session recordings, and research notes. Start your membership to unlock instant access.
+                        </p>
+                    </div>
+
+                    <div className="pt-6">
+                        <a
+                            href="/membership"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-gold hover:bg-[#E0A800] text-bg-deep font-bold text-xs tracking-wider uppercase transition-all duration-300 shadow-lg active:scale-[0.98]"
+                        >
+                            <span>Subscribe Now</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     // Filter reports (access === "subscriber" only)
     const filteredReports = posts.filter(report => {

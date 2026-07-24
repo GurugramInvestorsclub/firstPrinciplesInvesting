@@ -89,16 +89,12 @@ export function ReaderView({
     const isSubscriberOnly = report.access === "subscriber"
     const shouldLockContent = isSubscriberOnly && !hasSubscriptionAccess
 
-    // Helper to get 10% preview if user doesn't have access
+    // Helper to get preview if user doesn't have access
     const getPreviewBlocks = (blocks: any[]) => {
         if (report.previewBody && report.previewBody.length > 0) {
             return report.previewBody
         }
-        if (!blocks || blocks.length === 0) {
-            return []
-        }
-        const previewCount = Math.max(1, Math.ceil(blocks.length * 0.1))
-        return blocks.slice(0, previewCount)
+        return []
     }
 
     const rawBlocks = report.body || []
@@ -416,12 +412,12 @@ export function ReaderView({
                                 </div>
 
                                 <div className="pt-2">
-                                    <button
-                                        onClick={() => onNavigate?.("profile")}
-                                        className="px-6 py-3 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-full text-xs transition-transform active:scale-[0.98]"
+                                    <a
+                                        href="/membership"
+                                        className="inline-flex items-center justify-center px-6 py-3 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-full text-xs transition-transform active:scale-[0.98]"
                                     >
                                         {report.paywallCtaText ?? "Upgrade to Subscriber Access"}
-                                    </button>
+                                    </a>
                                 </div>
                             </section>
                         )}
