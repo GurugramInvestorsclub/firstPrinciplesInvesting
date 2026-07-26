@@ -5,6 +5,7 @@ import { Event } from "@/lib/types"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+import { isEventRegistrationOpen } from "@/lib/utils"
 
 declare global {
   interface Window {
@@ -79,7 +80,7 @@ function formatInrFromPaise(amountPaise: number): string {
 }
 
 function eventIsOpen(date: string): boolean {
-  return new Date(date).getTime() > Date.now()
+  return isEventRegistrationOpen(date)
 }
 
 export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: boolean }) {

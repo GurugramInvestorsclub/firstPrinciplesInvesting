@@ -5,6 +5,7 @@ import { client } from "@/lib/sanity.client"
 import { eventsQuery, pastEventsQuery, recordingsQuery, notesQuery } from "@/lib/sanity.queries"
 import { getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
 import { ResearchDesk } from "@/components/dashboard/ResearchDesk"
+import { getStartOfTodayKolkata } from "@/lib/utils"
 
 const dashboardPostsQuery = groq`
   *[_type == "post"] | order(publishedAt desc) {
@@ -29,13 +30,14 @@ export default async function DashboardPage() {
     }
 
     const userId = session.user.id
+    const startOfDay = getStartOfTodayKolkata().toISOString()
     
     // Fetch user membership status and Sanity contents in parallel
     const [insightsMembership, sanityPosts, upcomingEvents, pastEvents, recordings, notes] = await Promise.all([
         getCurrentInsightsMembershipForUser(userId),
         client.fetch<any[]>(dashboardPostsQuery, {}, { next: { revalidate: 60 } }),
-        client.fetch<any[]>(eventsQuery, {}, { next: { revalidate: 60 } }),
-        client.fetch<any[]>(pastEventsQuery, {}, { next: { revalidate: 60 } }),
+        client.fetch<any[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
+        client.fetch<any[]>(pastEventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(recordingsQuery, { search: null }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(notesQuery, { search: null }, { next: { revalidate: 60 } })
     ])

@@ -12,12 +12,14 @@ import { MembershipPromoSection } from "@/components/homepage/MembershipPromoSec
 import { client } from "@/lib/sanity.client"
 import { recentPostsQuery, upcomingEventsHomeQuery, testimonialsQuery } from "@/lib/sanity.queries"
 import { Testimonial } from "@/lib/types"
+import { getStartOfTodayKolkata } from "@/lib/utils"
 
 export const revalidate = 60 // revalidate every minute
 
 export default async function Home() {
+  const startOfDay = getStartOfTodayKolkata().toISOString()
   const posts = await client.fetch(recentPostsQuery, {}, { next: { revalidate: 60 } })
-  const events = await client.fetch(upcomingEventsHomeQuery, {}, { next: { revalidate: 60 } })
+  const events = await client.fetch(upcomingEventsHomeQuery, { startOfDay }, { next: { revalidate: 60 } })
   const testimonials = await client.fetch<Testimonial[]>(testimonialsQuery, {}, { next: { revalidate: 60 } })
 
   return (

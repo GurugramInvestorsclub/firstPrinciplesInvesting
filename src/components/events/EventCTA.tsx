@@ -4,9 +4,10 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Event } from "@/lib/types"
 import { EventCheckoutCard } from "./EventCheckoutCard"
+import { isEventRegistrationOpen } from "@/lib/utils"
 
 export function EventCTA({ event }: { event: Event }) {
-    const isRegistrationOpen = new Date(event.date) > new Date()
+    const isRegistrationOpen = isEventRegistrationOpen(event.date)
 
     return (
         <section id="register" className="py-32 bg-[#0E0E11] relative z-10 overflow-hidden">

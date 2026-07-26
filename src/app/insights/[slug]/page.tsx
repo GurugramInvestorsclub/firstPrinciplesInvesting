@@ -16,6 +16,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
 import { notFound } from "next/navigation"
+import { getStartOfTodayKolkata } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -31,12 +32,14 @@ export default async function InsightPage({ params }: Props) {
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
+    const startOfDay = getStartOfTodayKolkata().toISOString()
+
     // Fetch the post contents, auth session, comments, and events in parallel
     const [post, session, commentsResult, upcomingEvents] = await Promise.all([
         client.fetch<Post | null>(singlePostQuery, { slug }, { next: { revalidate: 60 } }),
         auth(),
         getComments(slug),
-        client.fetch<Event[]>(eventsQuery, {}, { next: { revalidate: 60 } })
+        client.fetch<Event[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } })
     ])
 
     const liveWebinar = upcomingEvents?.[0]

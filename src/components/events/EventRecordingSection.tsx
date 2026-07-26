@@ -4,13 +4,14 @@ import { motion } from "framer-motion"
 import { Play, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Event } from "@/lib/types"
+import { isEventRegistrationOpen } from "@/lib/utils"
 
 interface EventRecordingSectionProps {
     event: Event
 }
 
 export function EventRecordingSection({ event }: EventRecordingSectionProps) {
-    const isRegistrationClosed = new Date(event.date) <= new Date()
+    const isRegistrationClosed = !isEventRegistrationOpen(event.date)
 
     if (!isRegistrationClosed) return null
 

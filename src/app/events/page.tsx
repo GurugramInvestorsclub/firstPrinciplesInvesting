@@ -4,12 +4,14 @@ import { client } from "@/lib/sanity.client"
 import { eventsQuery, pastEventsQuery } from "@/lib/sanity.queries"
 import { Event } from "@/lib/types"
 import { EventCarousel } from "@/components/events/EventCarousel"
+import { getStartOfTodayKolkata } from "@/lib/utils"
 
 export const revalidate = 60
 
 export default async function EventsPage() {
-    const upcomingEvents = await client.fetch<Event[]>(eventsQuery, {}, { next: { revalidate: 60 } })
-    const pastEvents = await client.fetch<Event[]>(pastEventsQuery, {}, { next: { revalidate: 60 } })
+    const startOfDay = getStartOfTodayKolkata().toISOString()
+    const upcomingEvents = await client.fetch<Event[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } })
+    const pastEvents = await client.fetch<Event[]>(pastEventsQuery, { startOfDay }, { next: { revalidate: 60 } })
 
     return (
         <div className="flex flex-col min-h-screen bg-bg-deep text-text-primary selection:bg-gold/20 selection:text-gold">
