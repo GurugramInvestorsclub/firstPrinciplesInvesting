@@ -55,6 +55,9 @@ export const metadata: Metadata = {
   verification: {
     google: "XbJR72D3Pr-zTPbyhaLbMnYI3YzZqCdJDiALXArYKf4",
   },
+  other: {
+    "trustpilot-one-time-domain-verification-id": "3c2b1d73-9f50-4f4e-a7b7-f910a2ada2df",
+  },
 };
 
 export default function RootLayout({
