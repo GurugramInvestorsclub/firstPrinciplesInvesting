@@ -10,6 +10,8 @@ import {
   verifyWebhookSignature,
 } from "@/lib/payment-service"
 import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { triggerRegistrationEmail } from "@/lib/email-service"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -88,6 +90,30 @@ export async function POST(request: NextRequest) {
         }
 
         throw error
+      }
+
+      if (captureResult.ok && !captureResult.idempotent) {
+        prisma.registration
+          .findFirst({
+            where: {
+              razorpayOrderId,
+              seminarSlug: captureResult.eventId,
+            },
+            select: {
+              name: true,
+              email: true,
+            },
+          })
+          .then((reg) => {
+            if (reg?.email) {
+              triggerRegistrationEmail({
+                toEmail: reg.email,
+                toName: reg.name || "Attendee",
+                eventId: captureResult.eventId,
+              }).catch((err) => console.error("Webhook registration email delivery failed:", err))
+            }
+          })
+          .catch((err) => console.error("Failed to query registration for webhook email:", err))
       }
 
       if (!captureResult.ok && requiresCompensatingRefund(captureResult.reason)) {

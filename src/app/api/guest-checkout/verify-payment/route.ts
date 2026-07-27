@@ -10,6 +10,7 @@ import {
 } from "@/lib/payment-service"
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
+import { triggerRegistrationEmail } from "@/lib/email-service"
 
 export const runtime = "nodejs"
 
@@ -90,10 +91,19 @@ export async function POST(request: NextRequest) {
         seminarSlug: result.eventId,
       },
       select: {
+        name: true,
         email: true,
         phone: true,
       },
     })
+
+    if (result.ok && !result.idempotent && registration?.email) {
+      triggerRegistrationEmail({
+        toEmail: registration.email,
+        toName: registration.name || "Attendee",
+        eventId: result.eventId,
+      }).catch((err) => console.error("Guest registration email delivery failed:", err))
+    }
 
     let whatsappLink = null
     try {

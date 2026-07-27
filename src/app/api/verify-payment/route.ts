@@ -10,6 +10,7 @@ import {
   verifyCheckoutSignature,
 } from "@/lib/payment-service"
 import { NextRequest, NextResponse } from "next/server"
+import { triggerRegistrationEmail } from "@/lib/email-service"
 
 export const runtime = "nodejs"
 
@@ -66,6 +67,14 @@ export async function POST(request: NextRequest) {
       phoneNumber: contact,
       source: "api",
     })
+
+    if (result.ok && !result.idempotent && session.user.email) {
+      triggerRegistrationEmail({
+        toEmail: session.user.email,
+        toName: session.user.name || "Attendee",
+        eventId: result.eventId,
+      }).catch((err) => console.error("Registration email delivery failed:", err))
+    }
 
     if (!result.ok) {
       let refund = null
