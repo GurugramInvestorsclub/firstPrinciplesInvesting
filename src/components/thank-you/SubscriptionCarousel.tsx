@@ -26,7 +26,6 @@ interface PerkItem {
     description: string
     badge: string
     icon: any
-    highlight: string
     ctaText: string
     href: string
 }
@@ -35,55 +34,50 @@ const MEMBERSHIP_PERKS: PerkItem[] = [
     {
         id: "reports",
         title: "2 Premium Research Reports",
-        subtitle: "In-depth Institutional Breakdown",
-        description: "Receive 2 comprehensive, non-consensus equity research reports every month with full thesis and risk analysis.",
+        subtitle: "In-Depth Institutional Breakdowns",
+        description: "Receive 2 comprehensive, non-consensus equity research reports every month with full investment thesis, valuation models, and risk analysis.",
         badge: "MOST POPULAR",
         icon: BookOpen,
-        highlight: "PDF + Valuation Models included",
         ctaText: "Explore Membership",
-        href: "/membership"
-    },
-    {
-        id: "webinar-discount",
-        title: "50% Discount on Webinars",
-        subtitle: "Exclusive Member Pass",
-        description: "Save half on all future live sectoral masterclasses and deep-dive webinars conducted by senior analysts.",
-        badge: "MEMBER PERK",
-        icon: Percent,
-        highlight: "Save up to ₹1,500/webinar",
-        ctaText: "Claim Member Pass",
         href: "/membership"
     },
     {
         id: "archive",
         title: "Complete Research Archive",
         subtitle: "Historical Moat Repository",
-        description: "Unlock instant back-catalog access to past industry breakdowns, promoter quality assessments, and sector maps.",
+        description: "Unlock instant back-catalog access to 50+ past industry breakdowns, promoter quality assessments, and sector evolution maps.",
         badge: "INSTANT ACCESS",
         icon: Database,
-        highlight: "20+ Deep-dive reports ready",
         ctaText: "Unlock Archive",
         href: "/membership"
     },
     {
         id: "meetups",
-        title: "Monthly Member Live Meetups",
-        subtitle: "Scuttlebutt & Case Studies",
-        description: "Join private monthly interactive sessions with our analyst team discussing real-time market opportunities.",
+        title: "Monthly Live Member Meetups",
+        subtitle: "Scuttlebutt & Stress-Tests",
+        description: "Participate in monthly live stress-tests. Present your thesis, challenge other members, and get direct feedback from senior analysts.",
         badge: "LIVE SESSIONS",
         icon: Users,
-        highlight: "Interactive Q&A & scuttlebutt",
         ctaText: "Join Live Sessions",
+        href: "/membership"
+    },
+    {
+        id: "webinar-discount",
+        title: "50% Discount on Webinars",
+        subtitle: "Exclusive Member Pass",
+        description: "Save 50% on all live sectoral masterclasses detailing high-barrier growth sectors like API chemicals, defense electronics, and EMS.",
+        badge: "MEMBER PERK",
+        icon: Percent,
+        ctaText: "Claim Member Pass",
         href: "/membership"
     },
     {
         id: "models",
         title: "Valuation Models & Sheets",
-        subtitle: "Institutional-Grade Spreadsheets",
-        description: "Download ready-to-use DCF models, earnings sensitivity calculators, and financial templates in Excel/Google Sheets.",
+        subtitle: "Institutional Spreadsheets",
+        description: "Download ready-to-use DCF models, earnings sensitivity calculators, and financial templates in Excel and Google Sheets.",
         badge: "EXCEL & SHEETS",
         icon: FileSpreadsheet,
-        highlight: "Editable financial templates",
         ctaText: "Get Valuation Sheets",
         href: "/membership"
     },
@@ -94,7 +88,6 @@ const MEMBERSHIP_PERKS: PerkItem[] = [
         description: "Get direct answers from our research analysts on company fundamentals, governance queries, and sector trends.",
         badge: "ANALYST ACCESS",
         icon: MessageSquare,
-        highlight: "Direct analyst response",
         ctaText: "Ask Our Team",
         href: "/membership"
     }
@@ -137,13 +130,13 @@ export function SubscriptionCarousel() {
                 <div className="text-center max-w-3xl mx-auto space-y-3">
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-mono font-semibold uppercase tracking-widest">
                         <Sparkles className="w-3.5 h-3.5" />
-                        <span>Recommended Next Step</span>
+                        <span>Continue Learning Beyond This Event</span>
                     </div>
                     <h2 className="text-3xl md:text-5xl font-extrabold text-text-primary tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
                         Upgrade to <span className="text-gold">All-Access Membership</span>
                     </h2>
                     <p className="text-text-secondary text-base md:text-lg font-light leading-relaxed">
-                        Don&apos;t just attend single webinars. Get our complete institutional research workspace, valuation models, and 50% off all live events.
+                        Get access to in-depth company research, sector reports, member-only webinars, valuation models, and exclusive investing insights.
                     </p>
                 </div>
 
@@ -195,8 +188,8 @@ export function SubscriptionCarousel() {
                                     transition={{ duration: 0.3, ease: "easeOut" }}
                                     className="w-[300px] sm:w-[360px] flex-shrink-0 snap-center group"
                                 >
-                                    <div className="h-full flex flex-col justify-between p-7 rounded-3xl bg-[#121215]/80 border border-white/10 backdrop-blur-xl group-hover:border-gold/40 group-hover:shadow-[0_15px_40px_rgba(255,199,44,0.12)] transition-all duration-500 relative overflow-hidden">
-                                        {/* Subtle top glow */}
+                                    <div className="h-full flex flex-col justify-between p-7 rounded-3xl bg-[#121215]/90 border border-white/10 backdrop-blur-xl group-hover:border-gold/40 group-hover:shadow-[0_15px_40px_rgba(255,199,44,0.12)] transition-all duration-500 relative overflow-hidden">
+                                        {/* Top accent glow */}
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         
                                         <div className="space-y-5">
@@ -211,7 +204,7 @@ export function SubscriptionCarousel() {
                                             </div>
 
                                             {/* Text Content */}
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 text-left">
                                                 <h3 className="text-xl font-bold text-white group-hover:text-gold transition-colors duration-300">
                                                     {perk.title}
                                                 </h3>
@@ -225,7 +218,7 @@ export function SubscriptionCarousel() {
                                         </div>
 
                                         {/* Bottom Action Area */}
-                                        <div className="pt-6 mt-6 border-t border-white/5">
+                                        <div className="pt-6 mt-6 border-t border-white/10">
                                             <Button
                                                 asChild
                                                 className="w-full rounded-2xl bg-gold/10 hover:bg-gold text-gold hover:text-bg-deep border border-gold/30 font-bold py-3 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-gold/20 flex items-center justify-center gap-2"
@@ -243,21 +236,21 @@ export function SubscriptionCarousel() {
                     </div>
                 </div>
 
-                {/* Membership Direct Offer / Pricing Banner */}
+                {/* Membership Offer Banner */}
                 <div className="p-8 md:p-10 rounded-3xl bg-gradient-to-r from-[#18181C] via-[#1A1813] to-[#18181C] border border-gold/30 shadow-2xl relative overflow-hidden">
                     <div className="absolute -top-24 -right-24 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                         <div className="space-y-3 text-center md:text-left max-w-xl">
                             <div className="inline-flex items-center gap-1.5 text-xs font-mono text-gold bg-gold/10 px-3 py-1 rounded-full border border-gold/20">
-                                <Zap className="w-3.5 h-3.5" />
+                                <Zap className="w-3.5 h-3.5 text-gold" />
                                 <span>ALL-ACCESS MEMBERSHIP</span>
                             </div>
                             <h3 className="text-2xl md:text-3xl font-extrabold text-white">
                                 Ready to build high-conviction thesis?
                             </h3>
                             <p className="text-text-secondary text-sm md:text-base leading-relaxed">
-                                Join now for <span className="text-white font-bold">₹2,100 / 3 months</span> (less than ₹24/day). Get immediate access to all past & upcoming reports, valuation sheets, and member masterclasses.
+                                Join now for <span className="text-white font-bold">₹2,100 / 3 months</span> (less than ₹24/day). Get immediate access to all research reports, valuation sheets, and member masterclasses.
                             </p>
                         </div>
 
@@ -268,7 +261,7 @@ export function SubscriptionCarousel() {
                                 className="w-full sm:w-auto rounded-full px-8 h-14 text-base md:text-lg font-extrabold bg-gold text-bg-deep hover:bg-gold-muted transition-all duration-300 shadow-xl shadow-gold/20 hover:scale-[1.02]"
                             >
                                 <Link href="/membership" className="flex items-center gap-2 justify-center">
-                                    Join Membership Now
+                                    Explore Membership
                                     <ArrowRight className="w-5 h-5" />
                                 </Link>
                             </Button>

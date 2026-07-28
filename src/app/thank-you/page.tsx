@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
+import { SubscriptionCarousel } from "@/components/thank-you/SubscriptionCarousel"
 import { EventCarousel } from "@/components/events/EventCarousel"
 import { client } from "@/lib/sanity.client"
 import { pastEventsQuery } from "@/lib/sanity.queries"
@@ -190,6 +191,11 @@ function ThankYouContent() {
                         </Button>
                     </div>
                 )}
+
+                {/* SECTION 2: Subscription & Membership Carousel */}
+                <div className="w-full pt-4">
+                    <SubscriptionCarousel />
+                </div>
 
                 {/* SECTION 3: Explore Our Past Webinars Carousel */}
                 <div className="w-full py-12 space-y-8 border-t border-white/10 text-left">
