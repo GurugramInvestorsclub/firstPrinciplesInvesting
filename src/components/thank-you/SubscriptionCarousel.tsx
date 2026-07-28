@@ -225,12 +225,7 @@ export function SubscriptionCarousel() {
                                         </div>
 
                                         {/* Bottom Action Area */}
-                                        <div className="pt-6 mt-6 border-t border-white/5 space-y-4">
-                                            <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-                                                <Zap className="w-3.5 h-3.5 fill-current" />
-                                                <span>{perk.highlight}</span>
-                                            </div>
-
+                                        <div className="pt-6 mt-6 border-t border-white/5">
                                             <Button
                                                 asChild
                                                 className="w-full rounded-2xl bg-gold/10 hover:bg-gold text-gold hover:text-bg-deep border border-gold/30 font-bold py-3 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-gold/20 flex items-center justify-center gap-2"

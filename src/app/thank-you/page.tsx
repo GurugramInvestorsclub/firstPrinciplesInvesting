@@ -5,7 +5,6 @@ import Link from "next/link"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Button } from "@/components/ui/button"
-import { SubscriptionCarousel } from "@/components/thank-you/SubscriptionCarousel"
 import { EventCarousel } from "@/components/events/EventCarousel"
 import { client } from "@/lib/sanity.client"
 import { pastEventsQuery } from "@/lib/sanity.queries"
@@ -192,12 +191,7 @@ function ThankYouContent() {
                     </div>
                 )}
 
-                {/* SECTION 2: PRIMARY UP-SELL - Subscription & Membership Carousel */}
-                <div className="w-full pt-4">
-                    <SubscriptionCarousel />
-                </div>
-
-                {/* SECTION 3: SECONDARY UP-SELL - Explore Our Past Webinars Carousel */}
+                {/* SECTION 3: Explore Our Past Webinars Carousel */}
                 <div className="w-full py-12 space-y-8 border-t border-white/10 text-left">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                         <div className="space-y-2">
