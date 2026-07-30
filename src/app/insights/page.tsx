@@ -87,12 +87,6 @@ export default async function InsightsPage({
                                     >
                                         Subscribe for ₹23/day
                                     </Link>
-                                    <Link 
-                                        href="/insights/members-only" 
-                                        className="inline-flex items-center justify-center rounded-[10px] border border-white/10 hover:border-gold/30 bg-[#16161C]/50 hover:bg-[#1A1A22] text-white hover:text-gold px-7 py-3.5 font-semibold tracking-wide motion-safe:hover:-translate-y-[1px] transition-all duration-150 text-center shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
-                                    >
-                                        Members Portal &rarr;
-                                    </Link>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium pt-2">
                                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />

@@ -18,11 +18,20 @@ export function Navbar() {
 
     const navLinks = [
         { href: "/insights", label: "Insights" },
+        { href: "/insights/members-only", label: "Members" },
         { href: "/events", label: "Events" },
         { href: "/super30", label: "Super 30" },
         { href: "/ask", label: "Ask" },
         { href: "/about", label: "About" },
     ]
+
+    const isLinkActive = (href: string) => {
+        if (!pathname) return false
+        if (href === "/insights") {
+            return pathname.startsWith("/insights") && !pathname.startsWith("/insights/members-only")
+        }
+        return pathname.startsWith(href)
+    }
 
     // Desktop auth link
     const authLink = session ? { href: "/dashboard", label: "Dashboard" } : { href: "/login", label: "Login" }
@@ -101,7 +110,7 @@ export function Navbar() {
                             href={link.href}
                             className={cn(
                                 "text-sm font-medium transition-colors hover:text-gold",
-                                pathname?.startsWith(link.href) ? "text-gold" : "text-text-secondary"
+                                isLinkActive(link.href) ? "text-gold" : "text-text-secondary"
                             )}
                         >
                             {link.label}
@@ -146,7 +155,7 @@ export function Navbar() {
                             onClick={() => setMobileOpen(false)}
                             className={cn(
                                 "text-base font-medium py-3 px-4 rounded-xl transition-all duration-200",
-                                pathname?.startsWith(link.href)
+                                isLinkActive(link.href)
                                     ? "text-gold bg-gold/10"
                                     : "text-text-secondary hover:text-text-primary hover:bg-white/5"
                             )}
