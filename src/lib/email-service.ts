@@ -348,7 +348,7 @@ export async function sendManualGrantConfirmationEmail(
   const brevoApiKey = process.env.BREVO_API_KEY
   const resendApiKey = process.env.RESEND_API_KEY
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesinvesting.in"
-  const siteUrl = process.env.NEXTAUTH_URL || "https://firstprinciplesinvesting.com"
+  const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
 
   if (!brevoApiKey && !resendApiKey) {
     console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured. Manual grant email skipped.")
@@ -440,7 +440,7 @@ export async function sendManualGrantConfirmationEmail(
               </table>
 
               <div style="text-align: center; margin-bottom: 28px;">
-                <a href="${siteUrl}/insights" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 15px;">
+                <a href="${siteUrl}/insights/members-only" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 15px;">
                   Explore Premium Insights
                 </a>
               </div>

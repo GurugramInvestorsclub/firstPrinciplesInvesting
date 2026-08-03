@@ -693,23 +693,21 @@ export default function AdminSubscriptionsPage() {
                                 </button>
                               ) : null}
 
-                              {row.notes ? (
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedNotesRow(row)}
-                                  style={{
-                                    padding: "6px 10px",
-                                    borderRadius: "6px",
-                                    border: "1px solid rgba(255,255,255,0.15)",
-                                    background: "rgba(255,255,255,0.06)",
-                                    color: "#e2e8f0",
-                                    fontSize: "12px",
-                                    cursor: "pointer",
-                                  }}
-                                >
-                                  View Details / UTR
-                                </button>
-                              ) : null}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedNotesRow(row)}
+                                style={{
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  border: "1px solid rgba(255,255,255,0.15)",
+                                  background: "rgba(255,255,255,0.06)",
+                                  color: "#e2e8f0",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                {isManual ? "View Offline Details" : "View Details"}
+                              </button>
 
                               {isManual && row.status === "active" ? (
                                 <button
@@ -1037,73 +1035,100 @@ export default function AdminSubscriptionsPage() {
       ) : null}
 
       {/* View Details Modal */}
-      {selectedNotesRow ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-          }}
-        >
+      {selectedNotesRow ? (() => {
+        const isManualRow = selectedNotesRow.source === "manual_neft" || selectedNotesRow.razorpayPlanId === "MANUAL_GRANT"
+        const isRazorpayRow = Boolean(selectedNotesRow.razorpaySubscriptionId || selectedNotesRow.latestCharge?.razorpayPaymentId)
+        
+        const paymentMethodDisplay = selectedNotesRow.notes?.paymentMethod
+          ? selectedNotesRow.notes.paymentMethod
+          : isManualRow
+            ? "NEFT (Manual Grant)"
+            : isRazorpayRow
+              ? "Razorpay (Card / UPI / Netbanking)"
+              : "Online Payment"
+
+        const utrDisplay = selectedNotesRow.notes?.utrNumber
+          ? selectedNotesRow.notes.utrNumber
+          : selectedNotesRow.latestCharge?.razorpayPaymentId
+            ? selectedNotesRow.latestCharge.razorpayPaymentId
+            : selectedNotesRow.razorpaySubscriptionId
+              ? selectedNotesRow.razorpaySubscriptionId
+              : "-"
+
+        const utrLabel = isManualRow ? "UTR / Ref Number" : "Payment / Ref ID"
+
+        return (
           <div
             style={{
-              background: "#121216",
-              border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: "16px",
-              width: "100%",
-              maxWidth: "480px",
-              padding: "24px",
-              color: "#fff",
+              position: "fixed",
+              inset: 0,
+              zIndex: 9999,
+              background: "rgba(0,0,0,0.75)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "16px",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Offline Grant & Note Details</h2>
-              <button
-                type="button"
-                onClick={() => setSelectedNotesRow(null)}
-                style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "18px", cursor: "pointer" }}
-              >
-                ✕
-              </button>
-            </div>
+            <div
+              style={{
+                background: "#121216",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: "16px",
+                width: "100%",
+                maxWidth: "480px",
+                padding: "24px",
+                color: "#fff",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>
+                  {isManualRow ? "Offline Grant & Note Details" : "Subscription Payment & Details"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotesRow(null)}
+                  style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "18px", cursor: "pointer" }}
+                >
+                  ✕
+                </button>
+              </div>
 
-            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "16px", fontSize: "13px", lineHeight: "1.8" }}>
-              <div><strong>User Email:</strong> {selectedNotesRow.userEmail || "-"}</div>
-              <div><strong>User Name:</strong> {selectedNotesRow.userName || "-"}</div>
-              <div><strong>Payment Method:</strong> {selectedNotesRow.notes?.paymentMethod || "NEFT"}</div>
-              <div><strong>UTR / Ref Number:</strong> <code style={{ color: "#FFC72C" }}>{selectedNotesRow.notes?.utrNumber || "-"}</code></div>
-              <div><strong>Amount Paid:</strong> ₹{selectedNotesRow.notes?.amountPaid || (selectedNotesRow.latestCharge ? (selectedNotesRow.latestCharge.amount / 100).toFixed(0) : "-")}</div>
-              <div><strong>Admin Notes:</strong> {selectedNotesRow.notes?.adminNotes || "-"}</div>
-              <div><strong>Granted At:</strong> {selectedNotesRow.notes?.grantedAt ? formatDate(selectedNotesRow.notes.grantedAt) : formatDate(selectedNotesRow.currentStartAt)}</div>
-              <div><strong>Valid Until:</strong> {formatDate(selectedNotesRow.currentEndAt)}</div>
-            </div>
+              <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "16px", fontSize: "13px", lineHeight: "1.8" }}>
+                <div><strong>User Email:</strong> {selectedNotesRow.userEmail || "-"}</div>
+                <div><strong>User Name:</strong> {selectedNotesRow.userName || "-"}</div>
+                <div><strong>Payment Method:</strong> <span style={{ color: isManualRow ? "#93c5fd" : "#6ee7b7", fontWeight: 600 }}>{paymentMethodDisplay}</span></div>
+                <div><strong>{utrLabel}:</strong> <code style={{ color: "#FFC72C" }}>{utrDisplay}</code></div>
+                <div><strong>Amount Paid:</strong> ₹{selectedNotesRow.notes?.amountPaid || (selectedNotesRow.latestCharge ? (selectedNotesRow.latestCharge.amount / 100).toFixed(0) : "-")}</div>
+                {selectedNotesRow.notes?.adminNotes ? (
+                  <div><strong>Admin Notes:</strong> {selectedNotesRow.notes.adminNotes}</div>
+                ) : null}
+                <div><strong>Granted / Created At:</strong> {selectedNotesRow.notes?.grantedAt ? formatDate(selectedNotesRow.notes.grantedAt) : formatDate(selectedNotesRow.createdAt)}</div>
+                <div><strong>Valid Until:</strong> {formatDate(selectedNotesRow.currentEndAt)}</div>
+              </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-              <button
-                type="button"
-                onClick={() => setSelectedNotesRow(null)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#fff",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                }}
-              >
-                Close
-              </button>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedNotesRow(null)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.08)",
+                    color: "#fff",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ) : null}
+        )
+      })() : null}
     </div>
   )
 }
