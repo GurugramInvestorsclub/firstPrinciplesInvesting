@@ -2180,22 +2180,21 @@ export async function resendSubscriptionConfirmationEmail(params: {
     ? (subscription.notes as Record<string, unknown>)
     : null
 
-  const isManual = subscription.source === "manual_neft" || subscription.razorpayPlanId === "MANUAL_GRANT"
-  const isRazorpay = Boolean(subscription.razorpaySubscriptionId || latestCharge?.razorpayPaymentId)
+  const isManual = subscription.source === "manual_neft" || subscription.razorpayPlanId === "MANUAL_GRANT" || subscription.razorpaySubscriptionId === null
+  const isRazorpay = Boolean(subscription.razorpaySubscriptionId && subscription.razorpaySubscriptionId.startsWith("sub_"))
 
-  const paymentMethod = typeof notesObj?.paymentMethod === "string" && notesObj.paymentMethod
-    ? notesObj.paymentMethod
-    : isManual
-      ? "NEFT"
-      : isRazorpay
-        ? "RAZORPAY (ONLINE)"
-        : "ONLINE PAYMENT"
+  const paymentMethod = typeof notesObj?.paymentMethod === "string" && notesObj.paymentMethod.trim()
+    ? notesObj.paymentMethod.trim()
+    : isRazorpay
+      ? "RAZORPAY"
+      : "NEFT"
 
-  const utrNumber = typeof notesObj?.utrNumber === "string" && notesObj.utrNumber
-    ? notesObj.utrNumber
-    : latestCharge?.razorpayPaymentId
-      ? latestCharge.razorpayPaymentId
-      : subscription.razorpaySubscriptionId ?? null
+  const rawPaymentId = latestCharge?.razorpayPaymentId
+  const isSyntheticId = !rawPaymentId || rawPaymentId.startsWith("NEFT_") || rawPaymentId.startsWith("MANUAL_")
+
+  const utrNumber = typeof notesObj?.utrNumber === "string" && notesObj.utrNumber.trim()
+    ? notesObj.utrNumber.trim()
+    : (!isSyntheticId ? rawPaymentId : subscription.razorpaySubscriptionId ?? null)
 
   const amountPaid = typeof notesObj?.amountPaid === "number"
     ? notesObj.amountPaid
@@ -2239,5 +2238,140 @@ export async function resendSubscriptionConfirmationEmail(params: {
     email: subscription.user.email,
   }
 }
+
+export interface UpdateSubscriptionDetailsParams {
+  subscriptionId: string
+  paymentMethod?: string | null
+  utrNumber?: string | null
+  amountPaid?: number | null
+  currentEndAt?: Date | string | null
+  adminNotes?: string | null
+  updatedByAdminEmail?: string | null
+  resendEmail?: boolean
+}
+
+export async function updateSubscriptionDetails(
+  params: UpdateSubscriptionDetailsParams
+): Promise<InsightsMembershipSummary> {
+  const subscription = await prisma.insightsSubscription.findUnique({
+    where: { id: params.subscriptionId },
+    include: {
+      user: true,
+      charges: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
+    },
+  })
+
+  if (!subscription) {
+    throw new InsightsSubscriptionApiError(404, "NOT_FOUND", "Subscription record not found")
+  }
+
+  const existingNotes = (subscription.notes && typeof subscription.notes === "object" && !Array.isArray(subscription.notes))
+    ? (subscription.notes as Record<string, unknown>)
+    : {}
+
+  const updatedNotes: Prisma.InputJsonValue = {
+    ...existingNotes,
+    paymentMethod: params.paymentMethod !== undefined ? (params.paymentMethod?.trim().toUpperCase() || null) : (existingNotes.paymentMethod ?? null),
+    utrNumber: params.utrNumber !== undefined ? (params.utrNumber?.trim() || null) : (existingNotes.utrNumber ?? null),
+    amountPaid: params.amountPaid !== undefined ? (params.amountPaid ?? null) : (existingNotes.amountPaid ?? null),
+    adminNotes: params.adminNotes !== undefined ? (params.adminNotes?.trim() || null) : (existingNotes.adminNotes ?? null),
+    lastEditedAt: new Date().toISOString(),
+    lastEditedBy: params.updatedByAdminEmail ?? "ADMIN",
+  }
+
+  let newEndAt: Date | undefined = undefined
+  if (params.currentEndAt) {
+    const parsedDate = new Date(params.currentEndAt)
+    if (!isNaN(parsedDate.getTime())) {
+      newEndAt = parsedDate
+    }
+  }
+
+  const updated = await prisma.$transaction(
+    async (tx) => {
+      await acquireLock(tx, `insights-subscription:update:${subscription.id}`)
+
+      const updatedSub = await tx.insightsSubscription.update({
+        where: { id: subscription.id },
+        data: {
+          notes: updatedNotes,
+          ...(newEndAt ? { currentEndAt: newEndAt } : {}),
+        },
+      })
+
+      // Update latest charge if present or create one if manual
+      const latestCharge = subscription.charges[0]
+      const amountInPaise = params.amountPaid
+        ? Math.round(params.amountPaid * 100)
+        : latestCharge?.amount ?? 0
+
+      const utrRef = params.utrNumber?.trim()
+        ? `NEFT_${params.utrNumber.trim()}`
+        : latestCharge?.razorpayPaymentId ?? `MANUAL_${Date.now()}`
+
+      if (latestCharge) {
+        await tx.insightsSubscriptionCharge.update({
+          where: { id: latestCharge.id },
+          data: {
+            amount: amountInPaise,
+            razorpayPaymentId: utrRef,
+          },
+        })
+      } else if (params.amountPaid || params.utrNumber) {
+        await tx.insightsSubscriptionCharge.create({
+          data: {
+            subscriptionId: subscription.id,
+            razorpayPaymentId: utrRef,
+            amount: amountInPaise,
+            currency: CURRENCY,
+            status: InsightsSubscriptionChargeStatus.CAPTURED,
+            chargedAt: subscription.currentStartAt || subscription.createdAt,
+          },
+        })
+      }
+
+      await logSubscriptionAudit(tx, subscription.id, "SUBSCRIPTION_DETAILS_UPDATED", {
+        updatedBy: params.updatedByAdminEmail ?? "ADMIN",
+        paymentMethod: params.paymentMethod ?? null,
+        utrNumber: params.utrNumber ?? null,
+        amountPaid: params.amountPaid ?? null,
+        currentEndAt: newEndAt?.toISOString() ?? null,
+        adminNotes: params.adminNotes ?? null,
+      })
+
+      return tx.insightsSubscription.findUniqueOrThrow({
+        where: { id: subscription.id },
+        include: {
+          charges: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
+      })
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
+    }
+  )
+
+  if (params.resendEmail) {
+    try {
+      await resendSubscriptionConfirmationEmail({
+        subscriptionId: subscription.id,
+        resentByAdminEmail: params.updatedByAdminEmail,
+      })
+    } catch (err) {
+      console.error("Failed to resend confirmation email after update:", err)
+    }
+  }
+
+  return serializeMembership(updated)
+}
+
 
 

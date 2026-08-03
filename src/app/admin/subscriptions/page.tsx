@@ -69,6 +69,16 @@ export default function AdminSubscriptionsPage() {
   const [revokingId, setRevokingId] = useState<string | null>(null)
   const [resendingId, setResendingId] = useState<string | null>(null)
 
+  // Edit Subscription Modal State
+  const [editingRow, setEditingRow] = useState<SubscriptionRow | null>(null)
+  const [editPaymentMethod, setEditPaymentMethod] = useState("NEFT")
+  const [editUtrNumber, setEditUtrNumber] = useState("")
+  const [editAmountPaid, setEditAmountPaid] = useState("")
+  const [editEndAt, setEditEndAt] = useState("")
+  const [editAdminNotes, setEditAdminNotes] = useState("")
+  const [editResendEmail, setEditResendEmail] = useState(false)
+  const [submittingEdit, setSubmittingEdit] = useState(false)
+
   const loadData = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -249,6 +259,64 @@ export default function AdminSubscriptionsPage() {
       setActionMessage(resendErr instanceof Error ? resendErr.message : "Failed to resend email")
     } finally {
       setResendingId(null)
+    }
+  }
+
+  const openEditModal = (row: SubscriptionRow) => {
+    setEditingRow(row)
+    const isManual = row.source === "manual_neft" || row.razorpayPlanId === "MANUAL_GRANT"
+    const currentMethod = row.notes?.paymentMethod || (isManual ? "NEFT" : "RAZORPAY")
+    setEditPaymentMethod(currentMethod)
+
+    const currentUtr = row.notes?.utrNumber || (row.latestCharge?.razorpayPaymentId && !row.latestCharge.razorpayPaymentId.startsWith("NEFT_") && !row.latestCharge.razorpayPaymentId.startsWith("MANUAL_") ? row.latestCharge.razorpayPaymentId : "")
+    setEditUtrNumber(currentUtr)
+
+    const currentAmount = row.notes?.amountPaid !== undefined && row.notes?.amountPaid !== null
+      ? String(row.notes.amountPaid)
+      : row.latestCharge
+        ? String((row.latestCharge.amount / 100).toFixed(0))
+        : ""
+    setEditAmountPaid(currentAmount)
+
+    setEditEndAt(row.currentEndAt ? getLocalDateString(row.currentEndAt) : "")
+    setEditAdminNotes(row.notes?.adminNotes || "")
+    setEditResendEmail(false)
+  }
+
+  const handleSaveEditDetails = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingRow) return
+
+    setSubmittingEdit(true)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscriptionId: editingRow.id,
+          paymentMethod: editPaymentMethod,
+          utrNumber: editUtrNumber.trim() || null,
+          amountPaid: editAmountPaid ? Number(editAmountPaid) : null,
+          currentEndAt: editEndAt ? editEndAt : null,
+          adminNotes: editAdminNotes.trim() || null,
+          resendEmail: editResendEmail,
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to update subscription details")
+      }
+
+      setActionMessage(`Updated subscription details for ${editingRow.userEmail || editingRow.id}!`)
+      setEditingRow(null)
+      await loadData()
+    } catch (editErr) {
+      setActionMessage(editErr instanceof Error ? editErr.message : "Failed to update subscription details")
+    } finally {
+      setSubmittingEdit(false)
     }
   }
 
@@ -742,6 +810,23 @@ export default function AdminSubscriptionsPage() {
 
                               <button
                                 type="button"
+                                onClick={() => openEditModal(row)}
+                                style={{
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  border: "1px solid rgba(59,130,246,0.35)",
+                                  background: "rgba(59,130,246,0.12)",
+                                  color: "#93c5fd",
+                                  fontWeight: 600,
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Edit Details
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => handleResendEmail(row)}
                                 disabled={resendingId === row.id}
                                 style={{
@@ -1158,32 +1243,57 @@ export default function AdminSubscriptionsPage() {
                 <div><strong>Valid Until:</strong> {formatDate(selectedNotesRow.currentEndAt)}</div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px" }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const rowToResend = selectedNotesRow
-                    setSelectedNotesRow(null)
-                    handleResendEmail(rowToResend)
-                  }}
-                  disabled={resendingId === selectedNotesRow.id}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    border: "1px solid #FFC72C",
-                    background: "rgba(255,199,44,0.15)",
-                    color: "#FFC72C",
-                    fontWeight: 700,
-                    fontSize: "13px",
-                    cursor: resendingId === selectedNotesRow.id ? "wait" : "pointer",
-                    opacity: resendingId === selectedNotesRow.id ? 0.7 : 1,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
-                >
-                  {resendingId === selectedNotesRow.id ? "Sending Email..." : "✉️ Resend Confirmation Email"}
-                </button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginTop: "20px" }}>
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rowToEdit = selectedNotesRow
+                      setSelectedNotesRow(null)
+                      openEditModal(rowToEdit)
+                    }}
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(59,130,246,0.4)",
+                      background: "rgba(59,130,246,0.15)",
+                      color: "#93c5fd",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    ✏️ Edit Details
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rowToResend = selectedNotesRow
+                      setSelectedNotesRow(null)
+                      handleResendEmail(rowToResend)
+                    }}
+                    disabled={resendingId === selectedNotesRow.id}
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid #FFC72C",
+                      background: "rgba(255,199,44,0.15)",
+                      color: "#FFC72C",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                      cursor: resendingId === selectedNotesRow.id ? "wait" : "pointer",
+                      opacity: resendingId === selectedNotesRow.id ? 0.7 : 1,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    {resendingId === selectedNotesRow.id ? "Sending Email..." : "✉️ Resend Email"}
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => setSelectedNotesRow(null)}
@@ -1204,6 +1314,220 @@ export default function AdminSubscriptionsPage() {
           </div>
         )
       })() : null}
+
+      {/* Edit Subscription Details Modal */}
+      {editingRow ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: "#121216",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "520px",
+              padding: "28px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.8)",
+              color: "#fff",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <div>
+                <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>Edit Subscription Details</h2>
+                <p style={{ color: "#9ca3af", fontSize: "13px", margin: "4px 0 0 0" }}>
+                  {editingRow.userEmail || editingRow.userName || editingRow.id}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingRow(null)}
+                style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "20px", cursor: "pointer" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditDetails} style={{ display: "grid", gap: "16px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                    Payment Method
+                  </label>
+                  <select
+                    value={editPaymentMethod}
+                    onChange={(e) => setEditPaymentMethod(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      background: "#1f1f24",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "14px",
+                      outline: "none",
+                    }}
+                  >
+                    <option value="NEFT">NEFT</option>
+                    <option value="RTGS">RTGS</option>
+                    <option value="IMPS">IMPS</option>
+                    <option value="UPI_DIRECT">UPI Direct Transfer</option>
+                    <option value="BANK_TRANSFER">Direct Bank Transfer</option>
+                    <option value="CASH">Cash / Offline</option>
+                    <option value="RAZORPAY">Razorpay (Online)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                    Amount Paid (₹)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="2999"
+                    value={editAmountPaid}
+                    onChange={(e) => setEditAmountPaid(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "14px",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  UTR / Transaction Reference Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. UTR1234567890"
+                  value={editUtrNumber}
+                  onChange={(e) => setEditUtrNumber(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  Access Valid Until (Expiry Date)
+                </label>
+                <input
+                  type="date"
+                  value={editEndAt}
+                  onChange={(e) => setEditEndAt(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                    colorScheme: "dark",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  Internal Admin Notes
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Corrected UTR number and extended validity"
+                  value={editAdminNotes}
+                  onChange={(e) => setEditAdminNotes(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
+                <input
+                  type="checkbox"
+                  id="resend-on-edit-check"
+                  checked={editResendEmail}
+                  onChange={(e) => setEditResendEmail(e.target.checked)}
+                  style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                />
+                <label htmlFor="resend-on-edit-check" style={{ fontSize: "13px", color: "#d1d5db", cursor: "pointer" }}>
+                  Resend updated confirmation email to customer upon saving
+                </label>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "12px" }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingRow(null)}
+                  style={{
+                    padding: "10px 18px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.06)",
+                    color: "#ccc",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingEdit}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    border: "1px solid #FFC72C",
+                    background: "linear-gradient(180deg, #FFD54F 0%, #FFC72C 100%)",
+                    color: "#000",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    cursor: submittingEdit ? "wait" : "pointer",
+                    opacity: submittingEdit ? 0.7 : 1,
+                  }}
+                >
+                  {submittingEdit ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

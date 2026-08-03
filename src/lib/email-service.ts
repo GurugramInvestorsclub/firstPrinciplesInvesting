@@ -370,6 +370,15 @@ export async function sendManualGrantConfirmationEmail(
     timeZone: "Asia/Kolkata",
   })
 
+  const cleanUtr = params.utrNumber && !params.utrNumber.startsWith("MANUAL_")
+    ? params.utrNumber.startsWith("NEFT_") ? params.utrNumber.replace("NEFT_", "") : params.utrNumber
+    : null
+
+  const isRazorpayMethod = params.paymentMethod?.toUpperCase().includes("RAZORPAY")
+  const displayPaymentMethod = isRazorpayMethod
+    ? "Razorpay (Online Payment)"
+    : (params.paymentMethod?.trim().toUpperCase() || "NEFT")
+
   const subject = params.isResend
     ? `Insights Membership Details & Access Confirmation`
     : `Welcome to Insights Membership — Access Granted!`
@@ -380,7 +389,7 @@ export async function sendManualGrantConfirmationEmail(
 
   const introText = params.isResend
     ? `Below are your verified Insights membership and access details:`
-    : `We have verified your payment (${params.paymentMethod}${params.utrNumber ? ` — Ref: ${params.utrNumber}` : ""}) and activated your Insights membership. Below are your access details:`
+    : `We have verified your payment (${displayPaymentMethod}${cleanUtr ? ` — Ref: ${cleanUtr}` : ""}) and activated your Insights membership. Below are your access details:`
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -431,18 +440,18 @@ export async function sendManualGrantConfirmationEmail(
                   <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${formattedStartDate}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 18px; ${params.paymentMethod || params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Valid Until</td>
-                  <td style="padding: 14px 18px; ${params.paymentMethod || params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFC72C; font-weight: 700; font-size: 14px; text-align: right;">${formattedEndDate}</td>
+                  <td style="padding: 14px 18px; ${displayPaymentMethod || cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Valid Until</td>
+                  <td style="padding: 14px 18px; ${displayPaymentMethod || cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFC72C; font-weight: 700; font-size: 14px; text-align: right;">${formattedEndDate}</td>
                 </tr>
-                ${params.paymentMethod ? `
+                ${displayPaymentMethod ? `
                 <tr>
-                  <td style="padding: 14px 18px; ${params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Payment Method</td>
-                  <td style="padding: 14px 18px; ${params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${params.paymentMethod}</td>
+                  <td style="padding: 14px 18px; ${cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Payment Method</td>
+                  <td style="padding: 14px 18px; ${cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${displayPaymentMethod}</td>
                 </tr>` : ''}
-                ${params.utrNumber ? `
+                ${cleanUtr ? `
                 <tr>
                   <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Transaction UTR / Ref</td>
-                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${params.utrNumber}</td>
+                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${cleanUtr}</td>
                 </tr>` : ''}
                 ${params.amountPaid ? `
                 <tr>
