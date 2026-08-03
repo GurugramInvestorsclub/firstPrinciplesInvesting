@@ -67,6 +67,7 @@ export default function AdminSubscriptionsPage() {
   // View Notes Modal State
   const [selectedNotesRow, setSelectedNotesRow] = useState<SubscriptionRow | null>(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
+  const [resendingId, setResendingId] = useState<string | null>(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -218,6 +219,36 @@ export default function AdminSubscriptionsPage() {
       setActionMessage(revokeErr instanceof Error ? revokeErr.message : "Failed to revoke access")
     } finally {
       setRevokingId(null)
+    }
+  }
+
+  const handleResendEmail = async (row: SubscriptionRow) => {
+    const targetEmail = row.userEmail || row.userName || row.id
+    if (!window.confirm(`Resend membership confirmation email to ${targetEmail}?`)) {
+      return
+    }
+
+    setResendingId(row.id)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/resend-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscriptionId: row.id }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to resend confirmation email")
+      }
+
+      setActionMessage(payload.data?.message || `Confirmation email sent to ${targetEmail}`)
+      await loadData()
+    } catch (resendErr) {
+      setActionMessage(resendErr instanceof Error ? resendErr.message : "Failed to resend email")
+    } finally {
+      setResendingId(null)
     }
   }
 
@@ -709,6 +740,25 @@ export default function AdminSubscriptionsPage() {
                                 {isManual ? "View Offline Details" : "View Details"}
                               </button>
 
+                              <button
+                                type="button"
+                                onClick={() => handleResendEmail(row)}
+                                disabled={resendingId === row.id}
+                                style={{
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  border: "1px solid rgba(250,204,21,0.35)",
+                                  background: "rgba(250,204,21,0.12)",
+                                  color: "#fde68a",
+                                  fontWeight: 600,
+                                  fontSize: "12px",
+                                  cursor: resendingId === row.id ? "wait" : "pointer",
+                                  opacity: resendingId === row.id ? 0.7 : 1,
+                                }}
+                              >
+                                {resendingId === row.id ? "Sending..." : "Resend Email"}
+                              </button>
+
                               {isManual && row.status === "active" ? (
                                 <button
                                   type="button"
@@ -1108,7 +1158,32 @@ export default function AdminSubscriptionsPage() {
                 <div><strong>Valid Until:</strong> {formatDate(selectedNotesRow.currentEndAt)}</div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rowToResend = selectedNotesRow
+                    setSelectedNotesRow(null)
+                    handleResendEmail(rowToResend)
+                  }}
+                  disabled={resendingId === selectedNotesRow.id}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #FFC72C",
+                    background: "rgba(255,199,44,0.15)",
+                    color: "#FFC72C",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    cursor: resendingId === selectedNotesRow.id ? "wait" : "pointer",
+                    opacity: resendingId === selectedNotesRow.id ? 0.7 : 1,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  {resendingId === selectedNotesRow.id ? "Sending Email..." : "✉️ Resend Confirmation Email"}
+                </button>
                 <button
                   type="button"
                   onClick={() => setSelectedNotesRow(null)}

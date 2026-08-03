@@ -336,10 +336,11 @@ export interface SendManualGrantConfirmationEmailParams {
   paymentMethod: string
   utrNumber?: string | null
   amountPaid?: number | null
+  isResend?: boolean
 }
 
 /**
- * Sends a confirmation email to a user when their Insights membership is manually granted by an admin.
+ * Sends a confirmation email to a user when their Insights membership is manually granted or resent by an admin.
  * Supports Brevo SMTP API and Resend API.
  */
 export async function sendManualGrantConfirmationEmail(
@@ -369,14 +370,25 @@ export async function sendManualGrantConfirmationEmail(
     timeZone: "Asia/Kolkata",
   })
 
-  const subject = `Welcome to Insights Membership — Access Granted!`
+  const subject = params.isResend
+    ? `Insights Membership Details & Access Confirmation`
+    : `Welcome to Insights Membership — Access Granted!`
+
+  const subHeader = params.isResend
+    ? `Here are your current Insights membership access details.`
+    : `Your access to premium research memos and archives is now active.`
+
+  const introText = params.isResend
+    ? `Below are your verified Insights membership and access details:`
+    : `We have verified your payment (${params.paymentMethod}${params.utrNumber ? ` — Ref: ${params.utrNumber}` : ""}) and activated your Insights membership. Below are your access details:`
+
   const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Insights Membership Activated</title>
+  <title>Insights Membership Details</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
@@ -391,10 +403,10 @@ export async function sendManualGrantConfirmationEmail(
                 FIRST PRINCIPLES INVESTING
               </span>
               <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.5px;">
-                Insights Membership Activated 🎉
+                Insights Membership Details 🎉
               </h1>
               <p style="color: #A1A1AA; font-size: 15px; margin: 0;">
-                Your access to premium research memos and archives is now active.
+                ${subHeader}
               </p>
             </td>
           </tr>
@@ -406,7 +418,7 @@ export async function sendManualGrantConfirmationEmail(
                 Hello <strong>${params.toName || params.toEmail}</strong>,
               </p>
               <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-                We have verified your offline payment (${params.paymentMethod}${params.utrNumber ? ` — Ref: ${params.utrNumber}` : ""}) and manually activated your Insights membership. Below are your access details:
+                ${introText}
               </p>
 
               <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #18181F; border-radius: 12px; border: 1px solid #292934; margin-bottom: 28px;">

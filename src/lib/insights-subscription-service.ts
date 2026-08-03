@@ -2150,3 +2150,94 @@ export async function revokeManualInsightsSubscription(params: {
   return serializeMembership(updatedSubscription)
 }
 
+export async function resendSubscriptionConfirmationEmail(params: {
+  subscriptionId: string
+  resentByAdminEmail?: string | null
+}): Promise<{ success: boolean; email: string }> {
+  const subscription = await prisma.insightsSubscription.findUnique({
+    where: { id: params.subscriptionId },
+    include: {
+      user: true,
+      charges: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
+    },
+  })
+
+  if (!subscription) {
+    throw new InsightsSubscriptionApiError(404, "NOT_FOUND", "Subscription record not found")
+  }
+
+  if (!subscription.user?.email) {
+    throw new InsightsSubscriptionApiError(400, "MISSING_EMAIL", "User email address is missing for this subscription")
+  }
+
+  const planSlug = planKeyToSlug(subscription.planKey)
+  const planDef = getInsightsSubscriptionPlanDefinition(planSlug)
+  const latestCharge = subscription.charges[0]
+  const notesObj = (subscription.notes && typeof subscription.notes === "object" && !Array.isArray(subscription.notes))
+    ? (subscription.notes as Record<string, unknown>)
+    : null
+
+  const isManual = subscription.source === "manual_neft" || subscription.razorpayPlanId === "MANUAL_GRANT"
+  const isRazorpay = Boolean(subscription.razorpaySubscriptionId || latestCharge?.razorpayPaymentId)
+
+  const paymentMethod = typeof notesObj?.paymentMethod === "string" && notesObj.paymentMethod
+    ? notesObj.paymentMethod
+    : isManual
+      ? "NEFT"
+      : isRazorpay
+        ? "RAZORPAY (ONLINE)"
+        : "ONLINE PAYMENT"
+
+  const utrNumber = typeof notesObj?.utrNumber === "string" && notesObj.utrNumber
+    ? notesObj.utrNumber
+    : latestCharge?.razorpayPaymentId
+      ? latestCharge.razorpayPaymentId
+      : subscription.razorpaySubscriptionId ?? null
+
+  const amountPaid = typeof notesObj?.amountPaid === "number"
+    ? notesObj.amountPaid
+    : latestCharge?.amount
+      ? Math.round(latestCharge.amount / 100)
+      : null
+
+  const currentStartAt = subscription.currentStartAt || subscription.createdAt
+  const currentEndAt = subscription.currentEndAt || addPlanInterval(currentStartAt, subscription.planKey)
+
+  const sent = await sendManualGrantConfirmationEmail({
+    toEmail: subscription.user.email,
+    toName: subscription.user.name,
+    planLabel: planDef.label,
+    currentStartAt,
+    currentEndAt,
+    paymentMethod,
+    utrNumber,
+    amountPaid,
+    isResend: true,
+  })
+
+  if (!sent) {
+    throw new InsightsSubscriptionApiError(500, "EMAIL_FAILED", "Failed to deliver confirmation email via email service. Check API key configuration.")
+  }
+
+  await prisma.insightsSubscriptionAuditLog.create({
+    data: {
+      subscriptionId: subscription.id,
+      action: "CONFIRMATION_EMAIL_RESENT",
+      metadata: {
+        resentBy: params.resentByAdminEmail ?? "ADMIN",
+        sentTo: subscription.user.email,
+        resentAt: new Date().toISOString(),
+      },
+    },
+  })
+
+  return {
+    success: true,
+    email: subscription.user.email,
+  }
+}
+
+
