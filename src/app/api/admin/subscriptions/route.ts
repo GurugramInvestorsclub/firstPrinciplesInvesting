@@ -68,6 +68,8 @@ export async function GET() {
           endedAt: subscription.endedAt,
           razorpaySubscriptionId: subscription.razorpaySubscriptionId,
           razorpayPlanId: subscription.razorpayPlanId,
+          source: subscription.source,
+          notes: subscription.notes,
           createdAt: subscription.createdAt,
           updatedAt: subscription.updatedAt,
           latestCharge: subscription.charges[0]

@@ -17,6 +17,8 @@ interface SubscriptionRow {
   endedAt: string | null
   razorpaySubscriptionId: string | null
   razorpayPlanId: string
+  source?: string | null
+  notes?: Record<string, any> | null
   createdAt: string
   updatedAt: string
   latestCharge: {
@@ -49,6 +51,22 @@ export default function AdminSubscriptionsPage() {
   const [error, setError] = useState<string | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [reconcilingId, setReconcilingId] = useState<string | null>(null)
+
+  // Manual Grant Modal State
+  const [showGrantModal, setShowGrantModal] = useState(false)
+  const [modalEmail, setModalEmail] = useState("")
+  const [modalName, setModalName] = useState("")
+  const [modalDurationPreset, setModalDurationPreset] = useState<"3_months" | "1_year">("3_months")
+  const [modalPaymentMethod, setModalPaymentMethod] = useState("NEFT")
+  const [modalUtrNumber, setModalUtrNumber] = useState("")
+  const [modalAmountPaid, setModalAmountPaid] = useState("2999")
+  const [modalAdminNotes, setModalAdminNotes] = useState("")
+  const [modalSendEmail, setModalSendEmail] = useState(true)
+  const [submittingGrant, setSubmittingGrant] = useState(false)
+
+  // View Notes Modal State
+  const [selectedNotesRow, setSelectedNotesRow] = useState<SubscriptionRow | null>(null)
+  const [revokingId, setRevokingId] = useState<string | null>(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -123,6 +141,86 @@ export default function AdminSubscriptionsPage() {
     [loadData]
   )
 
+  const handleGrantManualAccess = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!modalEmail.trim() || !modalEmail.includes("@")) {
+      window.alert("Please enter a valid user email address.")
+      return
+    }
+
+    setSubmittingGrant(true)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/manual-grant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: modalEmail.trim(),
+          name: modalName.trim() || null,
+          durationPreset: modalDurationPreset,
+          paymentMethod: modalPaymentMethod,
+          utrNumber: modalUtrNumber.trim() || null,
+          amountPaid: modalAmountPaid ? Number(modalAmountPaid) : null,
+          adminNotes: modalAdminNotes.trim() || null,
+          sendEmailNotification: modalSendEmail,
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to grant manual access")
+      }
+
+      setActionMessage(
+        `Successfully granted ${modalDurationPreset === "1_year" ? "1-Year" : "3-Month"} Insights access to ${modalEmail.trim()}!`
+      )
+      setShowGrantModal(false)
+      setModalEmail("")
+      setModalName("")
+      setModalUtrNumber("")
+      setModalAdminNotes("")
+      await loadData()
+    } catch (grantErr) {
+      setActionMessage(grantErr instanceof Error ? grantErr.message : "Failed to grant manual access")
+    } finally {
+      setSubmittingGrant(false)
+    }
+  }
+
+  const handleRevokeManualAccess = async (row: SubscriptionRow) => {
+    const confirmRevoke = window.confirm(
+      `Are you sure you want to revoke manual access for ${row.userEmail || row.userName || row.id}?`
+    )
+    if (!confirmRevoke) return
+
+    setRevokingId(row.id)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/manual-revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscriptionId: row.id,
+          adminNotes: "Revoked by admin from dashboard",
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to revoke access")
+      }
+
+      setActionMessage(`Revoked access for ${row.userEmail || row.id}`)
+      await loadData()
+    } catch (revokeErr) {
+      setActionMessage(revokeErr instanceof Error ? revokeErr.message : "Failed to revoke access")
+    } finally {
+      setRevokingId(null)
+    }
+  }
+
   const uniqueStatuses = Array.from(new Set(rows.map((row) => row.status)))
 
   const filteredRows = rows.filter((row) => {
@@ -184,10 +282,34 @@ export default function AdminSubscriptionsPage() {
           background: "rgba(255,255,255,0.03)",
         }}
       >
-        <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "8px" }}>Insights Subscriptions</h1>
-        <p style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
-          Review premium Insights memberships, current billing windows, and the latest recurring charge recorded for each user.
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "8px" }}>Insights Subscriptions</h1>
+            <p style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
+              Review premium Insights memberships, current billing windows, and manually grant or manage offline (NEFT) access.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowGrantModal(true)}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "10px",
+              border: "1px solid #FFC72C",
+              background: "linear-gradient(180deg, #FFD54F 0%, #FFC72C 100%)",
+              color: "#000",
+              fontWeight: 700,
+              fontSize: "13px",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(255,199,44,0.25)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            + Grant Manual Access (NEFT)
+          </button>
+        </div>
         <div style={{ marginTop: "16px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
           <span
             style={{
@@ -236,8 +358,19 @@ export default function AdminSubscriptionsPage() {
           <div
             style={{
               marginTop: "16px",
-              color: actionMessage.toLowerCase().includes("unable") ? "#fca5a5" : "#6ee7b7",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              background: actionMessage.toLowerCase().includes("unable") || actionMessage.toLowerCase().includes("fail")
+                ? "rgba(239,68,68,0.12)"
+                : "rgba(16,185,129,0.12)",
+              border: actionMessage.toLowerCase().includes("unable") || actionMessage.toLowerCase().includes("fail")
+                ? "1px solid rgba(239,68,68,0.3)"
+                : "1px solid rgba(16,185,129,0.3)",
+              color: actionMessage.toLowerCase().includes("unable") || actionMessage.toLowerCase().includes("fail")
+                ? "#fca5a5"
+                : "#6ee7b7",
               fontSize: "13px",
+              fontWeight: 600,
             }}
           >
             {actionMessage}
@@ -427,111 +560,550 @@ export default function AdminSubscriptionsPage() {
                   </thead>
                   <tbody>
                     {filteredRows.map((row) => {
-                  const canReconcile = canReconcileSubscription(row)
-                  const isReconciling = reconcilingId === row.id
+                      const canReconcile = canReconcileSubscription(row)
+                      const isReconciling = reconcilingId === row.id
+                      const isManual = row.source === "manual_neft" || row.razorpayPlanId === "MANUAL_GRANT"
+                      const isRevoking = revokingId === row.id
 
-                  return (
-                    <tr key={row.id}>
-                      <td style={tableCellStyle}>
-                        <div style={{ fontWeight: 600 }}>{row.userName || "Unknown"}</div>
-                        <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>{row.userEmail || "No email"}</div>
-                      </td>
-                      <td style={tableCellStyle}>
-                        <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.planKey}</div>
-                        <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
-                          Created {formatDate(row.createdAt)}
-                        </div>
-                      </td>
-                      <td style={tableCellStyle}>
-                        <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.status.replace(/_/g, " ")}</div>
-                        {row.cancelAtCycleEnd ? (
-                          <div style={{ color: "#fcd34d", marginTop: "6px" }}>Cycle-end cancellation requested</div>
-                        ) : null}
-                        {row.cancelRequestedAt ? (
-                          <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
-                            Requested {formatDate(row.cancelRequestedAt)}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td style={tableCellStyle}>
-                        <div>Start: {formatDate(row.currentStartAt)}</div>
-                        <div style={{ marginTop: "6px" }}>End: {formatDate(row.currentEndAt)}</div>
-                        {row.cancelledAt ? (
-                          <div style={{ marginTop: "6px" }}>Cancelled: {formatDate(row.cancelledAt)}</div>
-                        ) : null}
-                        {row.endedAt ? (
-                          <div style={{ marginTop: "6px" }}>Ended: {formatDate(row.endedAt)}</div>
-                        ) : null}
-                      </td>
-                      <td style={tableCellStyle}>
-                        {row.latestCharge ? (
-                          <>
-                            <div>
-                              {row.latestCharge.currency} {(row.latestCharge.amount / 100).toFixed(2)}
+                      return (
+                        <tr key={row.id}>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 600 }}>{row.userName || "Unknown"}</div>
+                            <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>{row.userEmail || "No email"}</div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.planKey}</div>
+                            {isManual ? (
+                              <div style={{ marginTop: "6px" }}>
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    padding: "3px 8px",
+                                    borderRadius: "6px",
+                                    background: "rgba(59,130,246,0.15)",
+                                    color: "#93c5fd",
+                                    border: "1px solid rgba(59,130,246,0.3)",
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.04em",
+                                  }}
+                                >
+                                  MANUAL (NEFT)
+                                </span>
+                              </div>
+                            ) : null}
+                            <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
+                              Created {formatDate(row.createdAt)}
                             </div>
-                            <div style={{ marginTop: "6px", textTransform: "capitalize" }}>
-                              {row.latestCharge.status}
-                            </div>
-                            {row.latestCharge.chargedAt ? (
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.status.replace(/_/g, " ")}</div>
+                            {row.cancelAtCycleEnd ? (
+                              <div style={{ color: "#fcd34d", marginTop: "6px" }}>Cycle-end cancellation requested</div>
+                            ) : null}
+                            {row.cancelRequestedAt ? (
                               <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
-                                {formatDate(row.latestCharge.chargedAt)}
+                                Requested {formatDate(row.cancelRequestedAt)}
                               </div>
                             ) : null}
-                            {row.latestCharge.failureReason ? (
-                              <div style={{ color: "#fca5a5", marginTop: "6px" }}>
-                                {row.latestCharge.failureReason}
-                              </div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div>Start: {formatDate(row.currentStartAt)}</div>
+                            <div style={{ marginTop: "6px" }}>End: {formatDate(row.currentEndAt)}</div>
+                            {row.cancelledAt ? (
+                              <div style={{ marginTop: "6px" }}>Cancelled: {formatDate(row.cancelledAt)}</div>
                             ) : null}
-                          </>
-                        ) : (
-                          <span style={{ color: "var(--text-secondary)" }}>No charge recorded yet</span>
-                        )}
-                      </td>
-                      <td style={tableCellStyle}>
-                        <div style={{ wordBreak: "break-all" }}>{row.razorpaySubscriptionId || "No subscription ID"}</div>
-                        <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
-                          {row.razorpayPlanId}
-                        </div>
-                        {row.latestCharge?.razorpayPaymentId ? (
-                          <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
-                            Payment: {row.latestCharge.razorpayPaymentId}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td style={tableCellStyle}>
-                        {canReconcile ? (
-                          <button
-                            type="button"
-                            onClick={() => reconcilePayment(row)}
-                            disabled={isReconciling}
-                            style={{
-                              minWidth: "138px",
-                              padding: "8px 12px",
-                              borderRadius: "8px",
-                              border: "1px solid rgba(250,204,21,0.35)",
-                              background: "rgba(250,204,21,0.12)",
-                              color: "#fde68a",
-                              fontWeight: 700,
-                              cursor: isReconciling ? "wait" : "pointer",
-                              opacity: isReconciling ? 0.7 : 1,
-                            }}
-                          >
-                            {isReconciling ? "Reconciling..." : "Reconcile Payment"}
-                          </button>
-                        ) : (
-                          <span style={{ color: "var(--text-secondary)" }}>-</span>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                            {row.endedAt ? (
+                              <div style={{ marginTop: "6px" }}>Ended: {formatDate(row.endedAt)}</div>
+                            ) : null}
+                          </td>
+                          <td style={tableCellStyle}>
+                            {row.latestCharge ? (
+                              <>
+                                <div>
+                                  {row.latestCharge.currency} {(row.latestCharge.amount / 100).toFixed(2)}
+                                </div>
+                                <div style={{ marginTop: "6px", textTransform: "capitalize" }}>
+                                  {row.latestCharge.status}
+                                </div>
+                                {row.latestCharge.chargedAt ? (
+                                  <div style={{ color: "var(--text-secondary)", marginTop: "6px" }}>
+                                    {formatDate(row.latestCharge.chargedAt)}
+                                  </div>
+                                ) : null}
+                                {row.latestCharge.failureReason ? (
+                                  <div style={{ color: "#fca5a5", marginTop: "6px" }}>
+                                    {row.latestCharge.failureReason}
+                                  </div>
+                                ) : null}
+                              </>
+                            ) : (
+                              <span style={{ color: "var(--text-secondary)" }}>No charge recorded yet</span>
+                            )}
+                          </td>
+                          <td style={tableCellStyle}>
+                            {isManual ? (
+                              <>
+                                <div style={{ color: "#93c5fd", fontWeight: 600 }}>Manual Offline Grant</div>
+                                {row.notes?.utrNumber ? (
+                                  <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
+                                    UTR: <code style={{ color: "#FFC72C" }}>{row.notes.utrNumber}</code>
+                                  </div>
+                                ) : null}
+                                {row.notes?.paymentMethod ? (
+                                  <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
+                                    Method: {row.notes.paymentMethod}
+                                  </div>
+                                ) : null}
+                              </>
+                            ) : (
+                              <>
+                                <div style={{ wordBreak: "break-all" }}>{row.razorpaySubscriptionId || "No subscription ID"}</div>
+                                <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
+                                  {row.razorpayPlanId}
+                                </div>
+                                {row.latestCharge?.razorpayPaymentId ? (
+                                  <div style={{ color: "var(--text-secondary)", marginTop: "6px", wordBreak: "break-all" }}>
+                                    Payment: {row.latestCharge.razorpayPaymentId}
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                              {canReconcile ? (
+                                <button
+                                  type="button"
+                                  onClick={() => reconcilePayment(row)}
+                                  disabled={isReconciling}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "6px",
+                                    border: "1px solid rgba(250,204,21,0.35)",
+                                    background: "rgba(250,204,21,0.12)",
+                                    color: "#fde68a",
+                                    fontWeight: 600,
+                                    fontSize: "12px",
+                                    cursor: isReconciling ? "wait" : "pointer",
+                                    opacity: isReconciling ? 0.7 : 1,
+                                  }}
+                                >
+                                  {isReconciling ? "Reconciling..." : "Reconcile Payment"}
+                                </button>
+                              ) : null}
+
+                              {row.notes ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedNotesRow(row)}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "6px",
+                                    border: "1px solid rgba(255,255,255,0.15)",
+                                    background: "rgba(255,255,255,0.06)",
+                                    color: "#e2e8f0",
+                                    fontSize: "12px",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  View Details / UTR
+                                </button>
+                              ) : null}
+
+                              {isManual && row.status === "active" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRevokeManualAccess(row)}
+                                  disabled={isRevoking}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "6px",
+                                    border: "1px solid rgba(239,68,68,0.35)",
+                                    background: "rgba(239,68,68,0.12)",
+                                    color: "#fca5a5",
+                                    fontWeight: 600,
+                                    fontSize: "12px",
+                                    cursor: isRevoking ? "wait" : "pointer",
+                                    opacity: isRevoking ? 0.7 : 1,
+                                  }}
+                                >
+                                  {isRevoking ? "Revoking..." : "Revoke Access"}
+                                </button>
+                              ) : null}
+
+                              {!canReconcile && !row.notes && (!isManual || row.status !== "active") ? (
+                                <span style={{ color: "var(--text-secondary)" }}>-</span>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
-      </>
-    )}
-  </section>
+      </section>
+
+      {/* Grant Manual Access Modal */}
+      {showGrantModal ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: "#121216",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "520px",
+              padding: "28px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.8)",
+              color: "#fff",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>Grant Manual Access (NEFT / Offline)</h2>
+              <button
+                type="button"
+                onClick={() => setShowGrantModal(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#9ca3af",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleGrantManualAccess} style={{ display: "grid", gap: "16px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  User Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="customer@example.com"
+                  value={modalEmail}
+                  onChange={(e) => setModalEmail(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  User Full Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Rahul Sharma"
+                  value={modalName}
+                  onChange={(e) => setModalName(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  Select Preset Duration *
+                </label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalDurationPreset("3_months")
+                      setModalAmountPaid("2999")
+                    }}
+                    style={{
+                      padding: "12px",
+                      borderRadius: "10px",
+                      border: modalDurationPreset === "3_months" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
+                      background: modalDurationPreset === "3_months" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
+                      color: modalDurationPreset === "3_months" ? "#FFC72C" : "#ccc",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      textAlign: "center",
+                    }}
+                  >
+                    3 Months Pass<br />
+                    <span style={{ fontSize: "11px", fontWeight: 400, opacity: 0.8 }}>₹2,999</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalDurationPreset("1_year")
+                      setModalAmountPaid("9999")
+                    }}
+                    style={{
+                      padding: "12px",
+                      borderRadius: "10px",
+                      border: modalDurationPreset === "1_year" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
+                      background: modalDurationPreset === "1_year" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
+                      color: modalDurationPreset === "1_year" ? "#FFC72C" : "#ccc",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      textAlign: "center",
+                    }}
+                  >
+                    1 Year Pass<br />
+                    <span style={{ fontSize: "11px", fontWeight: 400, opacity: 0.8 }}>₹9,999</span>
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                    Payment Method
+                  </label>
+                  <select
+                    value={modalPaymentMethod}
+                    onChange={(e) => setModalPaymentMethod(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      background: "#1f1f24",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "14px",
+                      outline: "none",
+                    }}
+                  >
+                    <option value="NEFT">NEFT</option>
+                    <option value="RTGS">RTGS</option>
+                    <option value="IMPS">IMPS</option>
+                    <option value="UPI_DIRECT">UPI Direct Transfer</option>
+                    <option value="BANK_TRANSFER">Direct Bank Transfer</option>
+                    <option value="CASH">Cash / Offline</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                    Amount Paid (₹)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="2999"
+                    value={modalAmountPaid}
+                    onChange={(e) => setModalAmountPaid(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "14px",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  UTR / Bank Transaction Reference Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. UTR1234567890"
+                  value={modalUtrNumber}
+                  onChange={(e) => setModalUtrNumber(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                  Internal Admin Notes
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Received via HDFC Bank transfer on Aug 3"
+                  value={modalAdminNotes}
+                  onChange={(e) => setModalAdminNotes(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
+                <input
+                  type="checkbox"
+                  id="send-email-check"
+                  checked={modalSendEmail}
+                  onChange={(e) => setModalSendEmail(e.target.checked)}
+                  style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                />
+                <label htmlFor="send-email-check" style={{ fontSize: "13px", color: "#d1d5db", cursor: "pointer" }}>
+                  Send confirmation welcome email to customer
+                </label>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "12px" }}>
+                <button
+                  type="button"
+                  onClick={() => setShowGrantModal(false)}
+                  style={{
+                    padding: "10px 18px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.06)",
+                    color: "#ccc",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingGrant}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    border: "1px solid #FFC72C",
+                    background: "linear-gradient(180deg, #FFD54F 0%, #FFC72C 100%)",
+                    color: "#000",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    cursor: submittingGrant ? "wait" : "pointer",
+                    opacity: submittingGrant ? 0.7 : 1,
+                  }}
+                >
+                  {submittingGrant ? "Granting Access..." : "Grant Access Now"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {/* View Details Modal */}
+      {selectedNotesRow ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: "#121216",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "480px",
+              padding: "24px",
+              color: "#fff",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Offline Grant & Note Details</h2>
+              <button
+                type="button"
+                onClick={() => setSelectedNotesRow(null)}
+                style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "18px", cursor: "pointer" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "16px", fontSize: "13px", lineHeight: "1.8" }}>
+              <div><strong>User Email:</strong> {selectedNotesRow.userEmail || "-"}</div>
+              <div><strong>User Name:</strong> {selectedNotesRow.userName || "-"}</div>
+              <div><strong>Payment Method:</strong> {selectedNotesRow.notes?.paymentMethod || "NEFT"}</div>
+              <div><strong>UTR / Ref Number:</strong> <code style={{ color: "#FFC72C" }}>{selectedNotesRow.notes?.utrNumber || "-"}</code></div>
+              <div><strong>Amount Paid:</strong> ₹{selectedNotesRow.notes?.amountPaid || (selectedNotesRow.latestCharge ? (selectedNotesRow.latestCharge.amount / 100).toFixed(0) : "-")}</div>
+              <div><strong>Admin Notes:</strong> {selectedNotesRow.notes?.adminNotes || "-"}</div>
+              <div><strong>Granted At:</strong> {selectedNotesRow.notes?.grantedAt ? formatDate(selectedNotesRow.notes.grantedAt) : formatDate(selectedNotesRow.currentStartAt)}</div>
+              <div><strong>Valid Until:</strong> {formatDate(selectedNotesRow.currentEndAt)}</div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+              <button
+                type="button"
+                onClick={() => setSelectedNotesRow(null)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#fff",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

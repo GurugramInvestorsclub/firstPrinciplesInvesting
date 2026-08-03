@@ -326,3 +326,207 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
     return false
   }
 }
+
+export interface SendManualGrantConfirmationEmailParams {
+  toEmail: string
+  toName?: string | null
+  planLabel: string
+  currentStartAt: Date
+  currentEndAt: Date
+  paymentMethod: string
+  utrNumber?: string | null
+  amountPaid?: number | null
+}
+
+/**
+ * Sends a confirmation email to a user when their Insights membership is manually granted by an admin.
+ * Supports Brevo SMTP API and Resend API.
+ */
+export async function sendManualGrantConfirmationEmail(
+  params: SendManualGrantConfirmationEmailParams
+): Promise<boolean> {
+  const brevoApiKey = process.env.BREVO_API_KEY
+  const resendApiKey = process.env.RESEND_API_KEY
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesinvesting.in"
+  const siteUrl = process.env.NEXTAUTH_URL || "https://firstprinciplesinvesting.com"
+
+  if (!brevoApiKey && !resendApiKey) {
+    console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured. Manual grant email skipped.")
+    return false
+  }
+
+  const formattedStartDate = params.currentStartAt.toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "Asia/Kolkata",
+  })
+
+  const formattedEndDate = params.currentEndAt.toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "Asia/Kolkata",
+  })
+
+  const subject = `Welcome to Insights Membership — Access Granted!`
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insights Membership Activated</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #121216; border: 1px solid #24242C; border-radius: 16px; overflow: hidden;">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="padding: 36px 32px; background: linear-gradient(180deg, #1A1A22 0%, #121216 100%); text-align: center; border-bottom: 1px solid #24242C;">
+              <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 12px;">
+                FIRST PRINCIPLES INVESTING
+              </span>
+              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.5px;">
+                Insights Membership Activated 🎉
+              </h1>
+              <p style="color: #A1A1AA; font-size: 15px; margin: 0;">
+                Your access to premium research memos and archives is now active.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Details Table -->
+          <tr>
+            <td style="padding: 32px;">
+              <p style="color: #E4E4E7; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+                Hello <strong>${params.toName || params.toEmail}</strong>,
+              </p>
+              <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                We have verified your offline payment (${params.paymentMethod}${params.utrNumber ? ` — Ref: ${params.utrNumber}` : ""}) and manually activated your Insights membership. Below are your access details:
+              </p>
+
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #18181F; border-radius: 12px; border: 1px solid #292934; margin-bottom: 28px;">
+                <tr>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #A1A1AA; font-size: 14px;">Membership Plan</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${params.planLabel}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #A1A1AA; font-size: 14px;">Access Start Date</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${formattedStartDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 14px 18px; ${params.paymentMethod || params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Valid Until</td>
+                  <td style="padding: 14px 18px; ${params.paymentMethod || params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFC72C; font-weight: 700; font-size: 14px; text-align: right;">${formattedEndDate}</td>
+                </tr>
+                ${params.paymentMethod ? `
+                <tr>
+                  <td style="padding: 14px 18px; ${params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Payment Method</td>
+                  <td style="padding: 14px 18px; ${params.utrNumber || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${params.paymentMethod}</td>
+                </tr>` : ''}
+                ${params.utrNumber ? `
+                <tr>
+                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Transaction UTR / Ref</td>
+                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${params.utrNumber}</td>
+                </tr>` : ''}
+                ${params.amountPaid ? `
+                <tr>
+                  <td style="padding: 14px 18px; color: #A1A1AA; font-size: 14px;">Amount Received</td>
+                  <td style="padding: 14px 18px; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">₹${params.amountPaid}</td>
+                </tr>` : ''}
+              </table>
+
+              <div style="text-align: center; margin-bottom: 28px;">
+                <a href="${siteUrl}/insights" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 15px;">
+                  Explore Premium Insights
+                </a>
+              </div>
+
+              <p style="color: #71717A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
+                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesinvesting.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesinvesting.in</a>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 32px; border-top: 1px solid #1E1E24; text-align: center; background-color: #0E0E11;">
+              <p style="color: #D4D4D8; font-size: 13px; font-weight: 700; margin: 0 0 4px 0;">
+                First Principles Investing
+              </p>
+              <p style="color: #71717A; font-size: 12px; margin: 0;">
+                Automated Transactional Membership Confirmation
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `
+
+  try {
+    if (brevoApiKey) {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "api-key": brevoApiKey,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: {
+            name: "First Principles Investing",
+            email: emailFrom,
+          },
+          to: [
+            {
+              email: params.toEmail,
+              name: params.toName || params.toEmail,
+            },
+          ],
+          subject,
+          htmlContent,
+        }),
+      })
+
+      if (response.ok) {
+        return true
+      }
+      console.error(`Brevo email failed: ${response.status} ${await response.text()}`)
+    }
+
+    if (resendApiKey) {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: emailFrom,
+          to: [params.toEmail],
+          subject,
+          html: htmlContent,
+        }),
+      })
+
+      if (response.ok) {
+        return true
+      }
+      console.error(`Resend email failed: ${response.status} ${await response.text()}`)
+    }
+
+    return false
+  } catch (err) {
+    console.error("Failed to send manual grant confirmation email:", err)
+    return false
+  }
+}
+

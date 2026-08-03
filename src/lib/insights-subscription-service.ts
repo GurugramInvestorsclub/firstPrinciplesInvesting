@@ -8,6 +8,7 @@ import crypto from "crypto"
 import Razorpay from "razorpay"
 import type { Subscriptions } from "razorpay/dist/types/subscriptions"
 import { prisma } from "@/lib/prisma"
+import { sendManualGrantConfirmationEmail } from "@/lib/email-service"
 import {
   type InsightsPlanCatalogEntry,
   type InsightsPlanSlug,
@@ -1915,3 +1916,237 @@ export function getInsightsSubscriptionUiState() {
     })),
   }
 }
+
+export interface GrantManualSubscriptionParams {
+  email: string
+  name?: string | null
+  planKey: "three_monthly" | "yearly"
+  durationPreset: "3_months" | "1_year"
+  paymentMethod: string
+  utrNumber?: string | null
+  amountPaid?: number | null
+  adminNotes?: string | null
+  grantedByAdminEmail?: string | null
+  sendEmailNotification?: boolean
+}
+
+export async function grantManualInsightsSubscription(
+  params: GrantManualSubscriptionParams
+): Promise<InsightsMembershipSummary> {
+  const email = params.email.trim().toLowerCase()
+  if (!email || !email.includes("@")) {
+    throw new InsightsSubscriptionApiError(400, "INVALID_EMAIL", "A valid user email address is required")
+  }
+
+  const durationPreset = params.durationPreset === "1_year" ? "1_year" : "3_months"
+  const planSlug: InsightsPlanSlug = durationPreset === "1_year" ? "yearly" : "three_monthly"
+  const dbPlanKey = slugToPlanKey(planSlug)
+
+  const currentStartAt = new Date()
+  const currentEndAt = new Date(currentStartAt)
+  if (durationPreset === "1_year") {
+    currentEndAt.setFullYear(currentEndAt.getFullYear() + 1)
+  } else {
+    currentEndAt.setMonth(currentEndAt.getMonth() + 3)
+  }
+
+  // 1. Find or create User
+  let user = await prisma.user.findUnique({
+    where: { email },
+  })
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email,
+        name: params.name?.trim() || null,
+      },
+    })
+  } else if (params.name?.trim() && !user.name) {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { name: params.name.trim() },
+    })
+  }
+
+  const notesJson: Prisma.InputJsonValue = {
+    paymentMethod: (params.paymentMethod || "NEFT").trim().toUpperCase(),
+    utrNumber: params.utrNumber?.trim() || null,
+    amountPaid: params.amountPaid ?? null,
+    adminNotes: params.adminNotes?.trim() || null,
+    grantedByAdminEmail: params.grantedByAdminEmail?.trim() || null,
+    durationPreset,
+    grantedAt: currentStartAt.toISOString(),
+  }
+
+  const amountInPaise = params.amountPaid
+    ? Math.round(params.amountPaid * 100)
+    : durationPreset === "1_year"
+      ? 999900
+      : 299900
+
+  const paymentRefId = params.utrNumber?.trim()
+    ? `NEFT_${params.utrNumber.trim()}`
+    : `MANUAL_${Date.now()}`
+
+  // 2. Perform DB creation inside transaction
+  const updatedSubscription = await prisma.$transaction(
+    async (tx) => {
+      await acquireLock(tx, `insights-subscription:grant-manual:${user.id}`)
+
+      // Deactivate/Expire any existing open subscription for this user
+      const existingOpen = await tx.insightsSubscription.findMany({
+        where: {
+          userId: user.id,
+          status: {
+            in: [...OPEN_STATUSES],
+          },
+        },
+      })
+
+      for (const openSub of existingOpen) {
+        await tx.insightsSubscription.update({
+          where: { id: openSub.id },
+          data: {
+            status: InsightsSubscriptionStatus.EXPIRED,
+            endedAt: new Date(),
+          },
+        })
+      }
+
+      // Create new manual subscription record
+      const subscription = await tx.insightsSubscription.create({
+        data: {
+          userId: user.id,
+          planKey: dbPlanKey,
+          razorpayPlanId: "MANUAL_GRANT",
+          razorpaySubscriptionId: null,
+          status: InsightsSubscriptionStatus.ACTIVE,
+          currentStartAt,
+          currentEndAt,
+          startAt: currentStartAt,
+          source: "manual_neft",
+          notes: notesJson,
+        },
+      })
+
+      // Create matching charge record
+      await tx.insightsSubscriptionCharge.create({
+        data: {
+          subscriptionId: subscription.id,
+          razorpayPaymentId: paymentRefId,
+          amount: amountInPaise,
+          currency: CURRENCY,
+          status: InsightsSubscriptionChargeStatus.CAPTURED,
+          chargedAt: currentStartAt,
+        },
+      })
+
+      // Create audit log
+      await logSubscriptionAudit(tx, subscription.id, "MANUAL_SUBSCRIPTION_GRANTED", {
+        grantedBy: params.grantedByAdminEmail ?? "ADMIN",
+        email,
+        durationPreset,
+        currentStartAt,
+        currentEndAt,
+        paymentMethod: params.paymentMethod,
+        utrNumber: params.utrNumber ?? null,
+        amountPaid: params.amountPaid ?? null,
+        adminNotes: params.adminNotes ?? null,
+      })
+
+      return tx.insightsSubscription.findUniqueOrThrow({
+        where: { id: subscription.id },
+        include: {
+          charges: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
+      })
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
+    }
+  )
+
+  // 3. Send email confirmation if requested
+  if (params.sendEmailNotification !== false) {
+    const planDef = getInsightsSubscriptionPlanDefinition(planSlug)
+    sendManualGrantConfirmationEmail({
+      toEmail: email,
+      toName: user.name,
+      planLabel: planDef.label,
+      currentStartAt,
+      currentEndAt,
+      paymentMethod: (params.paymentMethod || "NEFT").toUpperCase(),
+      utrNumber: params.utrNumber?.trim() || null,
+      amountPaid: params.amountPaid ?? null,
+    }).catch((err) => {
+      console.error("Failed to send manual grant confirmation email:", err)
+    })
+  }
+
+  return serializeMembership(updatedSubscription)
+}
+
+export async function revokeManualInsightsSubscription(params: {
+  subscriptionId: string
+  adminNotes?: string | null
+  revokedByAdminEmail?: string | null
+}): Promise<InsightsMembershipSummary> {
+  const updatedSubscription = await prisma.$transaction(
+    async (tx) => {
+      await acquireLock(tx, `insights-subscription:revoke-manual:${params.subscriptionId}`)
+
+      const sub = await tx.insightsSubscription.findUnique({
+        where: { id: params.subscriptionId },
+      })
+
+      if (!sub) {
+        throw new InsightsSubscriptionApiError(404, "NOT_FOUND", "Subscription record not found")
+      }
+
+      const now = new Date()
+      await tx.insightsSubscription.update({
+        where: { id: sub.id },
+        data: {
+          status: InsightsSubscriptionStatus.CANCELLED,
+          cancelledAt: now,
+          endedAt: now,
+          currentEndAt: now,
+        },
+      })
+
+      await logSubscriptionAudit(tx, sub.id, "MANUAL_SUBSCRIPTION_REVOKED", {
+        revokedBy: params.revokedByAdminEmail ?? "ADMIN",
+        adminNotes: params.adminNotes ?? null,
+        revokedAt: now,
+      })
+
+      return tx.insightsSubscription.findUniqueOrThrow({
+        where: { id: sub.id },
+        include: {
+          charges: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
+      })
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
+    }
+  )
+
+  return serializeMembership(updatedSubscription)
+}
+
