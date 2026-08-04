@@ -490,8 +490,36 @@ async function logSubscriptionAudit(
   })
 }
 
+function getEffectiveEndAt(subscription: {
+  currentStartAt?: Date | null
+  currentEndAt?: Date | null
+  planKey: InsightsPlanKey
+  charges?: Array<{ status: InsightsSubscriptionChargeStatus; chargedAt?: Date | null; createdAt?: Date }>
+}): Date | null {
+  const start =
+    subscription.currentStartAt ??
+    subscription.charges?.find((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED)?.chargedAt ??
+    subscription.charges?.find((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED)?.createdAt ??
+    subscription.charges?.[0]?.chargedAt ??
+    subscription.charges?.[0]?.createdAt
+
+  if (subscription.currentEndAt && start) {
+    if (subscription.currentEndAt.getTime() > start.getTime()) {
+      return subscription.currentEndAt
+    }
+  } else if (subscription.currentEndAt) {
+    return subscription.currentEndAt
+  }
+
+  if (start) {
+    return addPlanInterval(new Date(start), subscription.planKey)
+  }
+
+  return null
+}
+
 function membershipHasAccess(
-  subscription: Pick<SubscriptionWithLatestCharge, "status" | "currentEndAt" | "charges">
+  subscription: Pick<SubscriptionWithLatestCharge, "status" | "currentStartAt" | "currentEndAt" | "planKey" | "paidCount" | "charges">
 ): boolean {
   const now = Date.now()
 
@@ -514,11 +542,21 @@ function membershipHasAccess(
     return true
   }
 
-  if (!subscription.currentEndAt) {
-    return true
+  const hasCapturedCharge =
+    subscription.charges.some((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED) ||
+    (subscription.paidCount ?? 0) > 0
+
+  if (subscription.status === InsightsSubscriptionStatus.CANCELLED && !hasCapturedCharge) {
+    return false
   }
 
-  return subscription.currentEndAt.getTime() > now
+  const effectiveEndAt = getEffectiveEndAt(subscription)
+
+  if (!effectiveEndAt) {
+    return hasCapturedCharge || subscription.status !== InsightsSubscriptionStatus.CANCELLED
+  }
+
+  return effectiveEndAt.getTime() > now
 }
 
 function serializeCharge(
@@ -547,6 +585,7 @@ function serializeCharge(
 
 function serializeMembership(subscription: SubscriptionWithLatestCharge): InsightsMembershipSummary {
   const planKey = planKeyToSlug(subscription.planKey)
+  const currentEndAt = getEffectiveEndAt(subscription)
 
   return {
     id: subscription.id,
@@ -558,7 +597,7 @@ function serializeMembership(subscription: SubscriptionWithLatestCharge): Insigh
     hasAccess: membershipHasAccess(subscription),
     cancelAtCycleEnd: subscription.cancelAtCycleEnd,
     currentStartAt: subscription.currentStartAt,
-    currentEndAt: subscription.currentEndAt,
+    currentEndAt,
     cancelRequestedAt: subscription.cancelRequestedAt,
     cancelledAt: subscription.cancelledAt,
     endedAt: subscription.endedAt,
@@ -751,16 +790,22 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
       },
     },
     select: {
+      planKey: true,
       status: true,
+      currentStartAt: true,
       currentEndAt: true,
+      paidCount: true,
       charges: {
         where: {
-          status: InsightsSubscriptionChargeStatus.CAPTURED
+          status: InsightsSubscriptionChargeStatus.CAPTURED,
         },
         select: {
-          id: true
-        }
-      }
+          id: true,
+          status: true,
+          chargedAt: true,
+          createdAt: true,
+        },
+      },
     },
     orderBy: {
       updatedAt: "desc",
@@ -792,11 +837,20 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
         return true
       }
 
-      if (!subscription.currentEndAt) {
+      const hasCapturedCharge =
+        subscription.charges.length > 0 || (subscription.paidCount ?? 0) > 0
+
+      if (subscription.status === InsightsSubscriptionStatus.CANCELLED && !hasCapturedCharge) {
+        continue
+      }
+
+      const effectiveEndAt = getEffectiveEndAt(subscription)
+
+      if (!effectiveEndAt) {
         return true
       }
 
-      if (subscription.currentEndAt.getTime() > now) {
+      if (effectiveEndAt.getTime() > now) {
         return true
       }
     }
@@ -1136,6 +1190,25 @@ async function applyProviderSubscriptionSnapshot(
     mappedStatus === InsightsSubscriptionStatus.COMPLETED ||
     mappedStatus === InsightsSubscriptionStatus.EXPIRED
 
+  const currentSub = await tx.insightsSubscription.findUnique({
+    where: { id: subscription.id },
+    select: { currentStartAt: true, currentEndAt: true, planKey: true },
+  })
+
+  const currentStartAt = providerEntity.currentStartAt ?? currentSub?.currentStartAt ?? null
+  const calculatedEndAt =
+    currentStartAt && currentSub?.planKey ? addPlanInterval(currentStartAt, currentSub.planKey) : null
+
+  let currentEndAt = providerEntity.currentEndAt ?? currentSub?.currentEndAt ?? calculatedEndAt
+  if (
+    currentEndAt &&
+    currentStartAt &&
+    currentEndAt.getTime() <= currentStartAt.getTime() &&
+    calculatedEndAt
+  ) {
+    currentEndAt = calculatedEndAt
+  }
+
   await tx.insightsSubscription.update({
     where: { id: subscription.id },
     data: {
@@ -1143,8 +1216,8 @@ async function applyProviderSubscriptionSnapshot(
       razorpayPlanId: providerEntity.planId ?? undefined,
       customerId: providerEntity.customerId ?? undefined,
       status: mappedStatus,
-      currentStartAt: providerEntity.currentStartAt,
-      currentEndAt: providerEntity.currentEndAt,
+      currentStartAt,
+      currentEndAt,
       chargeAt: providerEntity.chargeAt,
       startAt: providerEntity.startAt,
       endedAt: providerEntity.endedAt,
@@ -1638,6 +1711,20 @@ export async function cancelInsightsMembership(params: {
     async (tx) => {
       await acquireLock(tx, `insights-subscription:cancel:${current.id}`)
 
+      const currentStartAt = providerEntity.currentStartAt ?? current.currentStartAt ?? null
+      const calculatedEndAt =
+        currentStartAt ? addPlanInterval(currentStartAt, current.planKey) : null
+
+      let currentEndAt = providerEntity.currentEndAt ?? current.currentEndAt ?? calculatedEndAt
+      if (
+        currentEndAt &&
+        currentStartAt &&
+        currentEndAt.getTime() <= currentStartAt.getTime() &&
+        calculatedEndAt
+      ) {
+        currentEndAt = calculatedEndAt
+      }
+
       await tx.insightsSubscription.update({
         where: { id: current.id },
         data: {
@@ -1651,8 +1738,8 @@ export async function cancelInsightsMembership(params: {
             providerEntity.status === "cancelled"
               ? providerEntity.cancelledAt ?? new Date()
               : null,
-          currentStartAt: providerEntity.currentStartAt,
-          currentEndAt: providerEntity.currentEndAt,
+          currentStartAt,
+          currentEndAt,
           chargeAt: providerEntity.chargeAt,
           endedAt: providerEntity.endedAt,
           remainingCount: providerEntity.remainingCount,
