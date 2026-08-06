@@ -186,7 +186,7 @@ export function ResearchDesk({
                             <nav className="flex items-center gap-5 text-neutral-400">
                                 <Link href="/insights" className="hover:text-gold transition-colors">INSIGHTS</Link>
                                 <Link href="/events" className="hover:text-gold transition-colors">PUBLIC EVENTS</Link>
-                                <Link href="/super30" className="hover:text-gold transition-colors">SUPER 30</Link>
+                                <Link href="/insights/members-only" className="hover:text-gold transition-colors">MEMBERS</Link>
                             </nav>
                         </div>
                         <div className="flex items-center gap-4 text-neutral-400">
