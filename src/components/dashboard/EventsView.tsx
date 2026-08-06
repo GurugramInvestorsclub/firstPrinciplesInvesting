@@ -30,6 +30,24 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const [selectedEventName, setSelectedEventName] = useState("")
 
+    const isTestItem = (item: any) => {
+        if (!item) return true
+        const title = (item.title || "").toLowerCase().trim()
+        const slug = (item.slug?.current || item.slug || "").toLowerCase().trim()
+        return (
+            title === "test" ||
+            title === "test event" ||
+            title === "test carousel" ||
+            title.startsWith("test ") ||
+            title.endsWith(" test") ||
+            slug === "test" ||
+            slug.startsWith("test-")
+        )
+    }
+
+    const filteredUpcomingEvents = (upcomingEvents || []).filter(e => !isTestItem(e))
+    const filteredPastEvents = (pastEvents || []).filter(e => !isTestItem(e))
+
     const toggleRegister = (id: string) => {
         if (registeredIds.includes(id)) {
             setRegisteredIds(registeredIds.filter(item => item !== id))
@@ -66,9 +84,9 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
                     Upcoming Live Sessions
                 </h2>
 
-                {upcomingEvents.length > 0 ? (
+                {filteredUpcomingEvents.length > 0 ? (
                     <div className="grid md:grid-cols-2 gap-8">
-                        {upcomingEvents.map((event) => {
+                        {filteredUpcomingEvents.map((event) => {
                             const isReg = registeredIds.includes(event.eventId || event.id)
                             const eventDate = new Date(event.date)
                             const month = eventDate.toLocaleDateString("en-US", { month: "short" })
@@ -211,9 +229,9 @@ export function EventsView({ upcomingEvents, pastEvents, hasSubscriptionAccess =
                     Past Session Replays
                 </h2>
 
-                {pastEvents.length > 0 ? (
+                {filteredPastEvents.length > 0 ? (
                     <div className="grid md:grid-cols-2 gap-8">
-                        {pastEvents.map((event) => {
+                        {filteredPastEvents.map((event) => {
                             const eventDate = new Date(event.date)
                             const month = eventDate.toLocaleDateString("en-US", { month: "short" })
                             const day = eventDate.toLocaleDateString("en-US", { day: "2-digit" })

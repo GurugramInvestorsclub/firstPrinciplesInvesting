@@ -28,6 +28,19 @@ export function RecordingsCarousel({ recordings }: RecordingsCarouselProps) {
     const [canScrollLeft, setCanScrollLeft] = useState(false)
     const [canScrollRight, setCanScrollRight] = useState(false)
 
+    const isTestItem = (item: any) => {
+        if (!item) return true
+        const title = (item.title || "").toLowerCase().trim()
+        return (
+            title === "test" ||
+            title === "test recording" ||
+            title.startsWith("test ") ||
+            title.endsWith(" test")
+        )
+    }
+
+    const validRecordings = (recordings || []).filter(r => !isTestItem(r))
+
     const checkScroll = () => {
         if (!scrollRef.current) return
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
@@ -39,7 +52,7 @@ export function RecordingsCarousel({ recordings }: RecordingsCarouselProps) {
         checkScroll()
         window.addEventListener("resize", checkScroll)
         return () => window.removeEventListener("resize", checkScroll)
-    }, [recordings])
+    }, [validRecordings])
 
     const scroll = (direction: "left" | "right") => {
         if (!scrollRef.current) return
@@ -50,7 +63,7 @@ export function RecordingsCarousel({ recordings }: RecordingsCarouselProps) {
         })
     }
 
-    if (!recordings || recordings.length === 0) {
+    if (!validRecordings || validRecordings.length === 0) {
         return (
             <div className="pt-16 border-t border-white/5 space-y-6">
                 <div className="flex items-center gap-3">
@@ -110,7 +123,7 @@ export function RecordingsCarousel({ recordings }: RecordingsCarouselProps) {
                 onScroll={checkScroll}
                 className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 pb-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-                {recordings.map((recording) => (
+                {validRecordings.map((recording) => (
                     <div
                         key={recording._id}
                         className="w-[300px] sm:w-[340px] md:w-[380px] flex-shrink-0 snap-start group flex flex-col justify-between border border-white/10 hover:border-gold/30 bg-[#1E1E1E] rounded-2xl overflow-hidden hover:shadow-[0_12px_40px_rgba(255,199,44,0.12)] transition-all duration-300"

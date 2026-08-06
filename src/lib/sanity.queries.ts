@@ -66,7 +66,7 @@ export const singlePostQuery = groq`
 `
 
 export const eventsQuery = groq`
-  *[_type == "event" && date >= $startOfDay] | order(date asc) {
+  *[_type == "event" && date >= $startOfDay && lower(title) != "test" && !(lower(title) match "test *")] | order(date asc) {
     eventId,
     title,
     slug,
@@ -81,7 +81,7 @@ export const eventsQuery = groq`
 `
 
 export const upcomingEventsHomeQuery = groq`
-  *[_type == "event" && date >= $startOfDay] | order(date asc)[0...3] {
+  *[_type == "event" && date >= $startOfDay && lower(title) != "test" && !(lower(title) match "test *")] | order(date asc)[0...3] {
     eventId,
     title,
     slug,
@@ -120,7 +120,7 @@ export const singleEventQuery = groq`
 `
 
 export const pastEventsQuery = groq`
-  *[_type == "event" && date < $startOfDay] | order(date desc) {
+  *[_type == "event" && date < $startOfDay && lower(title) != "test" && !(lower(title) match "test *")] | order(date desc) {
     eventId,
     title,
     slug,

@@ -173,6 +173,20 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
 
+    const validEvents = (events || []).filter((event) => {
+        const title = (event.title || "").toLowerCase().trim()
+        const slug = (event.slug?.current || "").toLowerCase().trim()
+        return !(
+            title === "test" ||
+            title === "test event" ||
+            title === "test carousel" ||
+            title.startsWith("test ") ||
+            title.endsWith(" test") ||
+            slug === "test" ||
+            slug.startsWith("test-")
+        )
+    })
+
     const updateArrowVisibility = () => {
         if (!scrollRef.current) return;
         const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -184,7 +198,7 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
         updateArrowVisibility();
         window.addEventListener("resize", updateArrowVisibility);
         return () => window.removeEventListener("resize", updateArrowVisibility);
-    }, [events]);
+    }, [validEvents]);
 
     const scroll = (direction: "left" | "right") => {
         if (!scrollRef.current) return;
@@ -195,7 +209,7 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
         });
     };
 
-    if (!events || events.length === 0) return null;
+    if (!validEvents || validEvents.length === 0) return null;
 
     return (
         <div className="relative group/carousel -mx-4 px-4 md:mx-0 md:px-0">
@@ -239,7 +253,7 @@ export function EventCarousel({ events, isPastEvent }: { events: Event[]; isPast
                 variants={containerVariants}
                 className="flex flex-col md:flex-row gap-6 md:gap-8 md:overflow-x-auto md:snap-x md:snap-mandatory pb-12 pt-4 hide-scrollbar w-full max-w-7xl mx-auto"
             >
-                {events.map((event) => (
+                {validEvents.map((event) => (
                     <EventCard key={event.slug.current} event={event} isPastEvent={isPastEvent} />
                 ))}
             </motion.div>
