@@ -36,11 +36,11 @@ const components: PortableTextComponents = {
         h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-8 mb-4">{children}</h2>,
         h3: ({ children }: any) => <h3 className="text-xl font-bold mt-6 mb-3">{children}</h3>,
         blockquote: ({ children }: any) => (
-            <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-6">
+            <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4">
                 {children}
             </blockquote>
         ),
-        normal: ({ children }: any) => <p className="leading-relaxed mb-6 text-lg">{children}</p>,
+        normal: ({ children }: any) => <p className="leading-relaxed mb-3 text-lg">{children}</p>,
     },
     marks: {
         link: ({ children, value }: any) => {

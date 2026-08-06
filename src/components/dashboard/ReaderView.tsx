@@ -254,7 +254,7 @@ export function ReaderView({
                     </div>
 
                     {/* Markdown Body */}
-                    <div className="space-y-6 text-left w-full">
+                    <div className="space-y-3 text-left w-full">
                         {bodyBlocks.map((block: any, idx: number) => {
                             const isHeader = block._type === "block" && (block.style === "h1" || block.style === "h2" || block.style === "h3")
                             const paragraphKey = block._key || `p-${idx}`
