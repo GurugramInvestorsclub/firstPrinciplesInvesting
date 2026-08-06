@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Eye, EyeOff, Bookmark, Highlighter, MessageSquare, Lock } from "lucide-react"
+import { ArrowLeft, Bookmark, Highlighter, MessageSquare, Lock } from "lucide-react"
 import { RichText } from "../sanity/RichText"
 import { CopyProtection } from "../insights/CopyProtection"
-
 
 interface ReaderViewProps {
     slug: string
@@ -70,12 +69,10 @@ export function ReaderView({
     onNavigate
 }: ReaderViewProps) {
     const report = posts.find(r => r.slug?.current === slug)
-    const [distractionFree, setDistractionFree] = useState(false)
     const [fontSize, setFontSize] = useState<"sm" | "base" | "lg">("base")
     const [savedNotes, setSavedNotes] = useState<SavedNote[]>([])
     const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
     const [noteInput, setNoteInput] = useState("")
-    const [showExportSuccess, setShowExportSuccess] = useState(false)
 
     if (!report) {
         return (
@@ -159,19 +156,6 @@ export function ReaderView({
         setNoteInput("")
     }
 
-    const handleExport = () => {
-        if (shouldLockContent) return
-        const text = savedNotes
-            .filter(n => n.note && n.note.trim().length > 0)
-            .map(n => `[NOTE ON PARAGRAPH ${n.paragraphIdx + 1}]: ${n.note}`)
-            .join("\n\n")
-        
-        navigator.clipboard.writeText(`My Notes for: ${report.title}\n\n${text}`)
-        setShowExportSuccess(true)
-        setTimeout(() => setShowExportSuccess(false), 2000)
-    }
-
-
     // Keyboard Shortcuts
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -191,7 +175,6 @@ export function ReaderView({
         <div className="space-y-8 max-w-5xl mx-auto font-sans relative">
             <CopyProtection />
 
-            
             {/* Top Toolbar */}
             <div className="flex items-center justify-between border-b border-white/5 pb-4 select-none">
                 <button
@@ -230,60 +213,11 @@ export function ReaderView({
                             <span>{isBookmarked ? "Saved" : "Save"}</span>
                         </button>
                     )}
-
-                    {/* Focus Toggle */}
-                    <button
-                        onClick={() => setDistractionFree(!distractionFree)}
-                        className="p-2 rounded-xl border border-white/5 bg-[#1E1E1E] hover:border-gold/30 hover:bg-white/10 text-neutral-400 hover:text-text-primary transition-colors flex items-center gap-1.5 cursor-pointer"
-                    >
-                        {distractionFree ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                        <span>{distractionFree ? "Normal Mode" : "Focus Mode"}</span>
-                    </button>
                 </div>
             </div>
 
-            {/* Reading Grid */}
-            <div className="grid lg:grid-cols-12 gap-12 items-start">
-                
-                {/* Left Side: Sticky TOC (3 columns) - Hidden in Distraction Free Mode */}
-                {!distractionFree && (
-                    <div className="lg:col-span-3 sticky top-24 space-y-6 hidden lg:block text-left select-none font-mono">
-                        <div className="border border-white/5 bg-black/10 rounded-2xl p-6 space-y-4">
-                            <span className="text-[10px] text-neutral-500 uppercase tracking-widest block font-bold border-b border-white/5 pb-2">
-                                Navigation
-                            </span>
-                            <p className="text-neutral-500 text-[11px] leading-relaxed">
-                                {shouldLockContent 
-                                    ? "This preview covers introductory sectors. Subscribe to unlock chapters." 
-                                    : "Use the scrollbar to navigate the deep dive. Section highlights and figures are displayed inline."}
-                            </p>
-                        </div>
-
-                        {!shouldLockContent && (
-                            <div className="border border-white/5 bg-black/10 rounded-2xl p-6 space-y-4 text-xs font-mono">
-                                <span className="text-[10px] text-neutral-500 uppercase tracking-widest block font-bold border-b border-white/5 pb-2">
-                                    Study Tools
-                                </span>
-                                <p className="text-neutral-500 leading-relaxed font-light text-[11px]">
-                                    Double-click or click comment icons next to paragraphs to highlight sections and add notes.
-                                </p>
-                                <button
-                                    onClick={handleExport}
-                                    className="w-full py-2 bg-white/5 hover:bg-gold/10 hover:border-gold/30 hover:text-gold text-text-primary rounded-xl border border-white/5 text-[10px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                                >
-                                    {showExportSuccess ? (
-                                        <span>Notes Copied!</span>
-                                    ) : (
-                                        <span>Copy Study Memo</span>
-                                    )}
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Right Side: Article Body (9 columns or 12 if focus mode) */}
-                <div className={`${distractionFree ? "lg:col-span-12" : "lg:col-span-9"} space-y-12`}>
+            {/* Main Article Body */}
+            <div className="space-y-12">
                     
                     {/* Title Metadata */}
                     <div className="space-y-4 text-left border-b border-white/5 pb-8">
@@ -439,8 +373,6 @@ export function ReaderView({
                     )}
 
                 </div>
-
-            </div>
 
         </div>
     )
