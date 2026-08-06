@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Bookmark, Highlighter, MessageSquare, Lock } from "lucide-react"
+import { ArrowLeft, Bookmark, Highlighter, MessageSquare, Lock, Trash2 } from "lucide-react"
 import { RichText } from "../sanity/RichText"
 import { CopyProtection } from "../insights/CopyProtection"
 
@@ -156,6 +156,25 @@ export function ReaderView({
         setNoteInput("")
     }
 
+    const deleteNoteText = (idx: number) => {
+        const existing = savedNotes.find(n => n.paragraphIdx === idx)
+        let updated: SavedNote[] = []
+        if (existing) {
+            if (existing.isHighlighted) {
+                updated = savedNotes.map(n => 
+                    n.paragraphIdx === idx ? { ...n, note: "" } : n
+                )
+            } else {
+                updated = savedNotes.filter(n => n.paragraphIdx !== idx)
+            }
+        }
+        saveNotesToLocal(updated)
+        if (activeNoteIdx === idx) {
+            setActiveNoteIdx(null)
+            setNoteInput("")
+        }
+    }
+
     // Keyboard Shortcuts
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -290,11 +309,18 @@ export function ReaderView({
 
                                         {/* Show inline note if exists */}
                                         {hasNote && !shouldLockContent && (
-                                            <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-xs text-neutral-300 font-mono flex items-start gap-2 w-full">
-                                                <div>
+                                            <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-xs text-neutral-300 font-mono flex items-start justify-between gap-2 w-full group/note">
+                                                <div className="flex-1 min-w-0">
                                                     <span className="text-neutral-500 font-bold">MY RESEARCH NOTE:</span>
                                                     <p className="mt-1 text-text-primary font-sans font-light">{noteObj.note}</p>
                                                 </div>
+                                                <button
+                                                    onClick={() => deleteNoteText(idx)}
+                                                    className="p-1.5 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0"
+                                                    title="Delete note"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
                                             </div>
                                         )}
 
@@ -308,19 +334,30 @@ export function ReaderView({
                                                     className="w-full bg-bg-deep border border-[#2E2E2E] rounded-lg p-2 text-xs text-text-primary outline-none focus:border-gold/40 h-20"
                                                     autoFocus
                                                 />
-                                                <div className="flex justify-end gap-2 text-[10px] font-mono">
-                                                    <button 
-                                                        onClick={() => setActiveNoteIdx(null)}
-                                                        className="px-3 py-1.5 bg-black/20 rounded-md text-neutral-400 hover:text-text-primary"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => saveNoteText(idx)}
-                                                        className="px-3 py-1.5 bg-gold text-bg-deep font-bold rounded-md"
-                                                    >
-                                                        Save Note
-                                                    </button>
+                                                <div className="flex items-center justify-between text-[10px] font-mono">
+                                                    {hasNote ? (
+                                                        <button 
+                                                            onClick={() => deleteNoteText(idx)}
+                                                            className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-md font-medium transition-colors flex items-center gap-1 cursor-pointer"
+                                                        >
+                                                            <Trash2 className="w-3 h-3" />
+                                                            <span>Delete Note</span>
+                                                        </button>
+                                                    ) : <div />}
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => setActiveNoteIdx(null)}
+                                                            className="px-3 py-1.5 bg-black/20 rounded-md text-neutral-400 hover:text-text-primary cursor-pointer"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => saveNoteText(idx)}
+                                                            className="px-3 py-1.5 bg-gold text-bg-deep font-bold rounded-md cursor-pointer"
+                                                        >
+                                                            Save Note
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
