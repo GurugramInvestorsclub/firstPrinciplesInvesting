@@ -235,7 +235,7 @@ export function ReaderView({
                     </div>
 
                     {/* Markdown Body */}
-                    <div className="space-y-6 text-left max-w-[65ch] mx-auto">
+                    <div className="space-y-6 text-left w-full">
                         {bodyBlocks.map((block: any, idx: number) => {
                             const isHeader = block._type === "block" && (block.style === "h1" || block.style === "h2" || block.style === "h3")
                             const paragraphKey = block._key || `p-${idx}`
@@ -290,7 +290,7 @@ export function ReaderView({
 
                                         {/* Show inline note if exists */}
                                         {hasNote && !shouldLockContent && (
-                                            <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-xs text-neutral-300 font-mono flex items-start gap-2 max-w-xl">
+                                            <div className="p-3 bg-white/5 border border-white/5 rounded-xl text-xs text-neutral-300 font-mono flex items-start gap-2 w-full">
                                                 <div>
                                                     <span className="text-neutral-500 font-bold">MY RESEARCH NOTE:</span>
                                                     <p className="mt-1 text-text-primary font-sans font-light">{noteObj.note}</p>
@@ -300,7 +300,7 @@ export function ReaderView({
 
                                         {/* Note editing box */}
                                         {activeNoteIdx === idx && !shouldLockContent && (
-                                            <div className="p-4 rounded-xl border border-gold/30 bg-[#2E2E2E] space-y-3 max-w-lg mt-2 relative z-10">
+                                            <div className="p-4 rounded-xl border border-gold/30 bg-[#2E2E2E] space-y-3 w-full mt-2 relative z-10">
                                                 <textarea
                                                     value={noteInput}
                                                     onChange={(e) => setNoteInput(e.target.value)}
@@ -348,7 +348,7 @@ export function ReaderView({
                                 <div className="pt-2">
                                     <a
                                         href="/membership"
-                                        className="inline-flex items-center justify-center px-6 py-3 bg-gold hover:bg-[#E0A800] text-bg-deep font-bold rounded-full text-xs transition-transform active:scale-[0.98]"
+                                        className="inline-flex items-center justify-center px-6 py-3 bg-gold hover:bg-[#E0A800] text-[#0b0b0c] font-bold rounded-full text-xs transition-transform active:scale-[0.98]"
                                     >
                                         {report.paywallCtaText ?? "Upgrade to Subscriber Access"}
                                     </a>
@@ -360,12 +360,12 @@ export function ReaderView({
                     {/* Disclaimer Footnote */}
                     {!shouldLockContent && (
                         report.disclaimer ? (
-                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left max-w-[65ch] mx-auto">
+                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full">
                                 <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
                                 <RichText value={report.disclaimer} />
                             </div>
                         ) : (
-                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left max-w-[65ch] mx-auto">
+                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full">
                                 <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
                                 First Principles Investing is an independent research house. We do not provide personalized stock recommendations or advisory calls. This research is for educational and learning purposes. All investments are subject to capital risk.
                             </div>
