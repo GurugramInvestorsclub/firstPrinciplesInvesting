@@ -81,16 +81,25 @@ export default async function InsightsPage({
 
                                 {/* CTA Area */}
                                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                                    <Link 
-                                        href="#membership" 
-                                        className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
-                                    >
-                                        Subscribe for ₹23/day
-                                    </Link>
+                                    {hasSubscriptionAccess ? (
+                                        <Link 
+                                            href="/insights/members-only" 
+                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+                                        >
+                                            Go to Members Page
+                                        </Link>
+                                    ) : (
+                                        <Link 
+                                            href="#membership" 
+                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+                                        >
+                                            Subscribe for ₹23/day
+                                        </Link>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium pt-2">
                                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-                                    50+ members have joined in the last month
+                                    {hasSubscriptionAccess ? "Active Membership Status" : "50+ members have joined in the last month"}
                                 </div>
                             </div>
 
@@ -342,12 +351,21 @@ export default async function InsightsPage({
                                             <span className="text-gold font-bold">Research focus:</span>
                                             <p className="uppercase tracking-wider mt-1 text-white/95">First Principles Deep-Dives</p>
                                         </div>
-                                        <Link 
-                                            href="#membership" 
-                                            className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center"
-                                        >
-                                            Subscribe now for just ₹23 per day
-                                        </Link>
+                                        {hasSubscriptionAccess ? (
+                                            <Link 
+                                                href="/insights/members-only" 
+                                                className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center"
+                                            >
+                                                Go to Members Page
+                                            </Link>
+                                        ) : (
+                                            <Link 
+                                                href="#membership" 
+                                                className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center"
+                                            >
+                                                Subscribe now for just ₹23 per day
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             </div>
