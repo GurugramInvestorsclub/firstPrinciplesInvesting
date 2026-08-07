@@ -2460,5 +2460,105 @@ export async function updateSubscriptionDetails(
   return serializeMembership(updated)
 }
 
+export interface ActiveSubscriberInfo {
+  id: string
+  email: string
+  name: string | null
+}
+
+export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSubscriberInfo[]> {
+  const subscriptions = await prisma.insightsSubscription.findMany({
+    where: {
+      status: {
+        in: [
+          InsightsSubscriptionStatus.ACTIVE,
+          InsightsSubscriptionStatus.CANCEL_REQUESTED,
+          InsightsSubscriptionStatus.AUTHENTICATED,
+          InsightsSubscriptionStatus.CREATED,
+          InsightsSubscriptionStatus.CANCELLED,
+        ],
+      },
+      user: {
+        email: {
+          not: null,
+        },
+      },
+    },
+    select: {
+      userId: true,
+      planKey: true,
+      status: true,
+      currentStartAt: true,
+      currentEndAt: true,
+      paidCount: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      },
+      charges: {
+        where: {
+          status: InsightsSubscriptionChargeStatus.CAPTURED,
+        },
+        select: {
+          id: true,
+          status: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  })
+
+  const now = Date.now()
+  const eligibleUsersMap = new Map<string, ActiveSubscriberInfo>()
+
+  for (const subscription of subscriptions) {
+    if (!subscription.user?.email) continue
+    if (eligibleUsersMap.has(subscription.user.id)) continue
+
+    let hasAccess = false
+
+    if (subscription.status === InsightsSubscriptionStatus.CREATED) {
+      if (subscription.charges.length > 0) {
+        hasAccess = true
+      }
+    } else if (
+      subscription.status === InsightsSubscriptionStatus.ACTIVE ||
+      subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
+      subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+      subscription.status === InsightsSubscriptionStatus.CANCELLED
+    ) {
+      if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
+        hasAccess = true
+      } else {
+        const hasCapturedCharge =
+          subscription.charges.length > 0 || (subscription.paidCount ?? 0) > 0
+
+        if (subscription.status !== InsightsSubscriptionStatus.CANCELLED || hasCapturedCharge) {
+          const effectiveEndAt = getEffectiveEndAt(subscription)
+          if (!effectiveEndAt || effectiveEndAt.getTime() > now) {
+            hasAccess = true
+          }
+        }
+      }
+    }
+
+    if (hasAccess) {
+      eligibleUsersMap.set(subscription.user.id, {
+        id: subscription.user.id,
+        email: subscription.user.email,
+        name: subscription.user.name,
+      })
+    }
+  }
+
+  return Array.from(eligibleUsersMap.values())
+}
+
+
 
 

@@ -551,3 +551,229 @@ export async function sendManualGrantConfirmationEmail(
   }
 }
 
+export interface SendMembersPostEmailParams {
+  postUrl: string
+  title: string
+  excerpt?: string | null
+  mainImageUrl?: string | null
+  recipients: Array<{ email: string; name?: string | null }>
+  isTest?: boolean
+  customNote?: string | null
+}
+
+export interface SendMembersPostEmailResult {
+  successCount: number
+  failedCount: number
+  errors: string[]
+}
+
+/**
+ * Sends a members-only research memo email broadcast or test email to subscribers
+ */
+export async function sendMembersOnlyPostEmailNotification(
+  params: SendMembersPostEmailParams
+): Promise<SendMembersPostEmailResult> {
+  const brevoApiKey = process.env.BREVO_API_KEY
+  const resendApiKey = process.env.RESEND_API_KEY
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesinvesting.in"
+
+  if (!brevoApiKey && !resendApiKey) {
+    console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured.")
+    return {
+      successCount: 0,
+      failedCount: params.recipients.length,
+      errors: ["Email service credentials not configured"],
+    }
+  }
+
+  const subjectPrefix = params.isTest ? "[TEST PREVIEW] " : ""
+  const subject = `${subjectPrefix}New Members Research Memo: ${params.title}`
+
+  const badgeText = params.isTest
+    ? "🧪 TEST PREVIEW — MEMBERS-ONLY RESEARCH"
+    : "🔒 MEMBERS-ONLY RESEARCH MEMO"
+
+  const excerptHtml = params.excerpt
+    ? `<div style="padding: 16px 20px; background-color: #17171C; border-left: 3px solid #FFC72C; border-radius: 6px; margin-bottom: 24px;">
+        <p style="color: #D4D4D8; font-size: 15px; line-height: 1.6; margin: 0; font-style: italic;">
+          &ldquo;${params.excerpt.trim()}&rdquo;
+        </p>
+      </div>`
+    : ""
+
+  const customNoteHtml = params.customNote
+    ? `<div style="padding: 16px 20px; background-color: rgba(255, 199, 44, 0.08); border: 1px solid rgba(255, 199, 44, 0.25); border-radius: 8px; margin-bottom: 24px;">
+        <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px;">NOTE FROM EDITOR</span>
+        <p style="color: #E4E4E7; font-size: 14px; line-height: 1.5; margin: 0;">
+          ${params.customNote.trim()}
+        </p>
+      </div>`
+    : ""
+
+  const imageHtml = params.mainImageUrl
+    ? `<div style="margin-bottom: 24px; text-align: center;">
+        <img src="${params.mainImageUrl}" alt="${params.title}" style="max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #27272A; display: block; margin: 0 auto;" />
+      </div>`
+    : ""
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${params.title}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <!-- Main Email Container -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #111115; border: 1px solid #27272A; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+          
+          <!-- Header Bar -->
+          <tr>
+            <td style="padding: 28px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+              <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                FIRST PRINCIPLES INVESTING
+              </span>
+            </td>
+          </tr>
+
+          <!-- Hero Content Section -->
+          <tr>
+            <td style="padding: 32px 32px 24px 32px; text-align: left;">
+              <div style="display: inline-block; padding: 6px 14px; background-color: rgba(255, 199, 44, 0.12); border: 1px solid rgba(255, 199, 44, 0.3); border-radius: 20px; color: #FFC72C; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 20px;">
+                ${badgeText}
+              </div>
+              
+              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3; letter-spacing: -0.01em;">
+                ${params.title}
+              </h1>
+
+              ${imageHtml}
+              ${customNoteHtml}
+              ${excerptHtml}
+
+              <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; margin: 0 0 28px 0;">
+                A new exclusive fundamental research memo has been published in the Members Portal.
+              </p>
+
+              <!-- CTA Button -->
+              <table border="0" cellspacing="0" cellpadding="0" style="margin: 8px 0 16px 0;">
+                <tr>
+                  <td align="center" style="border-radius: 10px; background-color: #FFC72C;">
+                    <a href="${params.postUrl}" target="_blank" style="font-size: 15px; font-weight: 700; color: #0A0A0C; text-decoration: none; padding: 14px 28px; border-radius: 10px; border: 1px solid #FFC72C; display: inline-block;">
+                      Read Full Research Memo &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer Bar -->
+          <tr>
+            <td style="padding: 24px 32px; background-color: #0E0E12; border-top: 1px solid #1E1E24; text-align: left;">
+              <p style="color: #71717A; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+                You are receiving this notification as an active subscriber of First Principles Investing.
+              </p>
+              <p style="color: #52525B; font-size: 11px; margin: 0;">
+                First Principles Investing &bull; Members Only Research
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+
+  let successCount = 0
+  let failedCount = 0
+  const errors: string[] = []
+
+  // Chunk recipients in batches of 10
+  const chunkSize = 10
+  for (let i = 0; i < params.recipients.length; i += chunkSize) {
+    const chunk = params.recipients.slice(i, i + chunkSize)
+    const promises = chunk.map(async (recipient) => {
+      try {
+        if (brevoApiKey) {
+          const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: {
+              accept: "application/json",
+              "api-key": brevoApiKey,
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              sender: {
+                name: "First Principles Investing",
+                email: emailFrom,
+              },
+              to: [
+                {
+                  email: recipient.email,
+                  name: recipient.name || recipient.email,
+                },
+              ],
+              subject,
+              htmlContent,
+            }),
+          })
+
+          if (response.ok) {
+            return true
+          }
+          const errText = await response.text()
+          errors.push(`Brevo error for ${recipient.email}: ${response.status} ${errText}`)
+        } else if (resendApiKey) {
+          const response = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${resendApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: emailFrom,
+              to: [recipient.email],
+              subject,
+              html: htmlContent,
+            }),
+          })
+
+          if (response.ok) {
+            return true
+          }
+          const errText = await response.text()
+          errors.push(`Resend error for ${recipient.email}: ${response.status} ${errText}`)
+        }
+        return false
+      } catch (err: any) {
+        errors.push(`Failed for ${recipient.email}: ${err?.message || String(err)}`)
+        return false
+      }
+    })
+
+    const results = await Promise.all(promises)
+    for (const res of results) {
+      if (res) {
+        successCount++
+      } else {
+        failedCount++
+      }
+    }
+  }
+
+  return {
+    successCount,
+    failedCount,
+    errors,
+  }
+}
+
+
