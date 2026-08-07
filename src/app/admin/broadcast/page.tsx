@@ -421,7 +421,12 @@ export default function AdminBroadcastPage() {
             <div className="bg-[#111115] border border-white/10 rounded-xl overflow-hidden shadow-xl">
               
               {/* Header */}
-              <div className="px-6 py-4 border-b border-white/10 text-left">
+              <div className="px-6 py-4 border-b border-white/10 text-left flex items-center gap-3">
+                <img
+                  src="/logo.png"
+                  alt="First Principles Investing Logo"
+                  className="w-7 h-7 object-contain rounded"
+                />
                 <span className="text-xs font-bold text-gold tracking-widest uppercase">
                   FIRST PRINCIPLES INVESTING
                 </span>

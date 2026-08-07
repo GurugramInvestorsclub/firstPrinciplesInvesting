@@ -616,6 +616,9 @@ export async function sendMembersOnlyPostEmailNotification(
       </div>`
     : ""
 
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://firstprinciplesinvesting.in").replace(/\/$/, "")
+  const logoUrl = `${siteUrl}/logo.png`
+
   const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -633,10 +636,19 @@ export async function sendMembersOnlyPostEmailNotification(
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 28px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
-              <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
-                FIRST PRINCIPLES INVESTING
-              </span>
+            <td style="padding: 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="vertical-align: middle; padding-right: 12px;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                      FIRST PRINCIPLES INVESTING
+                    </span>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
