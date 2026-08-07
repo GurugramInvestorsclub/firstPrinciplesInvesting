@@ -438,6 +438,10 @@ export default function AdminBroadcastPage() {
                   🔒 MEMBERS-ONLY RESEARCH MEMO
                 </div>
 
+                <p className="text-sm font-semibold text-white/90">
+                  Dear investor, we just released a new deep-dive !
+                </p>
+
                 <h3 className="text-xl font-bold text-white leading-snug">
                   {effectiveTitle}
                 </h3>
@@ -464,10 +468,6 @@ export default function AdminBroadcastPage() {
                     &ldquo;{effectiveExcerpt}&rdquo;
                   </div>
                 )}
-
-                <p className="text-xs text-white/60 leading-relaxed">
-                  A new exclusive fundamental research memo has been published in the Members Portal.
-                </p>
 
                 {/* CTA Button */}
                 <div className="pt-2">

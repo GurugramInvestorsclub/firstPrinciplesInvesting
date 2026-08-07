@@ -659,6 +659,10 @@ export async function sendMembersOnlyPostEmailNotification(
                 ${badgeText}
               </div>
               
+              <p style="color: #E4E4E7; font-size: 16px; font-weight: 600; line-height: 1.5; margin: 0 0 16px 0;">
+                Dear investor, we just released a new deep-dive !
+              </p>
+
               <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3; letter-spacing: -0.01em;">
                 ${params.title}
               </h1>
@@ -666,10 +670,6 @@ export async function sendMembersOnlyPostEmailNotification(
               ${imageHtml}
               ${customNoteHtml}
               ${excerptHtml}
-
-              <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; margin: 0 0 28px 0;">
-                A new exclusive fundamental research memo has been published in the Members Portal.
-              </p>
 
               <!-- CTA Button -->
               <table border="0" cellspacing="0" cellpadding="0" style="margin: 8px 0 16px 0;">
