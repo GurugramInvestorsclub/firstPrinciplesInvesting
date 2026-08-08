@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       excerpt: customExcerpt,
       customNote,
       isTestMode = false,
-      testEmail = "support@firstprinciplesinvesting.in",
+      testEmail = "support@firstprinciplesresearch.in",
     } = body
 
     if (!postUrl || typeof postUrl !== "string") {
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
     let recipients: Array<{ email: string; name?: string | null }> = []
 
     if (isTestMode) {
-      const recipientEmail = (testEmail || "support@firstprinciplesinvesting.in").trim()
+      const recipientEmail = (testEmail || "support@firstprinciplesresearch.in").trim()
       recipients = [{ email: recipientEmail, name: "Admin Test" }]
     } else {
       const activeSubscribers = await getEligibleSubscribersWithActiveTenure()

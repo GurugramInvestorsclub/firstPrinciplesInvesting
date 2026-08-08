@@ -38,7 +38,7 @@ function formatEventDate(dateString: string): string {
  */
 export async function triggerRegistrationEmail(params: SendEmailParams): Promise<boolean> {
   const brevoApiKey = process.env.BREVO_API_KEY
-  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesinvesting.in"
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
 
   if (!brevoApiKey) {
     console.error("BREVO_API_KEY is not configured. Email skipped.")
@@ -261,7 +261,7 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
             <td style="padding: 0 32px 24px 32px;">
               <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.06);">
                 <p style="color: #A1A1AA; font-size: 14px; margin: 0; line-height: 1.5;">
-                  <strong style="color: #FFFFFF;">Questions?</strong> Simply reply to this email or contact us at <a href="mailto:support@firstprinciplesinvesting.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesinvesting.in</a>
+                  <strong style="color: #FFFFFF;">Questions?</strong> Simply reply to this email or contact us at <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>
                 </p>
               </div>
             </td>
@@ -348,7 +348,7 @@ export async function sendManualGrantConfirmationEmail(
 ): Promise<boolean> {
   const brevoApiKey = process.env.BREVO_API_KEY
   const resendApiKey = process.env.RESEND_API_KEY
-  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesinvesting.in"
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
   const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
 
   if (!brevoApiKey && !resendApiKey) {
@@ -467,7 +467,7 @@ export async function sendManualGrantConfirmationEmail(
               </div>
 
               <p style="color: #71717A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
-                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesinvesting.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesinvesting.in</a>.
+                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>.
               </p>
             </td>
           </tr>
@@ -575,7 +575,7 @@ export async function sendMembersOnlyPostEmailNotification(
 ): Promise<SendMembersPostEmailResult> {
   const brevoApiKey = process.env.BREVO_API_KEY
   const resendApiKey = process.env.RESEND_API_KEY
-  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesinvesting.in"
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
 
   if (!brevoApiKey && !resendApiKey) {
     console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured.")

@@ -28,7 +28,7 @@ export default function AdminBroadcastPage() {
   const [title, setTitle] = useState("")
   const [excerpt, setExcerpt] = useState("")
   const [customNote, setCustomNote] = useState("")
-  const [testEmail, setTestEmail] = useState("support@firstprinciplesinvesting.in")
+  const [testEmail, setTestEmail] = useState("support@firstprinciplesresearch.in")
 
   const [activeSubscriberCount, setActiveSubscriberCount] = useState<number | null>(null)
   const [previewPost, setPreviewPost] = useState<PreviewPost | null>(null)
@@ -349,7 +349,7 @@ export default function AdminBroadcastPage() {
                 type="email"
                 value={testEmail}
                 onChange={(e) => setTestEmail(e.target.value)}
-                placeholder="support@firstprinciplesinvesting.in"
+                placeholder="support@firstprinciplesresearch.in"
                 className="flex-1 px-4 py-2.5 rounded-lg bg-black/60 border border-amber-500/30 text-white text-sm focus:outline-none focus:border-amber-400"
               />
               <button
