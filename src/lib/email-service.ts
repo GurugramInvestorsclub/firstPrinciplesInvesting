@@ -612,7 +612,7 @@ export async function sendMembersOnlyPostEmailNotification(
 
   const imageHtml = params.mainImageUrl
     ? `<div style="margin-bottom: 24px; text-align: center;">
-        <img src="${params.mainImageUrl}" alt="${params.title}" style="max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #27272A; display: block; margin: 0 auto;" />
+        <img src="${params.mainImageUrl}" alt="${params.title}" width="536" style="width: 100%; max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #27272A; display: block; margin: 0 auto;" />
       </div>`
     : ""
 

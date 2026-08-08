@@ -38,7 +38,7 @@ export async function GET(request: Request) {
         let mainImageUrl: string | null = null
         if (sanityPost.mainImage) {
           try {
-            mainImageUrl = urlForImage(sanityPost.mainImage).width(1200).url()
+            mainImageUrl = urlForImage(sanityPost.mainImage).width(1200).format("jpg").url()
           } catch {
             mainImageUrl = null
           }
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
           }
           if (sanityPost.mainImage) {
             try {
-              mainImageUrl = urlForImage(sanityPost.mainImage).width(1200).url()
+              mainImageUrl = urlForImage(sanityPost.mainImage).width(1200).format("jpg").url()
             } catch {
               mainImageUrl = null
             }
