@@ -396,7 +396,7 @@ export function ReaderView({
 
                     {/* Disclaimer Footnote */}
                     {!shouldLockContent && (
-                        report.disclaimer ? (
+                        (Array.isArray(report.disclaimer) ? report.disclaimer.length > 0 : Boolean(report.disclaimer)) ? (
                             <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full">
                                 <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
                                 <RichText value={report.disclaimer} />

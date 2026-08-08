@@ -35,7 +35,7 @@ export default async function DashboardPage() {
     // Fetch user membership status and Sanity contents in parallel
     const [insightsMembership, sanityPosts, upcomingEvents, pastEvents, recordings, notes] = await Promise.all([
         getCurrentInsightsMembershipForUser(userId),
-        client.fetch<any[]>(dashboardPostsQuery, {}, { next: { revalidate: 60 } }),
+        client.fetch<any[]>(dashboardPostsQuery, {}, { cache: "no-store" }),
         client.fetch<any[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(pastEventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(recordingsQuery, { search: null }, { next: { revalidate: 60 } }),
