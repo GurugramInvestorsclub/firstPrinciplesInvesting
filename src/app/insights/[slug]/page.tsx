@@ -83,7 +83,7 @@ export default async function InsightPage({ params }: Props) {
 
                         {/* Disclaimer Section */}
                         <div className="my-8 p-6 rounded-xl border border-gold/50 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_30px_rgba(245,184,0,0.15)]">
-                            {Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer) ? (
+                            {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
                                 <div className="prose-sm dark:prose-invert text-text-primary space-y-4">
                                     <RichText value={post.disclaimer} />
                                 </div>
