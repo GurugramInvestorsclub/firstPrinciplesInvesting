@@ -1,12 +1,13 @@
 import { Question } from "@prisma/client";
 
 export async function sendDailyQuestionReport(questions: Question[]) {
+    const brevoApiKey = process.env.BREVO_API_KEY;
     const resendApiKey = process.env.RESEND_API_KEY;
-    const emailFrom = process.env.EMAIL_FROM;
+    const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in";
     const recipient = "rahul@firstprinciplesresearch.in";
 
-    if (!resendApiKey || !emailFrom) {
-        console.error("Email configuration missing: RESEND_API_KEY or EMAIL_FROM");
+    if (!brevoApiKey && !resendApiKey) {
+        console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured.");
         return false;
     }
 
@@ -28,6 +29,7 @@ export async function sendDailyQuestionReport(questions: Question[]) {
         </tr>
     `).join("");
 
+    const subject = `Daily Question Report: ${questions.length} new questions`;
     const html = `
         <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333;">
             <h2 style="color: #000; border-bottom: 2px solid #FFC72C; padding-bottom: 10px;">Daily Question Report</h2>
@@ -53,30 +55,67 @@ export async function sendDailyQuestionReport(questions: Question[]) {
         </div>
     `;
 
-    try {
-        const response = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${resendApiKey}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                from: emailFrom,
-                to: [recipient],
-                subject: `Daily Question Report: ${questions.length} new questions`,
-                html: html,
-            }),
-        });
+    if (brevoApiKey) {
+        try {
+            const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "api-key": brevoApiKey,
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: "First Principles Investing",
+                        email: emailFrom,
+                    },
+                    to: [
+                        {
+                            email: recipient,
+                        },
+                    ],
+                    subject,
+                    htmlContent: html,
+                }),
+            });
 
-        if (!response.ok) {
+            if (response.ok) {
+                return true;
+            }
+
+            const error = await response.text();
+            console.error(`Brevo API error (${response.status}):`, error);
+        } catch (err) {
+            console.error("Failed to send daily question report via Brevo:", err);
+        }
+    }
+
+    if (resendApiKey) {
+        try {
+            const response = await fetch("https://api.resend.com/emails", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${resendApiKey}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    from: emailFrom,
+                    to: [recipient],
+                    subject,
+                    html: html,
+                }),
+            });
+
+            if (response.ok) {
+                return true;
+            }
+
             const error = await response.json();
             console.error("Resend API error:", error);
-            return false;
+        } catch (err) {
+            console.error("Failed to send daily question report via Resend:", err);
         }
-
-        return true;
-    } catch (err) {
-        console.error("Failed to send daily question report:", err);
-        return false;
     }
+
+    return false;
 }

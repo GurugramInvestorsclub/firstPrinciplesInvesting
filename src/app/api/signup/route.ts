@@ -16,7 +16,7 @@ function acceptedSignupResponse() {
 }
 
 function isVerificationEmailConfigured(): boolean {
-    return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM)
+    return Boolean((process.env.BREVO_API_KEY || process.env.RESEND_API_KEY) && process.env.EMAIL_FROM)
 }
 
 export async function POST(req: Request) {

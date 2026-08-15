@@ -100,30 +100,76 @@ export async function sendSignupVerificationEmail(params: {
   toEmail: string
   verificationUrl: string
 }): Promise<boolean> {
+  const brevoApiKey = process.env.BREVO_API_KEY
   const resendApiKey = process.env.RESEND_API_KEY
-  const emailFrom = process.env.EMAIL_FROM
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
 
-  if (!resendApiKey || !emailFrom) {
+  if (!brevoApiKey && !resendApiKey) {
     return false
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: emailFrom,
-      to: [params.toEmail],
-      subject: "Verify your email - First Principles Investing",
-      html: `
-        <p>Click the link below to verify your email and activate your account:</p>
-        <p><a href="${params.verificationUrl}">${params.verificationUrl}</a></p>
-        <p>This link expires in 24 hours.</p>
-      `,
-    }),
-  })
+  const subject = "Verify your email - First Principles Investing"
+  const htmlContent = `
+    <p>Click the link below to verify your email and activate your account:</p>
+    <p><a href="${params.verificationUrl}">${params.verificationUrl}</a></p>
+    <p>This link expires in 24 hours.</p>
+  `
 
-  return response.ok
+  if (brevoApiKey) {
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "api-key": brevoApiKey,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: {
+            name: "First Principles Investing",
+            email: emailFrom,
+          },
+          to: [
+            {
+              email: params.toEmail,
+            },
+          ],
+          subject,
+          htmlContent,
+        }),
+      })
+
+      if (response.ok) {
+        return true
+      }
+    } catch (err) {
+      console.error("Error sending verification email via Brevo:", err)
+    }
+  }
+
+  if (resendApiKey) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: emailFrom,
+          to: [params.toEmail],
+          subject,
+          html: htmlContent,
+        }),
+      })
+
+      if (response.ok) {
+        return true
+      }
+    } catch (err) {
+      console.error("Error sending verification email via Resend:", err)
+    }
+  }
+
+  return false
 }
