@@ -62,6 +62,7 @@ export default async function DashboardPage() {
             userEmail={session.user.email || ""}
             subscriptionStatus={subscriptionStatus}
             subscriptionEnd={subscriptionEnd}
+            cancelAtCycleEnd={insightsMembership?.cancelAtCycleEnd || false}
             onSignOut={handleSignOut}
             initialPosts={sanityPosts}
             initialUpcomingEvents={upcomingEvents}

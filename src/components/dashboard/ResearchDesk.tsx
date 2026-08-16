@@ -21,6 +21,7 @@ interface ResearchDeskProps {
     userEmail: string
     subscriptionStatus: string
     subscriptionEnd?: string
+    cancelAtCycleEnd?: boolean
     onSignOut: () => void
     initialPosts?: any[]
     initialUpcomingEvents?: any[]
@@ -35,6 +36,7 @@ export function ResearchDesk({
     userEmail, 
     subscriptionStatus, 
     subscriptionEnd, 
+    cancelAtCycleEnd = false,
     onSignOut,
     initialPosts = [],
     initialUpcomingEvents = [],
@@ -270,6 +272,8 @@ export function ResearchDesk({
                             userEmail={userEmail}
                             subscriptionStatus={subscriptionStatus}
                             subscriptionEnd={subscriptionEnd}
+                            cancelAtCycleEnd={cancelAtCycleEnd}
+                            hasSubscriptionAccess={hasSubscriptionAccess}
                             onSignOut={onSignOut}
                         />
                     )}
