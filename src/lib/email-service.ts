@@ -337,10 +337,11 @@ export interface SendManualGrantConfirmationEmailParams {
   utrNumber?: string | null
   amountPaid?: number | null
   isResend?: boolean
+  isRenewal?: boolean
 }
 
 /**
- * Sends a confirmation email to a user when their Insights membership is manually granted or resent by an admin.
+ * Sends a confirmation email to a user when their Insights membership is manually granted, renewed, or resent by an admin.
  * Supports Brevo SMTP API and Resend API.
  */
 export async function sendManualGrantConfirmationEmail(
@@ -352,7 +353,7 @@ export async function sendManualGrantConfirmationEmail(
   const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
 
   if (!brevoApiKey && !resendApiKey) {
-    console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured. Manual grant email skipped.")
+    console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured. Subscription email skipped.")
     return false
   }
 
@@ -379,17 +380,27 @@ export async function sendManualGrantConfirmationEmail(
     ? "Razorpay (Online Payment)"
     : (params.paymentMethod?.trim().toUpperCase() || "NEFT")
 
-  const subject = params.isResend
-    ? `Insights Membership Details & Access Confirmation`
-    : `Welcome to Insights Membership — Access Granted!`
+  const subject = params.isRenewal
+    ? `Insights Membership Renewed — Access Extended!`
+    : params.isResend
+      ? `Insights Membership Details & Access Confirmation`
+      : `Welcome to Insights Membership — Access Granted!`
 
-  const subHeader = params.isResend
-    ? `Here are your current Insights membership access details.`
-    : `Your access to premium research memos and archives is now active.`
+  const subHeader = params.isRenewal
+    ? `Your Insights membership has been renewed successfully.`
+    : params.isResend
+      ? `Here are your current Insights membership access details.`
+      : `Your access to premium research memos and archives is now active.`
 
-  const introText = params.isResend
-    ? `Below are your verified Insights membership and access details:`
-    : `We have verified your payment (${displayPaymentMethod}${cleanUtr ? ` — Ref: ${cleanUtr}` : ""}) and activated your Insights membership. Below are your access details:`
+  const introText = params.isRenewal
+    ? `We have processed your subscription renewal payment (${displayPaymentMethod}${cleanUtr ? ` — Ref: ${cleanUtr}` : ""}) and extended your Insights membership. Below are your updated access details:`
+    : params.isResend
+      ? `Below are your verified Insights membership and access details:`
+      : `We have verified your payment (${displayPaymentMethod}${cleanUtr ? ` — Ref: ${cleanUtr}` : ""}) and activated your Insights membership. Below are your access details:`
+
+  const heroHeading = params.isRenewal
+    ? `Insights Membership Renewed 🎉`
+    : `Insights Membership Details 🎉`
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -397,7 +408,7 @@ export async function sendManualGrantConfirmationEmail(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Insights Membership Details</title>
+  <title>${heroHeading}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
@@ -412,7 +423,7 @@ export async function sendManualGrantConfirmationEmail(
                 FIRST PRINCIPLES INVESTING
               </span>
               <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.5px;">
-                Insights Membership Details 🎉
+                ${heroHeading}
               </h1>
               <p style="color: #A1A1AA; font-size: 15px; margin: 0;">
                 ${subHeader}

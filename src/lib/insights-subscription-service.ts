@@ -871,6 +871,121 @@ async function fetchProviderPayment(
   }
 }
 
+async function fetchLatestSubscriptionPayment(
+  client: Razorpay,
+  razorpaySubscriptionId: string
+): Promise<ProviderPaymentEntity | null> {
+  try {
+    const invoicesResult = await client.invoices.all({
+      subscription_id: razorpaySubscriptionId,
+    })
+    const invoices = (invoicesResult?.items || invoicesResult || []) as unknown as Array<any>
+    const paidInvoice = invoices.find(
+      (inv) => (inv.status === "paid" || inv.status === "issued") && inv.payment_id
+    )
+    if (paidInvoice?.payment_id) {
+      return await fetchProviderPayment(client, paidInvoice.payment_id as string)
+    }
+  } catch (error) {
+    console.error("Failed to fetch latest subscription payment:", error)
+  }
+  return null
+}
+
+async function triggerSubscriptionConfirmationEmailIfNeeded(params: {
+  subscriptionId: string
+  paymentEntity?: ProviderPaymentEntity | null
+}): Promise<boolean> {
+  try {
+    if (!params.paymentEntity?.id || params.paymentEntity.status !== "captured") {
+      return false
+    }
+
+    const razorpayPaymentId = params.paymentEntity.id
+
+    const subscription = await prisma.insightsSubscription.findUnique({
+      where: { id: params.subscriptionId },
+      include: {
+        user: true,
+        charges: {
+          where: { status: InsightsSubscriptionChargeStatus.CAPTURED },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    })
+
+    if (!subscription || !subscription.user?.email) {
+      return false
+    }
+
+    const existingAudit = await prisma.insightsSubscriptionAuditLog.findFirst({
+      where: {
+        subscriptionId: subscription.id,
+        action: "CHARGE_CONFIRMATION_EMAIL_SENT",
+        metadata: {
+          path: ["razorpayPaymentId"],
+          equals: razorpayPaymentId,
+        },
+      },
+    })
+
+    if (existingAudit) {
+      return false
+    }
+
+    const planSlug = planKeyToSlug(subscription.planKey)
+    const planDef = getInsightsSubscriptionPlanDefinition(planSlug)
+
+    const capturedCharges = subscription.charges
+    const isRenewal =
+      subscription.paidCount > 1 ||
+      capturedCharges.length > 1 ||
+      (subscription.startAt &&
+        subscription.currentStartAt &&
+        subscription.currentStartAt.getTime() > subscription.startAt.getTime() + 1000 * 60 * 60 * 24)
+
+    const amountPaid = params.paymentEntity.amount
+      ? Math.round(params.paymentEntity.amount / 100)
+      : null
+
+    const currentStartAt = subscription.currentStartAt || subscription.createdAt
+    const currentEndAt =
+      subscription.currentEndAt || addPlanInterval(currentStartAt, subscription.planKey)
+
+    const sent = await sendManualGrantConfirmationEmail({
+      toEmail: subscription.user.email,
+      toName: subscription.user.name,
+      planLabel: planDef.label,
+      currentStartAt,
+      currentEndAt,
+      paymentMethod: "RAZORPAY",
+      utrNumber: razorpayPaymentId,
+      amountPaid,
+      isRenewal: Boolean(isRenewal),
+    })
+
+    if (sent) {
+      await prisma.insightsSubscriptionAuditLog.create({
+        data: {
+          subscriptionId: subscription.id,
+          action: "CHARGE_CONFIRMATION_EMAIL_SENT",
+          metadata: {
+            razorpayPaymentId,
+            sentTo: subscription.user.email,
+            isRenewal: Boolean(isRenewal),
+            sentAt: new Date().toISOString(),
+          },
+        },
+      })
+      return true
+    }
+  } catch (error) {
+    console.error("Failed to send subscription confirmation email:", error)
+  }
+
+  return false
+}
+
 async function fetchProviderSubscription(
   client: Razorpay,
   razorpaySubscriptionId: string
@@ -1165,6 +1280,13 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
       timeout: 30000,
     }
   )
+
+  if (providerPayment) {
+    await triggerSubscriptionConfirmationEmailIfNeeded({
+      subscriptionId: updated.id,
+      paymentEntity: providerPayment,
+    })
+  }
 
   return serializeMembership(updated)
 }
@@ -1635,6 +1757,13 @@ export async function verifyInsightsCheckoutAndSync(params: {
     }
   )
 
+  if (providerPayment) {
+    await triggerSubscriptionConfirmationEmailIfNeeded({
+      subscriptionId: updated.id,
+      paymentEntity: providerPayment,
+    })
+  }
+
   return serializeMembership(updated)
 }
 
@@ -1957,6 +2086,25 @@ export async function processInsightsSubscriptionWebhook(params: {
       timeout: 30000,
     }
   )
+
+  if (updated) {
+    let effectivePayment = providerPayment
+    if (!effectivePayment && updated.razorpaySubscriptionId) {
+      try {
+        const client = getRazorpayClientOrThrow()
+        effectivePayment = await fetchLatestSubscriptionPayment(client, updated.razorpaySubscriptionId)
+      } catch (err) {
+        console.error("Webhook payment fetch error:", err)
+      }
+    }
+
+    if (effectivePayment) {
+      await triggerSubscriptionConfirmationEmailIfNeeded({
+        subscriptionId: updated.id,
+        paymentEntity: effectivePayment,
+      })
+    }
+  }
 
   return {
     handled: Boolean(updated),
