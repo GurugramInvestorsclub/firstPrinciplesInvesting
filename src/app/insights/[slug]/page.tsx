@@ -78,25 +78,29 @@ export default async function InsightPage({ params }: Props) {
                         </div>
                         <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
                             <span>
-                                Published: {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+                                Published: {post.publishedAt ? `${new Date(post.publishedAt).toLocaleDateString("en-US", {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
-                                }) : "Date not available"}
+                                })} at ${new Date(post.publishedAt).toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                })}` : "Date not available"}
                             </span>
                             <ArticleThemeToggleButton />
                         </div>
 
                         {/* Disclaimer Section */}
-                        <div className="my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[8px] leading-relaxed text-text-primary">
+                        <div className="my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[10px] leading-relaxed text-text-primary font-mono">
                             {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
-                                <div className="text-[8px] leading-relaxed space-y-2 [&_p]:text-[8px] [&_p]:leading-relaxed [&_strong]:text-[8px] [&_span]:text-[8px]">
+                                <div className="text-[10px] leading-relaxed space-y-2 [&_p]:text-[10px] [&_p]:leading-relaxed [&_strong]:text-[10px] [&_span]:text-[10px]">
                                     <RichText value={post.disclaimer} />
                                 </div>
                             ) : (
-                                <div className="text-[8px] text-text-primary space-y-2 leading-relaxed">
+                                <div className="text-[10px] text-text-primary space-y-2 leading-relaxed">
                                     <p>
-                                        <strong className="font-bold text-text-primary text-[8px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
+                                        <strong className="font-bold text-text-primary text-[10px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
                                     </p>
                                     <p>
                                         First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
@@ -170,15 +174,15 @@ export default async function InsightPage({ params }: Props) {
                     ) : null}
 
                     {/* Bottom Disclaimer Section */}
-                    <div className="my-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[8px] leading-relaxed text-text-primary">
+                    <div className="my-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[10px] leading-relaxed text-text-primary font-mono">
                         {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
-                            <div className="text-[8px] leading-relaxed space-y-2 [&_p]:text-[8px] [&_p]:leading-relaxed [&_strong]:text-[8px] [&_span]:text-[8px]">
+                            <div className="text-[10px] leading-relaxed space-y-2 [&_p]:text-[10px] [&_p]:leading-relaxed [&_strong]:text-[10px] [&_span]:text-[10px]">
                                 <RichText value={post.disclaimer} />
                             </div>
                         ) : (
-                            <div className="text-[8px] text-text-primary space-y-2 leading-relaxed">
+                            <div className="text-[10px] text-text-primary space-y-2 leading-relaxed">
                                 <p>
-                                    <strong className="font-bold text-text-primary text-[8px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
+                                    <strong className="font-bold text-text-primary text-[10px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
                                 </p>
                                 <p>
                                     First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.

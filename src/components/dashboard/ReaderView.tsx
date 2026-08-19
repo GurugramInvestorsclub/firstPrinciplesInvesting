@@ -50,11 +50,19 @@ function getBlockText(block: any): string {
 
 function formatDate(dateStr: string): string {
     try {
-        return new Date(dateStr).toLocaleDateString("en-US", {
+        const d = new Date(dateStr)
+        if (isNaN(d.getTime())) return dateStr
+        const formattedDate = d.toLocaleDateString("en-US", {
             month: "long",
             day: "numeric",
             year: "numeric"
         })
+        const formattedTime = d.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+        })
+        return `${formattedDate} at ${formattedTime}`
     } catch (e) {
         return dateStr
     }
@@ -399,13 +407,13 @@ export function ReaderView({
                     {/* Disclaimer Footnote */}
                     {!shouldLockContent && (
                         (Array.isArray(report.disclaimer) ? report.disclaimer.length > 0 : Boolean(report.disclaimer)) ? (
-                            <div className="border-t border-white/5 pt-8 text-[8px] font-mono text-neutral-500 leading-relaxed text-left w-full [&_p]:text-[8px] [&_span]:text-[8px]">
-                                <span className="text-neutral-400 font-bold uppercase block mb-1 text-[8px]">DISCLAIMER:</span>
+                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full [&_p]:text-[10px] [&_span]:text-[10px]">
+                                <span className="text-neutral-400 font-bold uppercase block mb-1 text-[10px]">DISCLAIMER:</span>
                                 <RichText value={report.disclaimer} />
                             </div>
                         ) : (
-                            <div className="border-t border-white/5 pt-8 text-[8px] font-mono text-neutral-500 leading-relaxed text-left w-full">
-                                <span className="text-neutral-400 font-bold uppercase block mb-1 text-[8px]">DISCLAIMER:</span>
+                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full">
+                                <span className="text-neutral-400 font-bold uppercase block mb-1 text-[10px]">DISCLAIMER:</span>
                                 First Principles Investing is an independent research house. We do not provide personalized stock recommendations or advisory calls. This research is for educational and learning purposes. All investments are subject to capital risk.
                             </div>
                         )
