@@ -45,6 +45,22 @@ const components: PortableTextComponents = {
         ),
         normal: ({ children }: any) => <p className="leading-relaxed mb-3 text-lg">{children}</p>,
     },
+    list: {
+        bullet: ({ children }: any) => (
+            <ul className="list-disc list-outside pl-6 my-4 space-y-2 leading-relaxed text-base md:text-lg">
+                {children}
+            </ul>
+        ),
+        number: ({ children }: any) => (
+            <ol className="list-decimal list-outside pl-6 my-4 space-y-2 leading-relaxed text-base md:text-lg">
+                {children}
+            </ol>
+        ),
+    },
+    listItem: {
+        bullet: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed">{children}</li>,
+        number: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed">{children}</li>,
+    },
     marks: {
         link: ({ children, value }: any) => {
             const rel = !value.href.startsWith("/") ? "noreferrer noopener" : undefined
