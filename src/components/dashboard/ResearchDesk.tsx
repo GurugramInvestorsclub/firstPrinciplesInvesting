@@ -109,9 +109,9 @@ export function ResearchDesk({
                     <div className="border-b border-white/5 pb-5 space-y-4">
                         <Link 
                             href="/" 
-                            className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+                            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group"
                         >
-                            <div className="relative w-8 h-8 shrink-0">
+                            <div className="relative w-7 h-7 shrink-0">
                                 <Image
                                     src="/logo.png"
                                     alt="First Principles Investing Logo"
@@ -120,19 +120,16 @@ export function ResearchDesk({
                                     priority
                                 />
                             </div>
-                            <span className="text-text-primary text-xs font-bold font-mono uppercase tracking-wider group-hover:text-gold transition-colors leading-tight">
+                            <span className="text-text-primary text-[11px] font-bold font-mono uppercase tracking-wider group-hover:text-gold transition-colors whitespace-nowrap">
                                 First Principles <span className="text-gold">Investing</span>
                             </span>
                         </Link>
 
                         {/* Research Desk Subtitle & Member Badge */}
                         <div className="flex items-center justify-between pt-1">
-                            <div className="flex items-center gap-1.5 text-neutral-400">
-                                <Sparkles className="w-3.5 h-3.5 text-gold fill-gold/20 shrink-0" />
-                                <span className="font-bold tracking-tight text-[11px] text-text-primary font-mono uppercase">
-                                    Research Desk
-                                </span>
-                            </div>
+                            <span className="font-bold tracking-tight text-[11px] text-text-primary font-mono uppercase">
+                                Research Desk
+                            </span>
                             <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full text-[8px] border border-emerald-500/20">
                                 {subscriptionStatus}
                             </span>
