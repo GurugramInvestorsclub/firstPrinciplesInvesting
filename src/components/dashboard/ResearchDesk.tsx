@@ -103,14 +103,40 @@ export function ResearchDesk({
         <div className="flex bg-bg-deep min-h-screen relative text-text-primary text-sm antialiased font-sans">
             
             {/* 1. Desktop Persistent Sidebar */}
-            <aside className="w-64 border-r border-white/5 bg-bg-deep fixed inset-y-0 left-0 z-30 hidden lg:flex flex-col justify-between py-8 px-6 text-left select-none">
-                <div className="space-y-8">
-                    {/* Header */}
-                    <div className="flex items-center gap-2 border-b border-white/5 pb-6">
-                        <Sparkles className="w-5 h-5 text-gold fill-gold/20 shrink-0" />
-                        <span className="font-bold tracking-tight text-base text-text-primary font-mono uppercase">
-                            Research Desk
-                        </span>
+            <aside className="w-64 border-r border-white/5 bg-bg-deep fixed inset-y-0 left-0 z-30 hidden lg:flex flex-col justify-between py-6 px-5 text-left select-none">
+                <div className="space-y-6">
+                    {/* Brand Logo & Title Header (Links to Home /) */}
+                    <div className="border-b border-white/5 pb-5 space-y-4">
+                        <Link 
+                            href="/" 
+                            className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+                        >
+                            <div className="relative w-8 h-8 shrink-0">
+                                <Image
+                                    src="/logo.png"
+                                    alt="First Principles Investing Logo"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
+                            <span className="text-text-primary text-xs font-bold font-mono uppercase tracking-wider group-hover:text-gold transition-colors leading-tight">
+                                First Principles <span className="text-gold">Investing</span>
+                            </span>
+                        </Link>
+
+                        {/* Research Desk Subtitle & Member Badge */}
+                        <div className="flex items-center justify-between pt-1">
+                            <div className="flex items-center gap-1.5 text-neutral-400">
+                                <Sparkles className="w-3.5 h-3.5 text-gold fill-gold/20 shrink-0" />
+                                <span className="font-bold tracking-tight text-[11px] text-text-primary font-mono uppercase">
+                                    Research Desk
+                                </span>
+                            </div>
+                            <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full text-[8px] border border-emerald-500/20">
+                                {subscriptionStatus}
+                            </span>
+                        </div>
                     </div>
 
                     {/* Navigation Menu */}
@@ -123,13 +149,13 @@ export function ResearchDesk({
                                 <button
                                     key={item.id}
                                     onClick={() => handleNavigate(item.id)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer ${
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
                                         isActive 
                                             ? "bg-[#2E2E2E] text-gold font-bold border border-gold/10" 
                                             : "text-neutral-400 hover:text-text-primary hover:bg-[#1E1E1E]"
                                     }`}
                                 >
-                                    <div className="flex items-center gap-3.5">
+                                    <div className="flex items-center gap-3">
                                         <NavIcon className={`w-4 h-4 shrink-0 ${isActive ? "text-gold" : "text-neutral-500"}`} />
                                         <span className="tracking-tight uppercase">{item.label}</span>
                                     </div>
@@ -145,10 +171,10 @@ export function ResearchDesk({
                 </div>
 
                 {/* Footer Section */}
-                <div className="space-y-4 font-mono text-[10px] text-neutral-500 border-t border-white/5 pt-6">
+                <div className="space-y-2 font-mono text-[10px] text-neutral-500 border-t border-white/5 pt-4">
                     <button
                         onClick={() => handleNavigate("profile")}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors cursor-pointer text-left ${
+                        className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl transition-colors cursor-pointer text-left ${
                             activeTab === "profile" 
                                 ? "bg-[#2E2E2E] text-gold border border-gold/10" 
                                 : "text-neutral-400 hover:text-text-primary hover:bg-[#1E1E1E]"
@@ -159,7 +185,7 @@ export function ResearchDesk({
                     </button>
                     <button
                         onClick={onSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-neutral-400 hover:text-rose-400 hover:bg-[#1E1E1E] transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-rose-400 hover:bg-[#1E1E1E] transition-colors cursor-pointer text-left"
                     >
                         <LogOut className="w-4 h-4 text-neutral-500 hover:text-rose-400" />
                         <span className="uppercase">Logout</span>
@@ -169,59 +195,17 @@ export function ResearchDesk({
 
             {/* 2. Main Content Frame (padded on left for desktop sidebar, bottom for mobile nav) */}
             <div className="flex-1 lg:pl-64 pb-20 lg:pb-0 min-h-screen flex flex-col">
-                {/* Desktop top header banner / navbar */}
-                <header className="sticky top-[10px] z-20 flex flex-col items-center transition-all duration-500 px-6 py-2 select-none w-full max-w-5xl mx-auto">
-                    <div className="w-full h-14 md:h-16 rounded-full border border-white/10 bg-bg-deep/90 backdrop-blur-xl shadow-lg flex items-center justify-between px-6 font-mono text-[10px]">
-                        <div className="flex items-center gap-6">
-                            <Link href="/" className="font-bold tracking-tight hover:opacity-80 transition-opacity flex items-center gap-2">
-                                <div className="relative w-8 h-8">
-                                    <Image
-                                        src="/logo.png"
-                                        alt="First Principles Investing Logo"
-                                        fill
-                                        className="object-contain"
-                                        priority
-                                    />
-                                </div>
-                                <span className="text-text-primary hidden xl:inline text-xs font-bold uppercase tracking-wider">First Principles <span className="text-gold">Investing</span></span>
-                                <span className="text-text-primary xl:hidden text-xs font-bold uppercase tracking-wider">FP <span className="text-gold">Investing</span></span>
-                            </Link>
-                            <span className="text-neutral-700">|</span>
-                            <nav className="flex items-center gap-5 text-neutral-400">
-                                <Link href="/insights" className="hover:text-gold transition-colors">INSIGHTS</Link>
-                                <Link href="/events" className="hover:text-gold transition-colors">PUBLIC EVENTS</Link>
-                                <Link href="/insights/members-only" className="hover:text-gold transition-colors">MEMBERS</Link>
-                            </nav>
+                {/* Mobile Header Bar */}
+                <header className="sticky top-0 z-20 flex items-center justify-between px-5 py-3 bg-bg-deep/95 backdrop-blur-xl border-b border-white/5 select-none lg:hidden w-full">
+                    <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white flex items-center gap-2">
+                        <div className="relative w-6 h-6">
+                            <Image src="/logo.png" alt="Logo" fill className="object-contain" />
                         </div>
-                        <div className="flex items-center gap-4 text-neutral-400">
-                            <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full text-[8px] border border-emerald-500/20">
-                                {subscriptionStatus} Member
-                            </span>
-                            <span className="text-neutral-700">|</span>
-                            <span className="uppercase tracking-widest text-neutral-400 font-bold bg-[#2E2E2E] px-3.5 py-1.5 rounded-full border border-white/5">
-                                MEMBERS AREA
-                            </span>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Mobile top header banner / navbar */}
-                <header className="sticky top-[10px] z-20 flex flex-col items-center transition-all duration-500 px-4 py-2 select-none lg:hidden w-full">
-                    <div className="w-full h-12 rounded-full border border-white/10 bg-bg-deep/90 backdrop-blur-xl shadow-lg flex items-center justify-between px-4 font-mono text-[9px]">
-                        <Link href="/" className="font-bold tracking-tight text-neutral-300 hover:text-white flex items-center gap-1.5">
-                            <div className="relative w-5 h-5">
-                                <Image src="/logo.png" alt="Logo" fill className="object-contain" />
-                            </div>
-                            <span>FP <span className="text-gold">INVESTING</span></span>
-                        </Link>
-                        <div className="flex items-center gap-3">
-                            <Link href="/insights" className="text-neutral-400 hover:text-gold font-bold">INSIGHTS</Link>
-                            <span className="text-neutral-700">|</span>
-                            <span className="text-emerald-400 font-bold text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded uppercase">
-                                MEMBER
-                            </span>
-                        </div>
-                    </div>
+                        <span className="text-xs font-mono uppercase font-bold">First Principles <span className="text-gold">Investing</span></span>
+                    </Link>
+                    <span className="text-emerald-400 font-bold text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase font-mono">
+                        {subscriptionStatus}
+                    </span>
                 </header>
 
 
