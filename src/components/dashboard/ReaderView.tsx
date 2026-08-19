@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { ArrowLeft, Bookmark, Highlighter, MessageSquare, Lock, Trash2 } from "lucide-react"
 import { RichText } from "../sanity/RichText"
 import { CopyProtection } from "../insights/CopyProtection"
+import { ArticleThemeWrapper, ArticleThemeToggleButton } from "../insights/ArticleThemeWrapper"
 
 interface ReaderViewProps {
     slug: string
@@ -191,7 +192,7 @@ export function ReaderView({
     }, [activeNoteIdx, onBack])
 
     return (
-        <div className="space-y-8 max-w-5xl mx-auto font-sans relative">
+        <ArticleThemeWrapper className="space-y-8 max-w-5xl mx-auto font-sans relative p-4 md:p-8 rounded-3xl">
             <CopyProtection />
 
             {/* Top Toolbar */}
@@ -205,6 +206,7 @@ export function ReaderView({
                 </button>
 
                 <div className="flex items-center gap-4 text-xs font-mono">
+                    <ArticleThemeToggleButton />
                     {/* Font sizes */}
                     <div className="flex border border-white/5 bg-black/20 rounded-xl p-0.5">
                         {["sm", "base", "lg"].map((size) => (
@@ -397,13 +399,13 @@ export function ReaderView({
                     {/* Disclaimer Footnote */}
                     {!shouldLockContent && (
                         (Array.isArray(report.disclaimer) ? report.disclaimer.length > 0 : Boolean(report.disclaimer)) ? (
-                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full">
-                                <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
+                            <div className="border-t border-white/5 pt-8 text-[8px] font-mono text-neutral-500 leading-relaxed text-left w-full [&_p]:text-[8px] [&_span]:text-[8px]">
+                                <span className="text-neutral-400 font-bold uppercase block mb-1 text-[8px]">DISCLAIMER:</span>
                                 <RichText value={report.disclaimer} />
                             </div>
                         ) : (
-                            <div className="border-t border-white/5 pt-8 text-[10px] font-mono text-neutral-500 leading-relaxed text-left w-full">
-                                <span className="text-neutral-400 font-bold uppercase block mb-1">DISCLAIMER:</span>
+                            <div className="border-t border-white/5 pt-8 text-[8px] font-mono text-neutral-500 leading-relaxed text-left w-full">
+                                <span className="text-neutral-400 font-bold uppercase block mb-1 text-[8px]">DISCLAIMER:</span>
                                 First Principles Investing is an independent research house. We do not provide personalized stock recommendations or advisory calls. This research is for educational and learning purposes. All investments are subject to capital risk.
                             </div>
                         )
@@ -411,6 +413,6 @@ export function ReaderView({
 
                 </div>
 
-        </div>
+        </ArticleThemeWrapper>
     )
 }

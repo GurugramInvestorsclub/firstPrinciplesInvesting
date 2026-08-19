@@ -285,3 +285,88 @@
   opacity: 0.04;
   mix-blend-mode: overlay;
 }
+
+/* ─── Article Typography Headings & Callouts (Brand Gold #F5B800) ─── */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6,
+.prose-lg h1,
+.prose-lg h2,
+.prose-lg h3,
+.prose-lg h4,
+.prose-lg h5,
+.prose-lg h6 {
+  color: var(--gold, #F5B800) !important;
+  font-weight: 700;
+}
+
+.prose blockquote,
+.prose-lg blockquote {
+  border-left-color: var(--gold, #F5B800) !important;
+}
+
+.prose hr,
+.prose-lg hr {
+  border-color: var(--gold, #F5B800) !important;
+}
+
+/* ─── Article Light Mode Custom Theme ─── */
+.article-theme-light {
+  background-color: #FAF9F6 !important;
+  color: #0F172A !important;
+}
+
+.article-theme-light h1,
+.article-theme-light h2,
+.article-theme-light h3,
+.article-theme-light h4,
+.article-theme-light h5,
+.article-theme-light h6 {
+  color: #D97706 !important; /* Rich Golden Amber for High Contrast on Light Background */
+}
+
+.article-theme-light .prose,
+.article-theme-light .prose-lg {
+  color: #1E293B !important;
+}
+
+.article-theme-light .prose p,
+.article-theme-light .prose-lg p,
+.article-theme-light .prose li,
+.article-theme-light .prose-lg li,
+.article-theme-light .prose span,
+.article-theme-light .prose-lg span {
+  color: #1E293B !important;
+}
+
+.article-theme-light .prose strong,
+.article-theme-light .prose-lg strong {
+  color: #0F172A !important;
+}
+
+.article-theme-light .prose blockquote,
+.article-theme-light .prose-lg blockquote {
+  border-left-color: #D97706 !important;
+  background-color: rgba(245, 184, 0, 0.08) !important;
+  color: #334155 !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 0.5rem !important;
+}
+
+.article-theme-light .prose blockquote p,
+.article-theme-light .prose-lg blockquote p {
+  color: #334155 !important;
+}
+
+.article-theme-light .text-muted-foreground,
+.article-theme-light .text-neutral-400,
+.article-theme-light .text-neutral-500 {
+  color: #64748B !important;
+}
+
+.article-theme-light .text-text-primary {
+  color: #0F172A !important;
+}

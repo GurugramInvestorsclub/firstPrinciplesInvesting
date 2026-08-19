@@ -12,6 +12,7 @@ import { CommentsSection, CommentType } from "@/components/insights/CommentsSect
 import { getComments } from "@/app/actions/comments"
 import { ShareButton } from "@/components/insights/ShareButton"
 import { CopyProtection } from "@/components/insights/CopyProtection"
+import { ArticleThemeWrapper, ArticleThemeToggleButton } from "@/components/insights/ArticleThemeWrapper"
 import Link from "next/link"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
@@ -61,7 +62,7 @@ export default async function InsightPage({ params }: Props) {
     const callbackUrl = `/insights/${slug}`
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <ArticleThemeWrapper className="flex flex-col min-h-screen">
             {isSubscriberOnly && <CopyProtection />}
             <Navbar />
             <main className="flex-1 blog-main-container">
@@ -70,27 +71,32 @@ export default async function InsightPage({ params }: Props) {
                 )}
                 <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto blog-article-container">
                     <header className="mb-12 text-left">
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
-                            {post.title}
-                        </h1>
-                        <div className="text-sm text-muted-foreground mb-6">
-                            Published: {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            }) : "Date not available"}
+                        <div className="flex items-center justify-between gap-4 mb-4">
+                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+                                {post.title}
+                            </h1>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
+                            <span>
+                                Published: {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                }) : "Date not available"}
+                            </span>
+                            <ArticleThemeToggleButton />
                         </div>
 
                         {/* Disclaimer Section */}
-                        <div className="my-8 p-6 rounded-xl border border-gold/50 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_30px_rgba(245,184,0,0.15)]">
+                        <div className="my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[8px] leading-relaxed text-text-primary">
                             {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
-                                <div className="prose-sm dark:prose-invert text-text-primary space-y-4">
+                                <div className="text-[8px] leading-relaxed space-y-2 [&_p]:text-[8px] [&_p]:leading-relaxed [&_strong]:text-[8px] [&_span]:text-[8px]">
                                     <RichText value={post.disclaimer} />
                                 </div>
                             ) : (
-                                <div className="text-sm text-text-primary space-y-3 leading-relaxed">
+                                <div className="text-[8px] text-text-primary space-y-2 leading-relaxed">
                                     <p>
-                                        <strong className="font-bold text-text-primary mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
+                                        <strong className="font-bold text-text-primary text-[8px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
                                     </p>
                                     <p>
                                         First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
@@ -163,6 +169,24 @@ export default async function InsightPage({ params }: Props) {
                         </section>
                     ) : null}
 
+                    {/* Bottom Disclaimer Section */}
+                    <div className="my-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[8px] leading-relaxed text-text-primary">
+                        {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
+                            <div className="text-[8px] leading-relaxed space-y-2 [&_p]:text-[8px] [&_p]:leading-relaxed [&_strong]:text-[8px] [&_span]:text-[8px]">
+                                <RichText value={post.disclaimer} />
+                            </div>
+                        ) : (
+                            <div className="text-[8px] text-text-primary space-y-2 leading-relaxed">
+                                <p>
+                                    <strong className="font-bold text-text-primary text-[8px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
+                                </p>
+                                <p>
+                                    First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
                     <CommentsSection 
                         postSlug={slug} 
                         initialComments={initialComments} 
@@ -172,7 +196,7 @@ export default async function InsightPage({ params }: Props) {
                 <ShareButton title={post.title} text={post.excerpt || ""} />
             </main>
             <Footer />
-        </div>
+        </ArticleThemeWrapper>
     )
 }
 

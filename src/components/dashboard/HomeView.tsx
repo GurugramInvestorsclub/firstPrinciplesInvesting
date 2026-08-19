@@ -80,7 +80,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents }: HomeVi
             {/* 1. Hero Greetings */}
             <div className="space-y-2 pb-6 border-b border-white/5">
                 <h1 className="text-3xl md:text-5xl font-bold text-text-primary tracking-tight font-sans">
-                    Welcome back, {userName}.
+                    Welcome back, {userName} 🙏
                 </h1>
             </div>
 

@@ -32,11 +32,14 @@ const components: PortableTextComponents = {
         },
     },
     block: {
-        h1: ({ children }: any) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
-        h2: ({ children }: any) => <h2 className="text-2xl font-bold mt-8 mb-4">{children}</h2>,
-        h3: ({ children }: any) => <h3 className="text-xl font-bold mt-6 mb-3">{children}</h3>,
+        h1: ({ children }: any) => <h1 className="text-3xl font-bold text-gold mt-8 mb-4">{children}</h1>,
+        h2: ({ children }: any) => <h2 className="text-2xl font-bold text-gold mt-8 mb-4">{children}</h2>,
+        h3: ({ children }: any) => <h3 className="text-xl font-bold text-gold mt-6 mb-3">{children}</h3>,
+        h4: ({ children }: any) => <h4 className="text-lg font-bold text-gold mt-6 mb-3">{children}</h4>,
+        h5: ({ children }: any) => <h5 className="text-base font-bold text-gold mt-4 mb-2">{children}</h5>,
+        h6: ({ children }: any) => <h6 className="text-sm font-bold text-gold mt-4 mb-2">{children}</h6>,
         blockquote: ({ children }: any) => (
-            <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4">
+            <blockquote className="border-l-4 border-gold pl-4 italic text-muted-foreground my-4">
                 {children}
             </blockquote>
         ),
