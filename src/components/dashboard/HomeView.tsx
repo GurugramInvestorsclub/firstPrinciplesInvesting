@@ -82,9 +82,6 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents }: HomeVi
                 <h1 className="text-3xl md:text-5xl font-bold text-text-primary tracking-tight font-sans">
                     Welcome back, {userName}.
                 </h1>
-                <p className="text-sm text-neutral-400 font-light max-w-lg">
-                    Continue building your investing knowledge. Review the latest structural deep dives below.
-                </p>
             </div>
 
             {/* 2. Continue Reading or Latest Article Banner */}

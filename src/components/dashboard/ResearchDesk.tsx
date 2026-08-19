@@ -136,18 +136,18 @@ export function ResearchDesk({
                                 <button
                                     key={item.id}
                                     onClick={() => handleNavigate(item.id)}
-                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all cursor-pointer ${
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
                                         isActive 
                                             ? "bg-[#2E2E2E] text-gold font-bold border border-gold/10" 
-                                            : "text-neutral-400 hover:text-text-primary hover:bg-[#1E1E1E]"
+                                            : "text-white hover:text-gold hover:bg-[#1E1E1E]"
                                     }`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <NavIcon className={`w-4 h-4 shrink-0 ${isActive ? "text-gold" : "text-neutral-500"}`} />
-                                        <span className="tracking-tight uppercase">{item.label}</span>
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <NavIcon className={`w-4 h-4 shrink-0 ${isActive ? "text-gold" : "text-white/80"}`} />
+                                        <span className="tracking-tight uppercase text-[11px] whitespace-nowrap">{item.label}</span>
                                     </div>
                                     {item.isComingSoon && (
-                                        <span className="text-[8px] bg-white/5 border border-white/10 text-neutral-500 px-1.5 py-0.5 rounded uppercase">
+                                        <span className="text-[8px] bg-white/5 border border-white/10 text-neutral-400 px-1.5 py-0.5 rounded uppercase shrink-0 ml-1">
                                             Soon
                                         </span>
                                     )}
@@ -163,19 +163,19 @@ export function ResearchDesk({
                         onClick={() => handleNavigate("profile")}
                         className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl transition-colors cursor-pointer text-left ${
                             activeTab === "profile" 
-                                ? "bg-[#2E2E2E] text-gold border border-gold/10" 
-                                : "text-neutral-400 hover:text-text-primary hover:bg-[#1E1E1E]"
+                                ? "bg-[#2E2E2E] text-gold font-bold border border-gold/10" 
+                                : "text-white hover:text-gold hover:bg-[#1E1E1E]"
                         }`}
                     >
-                        <User className="w-4 h-4 text-neutral-500" />
-                        <span className="uppercase">Profile</span>
+                        <User className={`w-4 h-4 ${activeTab === "profile" ? "text-gold" : "text-white/80"}`} />
+                        <span className="uppercase text-[11px]">Profile</span>
                     </button>
                     <button
                         onClick={onSignOut}
-                        className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-neutral-400 hover:text-rose-400 hover:bg-[#1E1E1E] transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-white hover:text-rose-400 hover:bg-[#1E1E1E] transition-colors cursor-pointer text-left"
                     >
-                        <LogOut className="w-4 h-4 text-neutral-500 hover:text-rose-400" />
-                        <span className="uppercase">Logout</span>
+                        <LogOut className="w-4 h-4 text-white/80" />
+                        <span className="uppercase text-[11px]">Logout</span>
                     </button>
                 </div>
             </aside>
