@@ -7,6 +7,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { mockReports, mockEvents } from "./mockData"
 import { HomeView } from "./HomeView"
 import { MembersOnlyView } from "./MembersOnlyView"
@@ -45,6 +46,7 @@ export function ResearchDesk({
     initialNotes = [],
     hasSubscriptionAccess = false
 }: ResearchDeskProps) {
+    const router = useRouter()
     const [activeTab, setActiveTab] = useState("home")
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [savedSlugs, setSavedSlugs] = useState<string[]>([])
@@ -80,12 +82,12 @@ export function ResearchDesk({
     }
 
     const handleNavigate = (tabId: string, argId?: string) => {
-        setActiveTab(tabId)
-        if (argId !== undefined) {
-            setSelectedId(argId)
-        } else {
-            setSelectedId(null)
+        if (argId) {
+            router.push(`/insights/${argId}`)
+            return
         }
+        setActiveTab(tabId)
+        setSelectedId(null)
         window.scrollTo({ top: 0, behavior: "smooth" })
     }
 

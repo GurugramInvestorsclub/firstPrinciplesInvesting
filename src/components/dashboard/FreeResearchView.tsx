@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Search, Clock, ArrowUpDown, Filter } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import { urlForImage } from "@/lib/sanity.image"
 
 interface FreeResearchViewProps {
@@ -116,48 +117,51 @@ export function FreeResearchView({ onSelectReport, posts }: FreeResearchViewProp
             {/* Results Grid */}
             {filteredReports.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredReports.map((report) => (
-                        <div 
-                            key={report._id || report.id}
-                            onClick={() => onSelectReport(report.slug?.current)}
-                            className="flex flex-col border border-white/5 hover:border-gold/25 bg-[#1E1E1E] rounded-2xl overflow-hidden hover:bg-white/5 transition-all duration-300 cursor-pointer group"
-                        >
-                            {/* Cover image if available */}
-                            {report.mainImage && (
-                                <div className="relative aspect-[16/9] w-full overflow-hidden">
-                                    <Image
-                                        src={urlForImage(report.mainImage).width(400).height(225).fit("crop").url()}
-                                        alt={report.title}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="p-6 flex flex-col justify-between flex-grow min-h-[220px]">
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
-                                        <span>{formatDate(report.publishedAt)}</span>
-                                        <span className="text-neutral-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded font-bold">FREE</span>
+                    {filteredReports.map((report) => {
+                        const reportSlug = report.slug?.current || report.slug
+                        return (
+                            <Link 
+                                key={report._id || report.id}
+                                href={`/insights/${reportSlug}`}
+                                className="flex flex-col border border-white/5 hover:border-gold/25 bg-[#1E1E1E] rounded-2xl overflow-hidden hover:bg-white/5 transition-all duration-300 cursor-pointer group"
+                            >
+                                {/* Cover image if available */}
+                                {report.mainImage && (
+                                    <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                        <Image
+                                            src={urlForImage(report.mainImage).width(400).height(225).fit("crop").url()}
+                                            alt={report.title}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                        />
                                     </div>
-                                    <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2">
-                                        {report.title}
-                                    </h3>
-                                    <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
-                                        {report.excerpt}
-                                    </p>
-                                </div>
+                                )}
 
-                                <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="w-3 h-3 text-neutral-500" />
-                                        <span>{calculateReadingTime(report.body)}</span>
+                                <div className="p-6 flex flex-col justify-between flex-grow min-h-[220px]">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500 uppercase">
+                                            <span>{formatDate(report.publishedAt)}</span>
+                                            <span className="text-neutral-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded font-bold">FREE</span>
+                                        </div>
+                                        <h3 className="text-base font-bold text-text-primary group-hover:text-gold transition-colors leading-snug line-clamp-2">
+                                            {report.title}
+                                        </h3>
+                                        <p className="text-xs text-neutral-400 font-light line-clamp-2 leading-relaxed">
+                                            {report.excerpt}
+                                        </p>
                                     </div>
-                                    <span className="text-gold">Read Article ↗</span>
+
+                                    <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="w-3 h-3 text-neutral-500" />
+                                            <span>{calculateReadingTime(report.body)}</span>
+                                        </div>
+                                        <span className="text-gold">Read Article ↗</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    ))}
+                            </Link>
+                        )
+                    })}
                 </div>
             ) : (
                 <div className="p-16 border border-dashed border-[#2E2E2E] rounded-2xl text-center text-xs text-neutral-500">
