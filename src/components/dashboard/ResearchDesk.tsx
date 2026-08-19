@@ -106,7 +106,7 @@ export function ResearchDesk({
             <aside className="w-64 border-r border-white/5 bg-bg-deep fixed inset-y-0 left-0 z-30 hidden lg:flex flex-col justify-between py-6 px-5 text-left select-none">
                 <div className="space-y-6">
                     {/* Brand Logo & Title Header (Links to Home /) */}
-                    <div className="border-b border-white/5 pb-5 space-y-4">
+                    <div className="border-b border-white/5 pb-5">
                         <Link 
                             href="/" 
                             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group"
@@ -124,16 +124,6 @@ export function ResearchDesk({
                                 First Principles <span className="text-gold">Investing</span>
                             </span>
                         </Link>
-
-                        {/* Research Desk Subtitle & Member Badge */}
-                        <div className="flex items-center justify-between pt-1">
-                            <span className="font-bold tracking-tight text-[11px] text-text-primary font-mono uppercase">
-                                Research Desk
-                            </span>
-                            <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full text-[8px] border border-emerald-500/20">
-                                {subscriptionStatus}
-                            </span>
-                        </div>
                     </div>
 
                     {/* Navigation Menu */}
