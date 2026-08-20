@@ -25,7 +25,7 @@ export default async function Super30IndexPage() {
                         Premium Cohorts
                     </div>
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6">
-                        Deep Focus. <span className="text-gold">Lasting Transformation.</span>
+                        Join our upcoming <span className="text-gold">Super-30 investing batch</span>
                     </h1>
                     <p className="text-xl text-gray-400 max-w-2xl font-light leading-relaxed">
                         Intensive cohort-based programs designed for serious investors ready to master specific disciplines.
@@ -67,13 +67,13 @@ export default async function Super30IndexPage() {
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/10 text-gray-400 border border-gray-500/20">
                                                             Registration Closed
                                                         </span>
-                                                    ) : program.seatsAvailable ? (
+                                                    ) : (
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                            {program.seatsAvailable} seats left
+                                                            Registrations Open{program.seatsAvailable ? ` (${program.seatsAvailable} seats left)` : ''}
                                                         </span>
-                                                    ) : null}
-                                                    {deadlineDate && !program.isSoldOut && (
+                                                    )}
+                                                    {deadlineDate && !program.isSoldOut && !isClosed && (
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-gray-400 bg-white/5 border border-white/5">
                                                             <Calendar className="w-3.5 h-3.5" />
                                                             Apply by {deadlineDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
