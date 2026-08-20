@@ -27,9 +27,6 @@ export default async function Super30IndexPage() {
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6">
                         Join our upcoming <span className="text-gold">Super-30 investing batch</span>
                     </h1>
-                    <p className="text-xl text-gray-400 max-w-2xl font-light leading-relaxed">
-                        Intensive cohort-based programs designed for serious investors ready to master specific disciplines.
-                    </p>
                 </div>
 
                 {programs.length === 0 ? (
