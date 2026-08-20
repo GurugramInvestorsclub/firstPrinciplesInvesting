@@ -470,7 +470,8 @@ export async function computePricingPreview(params: {
 }): Promise<PricingPreview> {
   const now = params.now ?? new Date()
   const event = await ensureEventPricing(params.db, params.eventId)
-  const isSubscriber = params.isGuest ? false : await userHasInsightsAccess(params.userId)
+  const isSuper30 = params.eventId.toUpperCase().includes("SUPER30") || params.eventId.toUpperCase().includes("SUPER_30") || params.eventId.toUpperCase().includes("SUPER-30")
+  const isSubscriber = (params.isGuest || isSuper30) ? false : await userHasInsightsAccess(params.userId)
   const baseAmount = isSubscriber ? 74900 : ensureAmount(event.price, "Event price")
 
   if (isSubscriber || !params.couponCode) {

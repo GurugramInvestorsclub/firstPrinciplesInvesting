@@ -54,7 +54,7 @@ export function MembershipPromoSection() {
                         <div className="md:col-span-4 flex flex-col items-start md:items-end justify-center">
                             <div className="p-1 rounded-full bg-[#2E2E2E]/80 border border-white/10 hover:border-gold/30 transition-all duration-300">
                                 <Link
-                                    href="/membership"
+                                    href="/insights"
                                     className="group relative flex items-center gap-2 bg-gold hover:bg-[#E0A800] text-bg-deep font-extrabold px-6 py-3 rounded-full text-xs transition-all active:scale-[0.98]"
                                 >
                                     <span>Explore Membership</span>

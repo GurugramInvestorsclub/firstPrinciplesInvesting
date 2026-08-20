@@ -119,6 +119,12 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
 
   const isRegistrationOpen = eventIsOpen(event.date)
 
+  const isSuper30 = useMemo(() => {
+    if (!event.eventId) return false
+    const upper = event.eventId.toUpperCase()
+    return upper.includes("SUPER30") || upper.includes("SUPER_30") || upper.includes("SUPER-30")
+  }, [event.eventId])
+
   useEffect(() => {
     if (status === "loading") {
       setIsPricingLoading(true)
@@ -147,7 +153,7 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
               finalAmount: payload.data.finalAmount,
               couponCode: payload.data.coupon?.code ?? null,
             })
-            setIsSubscriber(!!payload.data.isSubscriber)
+            setIsSubscriber(isSuper30 ? false : !!payload.data.isSubscriber)
           }
         } catch (e) {
           console.error("Failed to fetch initial pricing preview", e)
@@ -168,7 +174,7 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
         })
       }
     }
-  }, [status, event.eventId, cmsDisplayPricePaise])
+  }, [status, event.eventId, cmsDisplayPricePaise, isSuper30])
 
   const navigateToLogin = () => {
     const callbackUrl = `/events/${event.slug.current}`
@@ -520,7 +526,7 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
           <div className="flex flex-col items-end gap-1">
             {isPricingLoading ? (
               <span className="text-sm text-gray-500 animate-pulse">Calculating price...</span>
-            ) : isSubscriber ? (
+            ) : isSubscriber && !isSuper30 ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500 line-through">
                   {cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : ""}
@@ -534,7 +540,7 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
                 {pricing ? formatInrFromPaise(pricing.baseAmount) : (cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "Not configured")}
               </span>
             )}
-            {isSubscriber && !isPricingLoading && (
+            {isSubscriber && !isSuper30 && !isPricingLoading && (
               <span className="text-[10px] uppercase tracking-wider text-gold font-semibold bg-gold/10 px-2.5 py-0.5 rounded-full border border-gold/20">
                 Subscriber Discount
               </span>
@@ -561,25 +567,25 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
       <div className="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
         <input
           type="text"
-          placeholder={isSubscriber ? "Coupons disabled for subscribers" : "Coupon code"}
+          placeholder={isSubscriber && !isSuper30 ? "Coupons disabled for subscribers" : "Coupon code"}
           value={couponInput}
           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
           className="h-12 rounded-xl border border-white/15 bg-black/20 px-4 text-sm text-white outline-none transition focus:border-gold disabled:opacity-40 disabled:cursor-not-allowed"
           autoComplete="off"
           maxLength={32}
-          disabled={isApplyingCoupon || isCreatingOrder || isSubscriber || isPricingLoading}
+          disabled={isApplyingCoupon || isCreatingOrder || (isSubscriber && !isSuper30) || isPricingLoading}
         />
         <Button
           type="button"
           onClick={applyCoupon}
-          disabled={isApplyingCoupon || isCreatingOrder || couponInput.trim().length === 0 || !isRegistrationOpen || isSubscriber || isPricingLoading}
+          disabled={isApplyingCoupon || isCreatingOrder || couponInput.trim().length === 0 || !isRegistrationOpen || (isSubscriber && !isSuper30) || isPricingLoading}
           className="h-12 rounded-xl bg-white/10 text-white hover:bg-white/20 disabled:cursor-not-allowed"
         >
           {isApplyingCoupon ? "Validating..." : "Apply"}
         </Button>
       </div>
 
-      {isSubscriber && !isPricingLoading && (
+      {isSubscriber && !isSuper30 && !isPricingLoading && (
         <p className="mt-2 text-xs text-gold/80 italic font-medium">
           ★ Subscriber discount applied automatically. Coupon codes cannot be combined with subscriber pricing.
         </p>
