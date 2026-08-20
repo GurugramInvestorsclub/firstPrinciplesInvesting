@@ -150,6 +150,7 @@ export const allSuper30ProgramsQuery = groq`
     batchName,
     tagline,
     shortDescription,
+    investorsEducated,
     seatsAvailable,
     applicationDeadline,
     price,
