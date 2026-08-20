@@ -86,31 +86,34 @@ export default async function Super30IndexPage() {
                                             </h2>
                                             
                                             {program.tagline && (
-                                                <p className="text-xl text-gray-300 font-medium mb-4">
+                                                <p className="text-xl md:text-2xl text-gold font-semibold mb-4 tracking-tight leading-snug">
                                                     {program.tagline}
                                                 </p>
                                             )}
 
                                             {program.shortDescription && (
-                                                <p className="text-lg text-gold/90 leading-relaxed font-light max-w-3xl">
-                                                    {program.shortDescription}
-                                                </p>
+                                                <div className="border-l-2 border-gold/40 pl-4 py-1 bg-white/[0.01] rounded-r-xl max-w-3xl">
+                                                    <p className="text-base md:text-lg text-gray-200/90 leading-relaxed font-light">
+                                                        {program.shortDescription}
+                                                    </p>
+                                                </div>
                                             )}
                                         </div>
 
                                         <div className="shrink-0 flex items-center md:items-end justify-between md:flex-col mt-4 md:mt-0 pt-6 md:pt-0 border-t md:border-t-0 border-white/10">
-                                            <div className="flex flex-col items-start md:items-end gap-1 mb-4 md:mb-6">
-                                                <div className="flex items-center gap-1.5 text-gold text-xs font-semibold">
-                                                    <div className="flex items-center gap-0.5">
+                                            <div className="px-4 py-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-gold/20 flex flex-col items-start md:items-end gap-1.5 backdrop-blur-md transition-all duration-300 shadow-md shadow-gold/5 mb-4 md:mb-6">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-1">
                                                         {[...Array(5)].map((_, i) => (
-                                                            <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />
+                                                            <Star key={i} className="w-4 h-4 fill-gold text-gold drop-shadow-[0_0_6px_rgba(245,184,0,0.5)]" />
                                                         ))}
                                                     </div>
-                                                    <span className="text-white font-bold text-sm">4.9</span>
-                                                    <span className="text-gray-400 font-normal">rated us</span>
+                                                    <span className="text-white font-extrabold text-sm tracking-tight">4.9</span>
+                                                    <span className="text-gray-400 text-xs font-medium">/ 5.0</span>
                                                 </div>
-                                                <div className="text-xs text-gray-300 font-medium md:text-right">
-                                                    {program.investorsEducated || "50+ Investors Educated"}
+                                                <div className="flex items-center gap-1.5 text-xs text-gold/90 font-medium">
+                                                    <Users className="w-3.5 h-3.5 text-gold shrink-0" />
+                                                    <span>{program.investorsEducated || "50+ Investors Educated"}</span>
                                                 </div>
                                             </div>
                                             {isClickable ? (
