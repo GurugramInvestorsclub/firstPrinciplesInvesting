@@ -19,6 +19,7 @@ interface SubscriptionRow {
   razorpayPlanId: string
   source?: string | null
   notes?: Record<string, any> | null
+  paidCount?: number
   createdAt: string
   updatedAt: string
   latestCharge: {
@@ -651,6 +652,7 @@ export default function AdminSubscriptionsPage() {
                       <th style={tableCellStyle}>User</th>
                       <th style={tableCellStyle}>Plan</th>
                       <th style={tableCellStyle}>Status</th>
+                      <th style={tableCellStyle}>Purchases</th>
                       <th style={tableCellStyle}>Billing Window</th>
                       <th style={tableCellStyle}>Last Charge</th>
                       <th style={tableCellStyle}>Provider IDs</th>
@@ -705,6 +707,18 @@ export default function AdminSubscriptionsPage() {
                                 Requested {formatDate(row.cancelRequestedAt)}
                               </div>
                             ) : null}
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--gold)" }}>
+                              {row.paidCount ?? (row.status.toLowerCase() === "active" ? 1 : 0)}
+                            </div>
+                            <div style={{ color: "var(--text-secondary)", fontSize: "11px", marginTop: "2px" }}>
+                              {(row.paidCount ?? (row.status.toLowerCase() === "active" ? 1 : 0)) === 0
+                                ? "No Payment"
+                                : (row.paidCount ?? 1) === 1
+                                ? "Initial Purchase"
+                                : `Renewed ${(row.paidCount ?? 1) - 1}x`}
+                            </div>
                           </td>
                           <td style={tableCellStyle}>
                             <div>Start: {formatDate(row.currentStartAt)}</div>

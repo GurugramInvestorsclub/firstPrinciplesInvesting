@@ -15,6 +15,8 @@ import {
   RefreshCw,
   Info,
   ShieldCheck,
+  UserX,
+  AlertCircle,
 } from "lucide-react"
 
 interface RetentionMonthData {
@@ -24,6 +26,19 @@ interface RetentionMonthData {
   retained: number
   cancelled: number
   retentionRatePct: number
+}
+
+interface CancelledSubscriber {
+  id: string
+  userName: string
+  userEmail: string
+  planKey: string
+  status: string
+  cancelledAt: string | null
+  cancelRequestedAt: string | null
+  createdAt: string
+  paidCount: number
+  amountPaid: number
 }
 
 interface LtvTrendMonthData {
@@ -64,6 +79,7 @@ interface AnalyticsPayload {
   }
   retention: {
     monthly: RetentionMonthData[]
+    cancelledSubscribers: CancelledSubscriber[]
   }
   ltv: {
     averageLtv: number
@@ -206,6 +222,7 @@ export default function AdminAnalyticsPage() {
   }
 
   const retentionMonthly = data?.retention?.monthly || []
+  const cancelledSubscribers = data?.retention?.cancelledSubscribers || []
   const ltvTrend = data?.ltv?.monthlyTrend || []
   const ltvTiers = data?.ltv?.tiers || { under1k: 0, between1k3k: 0, between3k5k: 0, between5k10k: 0, above10k: 0 }
   const topCustomers = data?.ltv?.topCustomers || []
@@ -723,7 +740,110 @@ export default function AdminAnalyticsPage() {
         </div>
       </div>
 
-      {/* SECTION 4: TOP HIGH-LTV CUSTOMERS TABLE */}
+      {/* SECTION 4: CANCELLED, CANCEL REQUESTED & PAUSED SUBSCRIBERS TABLE */}
+      <div style={cardStyle}>
+        <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <h2 style={{ fontSize: "18px", fontWeight: 600, color: "#fff", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              <UserX style={{ width: "20px", height: "20px", color: "#ef4444" }} />
+              Cancelled & Paused Subscribers
+            </h2>
+            <p style={{ color: "rgba(255, 255, 255, 0.5)", fontSize: "13px", marginTop: "4px" }}>
+              List of members who have cancelled, requested cancellation, or paused their subscriptions.
+            </p>
+          </div>
+
+          <span
+            style={{
+              fontSize: "12px",
+              padding: "4px 10px",
+              borderRadius: "6px",
+              background: "rgba(239, 68, 68, 0.15)",
+              color: "#ef4444",
+              fontWeight: 600,
+            }}
+          >
+            {cancelledSubscribers.length} Members Listed
+          </span>
+        </div>
+
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", color: "#fff" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.12)", textAlign: "left" }}>
+                <th style={{ ...tableCellStyle, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>Member Name & Email</th>
+                <th style={{ ...tableCellStyle, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>Plan</th>
+                <th style={{ ...tableCellStyle, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>Current Status</th>
+                <th style={{ ...tableCellStyle, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>Amount Collected</th>
+                <th style={{ ...tableCellStyle, color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>Action Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cancelledSubscribers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ ...tableCellStyle, textAlign: "center", padding: "30px", color: "rgba(255,255,255,0.4)" }}>
+                    No cancelled or paused subscribers recorded.
+                  </td>
+                </tr>
+              ) : (
+                cancelledSubscribers.map((sub) => {
+                  const statusUpper = sub.status.toUpperCase()
+                  const isCancelled = statusUpper === "CANCELLED"
+                  const isCancelRequested = statusUpper === "CANCEL_REQUESTED"
+                  const isPaused = statusUpper === "PAUSED"
+
+                  const badgeBg = isCancelled
+                    ? "rgba(239, 68, 68, 0.15)"
+                    : isCancelRequested
+                    ? "rgba(245, 184, 0, 0.15)"
+                    : "rgba(59, 130, 246, 0.15)"
+
+                  const badgeColor = isCancelled ? "#ef4444" : isCancelRequested ? "var(--gold)" : "#3b82f6"
+
+                  const actionDateStr = sub.cancelledAt || sub.cancelRequestedAt || sub.createdAt
+
+                  return (
+                    <tr key={sub.id} style={{ transition: "background 0.15s ease" }} className="hover:bg-white/5">
+                      <td style={{ ...tableCellStyle }}>
+                        <div style={{ fontWeight: 600, color: "#fff" }}>{sub.userName}</div>
+                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{sub.userEmail}</div>
+                      </td>
+                      <td style={{ ...tableCellStyle, textTransform: "capitalize", fontWeight: 500 }}>
+                        {sub.planKey.toLowerCase().replace(/_/g, " ")}
+                      </td>
+                      <td style={{ ...tableCellStyle }}>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            padding: "3px 8px",
+                            borderRadius: "4px",
+                            fontWeight: 700,
+                            background: badgeBg,
+                            color: badgeColor,
+                            letterSpacing: "0.03em",
+                          }}
+                        >
+                          {statusUpper.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td style={{ ...tableCellStyle, fontWeight: 600, color: sub.amountPaid > 0 ? "var(--gold)" : "rgba(255,255,255,0.5)" }}>
+                        {formatCurrency(sub.amountPaid)}
+                      </td>
+                      <td style={{ ...tableCellStyle, color: "rgba(255,255,255,0.6)" }}>
+                        {actionDateStr
+                          ? new Date(actionDateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                          : "N/A"}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* SECTION 5: TOP HIGH-LTV CUSTOMERS TABLE */}
       <div style={cardStyle}>
         <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
           <div>

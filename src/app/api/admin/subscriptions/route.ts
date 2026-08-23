@@ -69,7 +69,7 @@ export async function GET() {
           razorpaySubscriptionId: subscription.razorpaySubscriptionId,
           razorpayPlanId: subscription.razorpayPlanId,
           source: subscription.source,
-          notes: subscription.notes,
+          paidCount: subscription.paidCount || (subscription.charges.length > 0 ? subscription.charges.length : (subscription.status === "ACTIVE" ? 1 : 0)),
           createdAt: subscription.createdAt,
           updatedAt: subscription.updatedAt,
           latestCharge: subscription.charges[0]

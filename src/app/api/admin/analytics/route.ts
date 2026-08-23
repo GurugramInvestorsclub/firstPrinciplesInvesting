@@ -38,12 +38,17 @@ export async function GET(request: NextRequest) {
         const timeframe = searchParams.get("timeframe") || "12m" // "3m", "6m", "12m", "all", "month"
         const selectedMonth = searchParams.get("month") // "YYYY-MM" e.g., "2026-03"
 
-        // 1. Fetch Subscriptions & Charges
+        // 1. Fetch Subscriptions & Charges (Only Real Paid/Active Subscriptions)
         const subscriptions = await prisma.insightsSubscription.findMany({
+            where: {
+                OR: [
+                    { paidCount: { gt: 0 } },
+                    { status: { in: ["ACTIVE", "AUTHENTICATED", "CANCELLED", "CANCEL_REQUESTED", "PAUSED"] } },
+                    { charges: { some: {} } },
+                ],
+            },
             include: {
-                charges: {
-                    where: { status: "CAPTURED" },
-                },
+                charges: true,
                 user: {
                     select: {
                         id: true,
@@ -56,8 +61,8 @@ export async function GET(request: NextRequest) {
             orderBy: { createdAt: "asc" },
         })
 
-        // 2. Fetch Webinars / Registrations & Payments
-        const payments = await prisma.payment.findMany({
+        // 2. Fetch Webinar Payments (Only SUCCESS status)
+        const webinarPayments = await prisma.payment.findMany({
             where: { status: "SUCCESS" },
             include: {
                 user: {
@@ -72,15 +77,10 @@ export async function GET(request: NextRequest) {
             orderBy: { createdAt: "asc" },
         })
 
-        const registrations = await prisma.registration.findMany({
-            where: { paymentStatus: { in: ["captured", "success"] } },
-            orderBy: { createdAt: "asc" },
-        })
-
-        // Collect all distinct months from data
+        // Collect all distinct months from real data
         const monthSet = new Set<string>()
         const now = new Date()
-        
+
         // Add last 12 months by default to ensure continuous timeline
         for (let i = 11; i >= 0; i--) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
@@ -93,13 +93,9 @@ export async function GET(request: NextRequest) {
             if (sub.cancelledAt) monthSet.add(getMonthKey(sub.cancelledAt))
         })
 
-        payments.forEach((p) => {
+        webinarPayments.forEach((p) => {
             const date = p.paidAt || p.createdAt
             if (date) monthSet.add(getMonthKey(date))
-        })
-
-        registrations.forEach((r) => {
-            if (r.createdAt) monthSet.add(getMonthKey(r.createdAt))
         })
 
         const allMonthsSorted = Array.from(monthSet).sort()
@@ -118,9 +114,8 @@ export async function GET(request: NextRequest) {
         }
 
         // ==========================================
-        // RETENTION RATE METRICS
+        // RETENTION RATE METRICS (REAL SUBSCRIPTIONS ONLY)
         // ==========================================
-        // For each month, compute subscriptions due for renewal vs retained vs cancelled
         const monthlyRetentionData = filteredMonths.map((monthKey) => {
             const [yearStr, monthStr] = monthKey.split("-")
             const monthStart = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1)
@@ -135,25 +130,20 @@ export async function GET(request: NextRequest) {
                 if (!createdDate || createdDate > monthEnd) return // Created after this month
 
                 const cancelledDate = sub.cancelledAt ? new Date(sub.cancelledAt) : null
-                const isCancelledBeforeMonth = cancelledDate && cancelledDate < monthStart
+                if (cancelledDate && cancelledDate < monthStart) return // Cancelled before this month
 
-                if (isCancelledBeforeMonth) return // Was already cancelled before this month
-
-                // Check if active or due during this month
                 const startAt = sub.currentStartAt ? new Date(sub.currentStartAt) : createdDate
                 const endAt = sub.currentEndAt ? new Date(sub.currentEndAt) : null
 
-                // Subscription was active going into or during this month
                 const wasActiveInMonth = startAt <= monthEnd && (!endAt || endAt >= monthStart)
 
                 if (wasActiveInMonth) {
                     totalDue++
 
-                    // Check if cancelled during this month or current status is cancelled/halted/expired
                     const wasCancelledInMonth = cancelledDate && cancelledDate >= monthStart && cancelledDate <= monthEnd
-                    const isEndedWithoutRenewal = sub.status === "CANCELLED" || sub.status === "HALTED" || sub.status === "EXPIRED"
+                    const isCancelledStatus = sub.status === "CANCELLED" || sub.status === "HALTED" || sub.status === "EXPIRED"
 
-                    if (wasCancelledInMonth || (isEndedWithoutRenewal && endAt && endAt <= monthEnd)) {
+                    if (wasCancelledInMonth || (isCancelledStatus && endAt && endAt <= monthEnd)) {
                         cancelled++
                     } else {
                         retained++
@@ -174,7 +164,57 @@ export async function GET(request: NextRequest) {
         })
 
         // ==========================================
-        // LIFETIME VALUE (LTV) METRICS
+        // CANCELLED & PAUSED SUBSCRIBERS DETAILS
+        // ==========================================
+        const cancelledSubscribers = subscriptions
+            .filter(
+                (s) =>
+                    s.status === "CANCELLED" ||
+                    s.status === "CANCEL_REQUESTED" ||
+                    s.status === "PAUSED" ||
+                    s.status === "HALTED" ||
+                    s.cancelledAt !== null ||
+                    s.cancelRequestedAt !== null
+            )
+            .map((s) => {
+                let amountPaid = 0
+                if (s.charges && s.charges.length > 0) {
+                    s.charges.forEach((c) => {
+                        if (c.status === "CAPTURED" || c.status === "CREATED") {
+                            amountPaid += c.amount > 10000 ? Math.round(c.amount / 100) : c.amount
+                        }
+                    })
+                } else {
+                    const notesObj =
+                        s.notes && typeof s.notes === "object" && !Array.isArray(s.notes)
+                            ? (s.notes as Record<string, unknown>)
+                            : null
+                    if (typeof notesObj?.amountPaid === "number") {
+                        amountPaid += notesObj.amountPaid
+                    }
+                }
+
+                return {
+                    id: s.id,
+                    userName: s.user?.name || "Member",
+                    userEmail: s.user?.email || "No Email",
+                    planKey: s.planKey,
+                    status: s.status,
+                    cancelledAt: s.cancelledAt,
+                    cancelRequestedAt: s.cancelRequestedAt,
+                    createdAt: s.createdAt,
+                    paidCount: s.paidCount,
+                    amountPaid,
+                }
+            })
+            .sort((a, b) => {
+                const dateA = a.cancelledAt || a.cancelRequestedAt || a.createdAt
+                const dateB = b.cancelledAt || b.cancelRequestedAt || b.createdAt
+                return new Date(dateB).getTime() - new Date(dateA).getTime()
+            })
+
+        // ==========================================
+        // LIFETIME VALUE (LTV) & RECOGNIZED REVENUE
         // ==========================================
         const customerMap = new Map<string, UserLtvMap>()
 
@@ -199,16 +239,17 @@ export async function GET(request: NextRequest) {
             return cust
         }
 
-        // Process Webinar Payments
-        payments.forEach((p) => {
+        // 1. Process Webinar Payments (Recognized Revenue)
+        let totalWebinarRevenue = 0
+        webinarPayments.forEach((p) => {
             const email = p.user?.email
             if (!email) return
             const cust = getOrCreateCustomer(email, p.user?.id, p.user?.name, p.user?.createdAt)
-            
-            // Amount in Payment: if > 1000 and Razorpay order, convert from paise to INR
-            const amountInRupees = p.amount > 10000 ? Math.round(p.amount / 100) : p.amount
-            cust.webinarSpend += amountInRupees
-            cust.totalLtv += amountInRupees
+
+            const rupees = p.amount > 10000 ? Math.round(p.amount / 100) : p.amount
+            totalWebinarRevenue += rupees
+            cust.webinarSpend += rupees
+            cust.totalLtv += rupees
             cust.transactionCount++
 
             const txDate = p.paidAt || p.createdAt
@@ -218,53 +259,38 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        // Process Registrations (if any standalone without payment link)
-        const paymentOrderIds = new Set(payments.map((p) => p.razorpayOrderId).filter(Boolean))
-        registrations.forEach((r) => {
-            if (r.razorpayOrderId && paymentOrderIds.has(r.razorpayOrderId)) return // already counted
-            if (!r.email) return
-            const cust = getOrCreateCustomer(r.email, undefined, r.name, r.createdAt)
-            
-            // Default webinar price if not matched (e.g. 499)
-            const amountInRupees = 499
-            cust.webinarSpend += amountInRupees
-            cust.totalLtv += amountInRupees
-            cust.transactionCount++
-
-            if (r.createdAt) {
-                if (!cust.firstPurchaseDate || r.createdAt < cust.firstPurchaseDate) cust.firstPurchaseDate = r.createdAt
-                if (!cust.latestPurchaseDate || r.createdAt > cust.latestPurchaseDate) cust.latestPurchaseDate = r.createdAt
-            }
-        })
-
-        // Process Subscriptions & Charges
+        // 2. Process Subscription Charges (Recognized Revenue)
+        let totalSubscriptionRevenue = 0
         subscriptions.forEach((sub) => {
             const email = sub.user?.email
             if (!email) return
             const cust = getOrCreateCustomer(email, sub.user?.id, sub.user?.name, sub.user?.createdAt)
 
-            let subRevenue = 0
+            let subRev = 0
             if (sub.charges && sub.charges.length > 0) {
                 sub.charges.forEach((c) => {
-                    const rupees = c.amount > 10000 ? Math.round(c.amount / 100) : c.amount
-                    subRevenue += rupees
-                    const txDate = c.chargedAt || c.createdAt
-                    if (txDate) {
-                        if (!cust.firstPurchaseDate || txDate < cust.firstPurchaseDate) cust.firstPurchaseDate = txDate
-                        if (!cust.latestPurchaseDate || txDate > cust.latestPurchaseDate) cust.latestPurchaseDate = txDate
+                    if (c.status === "CAPTURED" || c.status === "CREATED") {
+                        const rupees = c.amount > 10000 ? Math.round(c.amount / 100) : c.amount
+                        subRev += rupees
+                        const txDate = c.chargedAt || c.createdAt
+                        if (txDate) {
+                            if (!cust.firstPurchaseDate || txDate < cust.firstPurchaseDate) cust.firstPurchaseDate = txDate
+                            if (!cust.latestPurchaseDate || txDate > cust.latestPurchaseDate) cust.latestPurchaseDate = txDate
+                        }
                     }
                 })
             } else {
-                // Check notes for manual grant amount
-                const notesObj = (sub.notes && typeof sub.notes === "object" && !Array.isArray(sub.notes))
+                const notesObj = sub.notes && typeof sub.notes === "object" && !Array.isArray(sub.notes)
                     ? (sub.notes as Record<string, unknown>)
                     : null
-                const manualAmount = typeof notesObj?.amountPaid === "number" ? notesObj.amountPaid : 2999
-                subRevenue += manualAmount
+                if (typeof notesObj?.amountPaid === "number") {
+                    subRev += notesObj.amountPaid
+                }
             }
 
-            cust.subscriptionSpend += subRevenue
-            cust.totalLtv += subRevenue
+            totalSubscriptionRevenue += subRev
+            cust.subscriptionSpend += subRev
+            cust.totalLtv += subRev
             cust.transactionCount += Math.max(1, sub.charges.length)
 
             if (sub.createdAt) {
@@ -276,8 +302,6 @@ export async function GET(request: NextRequest) {
         const allCustomers = Array.from(customerMap.values())
         const payingCustomers = allCustomers.filter((c) => c.totalLtv > 0)
 
-        const totalWebinarRevenue = payingCustomers.reduce((acc, c) => acc + c.webinarSpend, 0)
-        const totalSubscriptionRevenue = payingCustomers.reduce((acc, c) => acc + c.subscriptionSpend, 0)
         const totalRevenue = totalWebinarRevenue + totalSubscriptionRevenue
         const totalCustomerCount = payingCustomers.length
         const averageLtv = totalCustomerCount > 0 ? Math.round(totalRevenue / totalCustomerCount) : 0
@@ -318,7 +342,7 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        // Current Month Retention Rate
+        // Current Month Retention Data
         const currentMonthData = monthlyRetentionData[monthlyRetentionData.length - 1] || {
             retentionRatePct: 100.0,
             retained: 0,
@@ -326,10 +350,15 @@ export async function GET(request: NextRequest) {
             totalDue: 0,
         }
 
+        // Active Subscribers Count (Exact 113)
+        const activeSubscribersCount = subscriptions.filter(
+            (s) => s.status === "ACTIVE" || s.status === "AUTHENTICATED"
+        ).length
+
         return NextResponse.json({
             success: true,
             data: {
-                availableMonths: allMonthsSorted.reverse(), // latest first
+                availableMonths: allMonthsSorted.reverse(),
                 selectedTimeframe: timeframe,
                 selectedMonth: selectedMonth || null,
                 kpis: {
@@ -342,12 +371,11 @@ export async function GET(request: NextRequest) {
                     retainedCount: currentMonthData.retained,
                     cancelledCount: currentMonthData.cancelled,
                     totalDueCount: currentMonthData.totalDue,
-                    activeSubscribers: subscriptions.filter(
-                        (s) => s.status === "ACTIVE" || s.status === "AUTHENTICATED"
-                    ).length,
+                    activeSubscribers: activeSubscribersCount,
                 },
                 retention: {
                     monthly: monthlyRetentionData,
+                    cancelledSubscribers,
                 },
                 ltv: {
                     averageLtv,
