@@ -56,21 +56,31 @@ export async function GET(
                 authorized: false,
                 topic: {
                     title: topic.title,
+                    companyName: topic.companyName,
                     forumType: topic.forumType,
                 },
             })
         }
 
-        // Increment views count asynchronously
+        // Increment views count
         await prisma.forumTopic.update({
             where: { id: topic.id },
             data: { viewsCount: { increment: 1 } },
         }).catch(() => {})
 
+        // Compute unique contributors
+        const authorSet = new Set<string>()
+        if (topic.authorId) authorSet.add(topic.authorId)
+        topic.posts.forEach((p) => authorSet.add(p.authorId))
+
         return NextResponse.json({
             success: true,
             authorized: true,
-            topic,
+            topic: {
+                ...topic,
+                contributorsCount: authorSet.size,
+                lastActiveAt: topic.lastActiveAt || topic.updatedAt || topic.createdAt,
+            },
         })
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -113,24 +123,32 @@ export async function POST(
             return NextResponse.json({ success: false, error: "Reply content is required" }, { status: 400 })
         }
 
-        const newPost = await prisma.forumPost.create({
-            data: {
-                topicId: topic.id,
-                authorId: session.user.id,
-                content: content.trim(),
-                parentId: parentId || null,
-            },
-            include: {
-                author: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        image: true,
+        const now = new Date()
+
+        const [newPost] = await prisma.$transaction([
+            prisma.forumPost.create({
+                data: {
+                    topicId: topic.id,
+                    authorId: session.user.id,
+                    content: content.trim(),
+                    parentId: parentId || null,
+                },
+                include: {
+                    author: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            image: true,
+                        },
                     },
                 },
-            },
-        })
+            }),
+            prisma.forumTopic.update({
+                where: { id: topic.id },
+                data: { lastActiveAt: now },
+            }),
+        ])
 
         return NextResponse.json({ success: true, post: newPost })
     } catch (error) {

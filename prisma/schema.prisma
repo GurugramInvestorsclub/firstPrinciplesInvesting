@@ -373,21 +373,26 @@ enum ForumType {
 }
 
 model ForumTopic {
-  id         String      @id @default(cuid())
-  title      String
-  slug       String      @unique
-  content    String
-  forumType  ForumType   @map("forum_type")
-  isPinned   Boolean     @default(false) @map("is_pinned")
-  isLocked   Boolean     @default(false) @map("is_locked")
-  authorId   String      @map("author_id")
-  viewsCount Int         @default(0) @map("views_count")
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
-  author     User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  posts      ForumPost[]
+  id           String      @id @default(cuid())
+  title        String
+  slug         String      @unique
+  content      String
+  forumType    ForumType   @map("forum_type")
+  companyName  String?     @map("company_name")
+  category     String      @default("General") @map("category")
+  tags         String[]    @default([])
+  isPinned     Boolean     @default(false) @map("is_pinned")
+  isLocked     Boolean     @default(false) @map("is_locked")
+  authorId     String      @map("author_id")
+  viewsCount   Int         @default(0) @map("views_count")
+  lastActiveAt DateTime    @default(now()) @map("last_active_at")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  posts        ForumPost[]
 
   @@index([forumType, createdAt])
+  @@index([forumType, lastActiveAt])
   @@index([authorId])
   @@map("forum_topics")
 }

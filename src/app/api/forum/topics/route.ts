@@ -1,6 +1,6 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { ForumType } from "@prisma/client"
+import { ForumType, Prisma } from "@prisma/client"
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 
@@ -41,6 +41,9 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const typeParam = searchParams.get("type")?.toUpperCase()
         const forumType = typeParam === "SUPER_30" ? ForumType.SUPER_30 : ForumType.SUBSCRIBERS
+        const categoryParam = searchParams.get("category") || "All"
+        const search = searchParams.get("search")?.trim() || ""
+        const sort = searchParams.get("sort") || "recently_active" // "recently_active", "newest", "most_discussed"
 
         const session = await auth()
         const userId = session?.user?.id
@@ -62,8 +65,48 @@ export async function GET(request: NextRequest) {
             })
         }
 
+        // Build Prisma Filter
+        const whereClause: Prisma.ForumTopicWhereInput = {
+            forumType,
+        }
+
+        // Category Filter
+        if (categoryParam && categoryParam !== "All") {
+            if (categoryParam === "Companies") {
+                whereClause.companyName = { not: null }
+            } else if (categoryParam === "Sectors") {
+                whereClause.OR = [
+                    { category: { equals: "Industry", mode: "insensitive" } },
+                    { tags: { hasSome: ["Sectors", "Industry", "Pharma", "Chemicals", "Banking", "IT"] } },
+                ]
+            } else {
+                whereClause.category = { equals: categoryParam, mode: "insensitive" }
+            }
+        }
+
+        // Search Filter across title, companyName, content, tags
+        if (search) {
+            whereClause.OR = [
+                { title: { contains: search, mode: "insensitive" } },
+                { companyName: { contains: search, mode: "insensitive" } },
+                { content: { contains: search, mode: "insensitive" } },
+                { tags: { hasSome: [search] } },
+            ]
+        }
+
+        // Order By
+        let orderByClause: Prisma.ForumTopicOrderByWithRelationInput[] = []
+        if (sort === "newest") {
+            orderByClause = [{ isPinned: "desc" }, { createdAt: "desc" }]
+        } else if (sort === "most_discussed") {
+            orderByClause = [{ isPinned: "desc" }, { posts: { _count: "desc" } }]
+        } else {
+            // Default: Recently Active
+            orderByClause = [{ isPinned: "desc" }, { lastActiveAt: "desc" }]
+        }
+
         const topics = await prisma.forumTopic.findMany({
-            where: { forumType },
+            where: whereClause,
             include: {
                 author: {
                     select: {
@@ -73,30 +116,50 @@ export async function GET(request: NextRequest) {
                         image: true,
                     },
                 },
+                posts: {
+                    select: {
+                        authorId: true,
+                        createdAt: true,
+                    },
+                },
                 _count: {
                     select: { posts: true },
                 },
             },
-            orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
+            orderBy: orderByClause,
+        })
+
+        const formattedTopics = topics.map((t) => {
+            // Count unique contributors (author + post authors)
+            const authorSet = new Set<string>()
+            if (t.authorId) authorSet.add(t.authorId)
+            t.posts.forEach((p) => authorSet.add(p.authorId))
+
+            return {
+                id: t.id,
+                title: t.title,
+                slug: t.slug,
+                content: t.content,
+                companyName: t.companyName,
+                category: t.category,
+                tags: t.tags,
+                isPinned: t.isPinned,
+                isLocked: t.isLocked,
+                viewsCount: t.viewsCount,
+                repliesCount: t._count.posts,
+                contributorsCount: authorSet.size,
+                lastActiveAt: t.lastActiveAt || t.updatedAt || t.createdAt,
+                createdAt: t.createdAt,
+                updatedAt: t.updatedAt,
+                author: t.author,
+            }
         })
 
         return NextResponse.json({
             success: true,
             authorized: true,
             forumType,
-            topics: topics.map((t) => ({
-                id: t.id,
-                title: t.title,
-                slug: t.slug,
-                content: t.content,
-                isPinned: t.isPinned,
-                isLocked: t.isLocked,
-                viewsCount: t.viewsCount,
-                repliesCount: t._count.posts,
-                createdAt: t.createdAt,
-                updatedAt: t.updatedAt,
-                author: t.author,
-            })),
+            topics: formattedTopics,
         })
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -112,7 +175,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { title, content, type } = body
+        const { title, content, type, companyName, category, tags } = body
 
         if (!title || typeof title !== "string" || !title.trim()) {
             return NextResponse.json({ success: false, error: "Title is required" }, { status: 400 })
@@ -130,6 +193,13 @@ export async function POST(request: NextRequest) {
         }
 
         const topicSlug = slugify(title)
+        const parsedCompanyName = typeof companyName === "string" && companyName.trim() ? companyName.trim().toUpperCase() : null
+        const parsedCategory = typeof category === "string" && category.trim() ? category.trim() : "Investment Thesis"
+        const parsedTags = Array.isArray(tags)
+            ? tags.map((t) => String(t).trim()).filter(Boolean)
+            : typeof tags === "string"
+            ? tags.split(",").map((t) => t.trim()).filter(Boolean)
+            : []
 
         const newTopic = await prisma.forumTopic.create({
             data: {
@@ -137,7 +207,11 @@ export async function POST(request: NextRequest) {
                 slug: topicSlug,
                 content: content.trim(),
                 forumType,
+                companyName: parsedCompanyName,
+                category: parsedCategory,
+                tags: parsedTags,
                 authorId: session.user.id,
+                lastActiveAt: new Date(),
             },
             include: {
                 author: {
