@@ -14,6 +14,7 @@ import {
   Award,
   RefreshCw,
   Info,
+  ShieldCheck,
 } from "lucide-react"
 
 interface RetentionMonthData {
