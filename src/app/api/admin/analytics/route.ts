@@ -329,7 +329,7 @@ export async function GET(request: NextRequest) {
 
             if (sub.createdAt) {
                 if (!cust.firstPurchaseDate || sub.createdAt < cust.firstPurchaseDate) cust.firstPurchaseDate = sub.createdAt
-                if (!cust.latestPurchaseDate || sub.createdAt > sub.latestPurchaseDate) cust.latestPurchaseDate = sub.createdAt
+                if (!cust.latestPurchaseDate || sub.createdAt > cust.latestPurchaseDate) cust.latestPurchaseDate = sub.createdAt
             }
         })
 
