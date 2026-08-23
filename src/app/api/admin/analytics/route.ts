@@ -119,6 +119,8 @@ export async function GET(request: NextRequest) {
         // ==========================================
         // A cancellation is ONLY evaluated when the subscription's billing cycle end date (currentEndAt) has arrived/passed.
         const monthlyRetentionData = filteredMonths.map((monthKey) => {
+            const [yearStr, monthStr] = monthKey.split("-")
+            const monthEnd = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10), 0, 23, 59, 59, 999)
             let retained = 0
             let cancelled = 0
 
