@@ -190,7 +190,7 @@ export default function SubscriberTopicDetailPage({ params }: { params: Promise<
               </div>
 
               {/* Topic Body Content */}
-              <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.9)", lineHeight: "1.7", whitespace: "pre-wrap" }}>
+              <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.9)", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
                 {topic.content}
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function SubscriberTopicDetailPage({ params }: { params: Promise<
                           {new Date(post.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
-                      <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", lineHeight: "1.6", whitespace: "pre-wrap" }}>
+                      <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
                         {post.content}
                       </div>
                     </div>
