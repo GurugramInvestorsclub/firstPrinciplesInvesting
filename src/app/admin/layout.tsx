@@ -85,6 +85,9 @@ export default function AdminLayout({
                         <Link href="/admin/users" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Users
                         </Link>
+                        <Link href="/admin/super30-codes" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Super 30 Codes
+                        </Link>
                     </nav>
                 </div>
             </header>
