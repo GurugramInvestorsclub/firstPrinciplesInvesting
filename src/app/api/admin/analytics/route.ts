@@ -50,7 +50,9 @@ export async function GET(request: NextRequest) {
                 ],
             },
             include: {
-                charges: true,
+                charges: {
+                    orderBy: { createdAt: "asc" },
+                },
                 user: {
                     select: {
                         id: true,
@@ -92,6 +94,10 @@ export async function GET(request: NextRequest) {
             if (sub.createdAt) monthSet.add(getMonthKey(sub.createdAt))
             if (sub.currentStartAt) monthSet.add(getMonthKey(sub.currentStartAt))
             if (sub.cancelledAt) monthSet.add(getMonthKey(sub.cancelledAt))
+            sub.charges.forEach((c) => {
+                const date = c.chargedAt || c.createdAt
+                if (date) monthSet.add(getMonthKey(new Date(date)))
+            })
         })
 
         webinarPayments.forEach((p) => {
@@ -115,9 +121,9 @@ export async function GET(request: NextRequest) {
         }
 
         // ==========================================
-        // RETENTION RATE METRICS (COUNTING CANCELLATIONS ONLY AFTER DUE DATE)
+        // RETENTION RATE METRICS BY MONTH
         // ==========================================
-        // A cancellation is ONLY evaluated when the subscription's billing cycle end date (currentEndAt) has arrived/passed.
+        // A renewal charge (2nd, 3rd, etc.) is mapped to the month in which it was charged.
         const monthlyRetentionData = filteredMonths.map((monthKey) => {
             const [yearStr, monthStr] = monthKey.split("-")
             const monthEnd = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10), 0, 23, 59, 59, 999)
@@ -125,7 +131,23 @@ export async function GET(request: NextRequest) {
             let cancelled = 0
 
             subscriptions.forEach((sub) => {
-                const hasRenewed = sub.paidCount >= 2 || sub.charges.length >= 2
+                // Check if any renewal charge (index >= 1, i.e., 2nd charge onwards) happened in this month
+                const renewalChargesInMonth = sub.charges.filter((c, idx) => {
+                    if (idx === 0) return false // 1st charge is initial purchase
+                    const date = c.chargedAt || c.createdAt
+                    return date && getMonthKey(new Date(date)) === monthKey
+                })
+
+                if (renewalChargesInMonth.length > 0) {
+                    retained += renewalChargesInMonth.length
+                } else if (sub.paidCount >= 2) {
+                    const startAt = sub.currentStartAt ? new Date(sub.currentStartAt) : null
+                    if (startAt && getMonthKey(startAt) === monthKey) {
+                        retained++
+                    }
+                }
+
+                // Check if cancelled in this month and endAt <= monthEnd
                 const isCancelled =
                     sub.status === "CANCELLED" ||
                     sub.status === "CANCEL_REQUESTED" ||
@@ -134,17 +156,8 @@ export async function GET(request: NextRequest) {
                     sub.cancelRequestedAt !== null
 
                 const endAt = sub.currentEndAt ? new Date(sub.currentEndAt) : null
-
-                // Evaluation month is based on renewal date (currentEndAt) or charge date
-                const renewalMonth = endAt ? getMonthKey(endAt) : sub.createdAt ? getMonthKey(new Date(sub.createdAt)) : null
-
-                if (renewalMonth === monthKey) {
-                    // Only count as cancelled if currentEndAt has passed or falls in this month
-                    if (hasRenewed) {
-                        retained++
-                    } else if (isCancelled && endAt && endAt <= monthEnd) {
-                        cancelled++
-                    }
+                if (isCancelled && endAt && endAt <= monthEnd && getMonthKey(endAt) === monthKey) {
+                    cancelled++
                 }
             })
 
@@ -161,7 +174,7 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        // KPI Retention Rate Across All Subscriptions (Evaluating cancellations ONLY after due date <= now)
+        // Overall KPI Retention Rate Across All Subscriptions
         let renewedCount = 0
         let renewalCancelledPastDueCount = 0
         let cancellationPendingFutureCount = 0
