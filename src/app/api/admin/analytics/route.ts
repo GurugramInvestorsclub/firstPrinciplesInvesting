@@ -1,0 +1,364 @@
+import { prisma } from "@/lib/prisma"
+import { NextRequest, NextResponse } from "next/server"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
+
+export const dynamic = "force-dynamic"
+
+interface UserLtvMap {
+    id: string
+    name: string | null
+    email: string
+    webinarSpend: number
+    subscriptionSpend: number
+    totalLtv: number
+    transactionCount: number
+    firstPurchaseDate: Date | null
+    latestPurchaseDate: Date | null
+}
+
+function getMonthKey(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    return `${year}-${month}`
+}
+
+function formatMonthLabel(monthKey: string): string {
+    const [year, month] = monthKey.split("-")
+    const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1)
+    return date.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        if (!(await isAdminAuthenticated())) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+
+        const { searchParams } = new URL(request.url)
+        const timeframe = searchParams.get("timeframe") || "12m" // "3m", "6m", "12m", "all", "month"
+        const selectedMonth = searchParams.get("month") // "YYYY-MM" e.g., "2026-03"
+
+        // 1. Fetch Subscriptions & Charges
+        const subscriptions = await prisma.insightsSubscription.findMany({
+            include: {
+                charges: {
+                    where: { status: "CAPTURED" },
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        createdAt: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: "asc" },
+        })
+
+        // 2. Fetch Webinars / Registrations & Payments
+        const payments = await prisma.payment.findMany({
+            where: { status: "SUCCESS" },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        createdAt: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: "asc" },
+        })
+
+        const registrations = await prisma.registration.findMany({
+            where: { paymentStatus: { in: ["captured", "success"] } },
+            orderBy: { createdAt: "asc" },
+        })
+
+        // Collect all distinct months from data
+        const monthSet = new Set<string>()
+        const now = new Date()
+        
+        // Add last 12 months by default to ensure continuous timeline
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+            monthSet.add(getMonthKey(d))
+        }
+
+        subscriptions.forEach((sub) => {
+            if (sub.createdAt) monthSet.add(getMonthKey(sub.createdAt))
+            if (sub.currentStartAt) monthSet.add(getMonthKey(sub.currentStartAt))
+            if (sub.cancelledAt) monthSet.add(getMonthKey(sub.cancelledAt))
+        })
+
+        payments.forEach((p) => {
+            const date = p.paidAt || p.createdAt
+            if (date) monthSet.add(getMonthKey(date))
+        })
+
+        registrations.forEach((r) => {
+            if (r.createdAt) monthSet.add(getMonthKey(r.createdAt))
+        })
+
+        const allMonthsSorted = Array.from(monthSet).sort()
+
+        // Filter months based on requested timeframe / month selection
+        let filteredMonths = [...allMonthsSorted]
+
+        if (timeframe === "3m") {
+            filteredMonths = filteredMonths.slice(-3)
+        } else if (timeframe === "6m") {
+            filteredMonths = filteredMonths.slice(-6)
+        } else if (timeframe === "12m") {
+            filteredMonths = filteredMonths.slice(-12)
+        } else if (timeframe === "month" && selectedMonth) {
+            filteredMonths = filteredMonths.filter((m) => m === selectedMonth)
+        }
+
+        // ==========================================
+        // RETENTION RATE METRICS
+        // ==========================================
+        // For each month, compute subscriptions due for renewal vs retained vs cancelled
+        const monthlyRetentionData = filteredMonths.map((monthKey) => {
+            const [yearStr, monthStr] = monthKey.split("-")
+            const monthStart = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1)
+            const monthEnd = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10), 0, 23, 59, 59, 999)
+
+            let totalDue = 0
+            let retained = 0
+            let cancelled = 0
+
+            subscriptions.forEach((sub) => {
+                const createdDate = sub.createdAt ? new Date(sub.createdAt) : null
+                if (!createdDate || createdDate > monthEnd) return // Created after this month
+
+                const cancelledDate = sub.cancelledAt ? new Date(sub.cancelledAt) : null
+                const isCancelledBeforeMonth = cancelledDate && cancelledDate < monthStart
+
+                if (isCancelledBeforeMonth) return // Was already cancelled before this month
+
+                // Check if active or due during this month
+                const startAt = sub.currentStartAt ? new Date(sub.currentStartAt) : createdDate
+                const endAt = sub.currentEndAt ? new Date(sub.currentEndAt) : null
+
+                // Subscription was active going into or during this month
+                const wasActiveInMonth = startAt <= monthEnd && (!endAt || endAt >= monthStart)
+
+                if (wasActiveInMonth) {
+                    totalDue++
+
+                    // Check if cancelled during this month or current status is cancelled/halted/expired
+                    const wasCancelledInMonth = cancelledDate && cancelledDate >= monthStart && cancelledDate <= monthEnd
+                    const isEndedWithoutRenewal = sub.status === "CANCELLED" || sub.status === "HALTED" || sub.status === "EXPIRED"
+
+                    if (wasCancelledInMonth || (isEndedWithoutRenewal && endAt && endAt <= monthEnd)) {
+                        cancelled++
+                    } else {
+                        retained++
+                    }
+                }
+            })
+
+            const retentionRatePct = totalDue > 0 ? Math.round((retained / totalDue) * 1000) / 10 : 100.0
+
+            return {
+                monthKey,
+                monthLabel: formatMonthLabel(monthKey),
+                totalDue,
+                retained,
+                cancelled,
+                retentionRatePct,
+            }
+        })
+
+        // ==========================================
+        // LIFETIME VALUE (LTV) METRICS
+        // ==========================================
+        const customerMap = new Map<string, UserLtvMap>()
+
+        const getOrCreateCustomer = (email: string, userId?: string, name?: string | null, userCreatedAt?: Date) => {
+            const key = (email || userId || `unknown_${Math.random()}`).toLowerCase().trim()
+            if (!customerMap.has(key)) {
+                customerMap.set(key, {
+                    id: userId || key,
+                    name: name || null,
+                    email: email.toLowerCase().trim(),
+                    webinarSpend: 0,
+                    subscriptionSpend: 0,
+                    totalLtv: 0,
+                    transactionCount: 0,
+                    firstPurchaseDate: userCreatedAt || null,
+                    latestPurchaseDate: null,
+                })
+            }
+            const cust = customerMap.get(key)!
+            if (name && !cust.name) cust.name = name
+            if (userId && cust.id.startsWith("unknown_")) cust.id = userId
+            return cust
+        }
+
+        // Process Webinar Payments
+        payments.forEach((p) => {
+            const email = p.user?.email
+            if (!email) return
+            const cust = getOrCreateCustomer(email, p.user?.id, p.user?.name, p.user?.createdAt)
+            
+            // Amount in Payment: if > 1000 and Razorpay order, convert from paise to INR
+            const amountInRupees = p.amount > 10000 ? Math.round(p.amount / 100) : p.amount
+            cust.webinarSpend += amountInRupees
+            cust.totalLtv += amountInRupees
+            cust.transactionCount++
+
+            const txDate = p.paidAt || p.createdAt
+            if (txDate) {
+                if (!cust.firstPurchaseDate || txDate < cust.firstPurchaseDate) cust.firstPurchaseDate = txDate
+                if (!cust.latestPurchaseDate || txDate > cust.latestPurchaseDate) cust.latestPurchaseDate = txDate
+            }
+        })
+
+        // Process Registrations (if any standalone without payment link)
+        const paymentOrderIds = new Set(payments.map((p) => p.razorpayOrderId).filter(Boolean))
+        registrations.forEach((r) => {
+            if (r.razorpayOrderId && paymentOrderIds.has(r.razorpayOrderId)) return // already counted
+            if (!r.email) return
+            const cust = getOrCreateCustomer(r.email, undefined, r.name, r.createdAt)
+            
+            // Default webinar price if not matched (e.g. 499)
+            const amountInRupees = 499
+            cust.webinarSpend += amountInRupees
+            cust.totalLtv += amountInRupees
+            cust.transactionCount++
+
+            if (r.createdAt) {
+                if (!cust.firstPurchaseDate || r.createdAt < cust.firstPurchaseDate) cust.firstPurchaseDate = r.createdAt
+                if (!cust.latestPurchaseDate || r.createdAt > cust.latestPurchaseDate) cust.latestPurchaseDate = r.createdAt
+            }
+        })
+
+        // Process Subscriptions & Charges
+        subscriptions.forEach((sub) => {
+            const email = sub.user?.email
+            if (!email) return
+            const cust = getOrCreateCustomer(email, sub.user?.id, sub.user?.name, sub.user?.createdAt)
+
+            let subRevenue = 0
+            if (sub.charges && sub.charges.length > 0) {
+                sub.charges.forEach((c) => {
+                    const rupees = c.amount > 10000 ? Math.round(c.amount / 100) : c.amount
+                    subRevenue += rupees
+                    const txDate = c.chargedAt || c.createdAt
+                    if (txDate) {
+                        if (!cust.firstPurchaseDate || txDate < cust.firstPurchaseDate) cust.firstPurchaseDate = txDate
+                        if (!cust.latestPurchaseDate || txDate > cust.latestPurchaseDate) cust.latestPurchaseDate = txDate
+                    }
+                })
+            } else {
+                // Check notes for manual grant amount
+                const notesObj = (sub.notes && typeof sub.notes === "object" && !Array.isArray(sub.notes))
+                    ? (sub.notes as Record<string, unknown>)
+                    : null
+                const manualAmount = typeof notesObj?.amountPaid === "number" ? notesObj.amountPaid : 2999
+                subRevenue += manualAmount
+            }
+
+            cust.subscriptionSpend += subRevenue
+            cust.totalLtv += subRevenue
+            cust.transactionCount += Math.max(1, sub.charges.length)
+
+            if (sub.createdAt) {
+                if (!cust.firstPurchaseDate || sub.createdAt < cust.firstPurchaseDate) cust.firstPurchaseDate = sub.createdAt
+                if (!cust.latestPurchaseDate || sub.createdAt > cust.latestPurchaseDate) cust.latestPurchaseDate = sub.createdAt
+            }
+        })
+
+        const allCustomers = Array.from(customerMap.values())
+        const payingCustomers = allCustomers.filter((c) => c.totalLtv > 0)
+
+        const totalWebinarRevenue = payingCustomers.reduce((acc, c) => acc + c.webinarSpend, 0)
+        const totalSubscriptionRevenue = payingCustomers.reduce((acc, c) => acc + c.subscriptionSpend, 0)
+        const totalRevenue = totalWebinarRevenue + totalSubscriptionRevenue
+        const totalCustomerCount = payingCustomers.length
+        const averageLtv = totalCustomerCount > 0 ? Math.round(totalRevenue / totalCustomerCount) : 0
+
+        // Sort Top Customers by LTV
+        const topCustomers = [...payingCustomers]
+            .sort((a, b) => b.totalLtv - a.totalLtv)
+            .slice(0, 25)
+
+        // LTV Tiers Breakdown
+        const ltvTiers = {
+            under1k: payingCustomers.filter((c) => c.totalLtv < 1000).length,
+            between1k3k: payingCustomers.filter((c) => c.totalLtv >= 1000 && c.totalLtv < 3000).length,
+            between3k5k: payingCustomers.filter((c) => c.totalLtv >= 3000 && c.totalLtv < 5000).length,
+            between5k10k: payingCustomers.filter((c) => c.totalLtv >= 5000 && c.totalLtv < 10000).length,
+            above10k: payingCustomers.filter((c) => c.totalLtv >= 10000).length,
+        }
+
+        // Monthly LTV Trend
+        const monthlyLtvTrend = filteredMonths.map((monthKey) => {
+            const [yearStr, monthStr] = monthKey.split("-")
+            const monthEnd = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10), 0, 23, 59, 59, 999)
+
+            const activeCustomersUpToMonth = payingCustomers.filter(
+                (c) => c.firstPurchaseDate && new Date(c.firstPurchaseDate) <= monthEnd
+            )
+
+            const totalRevUpToMonth = activeCustomersUpToMonth.reduce((acc, c) => acc + c.totalLtv, 0)
+            const count = activeCustomersUpToMonth.length
+            const avgLtvMonth = count > 0 ? Math.round(totalRevUpToMonth / count) : 0
+
+            return {
+                monthKey,
+                monthLabel: formatMonthLabel(monthKey),
+                customerCount: count,
+                cumulativeRevenue: totalRevUpToMonth,
+                avgLtv: avgLtvMonth,
+            }
+        })
+
+        // Current Month Retention Rate
+        const currentMonthData = monthlyRetentionData[monthlyRetentionData.length - 1] || {
+            retentionRatePct: 100.0,
+            retained: 0,
+            cancelled: 0,
+            totalDue: 0,
+        }
+
+        return NextResponse.json({
+            success: true,
+            data: {
+                availableMonths: allMonthsSorted.reverse(), // latest first
+                selectedTimeframe: timeframe,
+                selectedMonth: selectedMonth || null,
+                kpis: {
+                    averageLtv,
+                    totalRevenue,
+                    totalWebinarRevenue,
+                    totalSubscriptionRevenue,
+                    totalPayingCustomers: totalCustomerCount,
+                    currentRetentionRatePct: currentMonthData.retentionRatePct,
+                    retainedCount: currentMonthData.retained,
+                    cancelledCount: currentMonthData.cancelled,
+                    totalDueCount: currentMonthData.totalDue,
+                    activeSubscribers: subscriptions.filter(
+                        (s) => s.status === "ACTIVE" || s.status === "AUTHENTICATED"
+                    ).length,
+                },
+                retention: {
+                    monthly: monthlyRetentionData,
+                },
+                ltv: {
+                    averageLtv,
+                    tiers: ltvTiers,
+                    monthlyTrend: monthlyLtvTrend,
+                    topCustomers,
+                },
+            },
+        })
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        return NextResponse.json({ success: false, error: message }, { status: 500 })
+    }
+}
