@@ -38,6 +38,8 @@ export async function GET(request: NextRequest) {
         const timeframe = searchParams.get("timeframe") || "12m" // "3m", "6m", "12m", "all", "month"
         const selectedMonth = searchParams.get("month") // "YYYY-MM" e.g., "2026-03"
 
+        const now = new Date()
+
         // 1. Fetch Subscriptions & Charges (Only Real Paid/Active Subscriptions)
         const subscriptions = await prisma.insightsSubscription.findMany({
             where: {
@@ -79,7 +81,6 @@ export async function GET(request: NextRequest) {
 
         // Collect all distinct months from real data
         const monthSet = new Set<string>()
-        const now = new Date()
 
         // Add last 12 months by default to ensure continuous timeline
         for (let i = 11; i >= 0; i--) {
@@ -114,43 +115,38 @@ export async function GET(request: NextRequest) {
         }
 
         // ==========================================
-        // RETENTION RATE METRICS (REAL SUBSCRIPTIONS ONLY)
+        // RETENTION RATE METRICS (COUNTING CANCELLATIONS ONLY AFTER DUE DATE)
         // ==========================================
+        // A cancellation is ONLY evaluated when the subscription's billing cycle end date (currentEndAt) has arrived/passed.
         const monthlyRetentionData = filteredMonths.map((monthKey) => {
-            const [yearStr, monthStr] = monthKey.split("-")
-            const monthStart = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10) - 1, 1)
-            const monthEnd = new Date(parseInt(yearStr, 10), parseInt(monthStr, 10), 0, 23, 59, 59, 999)
-
-            let totalDue = 0
             let retained = 0
             let cancelled = 0
 
             subscriptions.forEach((sub) => {
-                const createdDate = sub.createdAt ? new Date(sub.createdAt) : null
-                if (!createdDate || createdDate > monthEnd) return // Created after this month
+                const hasRenewed = sub.paidCount >= 2 || sub.charges.length >= 2
+                const isCancelled =
+                    sub.status === "CANCELLED" ||
+                    sub.status === "CANCEL_REQUESTED" ||
+                    sub.status === "HALTED" ||
+                    sub.cancelledAt !== null ||
+                    sub.cancelRequestedAt !== null
 
-                const cancelledDate = sub.cancelledAt ? new Date(sub.cancelledAt) : null
-                if (cancelledDate && cancelledDate < monthStart) return // Cancelled before this month
-
-                const startAt = sub.currentStartAt ? new Date(sub.currentStartAt) : createdDate
                 const endAt = sub.currentEndAt ? new Date(sub.currentEndAt) : null
 
-                const wasActiveInMonth = startAt <= monthEnd && (!endAt || endAt >= monthStart)
+                // Evaluation month is based on renewal date (currentEndAt) or charge date
+                const renewalMonth = endAt ? getMonthKey(endAt) : sub.createdAt ? getMonthKey(new Date(sub.createdAt)) : null
 
-                if (wasActiveInMonth) {
-                    totalDue++
-
-                    const wasCancelledInMonth = cancelledDate && cancelledDate >= monthStart && cancelledDate <= monthEnd
-                    const isCancelledStatus = sub.status === "CANCELLED" || sub.status === "HALTED" || sub.status === "EXPIRED"
-
-                    if (wasCancelledInMonth || (isCancelledStatus && endAt && endAt <= monthEnd)) {
-                        cancelled++
-                    } else {
+                if (renewalMonth === monthKey) {
+                    // Only count as cancelled if currentEndAt has passed or falls in this month
+                    if (hasRenewed) {
                         retained++
+                    } else if (isCancelled && endAt && endAt <= monthEnd) {
+                        cancelled++
                     }
                 }
             })
 
+            const totalDue = retained + cancelled
             const retentionRatePct = totalDue > 0 ? Math.round((retained / totalDue) * 1000) / 10 : 100.0
 
             return {
@@ -162,6 +158,42 @@ export async function GET(request: NextRequest) {
                 retentionRatePct,
             }
         })
+
+        // KPI Retention Rate Across All Subscriptions (Evaluating cancellations ONLY after due date <= now)
+        let renewedCount = 0
+        let renewalCancelledPastDueCount = 0
+        let cancellationPendingFutureCount = 0
+        let initialCycleActiveCount = 0
+
+        subscriptions.forEach((sub) => {
+            const hasRenewed = sub.paidCount >= 2 || sub.charges.length >= 2
+            const isCancelled =
+                sub.status === "CANCELLED" ||
+                sub.status === "CANCEL_REQUESTED" ||
+                sub.status === "HALTED" ||
+                sub.cancelledAt !== null ||
+                sub.cancelRequestedAt !== null
+
+            const endAt = sub.currentEndAt ? new Date(sub.currentEndAt) : null
+            const isPastDue = endAt ? endAt <= now : false
+
+            if (hasRenewed) {
+                renewedCount++
+            } else if (isCancelled) {
+                if (isPastDue) {
+                    renewalCancelledPastDueCount++
+                } else {
+                    cancellationPendingFutureCount++
+                    initialCycleActiveCount++
+                }
+            } else {
+                initialCycleActiveCount++
+            }
+        })
+
+        const totalRenewalDueCount = renewedCount + renewalCancelledPastDueCount
+        const currentRetentionRatePct =
+            totalRenewalDueCount > 0 ? Math.round((renewedCount / totalRenewalDueCount) * 1000) / 10 : 100.0
 
         // ==========================================
         // CANCELLED & PAUSED SUBSCRIBERS DETAILS
@@ -295,7 +327,7 @@ export async function GET(request: NextRequest) {
 
             if (sub.createdAt) {
                 if (!cust.firstPurchaseDate || sub.createdAt < cust.firstPurchaseDate) cust.firstPurchaseDate = sub.createdAt
-                if (!cust.latestPurchaseDate || sub.createdAt > cust.latestPurchaseDate) cust.latestPurchaseDate = sub.createdAt
+                if (!cust.latestPurchaseDate || sub.createdAt > sub.latestPurchaseDate) cust.latestPurchaseDate = sub.createdAt
             }
         })
 
@@ -342,14 +374,6 @@ export async function GET(request: NextRequest) {
             }
         })
 
-        // Current Month Retention Data
-        const currentMonthData = monthlyRetentionData[monthlyRetentionData.length - 1] || {
-            retentionRatePct: 100.0,
-            retained: 0,
-            cancelled: 0,
-            totalDue: 0,
-        }
-
         // Active Subscribers Count (Exact 113)
         const activeSubscribersCount = subscriptions.filter(
             (s) => s.status === "ACTIVE" || s.status === "AUTHENTICATED"
@@ -367,10 +391,12 @@ export async function GET(request: NextRequest) {
                     totalWebinarRevenue,
                     totalSubscriptionRevenue,
                     totalPayingCustomers: totalCustomerCount,
-                    currentRetentionRatePct: currentMonthData.retentionRatePct,
-                    retainedCount: currentMonthData.retained,
-                    cancelledCount: currentMonthData.cancelled,
-                    totalDueCount: currentMonthData.totalDue,
+                    currentRetentionRatePct,
+                    retainedCount: renewedCount,
+                    cancelledCount: renewalCancelledPastDueCount,
+                    cancellationPendingFutureCount,
+                    totalDueCount: totalRenewalDueCount,
+                    initialCycleActiveCount,
                     activeSubscribers: activeSubscribersCount,
                 },
                 retention: {

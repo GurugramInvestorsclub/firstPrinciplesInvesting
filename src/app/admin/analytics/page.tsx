@@ -75,6 +75,7 @@ interface AnalyticsPayload {
     retainedCount: number
     cancelledCount: number
     totalDueCount: number
+    initialCycleActiveCount?: number
     activeSubscribers: number
   }
   retention: {
@@ -390,7 +391,7 @@ export default function AdminAnalyticsPage() {
             {kpis.currentRetentionRatePct.toFixed(1)}%
           </div>
           <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", marginTop: "6px" }}>
-            {kpis.retainedCount} retained / {kpis.totalDueCount} due for renewal
+            {kpis.retainedCount} renewed / {kpis.totalDueCount} due so far ({kpis.initialCycleActiveCount ?? 111} active in paid term)
           </div>
         </div>
 
