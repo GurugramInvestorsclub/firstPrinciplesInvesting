@@ -69,7 +69,7 @@ export default function Super30TopicDetailPage({ params }: { params: Promise<{ s
       setTopic(json.topic)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load thread")
-    } fontally {
+    } finally {
       setLoading(false)
     }
   }, [slug])
