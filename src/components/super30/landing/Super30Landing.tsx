@@ -365,10 +365,10 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             style={{
                                 fontFamily: SERIF,
                                 fontWeight: 400,
-                                fontSize: "clamp(76px,15vw,208px)",
-                                lineHeight: 0.86,
+                                fontSize: "clamp(52px,8vw,110px)",
+                                lineHeight: 0.95,
                                 letterSpacing: "-.02em",
-                                margin: "0 0 44px",
+                                margin: "0 0 28px",
                                 color: PAPER,
                             }}
                         >
@@ -380,14 +380,13 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                 maxWidth: 680,
                                 fontFamily: SANS,
                                 fontWeight: 400,
-                                fontSize: "clamp(19px,2vw,24px)",
-                                lineHeight: 1.5,
+                                fontSize: "clamp(18px,1.8vw,22px)",
+                                lineHeight: 1.6,
                                 color: "rgba(244,241,234,.92)",
-                                margin: "0 0 52px",
+                                margin: "0 0 44px",
                             }}
                         >
-                            16 hours of LIVE ONLINE Cohorts on a mission to discover mis-priced businesses using FOUR investment frameworks taught
-                            from first principles. Each framework answers What to buy, when to buy and When to sell.
+                            <span style={{ color: "#F5B800", fontWeight: 600 }}>16 hours of LIVE ONLINE Cohorts</span> on a mission to discover mis-priced businesses using <span style={{ color: "#F5B800", fontWeight: 600 }}>FOUR investment frameworks</span> taught from <span style={{ color: "#F5B800", fontWeight: 600 }}>first principles</span>. Each framework answers <span style={{ color: "#F5B800", fontWeight: 500 }}>What to buy</span>, <span style={{ color: "#F5B800", fontWeight: 500 }}>when to buy</span>, and <span style={{ color: "#F5B800", fontWeight: 500 }}>When to sell</span>.
                         </p>
                         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 18 }}>
                             <a href="#register" className="s30l-btn-go">
@@ -724,8 +723,8 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
 
             <style jsx global>{`
                 .s30l {
-                    --ac: #b57a28;
-                    --go: #23c077;
+                    --ac: #F5B800;
+                    --go: #F5B800;
                     --ink: #12110f;
                     --paper: #f4f1ea;
                     --muted: #c5bfb5;
@@ -758,59 +757,68 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                 }
                 .s30l-btn-go {
                     font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
+                    font-weight: 700;
+                    font-size: 13px;
+                    line-height: 1;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    padding: 18px 36px;
+                    border-radius: 9999px;
+                    background: #F5B800;
+                    color: #0c0c0e;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    box-shadow: 0 4px 20px rgba(245, 184, 0, 0.25);
+                    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+                }
+                .s30l-btn-go:hover {
+                    transform: translateY(-2px);
+                    background: #E0A800;
+                    color: #0c0c0e;
+                    box-shadow: 0 8px 30px rgba(245, 184, 0, 0.4);
+                }
+                .s30l-link-ghost {
+                    font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
                     font-weight: 500;
                     font-size: 13px;
                     line-height: 1;
                     letter-spacing: 0.12em;
                     text-transform: uppercase;
-                    padding: 20px 34px;
-                    background: var(--go);
-                    color: #08150e;
-                    display: inline-block;
-                    transition: transform 0.3s ease, opacity 0.3s ease;
-                }
-                .s30l-btn-go:hover {
-                    transform: translateY(-2px);
-                    opacity: 0.92;
-                    color: #08150e;
-                }
-                .s30l-link-ghost {
-                    font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
-                    font-weight: 400;
-                    font-size: 13px;
-                    line-height: 1;
-                    letter-spacing: 0.12em;
-                    text-transform: uppercase;
-                    padding: 20px 4px;
-                    color: rgba(244, 241, 234, 0.6);
-                    border-bottom: 1px solid rgba(244, 241, 234, 0.24);
+                    padding: 18px 12px;
+                    color: rgba(244, 241, 234, 0.7);
+                    border-bottom: 1px solid rgba(245, 184, 0, 0.4);
                     transition: color 0.2s ease, border-color 0.2s ease;
                 }
                 .s30l-link-ghost:hover {
-                    color: var(--paper);
-                    border-bottom-color: rgba(244, 241, 234, 0.6);
+                    color: #F5B800;
+                    border-bottom-color: #F5B800;
                 }
                 .s30l-btn-register {
                     display: block;
                     width: 100%;
                     text-align: center;
                     font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
-                    font-weight: 500;
+                    font-weight: 700;
                     font-size: 14px;
                     line-height: 1;
                     letter-spacing: 0.14em;
                     text-transform: uppercase;
-                    padding: 26px 32px;
-                    background: var(--go);
-                    color: #08150e;
+                    padding: 22px 32px;
+                    border-radius: 9999px;
+                    background: #F5B800;
+                    color: #0c0c0e;
                     border: none;
-                    border-radius: 0;
                     cursor: pointer;
-                    transition: transform 0.3s ease, opacity 0.3s ease;
+                    box-shadow: 0 4px 20px rgba(245, 184, 0, 0.25);
+                    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
                 }
                 .s30l-btn-register:hover:not(:disabled) {
                     transform: translateY(-2px);
-                    opacity: 0.92;
+                    background: #E0A800;
+                    color: #0c0c0e;
+                    box-shadow: 0 8px 30px rgba(245, 184, 0, 0.4);
                 }
                 .s30l-btn-register:disabled {
                     opacity: 0.45;
@@ -818,20 +826,21 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                 }
                 .s30l-btn-outline {
                     font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
-                    font-weight: 500;
+                    font-weight: 600;
                     font-size: 12px;
                     line-height: 1;
                     letter-spacing: 0.12em;
                     text-transform: uppercase;
                     background: transparent;
-                    border: 1px solid var(--go);
-                    border-radius: 0;
-                    color: var(--go);
+                    border: 1.5px solid #F5B800;
+                    border-radius: 9999px;
+                    color: #F5B800;
                     cursor: pointer;
-                    transition: background 0.2s ease;
+                    transition: all 0.25s ease;
                 }
                 .s30l-btn-outline:hover:not(:disabled) {
-                    background: rgba(35, 192, 119, 0.08);
+                    background: rgba(245, 184, 0, 0.12);
+                    border-color: #F5B800;
                 }
                 .s30l-btn-outline:disabled {
                     opacity: 0.4;

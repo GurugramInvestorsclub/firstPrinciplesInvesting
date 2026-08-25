@@ -69,7 +69,7 @@ export default async function Super30Page({ params }: Props) {
 
     return (
         <div
-            className={`${cormorant.variable} ${jetbrainsMono.variable} flex flex-col min-h-screen bg-[#12110F] text-[#F4F1EA] selection:bg-[#23C077]/20 selection:text-[#23C077] relative z-0 super30-page`}
+            className={`${cormorant.variable} ${jetbrainsMono.variable} flex flex-col min-h-screen bg-[#12110F] text-[#F4F1EA] selection:bg-[#F5B800]/20 selection:text-[#F5B800] relative z-0 super30-page`}
         >
             <Navbar />
 
