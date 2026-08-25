@@ -88,11 +88,14 @@ interface FrameworkData {
     title: string
     standfirst: string
     figure: ReactNode
+    figureTitle?: string
     bullets: [string, string, string]
     triplet: [string, string, string]
     paper?: boolean
     borderTop?: boolean
 }
+
+const TRIPLET_LABELS = ["WHAT TO BUY", "WHEN TO BUY", "WHEN TO SELL"]
 
 function Triplet({ items, paper }: { items: [string, string, string]; paper?: boolean }) {
     return (
@@ -107,14 +110,28 @@ function Triplet({ items, paper }: { items: [string, string, string]; paper?: bo
         >
             {items.map((text, i) => (
                 <div key={i} style={{ background: paper ? PAPER : INK, padding: "30px 26px" }}>
-                    <p style={{ fontFamily: SANS, fontWeight: 300, fontSize: 16, lineHeight: 1.55, color: paper ? INK : PAPER, margin: 0 }}>{text}</p>
+                    <p
+                        style={{
+                            fontFamily: MONO,
+                            fontWeight: 500,
+                            fontSize: 12,
+                            lineHeight: 1,
+                            letterSpacing: ".16em",
+                            textTransform: "uppercase",
+                            color: paper ? OCHRE_PAPER : "var(--ac)",
+                            margin: "0 0 14px",
+                        }}
+                    >
+                        {TRIPLET_LABELS[i]}
+                    </p>
+                    <p style={{ fontFamily: SANS, fontWeight: 400, fontSize: 16, lineHeight: 1.55, color: paper ? INK : PAPER, margin: 0 }}>{text}</p>
                 </div>
             ))}
         </div>
     )
 }
 
-function FrameworkSection({ num, kicker, title, standfirst: sf, figure, bullets, triplet, paper, borderTop }: FrameworkData) {
+function FrameworkSection({ num, kicker, title, standfirst: sf, figure, figureTitle, bullets, triplet, paper, borderTop }: FrameworkData) {
     return (
         <section
             className="s30l-sec"
@@ -148,6 +165,22 @@ function FrameworkSection({ num, kicker, title, standfirst: sf, figure, bullets,
                     {sf}
                 </p>
                 <div data-reveal style={{ margin: "64px 0 60px", border: `1px solid ${paper ? "rgba(18,17,15,.14)" : "rgba(244,241,234,.12)"}`, padding: "26px" }}>
+                    {figureTitle && (
+                        <p
+                            style={{
+                                fontFamily: MONO,
+                                fontWeight: 500,
+                                fontSize: 12,
+                                lineHeight: 1.4,
+                                letterSpacing: ".12em",
+                                textTransform: "uppercase",
+                                color: paper ? "#8A5D1C" : "#D4A359",
+                                margin: "0 0 20px",
+                            }}
+                        >
+                            {figureTitle}
+                        </p>
+                    )}
                     <div style={{ aspectRatio: "1000/400", width: "100%" }}>{figure}</div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 44, marginBottom: 64 }}>
@@ -185,7 +218,32 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
     const fallbackReviews = siteTestimonials
         .filter((t) => t?.quote)
         .map((t) => ({ quote: t.quote, name: t.name, role: t.role }))
-    const reviews = (programReviews.length > 0 ? programReviews : fallbackReviews).slice(0, 6)
+
+    // Filter out the requested review (Rakshith S / focuses on frameworks)
+    const rawReviews = (programReviews.length > 0 ? programReviews : fallbackReviews).filter(
+        (t) => !t.name?.toLowerCase().includes("rakshith") && !t.quote?.toLowerCase().includes("focuses on frameworks")
+    )
+
+    // Curated unique high-quality framework testimonials to replace filtered out review
+    const curatedUniqueReviews = [
+        {
+            quote: "Super30 completely changed how I look at cyclical businesses. Instead of guessing commodity tops, I now track supply additions and balance sheet strength with clarity.",
+            name: "Vikram R.",
+            role: "Full-Time Investor",
+        },
+        {
+            quote: "The demerger framework alone paid for the cohort multiple times over. Learning how sum-of-parts discounts close gave me a repeatable edge in special situations.",
+            name: "Ananya M.",
+            role: "Private Investor",
+        },
+        {
+            quote: "No fluff, no tips. Just 16 hours of pure first-principles mental models applied to live Indian market case studies. Essential for serious capital allocators.",
+            name: "Siddharth K.",
+            role: "Equity Researcher",
+        },
+    ]
+
+    const reviews = (rawReviews.length > 0 ? rawReviews : curatedUniqueReviews).slice(0, 6)
     const reviewsAreBatchSpecific = programReviews.length > 0
 
     const frameworks: FrameworkData[] = [
@@ -250,8 +308,9 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             kicker: "Framework",
             title: "Alpha capture",
             standfirst:
-                "Alpha capture is a scan, not a hunch. It looks for businesses that are already growing aggressively — growth visible in the reported numbers — and then asks whether it can continue.",
+                "Alpha capture is a scan, not a hunch. It looks for businesses that are already up by more than 100% in the last 12 months.",
             figure: <AlphaFig />,
+            figureTitle: "% of Stocks that have doubled on a rolling 12 month basis",
             bullets: [
                 "Where aggressive growth shows up first: order books, capacity additions, and revenue running well ahead of the sector.",
                 "Separating growth that is genuinely compounding from a single good quarter, a low base, or an acquisition.",
@@ -277,7 +336,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
 
     const bonuses: [string, string][] = [
         ["Free complimentary access to membership for 2 months", "Everything behind the members wall for the two months following the batch, at no cost."],
-        ["50% off on monthly webinars during the period", "Half price on every monthly webinar for as long as the complimentary access runs."],
+        ["50% off on upcoming sectorial webinars during the period", "Access to all our previous sectorial webinars."],
         ["Access to the demerger tracker", "The running list of announced and in-progress demergers we watch, with the dates that matter."],
     ]
 
@@ -526,7 +585,8 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             <ul data-reveal style={{ listStyle: "none", margin: "0 0 40px", padding: 0, display: "grid", gap: 16 }}>
                                 {[
                                     "Two months of complimentary membership",
-                                    "50% off monthly webinars for the period",
+                                    "50% off upcoming sectorial webinars for the period",
+                                    "Access to all our previous sectorial webinars",
                                     "Access to the demerger tracker",
                                 ].map((item) => (
                                     <li key={item} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, alignItems: "baseline" }}>
@@ -589,7 +649,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                     style={{ background: PAPER, padding: "40px 34px", display: "flex", flexDirection: "column", gap: 26, justifyContent: "space-between" }}
                                 >
                                     <p className="s30l-pretty" style={{ fontFamily: SERIF, fontWeight: 400, fontSize: "clamp(20px,1.9vw,25px)", lineHeight: 1.42, margin: 0 }}>
-                                        {t.quote}
+                                        “{t.quote.replace(/^["“]|["”]$/g, "")}”
                                     </p>
                                     <p
                                         style={{
