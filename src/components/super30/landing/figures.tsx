@@ -225,7 +225,10 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
             </defs>
 
             {/* Layer 1: Background Architectural Walls & Presentation Screen (Parallax ~ 1.5px) */}
-            <g transform={`translate(${(mouse.x * 1.5).toFixed(2)}, ${(mouse.y * 1.5).toFixed(2)})`} style={{ opacity: envProgress }}>
+            <g
+                transform={`translate(${(mouse.x * 1.5).toFixed(2)}, ${(mouse.y * 1.5).toFixed(2)})`}
+                style={{ opacity: envProgress, transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+            >
                 <path d="M 40 180 Q 280 80 520 180" fill="none" stroke="#26231F" strokeWidth="20" opacity={0.6} />
                 <path d="M 20 270 Q 280 130 540 270" fill="none" stroke="#1E1C19" strokeWidth="18" opacity={0.7} />
                 <path d="M 0 380 Q 280 200 560 380" fill="none" stroke="#181614" strokeWidth="16" opacity={0.8} />
@@ -275,7 +278,10 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
             </g>
 
             {/* Layer 2: Stage & Teacher (Parallax ~ 3.5px) */}
-            <g transform={`translate(${(mouse.x * 3.5).toFixed(2)}, ${(mouse.y * 3.5).toFixed(2)})`} style={{ opacity: stageProgress }}>
+            <g
+                transform={`translate(${(mouse.x * 3.5).toFixed(2)}, ${(mouse.y * 3.5).toFixed(2)})`}
+                style={{ opacity: stageProgress, transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+            >
                 <ellipse cx={280} cy={145} rx={160} ry={35} fill="url(#stageSpotlight)" />
 
                 <path d="M 130 148 Q 280 162 430 148" fill="none" stroke="var(--ac)" strokeWidth={1.8} style={{ opacity: 0.7 }} />
@@ -306,7 +312,10 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
             </g>
 
             {/* Layer 3: Amphitheatre Curved Seating Rows & 30 Students (Parallax ~ 2.8px) */}
-            <g transform={`translate(${(mouse.x * 2.8).toFixed(2)}, ${(mouse.y * 2.8).toFixed(2)})`}>
+            <g
+                transform={`translate(${(mouse.x * 2.8).toFixed(2)}, ${(mouse.y * 2.8).toFixed(2)})`}
+                style={{ transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+            >
                 <path d="M 110 220 Q 280 248 450 220" fill="none" stroke="#2B2823" strokeWidth={4} opacity={0.8} />
                 <path d="M 70 300 Q 280 338 490 300" fill="none" stroke="#24211D" strokeWidth={4} opacity={0.85} />
                 <path d="M 35 390 Q 280 435 525 390" fill="none" stroke="#1E1C19" strokeWidth={4} opacity={0.9} />
@@ -320,14 +329,6 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
                     const moveOffset = isMoving ? Math.sin(timeSec * 3 + st.phase) * 1.5 : 0
                     const noteArmMove = st.actionType === 1 ? Math.sin(timeSec * 4 + st.phase) * 1.2 : 0
 
-                    let isNearby = false
-                    if (mouse.active) {
-                        const mouseSvgX = stageCx + mouse.x * 240
-                        const mouseSvgY = stageCy + mouse.y * 250
-                        const d = Math.hypot(mouseSvgX - st.x, mouseSvgY - st.y)
-                        if (d < 80) isNearby = true
-                    }
-
                     const opacityVal = Math.min(1, studentEntrance * (st.row === 1 ? 0.95 : st.row === 2 ? 0.88 : st.row === 3 ? 0.78 : 0.68))
 
                     return (
@@ -337,13 +338,13 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
                             style={{ opacity: opacityVal }}
                         >
                             <circle cx={0} cy={14} r={3} fill="url(#seatLightGlow)" />
-                            <circle cx={0} cy={14} r={1.5} fill={isNearby ? "var(--ac)" : "#8A8578"} opacity={isNearby ? 1 : 0.7} />
+                            <circle cx={0} cy={14} r={1.5} fill="#D4A359" opacity={0.8} />
 
                             <path
                                 d="M -11 12 Q -12 2 -4 0 Q 0 -1 4 0 Q 12 2 11 12 Z"
-                                fill={isNearby ? "#2B2620" : "#1A1815"}
-                                stroke={isNearby || st.row === 1 ? "var(--ac)" : "#4A443B"}
-                                strokeWidth={isNearby ? 1.2 : 0.8}
+                                fill="#1A1815"
+                                stroke={st.row === 1 ? "var(--ac)" : "#4A443B"}
+                                strokeWidth={0.8}
                             />
 
                             {st.hairStyle === 0 && (
@@ -382,7 +383,7 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
 
             {/* Bottom Amphitheatre Caption */}
             <text x={stageCx} y={582} textAnchor="middle" style={mono(11, "#C5BFB5", ".18em")}>
-                {`${seatCount} COHORT MEMBERS · 1 MENTOR · FIRST PRINCIPLES`}
+                {`${seatCount} COHORT MEMBERS · FIRST PRINCIPLES`}
             </text>
         </svg>
     )
