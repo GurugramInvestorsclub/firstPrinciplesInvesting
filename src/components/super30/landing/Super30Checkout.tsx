@@ -78,9 +78,9 @@ function formatInrFromPaise(amountPaise: number): string {
     }).format(amountPaise / 100)
 }
 
-const MONO = "var(--font-s30-mono), 'IBM Plex Mono', monospace"
-const SERIF = "var(--font-s30-serif), 'Instrument Serif', serif"
-const SANS = "var(--font-s30-sans), 'IBM Plex Sans', sans-serif"
+const SERIF = "var(--font-s30-serif), var(--font-cormorant), var(--font-display), 'Cormorant Garamond', Georgia, serif"
+const SANS = "var(--font-geist-sans), var(--font-sans), system-ui, -apple-system, sans-serif"
+const MONO = "var(--font-s30-mono), var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace"
 
 const labelStyle: React.CSSProperties = {
     fontFamily: MONO,

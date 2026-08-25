@@ -4,27 +4,20 @@ import { client } from "@/lib/sanity.client"
 import { singleSuper30Query, testimonialsQuery } from "@/lib/sanity.queries"
 import { Super30Program, Testimonial } from "@/lib/types"
 import { notFound } from "next/navigation"
-import { IBM_Plex_Mono, IBM_Plex_Sans, Instrument_Serif } from "next/font/google"
+import { Cormorant_Garamond, JetBrains_Mono } from "next/font/google"
 
 import { Super30Landing } from "@/components/super30/landing/Super30Landing"
 
-const instrumentSerif = Instrument_Serif({
-    weight: "400",
+const cormorant = Cormorant_Garamond({
+    weight: ["400", "500", "600", "700"],
     style: ["normal", "italic"],
     subsets: ["latin"],
     variable: "--font-s30-serif",
     display: "swap",
 })
 
-const plexSans = IBM_Plex_Sans({
-    weight: ["300", "400", "500"],
-    subsets: ["latin"],
-    variable: "--font-s30-sans",
-    display: "swap",
-})
-
-const plexMono = IBM_Plex_Mono({
-    weight: ["400", "500"],
+const jetbrainsMono = JetBrains_Mono({
+    weight: ["400", "500", "600", "700"],
     subsets: ["latin"],
     variable: "--font-s30-mono",
     display: "swap",
@@ -76,7 +69,7 @@ export default async function Super30Page({ params }: Props) {
 
     return (
         <div
-            className={`${instrumentSerif.variable} ${plexSans.variable} ${plexMono.variable} flex flex-col min-h-screen bg-[#12110F] text-[#F4F1EA] selection:bg-[#23C077]/20 selection:text-[#23C077] relative z-0 super30-page`}
+            className={`${cormorant.variable} ${jetbrainsMono.variable} flex flex-col min-h-screen bg-[#12110F] text-[#F4F1EA] selection:bg-[#23C077]/20 selection:text-[#23C077] relative z-0 super30-page`}
         >
             <Navbar />
 

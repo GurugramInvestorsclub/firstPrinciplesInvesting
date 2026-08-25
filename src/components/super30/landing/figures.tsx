@@ -7,9 +7,9 @@ const seg = (t: number, a: number, b: number) => Math.max(0, Math.min(1, (t - a)
 const ease = (x: number) => 1 - Math.pow(1 - x, 3)
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
-const MONO = "var(--font-s30-mono), 'IBM Plex Mono', monospace"
-const SERIF = "var(--font-s30-serif), 'Instrument Serif', serif"
-const SANS = "var(--font-s30-sans), 'IBM Plex Sans', sans-serif"
+const SERIF = "var(--font-s30-serif), var(--font-cormorant), var(--font-display), 'Cormorant Garamond', Georgia, serif"
+const SANS = "var(--font-geist-sans), var(--font-sans), system-ui, -apple-system, sans-serif"
+const MONO = "var(--font-s30-mono), var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace"
 
 const mono = (size: number, fill: string, ls?: string): React.CSSProperties => ({
     fontFamily: MONO,

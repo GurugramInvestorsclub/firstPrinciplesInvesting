@@ -11,9 +11,9 @@ import { wireReveal } from "./reveal"
 import { AlphaFig, CyclicalsFig, DemergerFig, HeroFig, OceanFig, SeatStripFig, SeatsFig } from "./figures"
 import { Super30Checkout } from "./Super30Checkout"
 
-const SERIF = "var(--font-s30-serif), 'Instrument Serif', serif"
-const SANS = "var(--font-s30-sans), 'IBM Plex Sans', system-ui, sans-serif"
-const MONO = "var(--font-s30-mono), 'IBM Plex Mono', monospace"
+const SERIF = "var(--font-s30-serif), var(--font-cormorant), var(--font-display), 'Cormorant Garamond', Georgia, serif"
+const SANS = "var(--font-geist-sans), var(--font-sans), system-ui, -apple-system, sans-serif"
+const MONO = "var(--font-s30-mono), var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace"
 
 const INK = "#12110F"
 const PAPER = "#F4F1EA"
@@ -729,7 +729,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                     --ink: #12110f;
                     --paper: #f4f1ea;
                     --muted: #c5bfb5;
-                    font-family: var(--font-s30-sans), 'IBM Plex Sans', system-ui, sans-serif;
+                    font-family: var(--font-geist-sans), var(--font-sans), system-ui, -apple-system, sans-serif;
                     background: var(--ink);
                     color: var(--paper);
                     overflow-x: hidden;
@@ -757,7 +757,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                     text-decoration: none;
                 }
                 .s30l-btn-go {
-                    font-family: var(--font-s30-mono), 'IBM Plex Mono', monospace;
+                    font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
                     font-weight: 500;
                     font-size: 13px;
                     line-height: 1;
@@ -775,7 +775,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                     color: #08150e;
                 }
                 .s30l-link-ghost {
-                    font-family: var(--font-s30-mono), 'IBM Plex Mono', monospace;
+                    font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
                     font-weight: 400;
                     font-size: 13px;
                     line-height: 1;
@@ -794,7 +794,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                     display: block;
                     width: 100%;
                     text-align: center;
-                    font-family: var(--font-s30-mono), 'IBM Plex Mono', monospace;
+                    font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
                     font-weight: 500;
                     font-size: 14px;
                     line-height: 1;
@@ -817,7 +817,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                     cursor: not-allowed;
                 }
                 .s30l-btn-outline {
-                    font-family: var(--font-s30-mono), 'IBM Plex Mono', monospace;
+                    font-family: var(--font-jetbrains), var(--font-geist-mono), var(--font-mono-code), monospace;
                     font-weight: 500;
                     font-size: 12px;
                     line-height: 1;
