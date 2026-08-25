@@ -368,84 +368,170 @@ export function OceanFig() {
     )
 }
 
-// A scan line sweeping company growth curves, flagging the compounders (16s).
+// A scan line sweeping annual data points from 2005 to 2025, flagging alpha compounding.
 export function AlphaFig() {
     const t = useClock(16)
-    const x0 = 96
-    const x1 = 906
-    const yb = 316
-    const bx = (u: number) => x0 + (x1 - x0) * u
-    const cos: { h: number; k: number; flag?: number; label?: string }[] = [
-        { h: 22, k: 1.2 },
-        { h: 34, k: 1.1 },
-        { h: 14, k: 1.0 },
-        { h: 44, k: 1.3 },
-        { h: 236, k: 2.1, flag: 0.3, label: "Compounding" },
-        { h: 28, k: 1.1 },
-        { h: 40, k: 1.2 },
-        { h: 198, k: 1.9, flag: 0.52, label: "Compounding" },
-        { h: 18, k: 1.0 },
-        { h: 36, k: 1.2 },
-        { h: 162, k: 1.8, flag: 0.74, label: "Compounding" },
-        { h: 26, k: 1.1 },
+    const x0 = 110
+    const x1 = 920
+    const yTop = 50
+    const yBottom = 380
+
+    const getX = (yr: number) => x0 + ((yr - 2005) / 20.7) * (x1 - x0)
+    const getY = (val: number) => yBottom - (val / 40.0) * (yBottom - yTop)
+
+    const rawData: { yr: number; val: number; label: string; textDy?: number; textDx?: number }[] = [
+        { yr: 2005, val: 28.66, label: "28.66%", textDy: -12, textDx: -4 },
+        { yr: 2006, val: 23.58, label: "23.58%", textDy: -12 },
+        { yr: 2007, val: 16.56, label: "16.56%", textDy: -12 },
+        { yr: 2008, val: 12.70, label: "12.70%", textDy: -12 },
+        { yr: 2009, val: 4.49, label: "4.49%", textDy: -12, textDx: -6 },
+        { yr: 2010, val: 9.76, label: "9.76%", textDy: -12 },
+        { yr: 2011, val: 30.88, label: "30.88%", textDy: -14 },
+        { yr: 2012, val: 2.13, label: "2.13%", textDy: -10 },
+        { yr: 2013, val: 3.43, label: "3.43%", textDy: -12 },
+        { yr: 2014, val: 2.03, label: "2.03%", textDy: -10 },
+        { yr: 2015, val: 23.83, label: "23.83%", textDy: -14 },
+        { yr: 2016, val: 16.76, label: "16.76%", textDy: -12 },
+        { yr: 2017, val: 6.00, label: "6.00%", textDy: -12 },
+        { yr: 2018, val: 13.17, label: "13.17%", textDy: -12 },
+        { yr: 2019, val: 5.48, label: "5.48%", textDy: -12 },
+        { yr: 2020, val: 0.84, label: "0.84%", textDy: -10, textDx: 2 },
+        { yr: 2021, val: 3.04, label: "3.04%", textDy: -12 },
+        { yr: 2022, val: 30.18, label: "30.18%", textDy: -14 },
+        { yr: 2023, val: 11.78, label: "11.78%", textDy: -12 },
+        { yr: 2024, val: 8.71, label: "8.71%", textDy: -12 },
+        { yr: 2025, val: 17.79, label: "17.79%", textDy: -14 },
+        { yr: 2025.7, val: 4.82, label: "4.82%", textDy: -10 },
     ]
-    const scan = seg(t, 0.06, 0.94)
-    const path = (c: { h: number; k: number }) => {
-        let d = ""
-        for (let i = 0; i <= 40; i++) {
-            const u = i / 40
-            d += (i ? "L" : "M") + bx(u).toFixed(1) + " " + (yb - c.h * Math.pow(u, c.k)).toFixed(1)
+
+    const pts = rawData.map((d) => ({
+        ...d,
+        x: getX(d.yr),
+        y: getY(d.val),
+    }))
+
+    const fullPath = pts.reduce((acc, pt, i) => acc + (i === 0 ? "M" : " L") + pt.x.toFixed(1) + " " + pt.y.toFixed(1), "")
+
+    const scanProgress = seg(t, 0.04, 0.96)
+    const scanX = x0 + (x1 - x0) * scanProgress
+
+    // Build SVG path segment up to scanX
+    let scannedPath = ""
+    for (let i = 0; i < pts.length; i++) {
+        const pt = pts[i]
+        if (i === 0) {
+            scannedPath += `M${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`
+        } else {
+            const prev = pts[i - 1]
+            if (scanX >= pt.x) {
+                scannedPath += ` L${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`
+            } else if (scanX > prev.x) {
+                const ratio = (scanX - prev.x) / (pt.x - prev.x)
+                const interpY = prev.y + (pt.y - prev.y) * ratio
+                scannedPath += ` L${scanX.toFixed(1)} ${interpY.toFixed(1)}`
+                break
+            } else {
+                break
+            }
         }
-        return d
     }
-    const sx = bx(scan)
+
+    const yGridValues = [40, 30, 20, 10, 0]
+    const xGridYears = [2005, 2010, 2015, 2020, 2025]
+
     return (
-        <svg viewBox="0 0 1000 400" style={svgStyle}>
+        <svg viewBox="0 0 1000 470" style={svgStyle}>
+            {/* Grid lines (horizontal & vertical dotted lines) */}
             <g>
-                {[0, 1, 2, 3].map((i) => (
-                    <line key={"g" + i} x1={x0} x2={x1} y1={yb - i * 76} y2={yb - i * 76} strokeWidth={1} style={{ stroke: "#F4F1EA", opacity: i === 0 ? 0.3 : 0.08 }} />
-                ))}
+                {yGridValues.map((v) => {
+                    const y = getY(v)
+                    return (
+                        <g key={"yg-" + v}>
+                            <line
+                                x1={x0}
+                                x2={x1}
+                                y1={y}
+                                y2={y}
+                                strokeWidth={1}
+                                strokeDasharray="3 4"
+                                style={{ stroke: "#F4F1EA", opacity: 0.12 }}
+                            />
+                            <text x={x0 - 16} y={y + 4} textAnchor="end" style={mono(11, "#8A8578")}>
+                                {v.toFixed(2)}%
+                            </text>
+                        </g>
+                    )
+                })}
+                {xGridYears.map((yr) => {
+                    const x = getX(yr)
+                    return (
+                        <g key={"xg-" + yr}>
+                            <line
+                                x1={x}
+                                x2={x}
+                                y1={yTop}
+                                y2={yBottom}
+                                strokeWidth={1}
+                                strokeDasharray="3 4"
+                                style={{ stroke: "#F4F1EA", opacity: 0.12 }}
+                            />
+                            <text x={x} y={yBottom + 24} textAnchor="middle" style={mono(12, "#8A8578")}>
+                                {yr}
+                            </text>
+                        </g>
+                    )
+                })}
+                <text x={(x0 + x1) / 2} y={yBottom + 54} textAnchor="middle" style={mono(12, "#8A8578", ".18em")}>
+                    YEAR
+                </text>
             </g>
+
+            {/* Background Full Path (Dashed / Muted) */}
+            <path d={fullPath} fill="none" stroke="var(--ac)" strokeWidth={1.4} strokeDasharray="3 3" style={{ opacity: 0.22 }} />
+
+            {/* Active Scanned Path */}
+            <path d={scannedPath} fill="none" stroke="var(--ac)" strokeWidth={2.4} style={{ opacity: 1 }} />
+
+            {/* Data Points and Percentage Labels */}
             <g>
-                {cos
-                    .filter((c) => !c.flag)
-                    .map((c, i) => (
-                        <path key={"f" + i} d={path(c)} fill="none" strokeWidth={1.2} style={{ stroke: "#F4F1EA", opacity: 0.18 }} />
-                    ))}
+                {pts.map((pt, i) => {
+                    const isRevealed = scanX >= pt.x - 3
+                    return (
+                        <g key={"pt-" + i}>
+                            <circle
+                                cx={pt.x}
+                                cy={pt.y}
+                                r={isRevealed ? 3.5 : 2}
+                                style={{
+                                    fill: isRevealed ? "var(--ac)" : "#8A8578",
+                                    opacity: isRevealed ? 1 : 0.25,
+                                    transition: "opacity 0.2s ease",
+                                }}
+                            />
+                            <text
+                                x={pt.x + (pt.textDx || 0)}
+                                y={pt.y + (pt.textDy || -12)}
+                                textAnchor="middle"
+                                style={{
+                                    ...mono(11, isRevealed ? "#F4F1EA" : "rgba(244,241,234,0.3)"),
+                                    fontWeight: isRevealed ? 500 : 400,
+                                    opacity: isRevealed ? 1 : 0.2,
+                                }}
+                            >
+                                {pt.label}
+                            </text>
+                        </g>
+                    )
+                })}
             </g>
-            <g>
-                {cos
-                    .filter((c) => c.flag)
-                    .map((c, i) => {
-                        const on = scan >= (c.flag as number)
-                        const ey = yb - c.h
-                        return (
-                            <g key={"h" + i}>
-                                <path d={path(c)} fill="none" strokeWidth={on ? 2.4 : 1.2} style={{ stroke: on ? "var(--ac)" : "#F4F1EA", opacity: on ? 1 : 0.22, transition: "none" }} />
-                                {on ? <circle cx={bx(1)} cy={ey} r={5.5} style={{ fill: "var(--ac)" }} /> : null}
-                                {on && i === 0 ? (
-                                    <text x={bx(1) - 12} y={ey - 16} textAnchor="end" style={mono(12, "#B57A28", ".14em")}>
-                                        GROWTH ALREADY VISIBLE IN THE NUMBERS
-                                    </text>
-                                ) : null}
-                            </g>
-                        )
-                    })}
-            </g>
-            <line x1={sx} x2={sx} y1={44} y2={yb} strokeWidth={1.4} style={{ stroke: "var(--ac)", opacity: 0.7 }} />
-            <rect x={sx - 26} y={44} width={26} height={yb - 44} style={{ fill: "var(--ac)", opacity: 0.07 }} />
-            <text x={sx + 10} y={40} style={mono(12, "#B57A28", ".16em")}>
+
+            {/* Scan Line Overlay */}
+            <line x1={scanX} x2={scanX} y1={yTop - 10} y2={yBottom + 10} strokeWidth={1.4} style={{ stroke: "var(--ac)", opacity: 0.8 }} />
+            <rect x={scanX - 32} y={yTop - 10} width={32} height={yBottom - yTop + 20} style={{ fill: "var(--ac)", opacity: 0.08 }} />
+            <text x={Math.min(scanX + 8, x1 - 40)} y={yTop - 16} style={mono(11, "#B57A28", ".16em")}>
                 SCAN
-            </text>
-            <text x={x0} y={356} style={mono(12, "#8A8578")}>
-                {"TIME →"}
-            </text>
-            <text x={x0 - 8} y={30} style={mono(12, "#8A8578")}>
-                {"GROWTH ↑"}
-            </text>
-            <text x={x1 - 6} y={356} textAnchor="end" style={mono(12, "#6E6A60")}>
-                {"SCREENED OUT — FLAT OR ONE GOOD QUARTER"}
             </text>
         </svg>
     )
 }
+
