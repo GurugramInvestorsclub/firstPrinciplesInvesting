@@ -2156,7 +2156,7 @@ export interface GrantManualSubscriptionParams {
   email: string
   name?: string | null
   planKey: "three_monthly" | "yearly"
-  durationPreset: "3_months" | "1_year"
+  durationPreset: "2_months" | "3_months" | "1_year"
   paymentMethod: string
   utrNumber?: string | null
   amountPaid?: number | null
@@ -2173,7 +2173,12 @@ export async function grantManualInsightsSubscription(
     throw new InsightsSubscriptionApiError(400, "INVALID_EMAIL", "A valid user email address is required")
   }
 
-  const durationPreset = params.durationPreset === "1_year" ? "1_year" : "3_months"
+  const durationPreset: "2_months" | "3_months" | "1_year" =
+    params.durationPreset === "1_year"
+      ? "1_year"
+      : params.durationPreset === "2_months"
+      ? "2_months"
+      : "3_months"
   const planSlug: InsightsPlanSlug = durationPreset === "1_year" ? "yearly" : "three_monthly"
   const dbPlanKey = slugToPlanKey(planSlug)
 
@@ -2181,6 +2186,8 @@ export async function grantManualInsightsSubscription(
   const currentEndAt = new Date(currentStartAt)
   if (durationPreset === "1_year") {
     currentEndAt.setFullYear(currentEndAt.getFullYear() + 1)
+  } else if (durationPreset === "2_months") {
+    currentEndAt.setMonth(currentEndAt.getMonth() + 2)
   } else {
     currentEndAt.setMonth(currentEndAt.getMonth() + 3)
   }
@@ -2214,11 +2221,13 @@ export async function grantManualInsightsSubscription(
     grantedAt: currentStartAt.toISOString(),
   }
 
-  const amountInPaise = params.amountPaid
+  const amountInPaise = params.amountPaid !== undefined && params.amountPaid !== null
     ? Math.round(params.amountPaid * 100)
     : durationPreset === "1_year"
       ? 999900
-      : 299900
+      : durationPreset === "2_months"
+        ? 0
+        : 299900
 
   const paymentRefId = params.utrNumber?.trim()
     ? `NEFT_${params.utrNumber.trim()}`

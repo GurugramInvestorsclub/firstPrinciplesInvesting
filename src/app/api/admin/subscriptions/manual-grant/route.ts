@@ -28,12 +28,12 @@ function parseOptionalString(value: unknown): string | null {
 }
 
 function parseOptionalNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
     return value
   }
   if (typeof value === "string" && value.trim().length > 0) {
     const num = Number(value.trim())
-    if (Number.isFinite(num) && num > 0) {
+    if (Number.isFinite(num) && num >= 0) {
       return num
     }
   }
@@ -49,7 +49,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const email = parseRequiredString(body?.email, "email")
     const name = parseOptionalString(body?.name)
-    const durationPreset = body?.durationPreset === "1_year" ? "1_year" : "3_months"
+    const durationPreset =
+      body?.durationPreset === "1_year"
+        ? "1_year"
+        : body?.durationPreset === "2_months"
+        ? "2_months"
+        : "3_months"
     const paymentMethod = parseOptionalString(body?.paymentMethod) || "NEFT"
     const utrNumber = parseOptionalString(body?.utrNumber)
     const amountPaid = parseOptionalNumber(body?.amountPaid)

@@ -57,7 +57,7 @@ export default function AdminSubscriptionsPage() {
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [modalEmail, setModalEmail] = useState("")
   const [modalName, setModalName] = useState("")
-  const [modalDurationPreset, setModalDurationPreset] = useState<"3_months" | "1_year">("3_months")
+  const [modalDurationPreset, setModalDurationPreset] = useState<"2_months" | "3_months" | "1_year">("3_months")
   const [modalPaymentMethod, setModalPaymentMethod] = useState("NEFT")
   const [modalUtrNumber, setModalUtrNumber] = useState("")
   const [modalAmountPaid, setModalAmountPaid] = useState("2999")
@@ -989,27 +989,51 @@ export default function AdminSubscriptionsPage() {
                 <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
                   Select Preset Duration *
                 </label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalDurationPreset("2_months")
+                      setModalAmountPaid("0")
+                      setModalPaymentMethod("FREE_GRANT")
+                    }}
+                    style={{
+                      padding: "10px 6px",
+                      borderRadius: "10px",
+                      border: modalDurationPreset === "2_months" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
+                      background: modalDurationPreset === "2_months" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
+                      color: modalDurationPreset === "2_months" ? "#FFC72C" : "#ccc",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      textAlign: "center",
+                    }}
+                  >
+                    2 Months Free<br />
+                    <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.8 }}>₹0 (Complimentary)</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
                       setModalDurationPreset("3_months")
                       setModalAmountPaid("2999")
+                      if (modalPaymentMethod === "FREE_GRANT") setModalPaymentMethod("NEFT")
                     }}
                     style={{
-                      padding: "12px",
+                      padding: "10px 6px",
                       borderRadius: "10px",
                       border: modalDurationPreset === "3_months" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
                       background: modalDurationPreset === "3_months" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
                       color: modalDurationPreset === "3_months" ? "#FFC72C" : "#ccc",
                       fontWeight: 700,
                       cursor: "pointer",
-                      fontSize: "13px",
+                      fontSize: "12px",
                       textAlign: "center",
                     }}
                   >
                     3 Months Pass<br />
-                    <span style={{ fontSize: "11px", fontWeight: 400, opacity: 0.8 }}>₹2,999</span>
+                    <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.8 }}>₹2,999</span>
                   </button>
 
                   <button
@@ -1017,21 +1041,22 @@ export default function AdminSubscriptionsPage() {
                     onClick={() => {
                       setModalDurationPreset("1_year")
                       setModalAmountPaid("9999")
+                      if (modalPaymentMethod === "FREE_GRANT") setModalPaymentMethod("NEFT")
                     }}
                     style={{
-                      padding: "12px",
+                      padding: "10px 6px",
                       borderRadius: "10px",
                       border: modalDurationPreset === "1_year" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
                       background: modalDurationPreset === "1_year" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
                       color: modalDurationPreset === "1_year" ? "#FFC72C" : "#ccc",
                       fontWeight: 700,
                       cursor: "pointer",
-                      fontSize: "13px",
+                      fontSize: "12px",
                       textAlign: "center",
                     }}
                   >
                     1 Year Pass<br />
-                    <span style={{ fontSize: "11px", fontWeight: 400, opacity: 0.8 }}>₹9,999</span>
+                    <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.8 }}>₹9,999</span>
                   </button>
                 </div>
               </div>
@@ -1055,6 +1080,8 @@ export default function AdminSubscriptionsPage() {
                       outline: "none",
                     }}
                   >
+                    <option value="FREE_GRANT">Free / Complimentary (₹0)</option>
+                    <option value="SUPER30_BONUS">Super30 Cohort Bonus</option>
                     <option value="NEFT">NEFT</option>
                     <option value="RTGS">RTGS</option>
                     <option value="IMPS">IMPS</option>
