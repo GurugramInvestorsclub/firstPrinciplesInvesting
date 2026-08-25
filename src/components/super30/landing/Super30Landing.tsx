@@ -337,7 +337,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
     const bonuses: [string, string][] = [
         ["Free complimentary access to membership for 2 months", "Everything behind the members wall for the two months following the batch, at no cost."],
         ["50% off on upcoming sectorial webinars during the period", "Access to all our previous sectorial webinars."],
-        ["Access to the demerger tracker", "The running list of announced and in-progress demergers we watch, with the dates that matter."],
+        ["Access to the Demergers tracker", "The running list of announced and in-progress demergers we watch, with the dates that matter."],
     ]
 
     return (
@@ -587,7 +587,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                     "Two months of complimentary membership",
                                     "50% off upcoming sectorial webinars for the period",
                                     "Access to all our previous sectorial webinars",
-                                    "Access to the demerger tracker",
+                                    "Access to the Demergers tracker",
                                 ].map((item) => (
                                     <li key={item} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, alignItems: "baseline" }}>
                                         <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 14, lineHeight: 1.35, color: "var(--go)" }}>✓</span>
