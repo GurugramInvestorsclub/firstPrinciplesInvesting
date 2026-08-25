@@ -82,13 +82,10 @@ export function HeroFig() {
     )
 }
 
-// Abstract "Super30 Investment Network" — 30 cohort nodes, first-principles central core,
-// controlled connections, information flow particles, mouse parallax, and periodic convergence.
+// Anime-inspired Super30 Investment Masterclass Amphitheatre.
+// Depicts 30 distinct cohort students + 1 teacher/mentor in a cinematic, elevated amphitheatre view.
 export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
-    const t = useClock(25)
-    const cx = 280
-    const cy = 290
-
+    const t = useClock(24)
     const svgRef = useRef<SVGSVGElement | null>(null)
     const [mouse, setMouse] = useState<{ x: number; y: number; active: boolean }>({ x: 0, y: 0, active: false })
 
@@ -104,91 +101,102 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
         setMouse({ x: 0, y: 0, active: false })
     }
 
-    // Generate 30 cohort nodes in 3 concentric architectural orbits around (cx, cy)
-    const nodes = useMemo(() => {
-        const arr: { id: number; x: number; y: number; layer: number; phase: number; isConvergeTarget?: boolean }[] = []
+    const stageCx = 280
+    const stageCy = 140
+
+    // Generate 30 distinct student seats arranged across 4 curved amphitheatre rows
+    const students = useMemo(() => {
+        const list: {
+            id: number
+            row: number
+            x: number
+            y: number
+            scale: number
+            hairStyle: number
+            actionType: number
+            phase: number
+        }[] = []
+
         let id = 0
 
-        // Inner Orbit: 8 nodes at R = 125
-        for (let i = 0; i < 8; i++) {
-            const angle = i * ((Math.PI * 2) / 8) - Math.PI / 2
-            arr.push({
+        // Row 1 (Front Row): 6 students
+        const r1Count = 6
+        for (let i = 0; i < r1Count; i++) {
+            const angle = -0.55 + (i / (r1Count - 1)) * 1.1
+            const r = 115
+            list.push({
                 id: id++,
-                x: cx + 125 * Math.cos(angle),
-                y: cy + 125 * Math.sin(angle),
-                layer: 1,
-                phase: i * 0.7 + 0.2,
-                isConvergeTarget: i % 2 === 0,
+                row: 1,
+                x: stageCx + r * Math.sin(angle),
+                y: stageCy + r * Math.cos(angle) * 0.7 + 60,
+                scale: 1.0,
+                hairStyle: i % 4,
+                actionType: i % 3,
+                phase: i * 0.8,
             })
         }
 
-        // Middle Orbit: 12 nodes at R = 195
-        for (let i = 0; i < 12; i++) {
-            const angle = i * ((Math.PI * 2) / 12) - Math.PI / 2 + Math.PI / 12
-            arr.push({
+        // Row 2 (Middle-Front Row): 7 students
+        const r2Count = 7
+        for (let i = 0; i < r2Count; i++) {
+            const angle = -0.68 + (i / (r2Count - 1)) * 1.36
+            const r = 185
+            list.push({
                 id: id++,
-                x: cx + 195 * Math.cos(angle),
-                y: cy + 195 * Math.sin(angle),
-                layer: 2,
-                phase: i * 0.5 + 1.1,
-                isConvergeTarget: i % 3 === 0,
+                row: 2,
+                x: stageCx + r * Math.sin(angle),
+                y: stageCy + r * Math.cos(angle) * 0.68 + 120,
+                scale: 0.92,
+                hairStyle: (i + 1) % 4,
+                actionType: (i + 1) % 4,
+                phase: i * 0.7 + 1.2,
             })
         }
 
-        // Outer Orbit: 10 nodes at R = 248
-        for (let i = 0; i < 10; i++) {
-            const angle = i * ((Math.PI * 2) / 10) - Math.PI / 2 + Math.PI / 20
-            arr.push({
+        // Row 3 (Middle-Back Row): 8 students
+        const r3Count = 8
+        for (let i = 0; i < r3Count; i++) {
+            const angle = -0.76 + (i / (r3Count - 1)) * 1.52
+            const r = 260
+            list.push({
                 id: id++,
-                x: cx + 248 * Math.cos(angle),
-                y: cy + 248 * Math.sin(angle),
-                layer: 3,
-                phase: i * 0.9 + 2.3,
-                isConvergeTarget: i % 4 === 0,
+                row: 3,
+                x: stageCx + r * Math.sin(angle),
+                y: stageCy + r * Math.cos(angle) * 0.65 + 185,
+                scale: 0.84,
+                hairStyle: (i + 2) % 4,
+                actionType: (i + 2) % 3,
+                phase: i * 0.6 + 2.1,
             })
         }
 
-        return arr
-    }, [cx, cy])
+        // Row 4 (Back Row): 9 students
+        const r4Count = 9
+        for (let i = 0; i < r4Count; i++) {
+            const angle = -0.82 + (i / (r4Count - 1)) * 1.64
+            const r = 340
+            list.push({
+                id: id++,
+                row: 4,
+                x: stageCx + r * Math.sin(angle),
+                y: stageCy + r * Math.cos(angle) * 0.62 + 250,
+                scale: 0.76,
+                hairStyle: (i + 3) % 4,
+                actionType: (i + 3) % 4,
+                phase: i * 0.5 + 3.4,
+            })
+        }
 
-    // Generate controlled structural connections
-    const connections = useMemo(() => {
-        const lines: { n1: number; n2?: number; isCore?: boolean }[] = []
-        // Connect all nodes to central core
-        nodes.forEach((n) => {
-            lines.push({ n1: n.id, isCore: true })
-        })
-        // Connect ring neighbors and ring-to-ring neighbors
-        nodes.forEach((n, i) => {
-            if (n.layer === 1) {
-                const nextInner = (i + 1) % 8
-                lines.push({ n1: n.id, n2: nextInner })
-                const targetMiddle = 8 + (i * 12) / 8
-                lines.push({ n1: n.id, n2: Math.floor(targetMiddle) })
-            } else if (n.layer === 2) {
-                const nextMiddle = 8 + ((i - 8 + 1) % 12)
-                lines.push({ n1: n.id, n2: nextMiddle })
-                const targetOuter = 20 + Math.floor(((i - 8) * 10) / 12)
-                if (targetOuter < 30) {
-                    lines.push({ n1: n.id, n2: targetOuter })
-                }
-            }
-        })
-        return lines
-    }, [nodes])
+        return list
+    }, [stageCx, stageCy])
 
-    const timeSec = t * 25
-    const entranceCore = seg(timeSec, 0, 0.5)
-    const entranceLines = seg(timeSec, 1.2, 2.4)
+    const timeSec = t * 24
+    const envProgress = seg(timeSec, 0, 0.6)
+    const stageProgress = seg(timeSec, 0.4, 1.0)
+    const lightsBreathe = 0.5 + 0.5 * Math.sin(timeSec * 0.6)
 
-    const convCycle = (timeSec % 10) / 10
-    const convIntensity = seg(convCycle, 0.82, 0.9) * (1 - seg(convCycle, 0.9, 0.98))
-
-    const coreRot1 = (t * 360).toFixed(1)
-    const coreRot2 = (-t * 360 * 1.25).toFixed(1)
-
-    const cursorSvgX = cx + mouse.x * 240
-    const cursorSvgY = cy + mouse.y * 250
+    const teacherGesture = Math.sin(timeSec * 1.2) * 3
+    const screenPulse = seg((timeSec % 8) / 8, 0.2, 0.5) * (1 - seg((timeSec % 8) / 8, 0.5, 0.8))
 
     return (
         <svg
@@ -199,192 +207,182 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
             style={{ ...svgStyle, cursor: "crosshair" }}
         >
             <defs>
-                <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="var(--ac)" stopOpacity={0.35 + 0.3 * convIntensity} />
-                    <stop offset="60%" stopColor="#8A5D1C" stopOpacity={0.12} />
+                <radialGradient id="stageSpotlight" cx="50%" cy="30%" r="60%">
+                    <stop offset="0%" stopColor="#D4A359" stopOpacity={0.35 + 0.1 * lightsBreathe} />
+                    <stop offset="40%" stopColor="#8A5D1C" stopOpacity={0.15} />
                     <stop offset="100%" stopColor="#12110F" stopOpacity={0} />
                 </radialGradient>
-                <radialGradient id="nodePulseGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="var(--ac)" stopOpacity={0.8} />
+
+                <radialGradient id="screenGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="var(--ac)" stopOpacity={0.25 + 0.15 * screenPulse} />
+                    <stop offset="100%" stopColor="#12110F" stopOpacity={0} />
+                </radialGradient>
+
+                <radialGradient id="seatLightGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="var(--ac)" stopOpacity={0.85} />
                     <stop offset="100%" stopColor="var(--ac)" stopOpacity={0} />
                 </radialGradient>
             </defs>
 
-            {/* Layer 1: Background Architectural Arcs (Parallax ~ 1.8px) */}
-            <g transform={`translate(${(mouse.x * 1.8).toFixed(2)}, ${(mouse.y * 1.8).toFixed(2)})`}>
-                <circle cx={cx} cy={cy} r={265} fill="none" stroke="#F4F1EA" strokeWidth={1} strokeDasharray="3 8" style={{ opacity: 0.07 }} />
-                <circle cx={cx} cy={cy} r={205} fill="none" stroke="var(--ac)" strokeWidth={1} strokeDasharray="2 6" style={{ opacity: 0.12 }} />
-                <circle cx={cx} cy={cy} r={135} fill="none" stroke="#F4F1EA" strokeWidth={1} strokeDasharray="4 10" style={{ opacity: 0.09 }} />
-            </g>
+            {/* Layer 1: Background Architectural Walls & Presentation Screen (Parallax ~ 1.5px) */}
+            <g transform={`translate(${(mouse.x * 1.5).toFixed(2)}, ${(mouse.y * 1.5).toFixed(2)})`} style={{ opacity: envProgress }}>
+                <path d="M 40 180 Q 280 80 520 180" fill="none" stroke="#26231F" strokeWidth="20" opacity={0.6} />
+                <path d="M 20 270 Q 280 130 540 270" fill="none" stroke="#1E1C19" strokeWidth="18" opacity={0.7} />
+                <path d="M 0 380 Q 280 200 560 380" fill="none" stroke="#181614" strokeWidth="16" opacity={0.8} />
 
-            {/* Layer 2: Network Connections & Information Flow (Parallax ~ 3.2px) */}
-            <g transform={`translate(${(mouse.x * 3.2).toFixed(2)}, ${(mouse.y * 3.2).toFixed(2)})`}>
-                {connections.map((c, idx) => {
-                    const n1 = nodes[c.n1]
-                    const n2 = c.isCore ? { x: cx, y: cy } : nodes[c.n2!]
-                    if (!n1 || !n2) return null
-
-                    const lineProgress = seg(entranceLines, (c.n1 / 30) * 0.5, (c.n1 / 30) * 0.5 + 0.5)
-                    if (lineProgress <= 0) return null
-
-                    let proximityOpacity = 0
-                    if (mouse.active) {
-                        const d1 = Math.hypot(cursorSvgX - n1.x, cursorSvgY - n1.y)
-                        const d2 = Math.hypot(cursorSvgX - n2.x, cursorSvgY - n2.y)
-                        if (d1 < 100 || d2 < 100) proximityOpacity = 0.25
-                    }
-
-                    const isHighlight = c.isCore && n1.isConvergeTarget && convIntensity > 0
-                    const strokeOp = isHighlight
-                        ? 0.15 + 0.45 * convIntensity
-                        : Math.min(1, lineProgress) * (0.08 + (c.isCore ? 0.06 : 0) + proximityOpacity)
-
+                {[-0.8, -0.4, 0.4, 0.8].map((pos, idx) => {
+                    const colX = stageCx + pos * 240
                     return (
                         <line
-                            key={"conn-" + idx}
-                            x1={n1.x.toFixed(1)}
-                            y1={n1.y.toFixed(1)}
-                            x2={n2.x.toFixed(1)}
-                            y2={n2.y.toFixed(1)}
-                            stroke={isHighlight ? "var(--ac)" : c.isCore ? "var(--ac)" : "#F4F1EA"}
-                            strokeWidth={isHighlight ? 1.6 : 1}
-                            style={{ opacity: strokeOp, transition: "opacity 0.3s ease" }}
+                            key={"col-" + idx}
+                            x1={colX}
+                            y1={30}
+                            x2={colX}
+                            y2={160}
+                            stroke="#F4F1EA"
+                            strokeWidth={1}
+                            strokeDasharray="2 8"
+                            style={{ opacity: 0.1 }}
                         />
                     )
                 })}
 
-                {/* Information Particles travelling along selected connections */}
-                {nodes
-                    .filter((n) => n.id % 4 === 0)
-                    .map((n, pIdx) => {
-                        const pTime = (t * 25 * 0.2 + pIdx * 0.25) % 1
-                        const px = n.x + (cx - n.x) * pTime
-                        const py = n.y + (cy - n.y) * pTime
-                        const pOpacity = Math.sin(pTime * Math.PI) * 0.75 * (1 + convIntensity)
-                        return (
-                            <circle
-                                key={"part-" + pIdx}
-                                cx={px.toFixed(1)}
-                                cy={py.toFixed(1)}
-                                r={2}
-                                style={{ fill: "var(--ac)", opacity: pOpacity }}
-                            />
-                        )
-                    })}
+                <rect x={150} y={35} width={260} height={95} rx={4} fill="#161412" stroke="var(--ac)" strokeWidth={1} style={{ opacity: 0.8 }} />
+                <rect x={150} y={35} width={260} height={95} rx={4} fill="url(#screenGlow)" />
+
+                <g style={{ opacity: 0.75 }}>
+                    <circle cx={280} cy={72} r={8} fill="none" stroke="var(--ac)" strokeWidth={1.2} />
+                    <circle cx={280} cy={72} r={3} fill="var(--ac)" />
+                    <text x={280} y={94} textAnchor="middle" style={mono(9, "var(--ac)", ".14em")}>
+                        FIRST PRINCIPLES
+                    </text>
+
+                    {[
+                        { label: "CYCLICALS", x: 200, y: 55 },
+                        { label: "DEMERGERS", x: 360, y: 55 },
+                        { label: "BLUE OCEANS", x: 200, y: 95 },
+                        { label: "ALPHA", x: 360, y: 95 },
+                    ].map((node, i) => (
+                        <g key={"sn-" + i}>
+                            <line x1={280} y1={72} x2={node.x} y2={node.y} stroke="#F4F1EA" strokeWidth={0.8} strokeDasharray="3 3" opacity={0.4} />
+                            <circle cx={node.x} cy={node.y} r={3} fill="#F4F1EA" opacity={0.6 + (i === Math.floor(timeSec / 2) % 4 ? 0.4 : 0)} />
+                            <text x={node.x} y={node.y + (node.y > 70 ? 12 : -8)} textAnchor="middle" style={mono(7.5, "#C5BFB5", ".1em")}>
+                                {node.label}
+                            </text>
+                        </g>
+                    ))}
+                </g>
             </g>
 
-            {/* Layer 3: Central Core & Inner Structure (Parallax ~ 5.5px) */}
-            <g transform={`translate(${(mouse.x * 5.5).toFixed(2)}, ${(mouse.y * 5.5).toFixed(2)})`}>
-                <circle cx={cx} cy={cy} r={95} fill="url(#coreGlow)" style={{ opacity: Math.min(1, entranceCore * 1.5) }} />
+            {/* Layer 2: Stage & Teacher (Parallax ~ 3.5px) */}
+            <g transform={`translate(${(mouse.x * 3.5).toFixed(2)}, ${(mouse.y * 3.5).toFixed(2)})`} style={{ opacity: stageProgress }}>
+                <ellipse cx={280} cy={145} rx={160} ry={35} fill="url(#stageSpotlight)" />
 
-                <g transform={`rotate(${coreRot1} ${cx} ${cy})`} style={{ opacity: 0.3 + 0.3 * convIntensity }}>
-                    <polygon
-                        points={[0, 45, 90, 135, 180, 225, 270, 315]
-                            .map((deg) => {
-                                const rad = (deg * Math.PI) / 180
-                                return `${(cx + 72 * Math.cos(rad)).toFixed(1)},${(cy + 72 * Math.sin(rad)).toFixed(1)}`
-                            })
-                            .join(" ")}
-                        fill="none"
-                        stroke="var(--ac)"
-                        strokeWidth={1}
-                        strokeDasharray="4 6"
-                    />
-                </g>
+                <path d="M 130 148 Q 280 162 430 148" fill="none" stroke="var(--ac)" strokeWidth={1.8} style={{ opacity: 0.7 }} />
+                <path d="M 140 151 Q 280 165 420 151" fill="none" stroke="#8A5D1C" strokeWidth={1} style={{ opacity: 0.3 }} />
 
-                <g transform={`rotate(${coreRot2} ${cx} ${cy})`} style={{ opacity: 0.4 + 0.4 * convIntensity }}>
-                    <rect
-                        x={cx - 38}
-                        y={cy - 38}
-                        width={76}
-                        height={76}
-                        fill="none"
-                        stroke="#F4F1EA"
-                        strokeWidth={1}
-                        style={{ opacity: 0.25 }}
-                    />
-                    <polygon
-                        points={`${cx},${cy - 48} ${cx + 48},${cy} ${cx},${cy + 48} ${cx - 48},${cy}`}
-                        fill="rgba(138,93,28,0.06)"
+                <g transform={`rotate(${teacherGesture.toFixed(2)} 280 140)`}>
+                    <ellipse cx={280} cy={138} rx={12} ry={22} fill="var(--ac)" opacity={0.12} />
+
+                    <path
+                        d="M 273 148 L 271 128 Q 271 120 280 118 Q 289 120 289 128 L 287 148 Z"
+                        fill="#1C1A17"
                         stroke="var(--ac)"
                         strokeWidth={1.2}
                     />
-                </g>
 
-                {/* Site Brand Logo (The Brain logo) */}
-                <image
-                    href="/logo.png"
-                    x={cx - 32}
-                    y={cy - 32}
-                    width={64}
-                    height={64}
-                    preserveAspectRatio="xMidYMid meet"
-                    style={{
-                        opacity: Math.min(1, entranceCore * 1.5),
-                        filter: `drop-shadow(0 0 12px rgba(181,122,40,${(0.5 + 0.4 * convIntensity).toFixed(2)}))`,
-                        transition: "filter 0.3s ease",
-                    }}
-                />
+                    <circle cx={280} cy={114} r={6} fill="#24211D" stroke="var(--ac)" strokeWidth={1} />
+
+                    <path
+                        d={`M 286 123 Q 296 ${120 + Math.sin(timeSec * 1.5) * 4} 302 ${115 + Math.sin(timeSec * 1.5) * 5}`}
+                        fill="none"
+                        stroke="var(--ac)"
+                        strokeWidth={1.4}
+                        strokeLinecap="round"
+                    />
+
+                    <circle cx={280} cy={107} r={1.5} fill="#F4F1EA" opacity={0.8} />
+                </g>
             </g>
 
-            {/* Layer 4: 30 Cohort Nodes (Parallax ~ 4.2px) */}
-            <g transform={`translate(${(mouse.x * 4.2).toFixed(2)}, ${(mouse.y * 4.2).toFixed(2)})`}>
-                {nodes.map((n) => {
-                    const nodeEntrance = seg(timeSec, 0.4 + (n.id / 30) * 0.9, 0.4 + (n.id / 30) * 0.9 + 0.3)
-                    if (nodeEntrance <= 0) return null
+            {/* Layer 3: Amphitheatre Curved Seating Rows & 30 Students (Parallax ~ 2.8px) */}
+            <g transform={`translate(${(mouse.x * 2.8).toFixed(2)}, ${(mouse.y * 2.8).toFixed(2)})`}>
+                <path d="M 110 220 Q 280 248 450 220" fill="none" stroke="#2B2823" strokeWidth={4} opacity={0.8} />
+                <path d="M 70 300 Q 280 338 490 300" fill="none" stroke="#24211D" strokeWidth={4} opacity={0.85} />
+                <path d="M 35 390 Q 280 435 525 390" fill="none" stroke="#1E1C19" strokeWidth={4} opacity={0.9} />
+                <path d="M 10 490 Q 280 542 550 490" fill="none" stroke="#181614" strokeWidth={4} opacity={0.95} />
 
-                    const breatheOsc = 0.5 + 0.5 * Math.sin(timeSec * 2.2 + n.phase)
-                    const baseRadius = n.layer === 1 ? 3.8 : n.layer === 2 ? 3.4 : 3.0
-                    const nodeR = baseRadius + breatheOsc * 0.8
+                {students.map((st) => {
+                    const studentEntrance = seg(timeSec, 0.8 + (st.id / 30) * 1.2, 0.8 + (st.id / 30) * 1.2 + 0.3)
+                    if (studentEntrance <= 0) return null
 
-                    let isHovered = false
-                    let hoverBoost = 0
+                    const isMoving = st.id % 7 === Math.floor(timeSec * 0.5) % 7
+                    const moveOffset = isMoving ? Math.sin(timeSec * 3 + st.phase) * 1.5 : 0
+                    const noteArmMove = st.actionType === 1 ? Math.sin(timeSec * 4 + st.phase) * 1.2 : 0
+
+                    let isNearby = false
                     if (mouse.active) {
-                        const dist = Math.hypot(cursorSvgX - n.x, cursorSvgY - n.y)
-                        if (dist < 90) {
-                            isHovered = true
-                            hoverBoost = (1 - dist / 90) * 0.6
-                        }
+                        const mouseSvgX = stageCx + mouse.x * 240
+                        const mouseSvgY = stageCy + mouse.y * 250
+                        const d = Math.hypot(mouseSvgX - st.x, mouseSvgY - st.y)
+                        if (d < 80) isNearby = true
                     }
 
-                    const isConvTarget = n.isConvergeTarget && convIntensity > 0
-                    const convBoost = isConvTarget ? convIntensity * 0.5 : 0
-
-                    const nodeOpacity = Math.min(
-                        1,
-                        nodeEntrance * (0.55 + breatheOsc * 0.35 + hoverBoost + convBoost)
-                    )
-                    const finalRadius = nodeR + hoverBoost * 2 + convBoost * 1.5
+                    const opacityVal = Math.min(1, studentEntrance * (st.row === 1 ? 0.95 : st.row === 2 ? 0.88 : st.row === 3 ? 0.78 : 0.68))
 
                     return (
-                        <g key={"node-" + n.id}>
-                            {(isHovered || isConvTarget) && (
-                                <circle
-                                    cx={n.x.toFixed(1)}
-                                    cy={n.y.toFixed(1)}
-                                    r={(finalRadius * 2.4).toFixed(1)}
-                                    fill="url(#nodePulseGlow)"
-                                    style={{ opacity: hoverBoost + convBoost }}
-                                />
-                            )}
-                            <circle
-                                cx={n.x.toFixed(1)}
-                                cy={n.y.toFixed(1)}
-                                r={finalRadius.toFixed(2)}
-                                style={{
-                                    fill: isConvTarget || isHovered ? "var(--ac)" : n.layer === 1 ? "var(--ac)" : "#F4F1EA",
-                                    opacity: nodeOpacity,
-                                    transition: "opacity 0.2s ease",
-                                }}
+                        <g
+                            key={"st-" + st.id}
+                            transform={`translate(${(st.x + moveOffset).toFixed(1)}, ${st.y.toFixed(1)}) scale(${st.scale})`}
+                            style={{ opacity: opacityVal }}
+                        >
+                            <circle cx={0} cy={14} r={3} fill="url(#seatLightGlow)" />
+                            <circle cx={0} cy={14} r={1.5} fill={isNearby ? "var(--ac)" : "#8A8578"} opacity={isNearby ? 1 : 0.7} />
+
+                            <path
+                                d="M -11 12 Q -12 2 -4 0 Q 0 -1 4 0 Q 12 2 11 12 Z"
+                                fill={isNearby ? "#2B2620" : "#1A1815"}
+                                stroke={isNearby || st.row === 1 ? "var(--ac)" : "#4A443B"}
+                                strokeWidth={isNearby ? 1.2 : 0.8}
                             />
+
+                            {st.hairStyle === 0 && (
+                                <path d="M -5 -2 C -7 -10 7 -10 5 -2 Z" fill="#292520" stroke="var(--ac)" strokeWidth={0.6} />
+                            )}
+                            {st.hairStyle === 1 && (
+                                <g>
+                                    <circle cx={0} cy={-5} r={5} fill="#24201B" stroke="var(--ac)" strokeWidth={0.6} />
+                                    <path d="M 3 -4 Q 8 -2 6 4" fill="none" stroke="var(--ac)" strokeWidth={0.8} />
+                                </g>
+                            )}
+                            {st.hairStyle === 2 && (
+                                <path d="M -6 -1 Q -8 -9 0 -11 Q 8 -9 6 -1 Z" fill="#1F1C18" stroke="var(--ac)" strokeWidth={0.6} />
+                            )}
+                            {st.hairStyle === 3 && (
+                                <g>
+                                    <ellipse cx={0} cy={-5} rx={5} ry={4.5} fill="#2A2621" />
+                                    <line x1={-5} y1={-5} x2={5} y2={-5} stroke="var(--ac)" strokeWidth={0.8} />
+                                </g>
+                            )}
+
+                            {st.actionType === 1 && (
+                                <g transform={`translate(${noteArmMove.toFixed(1)}, 0)`}>
+                                    <rect x={-5} y={6} width={10} height={5} rx={1} fill="#F4F1EA" opacity={0.6} />
+                                    <line x1={-3} y1={8} x2={3} y2={8} stroke="var(--ac)" strokeWidth={0.6} />
+                                </g>
+                            )}
+
+                            {st.actionType === 3 && isMoving && (
+                                <path d="M 6 3 L 10 -4" fill="none" stroke="var(--ac)" strokeWidth={1} strokeLinecap="round" />
+                            )}
                         </g>
                     )
                 })}
             </g>
 
-            {/* Bottom Caption Badge */}
-            <text x={cx} y={582} textAnchor="middle" style={mono(11, "#8A8578", ".18em")}>
-                {`${seatCount} COHORT MEMBERS · FIRST PRINCIPLES SYSTEM`}
+            {/* Bottom Amphitheatre Caption */}
+            <text x={stageCx} y={582} textAnchor="middle" style={mono(11, "#C5BFB5", ".18em")}>
+                {`${seatCount} COHORT MEMBERS · 1 MENTOR · FIRST PRINCIPLES`}
             </text>
         </svg>
     )

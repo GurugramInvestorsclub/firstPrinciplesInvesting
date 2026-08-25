@@ -88,7 +88,6 @@ interface FrameworkData {
     title: string
     standfirst: string
     figure: ReactNode
-    caption: string
     bullets: [string, string, string]
     triplet: [string, string, string]
     paper?: boolean
@@ -115,7 +114,7 @@ function Triplet({ items, paper }: { items: [string, string, string]; paper?: bo
     )
 }
 
-function FrameworkSection({ num, kicker, title, standfirst: sf, figure, caption, bullets, triplet, paper, borderTop }: FrameworkData) {
+function FrameworkSection({ num, kicker, title, standfirst: sf, figure, bullets, triplet, paper, borderTop }: FrameworkData) {
     return (
         <section
             className="s30l-sec"
@@ -148,9 +147,8 @@ function FrameworkSection({ num, kicker, title, standfirst: sf, figure, caption,
                 <p data-reveal className="s30l-pretty" style={standfirst(paper)}>
                     {sf}
                 </p>
-                <div data-reveal style={{ margin: "64px 0 60px", border: `1px solid ${paper ? "rgba(18,17,15,.14)" : "rgba(244,241,234,.12)"}`, padding: "26px 26px 18px" }}>
+                <div data-reveal style={{ margin: "64px 0 60px", border: `1px solid ${paper ? "rgba(18,17,15,.14)" : "rgba(244,241,234,.12)"}`, padding: "26px" }}>
                     <div style={{ aspectRatio: "1000/400", width: "100%" }}>{figure}</div>
-                    <p style={figCaption(paper)}>{caption}</p>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 44, marginBottom: 64 }}>
                     {bullets.map((b, i) => (
@@ -198,7 +196,6 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             standfirst:
                 "Every cyclical business tells the same story in a different commodity. Price leads earnings, earnings invite capacity, and capacity ends the cycle. The work is knowing where on the curve you are standing.",
             figure: <CyclicalsFig />,
-            caption: "Illustrative — the shape of a cycle, not a specific commodity.",
             bullets: [
                 "Reading the cycle from supply rather than sentiment: capex announcements, utilisation, inventory and imports, rather than the last quarter’s earnings.",
                 "Why the cheapest-looking point of a cycle is usually the most expensive place to buy, and what the low-cost producer looks like on a balance sheet.",
@@ -218,7 +215,6 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             standfirst:
                 "A conglomerate is priced as one story. A demerger forces the market to price two. Most of the value in special situations sits in the gap between one multiple and two.",
             figure: <DemergerFig />,
-            caption: "Illustrative — how a sum-of-parts discount closes, not a forecast.",
             bullets: [
                 "Why a holding structure trades below the sum of its parts, and what specifically has to change for that discount to close.",
                 "Reading the scheme of arrangement: record dates, entitlement ratios, and the mechanics that create forced sellers on listing.",
@@ -238,7 +234,6 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             standfirst:
                 "In a red ocean, everyone sells the same thing to the same customer and price is the only lever left. A blue ocean is a market a business has largely created for itself. The same capital earns very different returns in the two.",
             figure: <OceanFig />,
-            caption: "Illustrative — competitive density and where margin goes.",
             bullets: [
                 "Telling a blue ocean from a temporary lead: what keeps the water uncontested once the numbers get noticed.",
                 "Why red-ocean businesses look cheap on every screen you will ever run, and stay cheap for a decade.",
@@ -257,7 +252,6 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             standfirst:
                 "Alpha capture is a scan, not a hunch. It looks for businesses that are already growing aggressively — growth visible in the reported numbers — and then asks whether it can continue.",
             figure: <AlphaFig />,
-            caption: "Illustrative — a scan surfacing businesses already compounding.",
             bullets: [
                 "Where aggressive growth shows up first: order books, capacity additions, and revenue running well ahead of the sector.",
                 "Separating growth that is genuinely compounding from a single good quarter, a low base, or an acquisition.",
