@@ -4,26 +4,31 @@ import { client } from "@/lib/sanity.client"
 import { singleSuper30Query } from "@/lib/sanity.queries"
 import { Super30Program } from "@/lib/types"
 import { notFound } from "next/navigation"
+import { IBM_Plex_Mono, IBM_Plex_Sans, Instrument_Serif } from "next/font/google"
 
-import { AmbientLighting } from "@/components/events/AmbientLighting"
-import { ScrollProgress } from "@/components/events/ScrollProgress"
-import { StickyNav } from "@/components/events/StickyNav"
+import { Super30Landing } from "@/components/super30/landing/Super30Landing"
 
-import { Super30Hero } from "@/components/super30/Super30Hero"
-import { Super30ProblemSection } from "@/components/super30/Super30ProblemSection"
-import { Super30PhilosophySection } from "@/components/super30/Super30PhilosophySection"
-import { Super30Deliverables } from "@/components/super30/Super30Deliverables"
-import { Super30Outcomes } from "@/components/super30/Super30Outcomes"
-import { Super30Audience } from "@/components/super30/Super30Audience"
-import { Super30Testimonials } from "@/components/super30/Super30Testimonials"
-import { Super30Pricing } from "@/components/super30/Super30Pricing"
-import { Super30FAQ } from "@/components/super30/Super30FAQ"
-import { Super30FinalCTA } from "@/components/super30/Super30FinalCTA"
-import { Super30Cursor } from "@/components/super30/Super30Cursor"
-import { Super30Trust } from "@/components/super30/Super30Trust"
-import { Super30StickyCTA } from "@/components/super30/Super30StickyCTA"
+const instrumentSerif = Instrument_Serif({
+    weight: "400",
+    style: ["normal", "italic"],
+    subsets: ["latin"],
+    variable: "--font-s30-serif",
+    display: "swap",
+})
 
-import { Super30NewDesign } from "@/components/super30/Super30NewDesign"
+const plexSans = IBM_Plex_Sans({
+    weight: ["300", "400", "500"],
+    subsets: ["latin"],
+    variable: "--font-s30-sans",
+    display: "swap",
+})
+
+const plexMono = IBM_Plex_Mono({
+    weight: ["400", "500"],
+    subsets: ["latin"],
+    variable: "--font-s30-mono",
+    display: "swap",
+})
 
 export const revalidate = 60
 
@@ -65,12 +70,13 @@ export default async function Super30Page({ params }: Props) {
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#0E0E11] text-text-primary selection:bg-gold/20 selection:text-gold relative z-0 super30-page">
-            <div className="noise-bg" />
+        <div
+            className={`${instrumentSerif.variable} ${plexSans.variable} ${plexMono.variable} flex flex-col min-h-screen bg-[#12110F] text-[#F4F1EA] selection:bg-[#23C077]/20 selection:text-[#23C077] relative z-0 super30-page`}
+        >
             <Navbar />
 
             <main className="flex-1">
-                <Super30NewDesign program={program} />
+                <Super30Landing program={program} />
             </main>
 
             <Footer />
