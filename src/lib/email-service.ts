@@ -1,5 +1,6 @@
 import { client } from "@/lib/sanity.client"
 import { groq } from "next-sanity"
+import { prisma } from "@/lib/prisma"
 
 interface SendEmailParams {
   toEmail: string
@@ -64,7 +65,49 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
 
     const formattedDate = event.date ? formatEventDate(event.date) : null
     const speakerName = typeof event.speaker === "string" ? event.speaker : event.speaker?.name ?? null
-    const amountDisplay = event.price ? `₹${event.price}` : (params.amountPaid ? `₹${params.amountPaid}` : null)
+
+    // Determine actual amount paid (Priority: passed amountPaid -> DB Payment record -> Sanity event.price fallback)
+    let resolvedAmountPaid: number | string | null =
+      params.amountPaid !== undefined && params.amountPaid !== null ? params.amountPaid : null
+
+    if (resolvedAmountPaid === null) {
+      try {
+        const paymentConditions = []
+        if (params.orderId) {
+          paymentConditions.push({ razorpayOrderId: params.orderId })
+        }
+        if (params.paymentId) {
+          paymentConditions.push({ razorpayPaymentId: params.paymentId })
+        }
+        if (params.toEmail && params.eventId) {
+          paymentConditions.push({
+            user: { email: params.toEmail },
+            eventId: params.eventId,
+            status: "SUCCESS" as const,
+          })
+        }
+
+        if (paymentConditions.length > 0) {
+          const payment = await prisma.payment.findFirst({
+            where: { OR: paymentConditions },
+            orderBy: { createdAt: "desc" },
+            select: { amount: true },
+          })
+
+          if (payment && typeof payment.amount === "number") {
+            resolvedAmountPaid = payment.amount / 100
+          }
+        }
+      } catch (dbError) {
+        console.error("Failed to lookup payment amount for registration email:", dbError)
+      }
+    }
+
+    if (resolvedAmountPaid === null && event.price != null) {
+      resolvedAmountPaid = event.price
+    }
+
+    const amountDisplay = resolvedAmountPaid != null ? `₹${resolvedAmountPaid}` : null
     const transactionId = params.paymentId || params.orderId || null
 
     // 2. Call Brevo Transactional SMTP API

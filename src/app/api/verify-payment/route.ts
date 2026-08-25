@@ -5,6 +5,7 @@ import {
   finalizeCapturedPayment,
   initiateCompensatingRefund,
   mapPaymentApiError,
+  paiseToRupees,
   requiresCompensatingRefund,
   validateCapturedPaymentAtProvider,
   verifyCheckoutSignature,
@@ -73,6 +74,9 @@ export async function POST(request: NextRequest) {
         toEmail: session.user.email,
         toName: session.user.name || "Attendee",
         eventId: result.eventId,
+        paymentId: razorpayPaymentId,
+        orderId: razorpayOrderId,
+        amountPaid: paiseToRupees(result.amount),
       }).catch((err) => console.error("Registration email delivery failed:", err))
     }
 

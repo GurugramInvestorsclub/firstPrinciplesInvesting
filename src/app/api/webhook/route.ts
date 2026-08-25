@@ -5,6 +5,7 @@ import {
   mapPaymentApiError,
   markOrderFailed,
   markWebhookEventProcessed,
+  paiseToRupees,
   requiresCompensatingRefund,
   reserveWebhookEventProcessing,
   verifyWebhookSignature,
@@ -110,6 +111,9 @@ export async function POST(request: NextRequest) {
                 toEmail: reg.email,
                 toName: reg.name || "Attendee",
                 eventId: captureResult.eventId,
+                paymentId: razorpayPaymentId ?? captureResult.razorpayPaymentId ?? undefined,
+                orderId: razorpayOrderId,
+                amountPaid: paiseToRupees(captureResult.amount),
               }).catch((err) => console.error("Webhook registration email delivery failed:", err))
             }
           })
