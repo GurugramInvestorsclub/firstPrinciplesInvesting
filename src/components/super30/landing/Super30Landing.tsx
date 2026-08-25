@@ -5,7 +5,7 @@
 // no shadows; separation is 1px hairlines and 1px grid gaps only.
 
 import { CSSProperties, ReactNode, useEffect, useRef } from "react"
-import { Super30Program } from "@/lib/types"
+import { Super30Program, Testimonial } from "@/lib/types"
 import { isEventRegistrationOpen } from "@/lib/utils"
 import { wireReveal } from "./reveal"
 import { AlphaFig, CyclicalsFig, DemergerFig, HeroFig, OceanFig, SeatStripFig, SeatsFig } from "./figures"
@@ -180,7 +180,7 @@ function FrameworkSection({ num, kicker, title, standfirst: sf, figure, caption,
     )
 }
 
-export function Super30Landing({ program }: { program: Super30Program }) {
+export function Super30Landing({ program, siteTestimonials = [] }: { program: Super30Program; siteTestimonials?: Testimonial[] }) {
     const rootRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
@@ -194,7 +194,16 @@ export function Super30Landing({ program }: { program: Super30Program }) {
     const seatsWordLower = seats === 30 ? "thirty" : String(seats)
     const registrationOpen =
         !program.isSoldOut && (program.applicationDeadline ? isEventRegistrationOpen(program.applicationDeadline) : true)
-    const testimonials = (program.testimonials ?? []).filter((t) => t?.text)
+    // Reviews: batch-specific testimonials from the program document win; otherwise
+    // fall back to the site-wide testimonials shown on the homepage.
+    const programReviews = (program.testimonials ?? [])
+        .filter((t) => t?.text)
+        .map((t) => ({ quote: t.text, name: t.name, role: undefined as string | undefined }))
+    const fallbackReviews = siteTestimonials
+        .filter((t) => t?.quote)
+        .map((t) => ({ quote: t.quote, name: t.name, role: t.role }))
+    const reviews = (programReviews.length > 0 ? programReviews : fallbackReviews).slice(0, 6)
+    const reviewsAreBatchSpecific = programReviews.length > 0
 
     const frameworks: FrameworkData[] = [
         {
@@ -579,27 +588,29 @@ export function Super30Landing({ program }: { program: Super30Program }) {
                 </div>
             </section>
 
-            {/* ── Reviews (CMS testimonials; hidden until the client supplies real quotes) ── */}
-            {testimonials.length > 0 && (
+            {/* ── Reviews (batch testimonials if present, else the homepage community reviews) ── */}
+            {reviews.length > 0 && (
                 <section className="s30l-sec" style={{ background: PAPER, color: INK }}>
                     <div style={wrap}>
                         <p data-reveal style={eyebrow(true)}>
-                            Previous batches
+                            {reviewsAreBatchSpecific ? "Previous batches" : "Our community"}
                         </p>
                         <h2 data-reveal className="s30l-pretty" style={sectionH2(true)}>
-                            Still not convinced — here is what our previous batchmates have to say
+                            {reviewsAreBatchSpecific
+                                ? "Still not convinced — here is what our previous batchmates have to say"
+                                : "Still not convinced — here is what our community has to say"}
                         </h2>
                         <div data-reveal="line" style={{ height: 1, background: OCHRE_PAPER, opacity: 0.5, margin: "0 0 56px" }} />
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(320px,100%),1fr))", gap: 1, background: "rgba(18,17,15,.14)" }}>
-                            {testimonials.map((t, i) => (
+                            {reviews.map((t, i) => (
                                 <div
                                     key={i}
                                     data-reveal
                                     data-reveal-delay={(i * 0.09).toFixed(2)}
-                                    style={{ background: PAPER, padding: "40px 34px", display: "flex", flexDirection: "column", gap: 26 }}
+                                    style={{ background: PAPER, padding: "40px 34px", display: "flex", flexDirection: "column", gap: 26, justifyContent: "space-between" }}
                                 >
                                     <p className="s30l-pretty" style={{ fontFamily: SERIF, fontWeight: 400, fontSize: "clamp(20px,1.9vw,25px)", lineHeight: 1.42, margin: 0 }}>
-                                        {t.text}
+                                        {t.quote}
                                     </p>
                                     <p
                                         style={{
@@ -614,6 +625,7 @@ export function Super30Landing({ program }: { program: Super30Program }) {
                                         }}
                                     >
                                         {t.name}
+                                        {t.role ? ` · ${t.role}` : ""}
                                     </p>
                                 </div>
                             ))}
@@ -623,7 +635,9 @@ export function Super30Landing({ program }: { program: Super30Program }) {
                                 Register for Super30
                             </a>
                             <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 14, lineHeight: 1.5, color: "rgba(18,17,15,.6)" }}>
-                                Quotes are from participants of earlier batches, published with permission.
+                                {reviewsAreBatchSpecific
+                                    ? "Quotes are from participants of earlier batches, published with permission."
+                                    : "Quotes are from our community, published with permission."}
                             </span>
                         </div>
                     </div>

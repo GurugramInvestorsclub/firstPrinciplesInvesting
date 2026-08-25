@@ -1,8 +1,8 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { singleSuper30Query } from "@/lib/sanity.queries"
-import { Super30Program } from "@/lib/types"
+import { singleSuper30Query, testimonialsQuery } from "@/lib/sanity.queries"
+import { Super30Program, Testimonial } from "@/lib/types"
 import { notFound } from "next/navigation"
 import { IBM_Plex_Mono, IBM_Plex_Sans, Instrument_Serif } from "next/font/google"
 
@@ -69,6 +69,11 @@ export default async function Super30Page({ params }: Props) {
         notFound()
     }
 
+    // Same reviews as the homepage community section.
+    const siteTestimonials = await client
+        .fetch<Testimonial[]>(testimonialsQuery, {}, { next: { revalidate: 60 } })
+        .catch(() => [])
+
     return (
         <div
             className={`${instrumentSerif.variable} ${plexSans.variable} ${plexMono.variable} flex flex-col min-h-screen bg-[#12110F] text-[#F4F1EA] selection:bg-[#23C077]/20 selection:text-[#23C077] relative z-0 super30-page`}
@@ -76,7 +81,7 @@ export default async function Super30Page({ params }: Props) {
             <Navbar />
 
             <main className="flex-1">
-                <Super30Landing program={program} />
+                <Super30Landing program={program} siteTestimonials={siteTestimonials} />
             </main>
 
             <Footer />
