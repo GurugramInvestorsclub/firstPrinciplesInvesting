@@ -96,7 +96,6 @@ interface FrameworkData {
 }
 
 function Triplet({ items, paper }: { items: [string, string, string]; paper?: boolean }) {
-    const labels = ["What to buy", "When to buy", "When to sell"]
     return (
         <div
             data-reveal
@@ -109,20 +108,6 @@ function Triplet({ items, paper }: { items: [string, string, string]; paper?: bo
         >
             {items.map((text, i) => (
                 <div key={i} style={{ background: paper ? PAPER : INK, padding: "30px 26px" }}>
-                    <p
-                        style={{
-                            fontFamily: MONO,
-                            fontWeight: 500,
-                            fontSize: 11,
-                            lineHeight: 1,
-                            letterSpacing: ".16em",
-                            textTransform: "uppercase",
-                            color: paper ? OCHRE_PAPER : "var(--ac)",
-                            margin: "0 0 14px",
-                        }}
-                    >
-                        {labels[i]}
-                    </p>
                     <p style={{ fontFamily: SANS, fontWeight: 300, fontSize: 16, lineHeight: 1.55, color: paper ? INK : PAPER, margin: 0 }}>{text}</p>
                 </div>
             ))}
