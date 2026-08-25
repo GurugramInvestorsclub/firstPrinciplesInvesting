@@ -84,12 +84,12 @@ const SANS = "var(--font-s30-sans), 'IBM Plex Sans', sans-serif"
 
 const labelStyle: React.CSSProperties = {
     fontFamily: MONO,
-    fontWeight: 400,
+    fontWeight: 500,
     fontSize: 12,
     lineHeight: 1,
     letterSpacing: ".14em",
     textTransform: "uppercase",
-    color: "var(--muted)",
+    color: "#C5BFB5",
     margin: 0,
 }
 

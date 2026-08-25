@@ -56,29 +56,29 @@ const sectionH2 = (paper?: boolean): CSSProperties => ({
 const standfirst = (paper?: boolean): CSSProperties => ({
     maxWidth: 720,
     fontFamily: SANS,
-    fontWeight: 300,
+    fontWeight: 400,
     fontSize: "clamp(18px,1.9vw,22px)",
     lineHeight: 1.55,
-    color: paper ? "rgba(18,17,15,.72)" : "rgba(244,241,234,.72)",
+    color: paper ? "#12110F" : "rgba(244,241,234,.92)",
     margin: 0,
 })
 
 const bodyText = (paper?: boolean): CSSProperties => ({
     fontFamily: SANS,
-    fontWeight: 300,
+    fontWeight: 400,
     fontSize: 16,
     lineHeight: 1.65,
-    color: paper ? "rgba(18,17,15,.7)" : "rgba(244,241,234,.7)",
+    color: paper ? "#12110F" : "rgba(244,241,234,.88)",
     margin: 0,
 })
 
 const figCaption = (paper?: boolean): CSSProperties => ({
     fontFamily: MONO,
-    fontWeight: 400,
+    fontWeight: 500,
     fontSize: 12,
     lineHeight: 1.5,
     letterSpacing: ".06em",
-    color: paper ? "#77726A" : "var(--muted)",
+    color: paper ? "#555048" : "#C5BFB5",
     margin: "14px 0 0",
 })
 
@@ -326,10 +326,10 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             style={{
                                 maxWidth: 680,
                                 fontFamily: SANS,
-                                fontWeight: 300,
+                                fontWeight: 400,
                                 fontSize: "clamp(19px,2vw,24px)",
                                 lineHeight: 1.5,
-                                color: "rgba(244,241,234,.76)",
+                                color: "rgba(244,241,234,.92)",
                                 margin: "0 0 52px",
                             }}
                         >
@@ -358,11 +358,11 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                         <p style={eyebrow()}>The program</p>
                         <p
                             className="s30l-pretty"
-                            style={{ fontFamily: SANS, fontWeight: 300, fontSize: "clamp(22px,2.4vw,30px)", lineHeight: 1.42, color: PAPER, margin: "0 0 24px" }}
+                            style={{ fontFamily: SANS, fontWeight: 400, fontSize: "clamp(22px,2.4vw,30px)", lineHeight: 1.42, color: PAPER, margin: "0 0 24px" }}
                         >
                             Super 30 teaches specific Investment processes. Supported by LIVE case studies.
                         </p>
-                        <p className="s30l-pretty" style={{ fontFamily: SANS, fontWeight: 300, fontSize: 17, lineHeight: 1.62, color: "rgba(244,241,234,.66)", margin: 0 }}>
+                        <p className="s30l-pretty" style={{ fontFamily: SANS, fontWeight: 400, fontSize: 17, lineHeight: 1.62, color: "rgba(244,241,234,.88)", margin: 0 }}>
                             Four frameworks, each one a complete decision loop rather than a screen or a tip — the same loop applied to a commodity
                             producer, a demerger, a category creator, and finally to your own portfolio.
                         </p>
@@ -387,7 +387,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                     borderBottom: i === arr.length - 1 ? "1px solid rgba(244,241,234,.14)" : undefined,
                                 }}
                             >
-                                <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: 14, lineHeight: 1, letterSpacing: ".1em", color: "var(--muted)" }}>{k}</span>
+                                <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 14, lineHeight: 1, letterSpacing: ".1em", color: "#D4A359" }}>{k}</span>
                                 <span style={{ fontFamily: SERIF, fontWeight: 400, fontSize: 22, lineHeight: 1, color: PAPER }}>{v}</span>
                             </div>
                         ))}
@@ -423,7 +423,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             >
                                 {k}
                             </p>
-                            <p style={{ fontFamily: SANS, fontWeight: 300, fontSize: 16, lineHeight: 1.6, color: "rgba(244,241,234,.7)", margin: 0 }}>{v}</p>
+                            <p style={{ fontFamily: SANS, fontWeight: 400, fontSize: 16, lineHeight: 1.6, color: "rgba(244,241,234,.92)", margin: 0 }}>{v}</p>
                         </div>
                     ))}
                 </div>
@@ -518,10 +518,10 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                 className="s30l-pretty"
                                 style={{
                                     fontFamily: SANS,
-                                    fontWeight: 300,
+                                    fontWeight: 400,
                                     fontSize: "clamp(17px,1.8vw,20px)",
                                     lineHeight: 1.55,
-                                    color: "rgba(244,241,234,.7)",
+                                    color: "rgba(244,241,234,.92)",
                                     margin: "0 0 40px",
                                     maxWidth: 520,
                                 }}
@@ -537,7 +537,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                 ].map((item) => (
                                     <li key={item} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, alignItems: "baseline" }}>
                                         <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 14, lineHeight: 1.35, color: "var(--go)" }}>✓</span>
-                                        <span style={{ fontFamily: SANS, fontWeight: 300, fontSize: 17, lineHeight: 1.45, color: "rgba(244,241,234,.82)" }}>{item}</span>
+                                        <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 17, lineHeight: 1.45, color: "rgba(244,241,234,.92)" }}>{item}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -545,7 +545,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                 <div style={{ aspectRatio: `${(seats * 11.2).toFixed(1)}/28`, width: "100%" }}>
                                     <SeatStripFig count={seats} />
                                 </div>
-                                <p style={{ fontFamily: MONO, fontWeight: 400, fontSize: 11, lineHeight: 1, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--muted)", margin: 0 }}>
+                                <p style={{ fontFamily: MONO, fontWeight: 500, fontSize: 11, lineHeight: 1, letterSpacing: ".16em", textTransform: "uppercase", color: "#C5BFB5", margin: 0 }}>
                                     {seatsWord} seats per cohort
                                 </p>
                             </div>
@@ -558,10 +558,10 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                         data-reveal
                         style={{
                             fontFamily: SANS,
-                            fontWeight: 300,
+                            fontWeight: 400,
                             fontSize: 13,
                             lineHeight: 1.7,
-                            color: "rgba(244,241,234,.42)",
+                            color: "rgba(244,241,234,.78)",
                             margin: 0,
                             padding: "26px clamp(36px,4vw,64px)",
                             borderTop: "1px solid rgba(244,241,234,.14)",
@@ -600,12 +600,12 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                     <p
                                         style={{
                                             fontFamily: MONO,
-                                            fontWeight: 400,
+                                            fontWeight: 500,
                                             fontSize: 12,
                                             lineHeight: 1.6,
                                             letterSpacing: ".1em",
                                             textTransform: "uppercase",
-                                            color: "#77726A",
+                                            color: "#4A453E",
                                             margin: 0,
                                         }}
                                     >
@@ -619,7 +619,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             <a href="#register" className="s30l-btn-go">
                                 Register for Super30
                             </a>
-                            <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 14, lineHeight: 1.5, color: "rgba(18,17,15,.6)" }}>
+                            <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 14, lineHeight: 1.5, color: "rgba(18,17,15,.85)" }}>
                                 {reviewsAreBatchSpecific
                                     ? "Quotes are from participants of earlier batches, published with permission."
                                     : "Quotes are from our community, published with permission."}
@@ -652,7 +652,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                                 </span>
                                 <div>
                                     <h3 style={{ fontFamily: SERIF, fontWeight: 400, fontSize: "clamp(26px,3vw,38px)", lineHeight: 1.15, margin: "0 0 12px", color: PAPER }}>{title}</h3>
-                                    <p style={{ fontFamily: SANS, fontWeight: 300, fontSize: 16, lineHeight: 1.6, color: "rgba(244,241,234,.66)", margin: 0, maxWidth: 640 }}>{body}</p>
+                                    <p style={{ fontFamily: SANS, fontWeight: 400, fontSize: 16, lineHeight: 1.6, color: "rgba(244,241,234,.88)", margin: 0, maxWidth: 640 }}>{body}</p>
                                 </div>
                             </div>
                         ))}
@@ -661,7 +661,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                         <a href="#register" className="s30l-btn-go">
                             Register for Super30
                         </a>
-                        <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 14, lineHeight: 1.5, color: "rgba(244,241,234,.6)" }}>
+                        <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 14, lineHeight: 1.5, color: "rgba(244,241,234,.85)" }}>
                             All three are included with a {batchName || "Super30"} seat.
                         </span>
                     </div>
@@ -674,7 +674,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                     --go: #23c077;
                     --ink: #12110f;
                     --paper: #f4f1ea;
-                    --muted: #8a8578;
+                    --muted: #c5bfb5;
                     font-family: var(--font-s30-sans), 'IBM Plex Sans', system-ui, sans-serif;
                     background: var(--ink);
                     color: var(--paper);
