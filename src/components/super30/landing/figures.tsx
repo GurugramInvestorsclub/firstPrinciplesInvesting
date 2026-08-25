@@ -311,23 +311,20 @@ export function SeatsFig({ seatCount = 30 }: { seatCount?: number }) {
                     />
                 </g>
 
-                <polygon
-                    points={`${cx},${cy - 28} ${cx + 24},${cy + 16} ${cx - 24},${cy + 16}`}
-                    fill="rgba(35,192,119,0.08)"
-                    stroke="var(--ac)"
-                    strokeWidth={1}
-                    style={{ opacity: 0.6 }}
+                {/* Site Brand Logo (The Brain logo) */}
+                <image
+                    href="/logo.png"
+                    x={cx - 32}
+                    y={cy - 32}
+                    width={64}
+                    height={64}
+                    preserveAspectRatio="xMidYMid meet"
+                    style={{
+                        opacity: Math.min(1, entranceCore * 1.5),
+                        filter: `drop-shadow(0 0 12px rgba(181,122,40,${(0.5 + 0.4 * convIntensity).toFixed(2)}))`,
+                        transition: "filter 0.3s ease",
+                    }}
                 />
-                <polygon
-                    points={`${cx},${cy + 28} ${cx + 24},${cy - 16} ${cx - 24},${cy - 16}`}
-                    fill="rgba(181,122,40,0.08)"
-                    stroke="var(--ac)"
-                    strokeWidth={1}
-                    style={{ opacity: 0.6 }}
-                />
-
-                <circle cx={cx} cy={cy} r={5} style={{ fill: "var(--ac)", opacity: 0.9 }} />
-                <circle cx={cx} cy={cy} r={2} style={{ fill: "#F4F1EA" }} />
             </g>
 
             {/* Layer 4: 30 Cohort Nodes (Parallax ~ 4.2px) */}
