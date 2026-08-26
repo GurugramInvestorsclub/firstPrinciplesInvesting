@@ -257,7 +257,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             bullets: [
                 "Reading the cycle from supply rather than sentiment: capex announcements, utilisation, inventory and imports, rather than the last quarter’s earnings.",
                 "Why the cheapest-looking point of a cycle is usually the most expensive place to buy, and what the low-cost producer looks like on a balance sheet.",
-                "Exiting into strength — the signals that show up well before the downgrade cycle starts and the story turns.",
+                "Exiting into strength: the signals that show up well before the downgrade cycle starts and the story turns.",
             ],
             triplet: [
                 "The lowest-cost producer with a balance sheet that survives the trough.",
@@ -276,7 +276,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             bullets: [
                 "Why a holding structure trades below the sum of its parts, and what specifically has to change for that discount to close.",
                 "Reading the scheme of arrangement: record dates, entitlement ratios, and the mechanics that create forced sellers on listing.",
-                "Separating a genuine re-rating from a discount that was always deserved — some parents are cheap for good reason.",
+                "Separating a genuine re-rating from a discount that was always deserved. Some parents are cheap for good reason.",
             ],
             triplet: [
                 "The business that was invisible while it sat inside the parent.",
@@ -319,7 +319,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
             triplet: [
                 "Companies already growing aggressively, with that growth visible in reported numbers.",
                 "While the growth is in the numbers but not yet in the price.",
-                "When growth decelerates — whatever the story says.",
+                "When growth decelerates, whatever the story says.",
             ],
             borderTop: true,
         },
@@ -414,7 +414,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             Super 30 teaches specific Investment processes. Supported by LIVE case studies.
                         </p>
                         <p className="s30l-pretty" style={{ fontFamily: SANS, fontWeight: 400, fontSize: 17, lineHeight: 1.62, color: "rgba(244,241,234,.88)", margin: 0 }}>
-                            Four frameworks, each one a complete decision loop rather than a screen or a tip — the same loop applied to a commodity
+                            Four frameworks, each one a complete decision loop rather than a screen or a tip: the same loop applied to a commodity
                             producer, a demerger, a category creator, and finally to your own portfolio.
                         </p>
                     </div>
@@ -633,8 +633,8 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                         </p>
                         <h2 data-reveal className="s30l-pretty" style={sectionH2(true)}>
                             {reviewsAreBatchSpecific
-                                ? "Still not convinced — here is what our previous batchmates have to say"
-                                : "Still not convinced — here is what our community has to say"}
+                                ? "Still not convinced? Here is what our previous batchmates have to say"
+                                : "Still not convinced? Here is what our community has to say"}
                         </h2>
                         <div data-reveal="line" style={{ height: 1, background: OCHRE_PAPER, opacity: 0.5, margin: "0 0 56px" }} />
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(320px,100%),1fr))", gap: 1, background: "rgba(18,17,15,.14)" }}>
@@ -687,7 +687,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                         Included with the batch
                     </p>
                     <h2 data-reveal className="s30l-pretty" style={sectionH2()}>
-                        Wait, that’s not all — we have some bonus for you
+                        Wait, that’s not all: we have some bonus for you
                     </h2>
                     <div data-reveal="line" style={{ height: 1, background: "var(--ac)", opacity: 0.5, margin: "0 0 56px" }} />
                     <div style={{ display: "grid", gap: 1, background: "rgba(244,241,234,.14)" }}>

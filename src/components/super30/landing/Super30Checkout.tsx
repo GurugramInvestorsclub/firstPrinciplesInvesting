@@ -496,7 +496,7 @@ export function Super30Checkout({ program, registrationOpen, seats, showSeats = 
                     color: "var(--go)",
                 }}
             >
-                {isPricingLoading ? "…" : pricing ? formatInrFromPaise(pricing.baseAmount) : cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "—"}
+                {isPricingLoading ? "…" : pricing ? formatInrFromPaise(pricing.baseAmount) : cmsDisplayPricePaise ? formatInrFromPaise(cmsDisplayPricePaise) : "-"}
             </p>
 
             <div style={rowStyle}>
@@ -544,7 +544,7 @@ export function Super30Checkout({ program, registrationOpen, seats, showSeats = 
                         disabled={isApplyingCoupon || busy || couponInput.trim().length === 0 || isPricingLoading || status !== "authenticated"}
                         className="s30l-btn-outline"
                         style={{ height: 48, padding: "0 20px" }}
-                        title={status !== "authenticated" ? "Log in to validate a coupon, or enter it here — it is applied at fast checkout" : undefined}
+                        title={status !== "authenticated" ? "Log in to validate a coupon, or enter it here - it is applied at fast checkout" : undefined}
                     >
                         {isApplyingCoupon ? "Checking…" : "Apply"}
                     </button>
@@ -584,7 +584,7 @@ export function Super30Checkout({ program, registrationOpen, seats, showSeats = 
                 <div style={{ marginTop: 36, borderTop: "1px solid rgba(244,241,234,.14)", paddingTop: 28 }}>
                     <p style={{ ...labelStyle, marginBottom: 8 }}>Fast checkout</p>
                     <p style={{ fontFamily: SANS, fontWeight: 300, fontSize: 14, lineHeight: 1.6, color: "rgba(244,241,234,.6)", margin: "0 0 18px" }}>
-                        Pay without logging in — enter your details and we will capture your registration after payment.
+                        Pay without logging in: enter your details and we will capture your registration after payment.
                     </p>
                     <div style={{ display: "grid", gap: 10 }}>
                         <input
