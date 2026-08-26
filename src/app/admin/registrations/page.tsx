@@ -67,6 +67,67 @@ export default function AdminRegistrationsPage() {
         fetchRegistrations();
     }, [fetchRegistrations]);
 
+    const [resendingIds, setResendingIds] = useState<Record<string, boolean>>({});
+    const [isBulkResending, setIsBulkResending] = useState(false);
+    const [toastMessage, setToastMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+    const handleResendSingle = async (regId: string, email: string) => {
+        setResendingIds((prev) => ({ ...prev, [regId]: true }));
+        setToastMessage(null);
+        try {
+            const res = await fetch("/api/admin/registrations/resend-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ registrationId: regId }),
+            });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.error || "Failed to resend email");
+
+            setToastMessage({
+                type: "success",
+                text: `Confirmation email sent to ${email}`,
+            });
+        } catch (err) {
+            setToastMessage({
+                type: "error",
+                text: err instanceof Error ? err.message : String(err),
+            });
+        } finally {
+            setResendingIds((prev) => ({ ...prev, [regId]: false }));
+        }
+    };
+
+    const handleResendBulk = async () => {
+        if (registrations.length === 0) return;
+        const confirmMsg = `Resend confirmation email (with WhatsApp invite link) to ${registrations.length} registration(s)?`;
+        if (!window.confirm(confirmMsg)) return;
+
+        setIsBulkResending(true);
+        setToastMessage(null);
+        try {
+            const ids = registrations.map((r) => r.id);
+            const res = await fetch("/api/admin/registrations/resend-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ registrationIds: ids }),
+            });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.error || "Failed to resend emails");
+
+            setToastMessage({
+                type: "success",
+                text: `Successfully resent ${json.sentCount} of ${json.totalProcessed} email(s)!`,
+            });
+        } catch (err) {
+            setToastMessage({
+                type: "error",
+                text: err instanceof Error ? err.message : String(err),
+            });
+        } finally {
+            setIsBulkResending(false);
+        }
+    };
+
     const handleExport = () => {
         const a = document.createElement("a");
         a.href = `/api/admin/export-emails${seminarFilter ? `?seminar=${encodeURIComponent(seminarFilter)}` : ""}`;
@@ -153,31 +214,80 @@ export default function AdminRegistrationsPage() {
                     </p>
                 </div>
 
-                <button
-                    onClick={handleExport}
-                    style={{
-                        padding: "10px 20px",
-                        background: "linear-gradient(135deg, var(--gold), var(--gold-muted))",
-                        color: "#1A1A1A",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        letterSpacing: "0.02em",
-                        transition: "all 0.2s",
-                        boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
-                    }}
-                    onMouseEnter={(e) =>
-                        (e.currentTarget.style.transform = "translateY(-1px)")
-                    }
-                    onMouseLeave={(e) =>
-                        (e.currentTarget.style.transform = "translateY(0)")
-                    }
-                >
-                    ↓ Export CSV
-                </button>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+                    <button
+                        onClick={handleResendBulk}
+                        disabled={isBulkResending || registrations.length === 0}
+                        style={{
+                            padding: "10px 18px",
+                            background: "rgba(245,184,0,0.12)",
+                            color: "var(--gold)",
+                            border: "1px solid rgba(245,184,0,0.3)",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: isBulkResending || registrations.length === 0 ? "not-allowed" : "pointer",
+                            letterSpacing: "0.02em",
+                            transition: "all 0.2s",
+                            opacity: isBulkResending || registrations.length === 0 ? 0.5 : 1,
+                        }}
+                    >
+                        {isBulkResending ? "Resending Emails…" : `✉ Resend Emails (${registrations.length})`}
+                    </button>
+
+                    <button
+                        onClick={handleExport}
+                        style={{
+                            padding: "10px 20px",
+                            background: "linear-gradient(135deg, var(--gold), var(--gold-muted))",
+                            color: "#1A1A1A",
+                            border: "none",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            letterSpacing: "0.02em",
+                            transition: "all 0.2s",
+                            boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
+                        }}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.transform = "translateY(-1px)")
+                        }
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.transform = "translateY(0)")
+                        }
+                    >
+                        ↓ Export CSV
+                    </button>
+                </div>
             </div>
+
+            {/* Notification Banner */}
+            {toastMessage && (
+                <div
+                    style={{
+                        padding: "12px 18px",
+                        borderRadius: "8px",
+                        marginBottom: "20px",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                        background: toastMessage.type === "success" ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
+                        border: `1px solid ${toastMessage.type === "success" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                        color: toastMessage.type === "success" ? "#4ade80" : "#f87171",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <span>{toastMessage.text}</span>
+                    <button
+                        onClick={() => setToastMessage(null)}
+                        style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: "16px" }}
+                    >
+                        ✕
+                    </button>
+                </div>
+            )}
 
             {/* Filters */}
             <div
@@ -285,6 +395,7 @@ export default function AdminRegistrationsPage() {
                                     "Status",
                                     "Amount",
                                     "Date",
+                                    "Actions",
                                 ].map((h) => (
                                     <th
                                         key={h}
@@ -308,7 +419,7 @@ export default function AdminRegistrationsPage() {
                             {loading ? (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={8}
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
@@ -328,7 +439,7 @@ export default function AdminRegistrationsPage() {
                             ) : registrations.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={6}
+                                        colSpan={8}
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
@@ -341,6 +452,7 @@ export default function AdminRegistrationsPage() {
                             ) : (
                                 registrations.map((reg) => {
                                     const sc = statusColor(reg.paymentStatus);
+                                    const isResendingThis = Boolean(resendingIds[reg.id]);
                                     return (
                                         <tr
                                             key={reg.id}
@@ -449,6 +561,31 @@ export default function AdminRegistrationsPage() {
                                                 }}
                                             >
                                                 {formatDate(reg.createdAt)}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    padding: "14px 16px",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={() => handleResendSingle(reg.id, reg.email)}
+                                                    disabled={isResendingThis}
+                                                    style={{
+                                                        padding: "5px 12px",
+                                                        borderRadius: "6px",
+                                                        border: "1px solid rgba(245,184,0,0.3)",
+                                                        background: "rgba(245,184,0,0.08)",
+                                                        color: "var(--gold)",
+                                                        fontSize: "12px",
+                                                        fontWeight: 600,
+                                                        cursor: isResendingThis ? "not-allowed" : "pointer",
+                                                        transition: "all 0.2s",
+                                                        opacity: isResendingThis ? 0.5 : 1,
+                                                    }}
+                                                >
+                                                    {isResendingThis ? "Sending…" : "✉ Resend Email"}
+                                                </button>
                                             </td>
                                         </tr>
                                     );

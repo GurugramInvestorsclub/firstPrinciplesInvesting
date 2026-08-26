@@ -48,7 +48,7 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
 
   try {
     // 1. Fetch Event Details from Sanity
-    const query = groq`*[_type in ["event", "super30Program"] && eventId == $eventId][0]{
+    const query = groq`*[_type in ["event", "super30Program"] && (eventId == $eventId || slug.current == $eventId)][0]{
       title,
       date,
       location,
