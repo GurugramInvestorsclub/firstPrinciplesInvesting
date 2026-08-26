@@ -13,21 +13,28 @@ const components: PortableTextComponents = {
             const { width, height } = getImageDimensions(value) || { width: 800, height: 450 } // Fallback
 
             return (
-                <div className="my-8 rounded-xl overflow-hidden bg-secondary/20">
+                <figure className="my-8 p-3 sm:p-4 rounded-2xl bg-[#F5B800] shadow-lg shadow-[#F5B800]/15 border border-[#F5B800]/30 transition-transform duration-300 hover:scale-[1.005]">
                     {imageUrl && (
-                        <Image
-                            src={imageUrl}
-                            alt={value.alt || "Post image"}
-                            width={width}
-                            height={height}
-                            className="w-full h-auto"
-                            style={{
-                                maxWidth: "100%",
-                                aspectRatio: `${width} / ${height}`
-                            }}
-                        />
+                        <div className="rounded-xl overflow-hidden bg-white/95 shadow-sm">
+                            <Image
+                                src={imageUrl}
+                                alt={value.alt || value.caption || "Post image"}
+                                width={width}
+                                height={height}
+                                className="w-full h-auto block object-contain"
+                                style={{
+                                    maxWidth: "100%",
+                                    aspectRatio: `${width} / ${height}`
+                                }}
+                            />
+                        </div>
                     )}
-                </div>
+                    {value.caption && (
+                        <figcaption className="mt-2.5 text-center text-xs font-mono font-semibold text-black/90 tracking-wide">
+                            {value.caption}
+                        </figcaption>
+                    )}
+                </figure>
             )
         },
     },
