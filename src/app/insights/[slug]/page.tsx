@@ -117,16 +117,14 @@ export default async function InsightPage({ params }: Props) {
                     </header>
 
                     {post.mainImage && (
-                        <div className="p-3 sm:p-4 rounded-2xl bg-[#F5B800] mb-12 shadow-lg shadow-[#F5B800]/15 border border-[#F5B800]/30">
-                            <div className="aspect-video w-full rounded-xl relative overflow-hidden bg-white/95 shadow-sm">
-                                <Image
-                                    src={urlForImage(post.mainImage).width(1200).height(675).url()}
-                                    alt={post.title}
-                                    fill
-                                    className="object-cover"
-                                    priority
-                                />
-                            </div>
+                        <div className="aspect-video w-full rounded-2xl border-2 border-[#F5B800] shadow-[0_0_25px_rgba(245,184,0,0.3)] mb-12 relative overflow-hidden bg-[#12110F] transition-all duration-300 hover:shadow-[0_0_35px_rgba(245,184,0,0.45)]">
+                            <Image
+                                src={urlForImage(post.mainImage).width(1200).height(675).url()}
+                                alt={post.title}
+                                fill
+                                className="object-cover"
+                                priority
+                            />
                         </div>
                     )}
 

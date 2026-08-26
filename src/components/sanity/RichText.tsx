@@ -13,9 +13,9 @@ const components: PortableTextComponents = {
             const { width, height } = getImageDimensions(value) || { width: 800, height: 450 } // Fallback
 
             return (
-                <figure className="my-8 p-3 sm:p-4 rounded-2xl bg-[#F5B800] shadow-lg shadow-[#F5B800]/15 border border-[#F5B800]/30 transition-transform duration-300 hover:scale-[1.005]">
+                <figure className="my-8 rounded-2xl border-2 border-[#F5B800] shadow-[0_0_25px_rgba(245,184,0,0.3)] overflow-hidden bg-[#12110F] transition-all duration-300 hover:shadow-[0_0_35px_rgba(245,184,0,0.45)]">
                     {imageUrl && (
-                        <div className="rounded-xl overflow-hidden bg-white/95 shadow-sm">
+                        <div className="w-full overflow-hidden bg-white/95">
                             <Image
                                 src={imageUrl}
                                 alt={value.alt || value.caption || "Post image"}
@@ -30,7 +30,7 @@ const components: PortableTextComponents = {
                         </div>
                     )}
                     {value.caption && (
-                        <figcaption className="mt-2.5 text-center text-xs font-mono font-semibold text-black/90 tracking-wide">
+                        <figcaption className="p-3 text-center text-xs font-mono font-medium text-gold tracking-wide bg-[#12110F] border-t border-[#F5B800]/20">
                             {value.caption}
                         </figcaption>
                     )}
