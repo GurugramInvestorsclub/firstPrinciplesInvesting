@@ -335,7 +335,6 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
     ]
 
     const bonuses: [string, string][] = [
-        ["Free complimentary access to membership for 2 months", "Everything behind the members wall for the two months following the batch, at no cost."],
         ["50% off on upcoming sectorial webinars during the period", "Access to all our previous sectorial webinars."],
         ["Access to the Demergers tracker", "The running list of announced and in-progress demergers we watch, with the dates that matter."],
     ]
@@ -583,7 +582,6 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             </p>
                             <ul data-reveal style={{ listStyle: "none", margin: "0 0 40px", padding: 0, display: "grid", gap: 16 }}>
                                 {[
-                                    "Two months of complimentary membership",
                                     "50% off upcoming sectorial webinars for the period",
                                     "Access to all our previous sectorial webinars",
                                     "Access to the Demergers tracker",
@@ -715,7 +713,7 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             Register for Super30
                         </a>
                         <span style={{ fontFamily: SANS, fontWeight: 400, fontSize: 14, lineHeight: 1.5, color: "rgba(244,241,234,.85)" }}>
-                            All three are included with a {batchName || "Super30"} seat.
+                            Included with a {batchName || "Super30"} seat.
                         </span>
                     </div>
                 </div>
