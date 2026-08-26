@@ -522,6 +522,116 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                 </div>
             </section>
 
+            {/* ── Tentative Schedule ── */}
+            <section className="s30l-sec" style={{ borderTop: "1px solid rgba(244,241,234,.1)", position: "relative" }}>
+                <div style={wrap}>
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 24, marginBottom: 56 }}>
+                        <div>
+                            <p data-reveal style={eyebrow()}>
+                                Tentative Schedule
+                            </p>
+                            <h2 data-reveal className="s30l-pretty" style={{ ...sectionH2(), margin: 0 }}>
+                                Live session timeline
+                            </h2>
+                        </div>
+                        <p data-reveal style={{ fontFamily: MONO, fontWeight: 500, fontSize: 12, lineHeight: 1.4, letterSpacing: ".12em", textTransform: "uppercase", color: "rgba(244,241,234,.6)", margin: 0 }}>
+                            Four Live Weekend Sessions
+                        </p>
+                    </div>
+
+                    <div
+                        data-reveal
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit,minmax(min(260px,100%),1fr))",
+                            gap: 1,
+                            background: "rgba(244,241,234,.14)",
+                        }}
+                    >
+                        {[
+                            {
+                                session: "01",
+                                date: "13th September",
+                                title: "Cyclicals",
+                                tag: "Framework 01",
+                                description: "Supply-side cycle tracking, trough balance sheet durability, capacity additions, and peak exit signals.",
+                            },
+                            {
+                                session: "02",
+                                date: "27th September",
+                                title: "Demergers",
+                                tag: "Framework 02",
+                                description: "Special situations, conglomerate holding discounts, scheme of arrangement mechanics, and forced selling windows.",
+                            },
+                            {
+                                session: "03",
+                                date: "11th October",
+                                title: "Blue Ocean",
+                                tag: "Framework 03",
+                                description: "Category creators, structural moats, early pricing power, and untracked market expansion opportunities.",
+                            },
+                            {
+                                session: "04",
+                                date: "25th October",
+                                title: "Alpha Capture",
+                                tag: "Framework 04",
+                                description: "Aggressive operational screening, momentum validation, earnings acceleration triggers, and portfolio sizing.",
+                            },
+                        ].map((item) => (
+                            <div
+                                key={item.session}
+                                style={{
+                                    background: INK,
+                                    padding: "38px 32px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "space-between",
+                                    position: "relative",
+                                }}
+                            >
+                                <div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+                                        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 12, lineHeight: 1, letterSpacing: ".14em", color: "var(--ac)" }}>
+                                            SESSION {item.session}
+                                        </span>
+                                        <span style={{ fontFamily: MONO, fontWeight: 400, fontSize: 11, lineHeight: 1, letterSpacing: ".1em", color: "rgba(244,241,234,.5)", textTransform: "uppercase" }}>
+                                            {item.tag}
+                                        </span>
+                                    </div>
+                                    <div style={{ marginBottom: 20 }}>
+                                        <span
+                                            style={{
+                                                display: "inline-block",
+                                                fontFamily: MONO,
+                                                fontWeight: 600,
+                                                fontSize: "clamp(18px,2vw,22px)",
+                                                lineHeight: 1.2,
+                                                color: PAPER,
+                                                borderBottom: "2px solid var(--ac)",
+                                                paddingBottom: 4,
+                                                marginBottom: 12,
+                                            }}
+                                        >
+                                            {item.date}
+                                        </span>
+                                        <h3 style={{ fontFamily: SERIF, fontWeight: 400, fontSize: "clamp(28px,3vw,36px)", lineHeight: 1.1, margin: "12px 0 0", color: PAPER }}>
+                                            {item.title}
+                                        </h3>
+                                    </div>
+                                    <p style={{ fontFamily: SANS, fontWeight: 400, fontSize: 15, lineHeight: 1.6, color: "rgba(244,241,234,.78)", margin: 0 }}>
+                                        {item.description}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <p data-reveal style={{ fontFamily: SANS, fontWeight: 400, fontSize: 13, lineHeight: 1.5, color: "rgba(244,241,234,.55)", margin: "24px 0 0" }}>
+                        * Dates are tentative and subject to minor adjustments. Full recordings and resource materials are shared with cohort members after every session.
+                    </p>
+                </div>
+            </section>
+
             {/* ── Register ── */}
             <section id="register" className="s30l-reg" style={{ position: "relative", overflow: "hidden", scrollMarginTop: 90 }}>
                 <div style={{ position: "absolute", inset: "auto 0 -60px 0", height: 420, opacity: 0.32, pointerEvents: "none" }}>
