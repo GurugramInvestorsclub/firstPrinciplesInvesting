@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Share2, Check } from "lucide-react"
 
-export function ShareButton({ title, text }: { title: string, text?: string }) {
+export function ShareButton({ title, text, className = "" }: { title: string, text?: string, className?: string }) {
     const [isMounted, setIsMounted] = useState(false)
     const [copied, setCopied] = useState(false)
 
@@ -41,7 +41,7 @@ export function ShareButton({ title, text }: { title: string, text?: string }) {
     return (
         <button
             onClick={handleShare}
-            className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-black shadow-xl hover:bg-gold/90 transition-all hover:scale-105 active:scale-95 border-2 border-black/10"
+            className={`fixed bottom-20 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-black shadow-xl hover:bg-gold/90 transition-all hover:scale-105 active:scale-95 border-2 border-black/10 ${className}`}
             title="Share this article"
             aria-label="Share this article"
         >
