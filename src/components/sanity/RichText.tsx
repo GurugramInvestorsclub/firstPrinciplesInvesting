@@ -1,7 +1,20 @@
 import { PortableText as PortableTextReact, PortableTextComponents } from "@portabletext/react"
 import { urlForImage, getImageDimensions } from "@/lib/sanity.image"
+import { slugifyHeading, getPortableTextChildrenText } from "@/lib/toc"
 import Image from "next/image"
 import Link from "next/link"
+
+function renderHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6", className: string) {
+    return ({ children, value }: any) => {
+        const text = getPortableTextChildrenText(value?.children)
+        const id = text ? slugifyHeading(text) : (value?._key ? `heading-${value._key}` : undefined)
+        return (
+            <Tag id={id} className={`scroll-mt-28 ${className}`}>
+                {children}
+            </Tag>
+        )
+    }
+}
 
 const components: PortableTextComponents = {
     types: {
@@ -39,12 +52,12 @@ const components: PortableTextComponents = {
         },
     },
     block: {
-        h1: ({ children }: any) => <h1 className="text-3xl font-bold text-gold mt-8 mb-4">{children}</h1>,
-        h2: ({ children }: any) => <h2 className="text-2xl font-bold text-gold mt-8 mb-4">{children}</h2>,
-        h3: ({ children }: any) => <h3 className="text-xl font-bold text-gold mt-6 mb-3">{children}</h3>,
-        h4: ({ children }: any) => <h4 className="text-lg font-bold text-gold mt-6 mb-3">{children}</h4>,
-        h5: ({ children }: any) => <h5 className="text-base font-bold text-gold mt-4 mb-2">{children}</h5>,
-        h6: ({ children }: any) => <h6 className="text-sm font-bold text-gold mt-4 mb-2">{children}</h6>,
+        h1: renderHeading("h1", "text-3xl font-bold text-gold mt-8 mb-4"),
+        h2: renderHeading("h2", "text-2xl font-bold text-gold mt-8 mb-4"),
+        h3: renderHeading("h3", "text-xl font-bold text-gold mt-6 mb-3"),
+        h4: renderHeading("h4", "text-lg font-bold text-gold mt-6 mb-3"),
+        h5: renderHeading("h5", "text-base font-bold text-gold mt-4 mb-2"),
+        h6: renderHeading("h6", "text-sm font-bold text-gold mt-4 mb-2"),
         blockquote: ({ children }: any) => (
             <blockquote className="border-l-4 border-gold pl-4 italic text-muted-foreground my-4">
                 {children}
