@@ -3,8 +3,10 @@ export interface DemergerRecord {
     companyName: string
     symbol?: string
     demergedEntity: string
-    ratio: string
-    status: "Announced" | "NCLT Approval Pending" | "Record Date Set" | "Listed" | string
+    newTicker?: string
+    ratio?: string
+    status: string
+    stageRaw?: string
     announcementDate?: string
     recordDate?: string
     listingDate?: string
@@ -12,7 +14,7 @@ export interface DemergerRecord {
     marketCap?: string
     rationale?: string
     exchangeLink?: string
-    memoLink?: string
+    valuation?: string
     notes?: string
 }
 
@@ -25,10 +27,10 @@ const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}
 const GVIZ_CSV_URL = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`
 
 /**
- * Robust CSV parser that handles quotes, commas inside text, and empty fields.
+ * Robust CSV parser that handles quotes, commas inside text, and title rows.
  */
 export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
-    const lines: string[] = []
+    const rawLines: string[] = []
     let currentLine = ""
     let insideQuotes = false
 
@@ -48,7 +50,7 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
                 i++
             }
             if (currentLine.trim()) {
-                lines.push(currentLine)
+                rawLines.push(currentLine)
             }
             currentLine = ""
         } else {
@@ -56,10 +58,10 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
         }
     }
     if (currentLine.trim()) {
-        lines.push(currentLine)
+        rawLines.push(currentLine)
     }
 
-    if (lines.length < 2) return []
+    if (rawLines.length === 0) return []
 
     const parseLine = (line: string): string[] => {
         const result: string[] = []
@@ -81,49 +83,74 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
         return result
     }
 
-    const headers = parseLine(lines[0]).map((h) => h.toLowerCase().replace(/[^a-z0-9]/g, ""))
+    // Find the actual header line by searching for header keywords
+    let headerRowIndex = -1
+    let headers: string[] = []
 
-    const getFieldIndex = (possibleNames: string[]): number => {
-        return headers.findIndex((h) => possibleNames.some((p) => h.includes(p)))
+    for (let i = 0; i < rawLines.length; i++) {
+        const parsed = parseLine(rawLines[i]).map((h) => h.toLowerCase().replace(/[^a-z0-9]/g, ""))
+        const matchesKeyword = parsed.some((cell) =>
+            ["parentcompany", "parent", "company", "resultingentity", "currentstage", "recorddate", "stage", "ticker"].some((k) => cell.includes(k))
+        )
+        if (matchesKeyword) {
+            headerRowIndex = i
+            headers = parsed
+            break
+        }
     }
 
-    const colCompany = getFieldIndex(["company", "parent", "name", "stock"])
-    const colDemerged = getFieldIndex(["demerged", "spinoff", "newentity", "entity", "child"])
-    const colRatio = getFieldIndex(["ratio", "swap", "share"])
-    const colStatus = getFieldIndex(["status", "stage", "state"])
-    const colAnnounce = getFieldIndex(["announce", "announcement", "dateannounced"])
-    const colRecord = getFieldIndex(["record", "recorddate", "exdate"])
-    const colListing = getFieldIndex(["listing", "listed", "listingdate"])
+    if (headerRowIndex === -1) {
+        // Fallback: use first non-empty line as header
+        headerRowIndex = 0
+        headers = parseLine(rawLines[0]).map((h) => h.toLowerCase().replace(/[^a-z0-9]/g, ""))
+    }
+
+    const getFieldIndex = (possibleNames: string[]): number => {
+        return headers.findIndex((h) => possibleNames.some((p) => h.includes(p.toLowerCase().replace(/[^a-z0-9]/g, ""))))
+    }
+
+    const colCompany = getFieldIndex(["parentcompanydemerged", "parentcompany", "parent", "company"])
+    const colParentTicker = getFieldIndex(["parenttickerbse", "parentticker", "ticker"])
+    const colDemerged = getFieldIndex(["resultingentitynew", "resultingentity", "resulting", "newentity", "spinoff"])
+    const colNewTicker = getFieldIndex(["newentityticker", "newticker"])
+    const colStatus = getFieldIndex(["currentstage", "stage", "status"])
+    const colRecord = getFieldIndex(["recorddate", "record"])
+    const colFiling = getFieldIndex(["filingdisclosure", "filing", "disclosure"])
+    const colValuation = getFieldIndex(["valuation", "sotp"])
     const colSector = getFieldIndex(["sector", "industry"])
-    const colMarketCap = getFieldIndex(["mcap", "marketcap", "cap", "val"])
-    const colRationale = getFieldIndex(["rationale", "thesis", "description", "details", "reason"])
-    const colLink = getFieldIndex(["link", "filing", "url", "exchange"])
-    const colNotes = getFieldIndex(["notes", "comment", "remarks"])
 
     const records: DemergerRecord[] = []
 
-    for (let i = 1; i < lines.length; i++) {
-        const row = parseLine(lines[i])
+    for (let i = headerRowIndex + 1; i < rawLines.length; i++) {
+        const row = parseLine(rawLines[i])
         if (row.length === 0 || !row.some((cell) => cell.length > 0)) continue
 
-        const companyName = colCompany !== -1 ? row[colCompany] : row[0]
-        if (!companyName || companyName.toLowerCase().includes("sample") || companyName.startsWith("#")) continue
+        const companyName = colCompany !== -1 ? row[colCompany] : (row[1] || row[0])
+        if (!companyName || companyName.toLowerCase().includes("sample") || companyName.startsWith("#") || companyName.toLowerCase() === "parent company") continue
+
+        const parentTicker = colParentTicker !== -1 ? row[colParentTicker] : ""
+        const demergedEntity = colDemerged !== -1 && row[colDemerged] ? row[colDemerged] : "Spin-off Entity"
+        const newTicker = colNewTicker !== -1 ? row[colNewTicker] : ""
+        const rawStage = colStatus !== -1 && row[colStatus] ? row[colStatus] : "Announced"
+        const recordDate = colRecord !== -1 ? row[colRecord] : ""
+        const filingLink = colFiling !== -1 ? row[colFiling] : ""
+        const valuation = colValuation !== -1 ? row[colValuation] : ""
+        const sector = colSector !== -1 ? row[colSector] : ""
 
         records.push({
             id: `demerger-${i}`,
             companyName: companyName.replace(/^["']|["']$/g, ""),
-            symbol: extractSymbol(companyName),
-            demergedEntity: colDemerged !== -1 && row[colDemerged] ? row[colDemerged] : "Spin-off Entity",
-            ratio: colRatio !== -1 && row[colRatio] ? row[colRatio] : "1 : 1",
-            status: colStatus !== -1 && row[colStatus] ? normalizeStatus(row[colStatus]) : "Announced",
-            announcementDate: colAnnounce !== -1 ? row[colAnnounce] : "",
-            recordDate: colRecord !== -1 ? row[colRecord] : "",
-            listingDate: colListing !== -1 ? row[colListing] : "",
-            sector: colSector !== -1 && row[colSector] ? row[colSector] : "General",
-            marketCap: colMarketCap !== -1 ? row[colMarketCap] : "",
-            rationale: colRationale !== -1 ? row[colRationale] : "",
-            exchangeLink: colLink !== -1 ? row[colLink] : "",
-            notes: colNotes !== -1 ? row[colNotes] : "",
+            symbol: parentTicker || extractSymbol(companyName),
+            demergedEntity: demergedEntity.replace(/^["']|["']$/g, ""),
+            newTicker: newTicker || "",
+            ratio: valuation.includes("1:") || valuation.includes("1 :") ? valuation : "1 : 1",
+            status: normalizeStatus(rawStage),
+            stageRaw: rawStage,
+            recordDate: recordDate,
+            exchangeLink: filingLink,
+            valuation: valuation,
+            sector: sector || "Equities",
+            rationale: `Demerger of ${demergedEntity} from ${companyName}. Current Stage: ${rawStage}.`,
         })
     }
 
@@ -137,10 +164,10 @@ function extractSymbol(name: string): string {
 
 function normalizeStatus(statusRaw: string): string {
     const s = statusRaw.toLowerCase()
-    if (s.includes("listed") || s.includes("completed") || s.includes("done")) return "Listed"
-    if (s.includes("record") || s.includes("ex-date")) return "Record Date Set"
-    if (s.includes("nclt") || s.includes("approval") || s.includes("pending")) return "NCLT Approval Pending"
-    if (s.includes("announced") || s.includes("board")) return "Announced"
+    if (s.includes("listed") || s.includes("completed") || s.includes("done") || s.includes("7.")) return "Listed"
+    if (s.includes("effective") || s.includes("record") || s.includes("ex-date") || s.includes("6.")) return "Record Date Set"
+    if (s.includes("nclt") || s.includes("approval") || s.includes("pending") || s.includes("regulatory") || s.includes("clearance") || s.includes("2.") || s.includes("3.") || s.includes("4.") || s.includes("5.")) return "NCLT Approval Pending"
+    if (s.includes("announced") || s.includes("board") || s.includes("1.")) return "Announced"
     return statusRaw || "Announced"
 }
 
@@ -153,9 +180,9 @@ export async function getDemergerData(): Promise<{ records: DemergerRecord[]; la
     for (const url of urls) {
         try {
             const res = await fetch(url, {
-                next: { revalidate: 300 }, // Auto-revalidate every 5 minutes
+                cache: "no-store",
                 headers: {
-                    "Cache-Control": "max-age=300",
+                    "Cache-Control": "no-cache",
                 },
             })
 
@@ -175,7 +202,7 @@ export async function getDemergerData(): Promise<{ records: DemergerRecord[]; la
         }
     }
 
-    // Fallback sample records if Google Sheet access is restricted (401)
+    // Fallback sample records if Google Sheet access is restricted
     return {
         records: FALLBACK_DEMERGER_RECORDS,
         lastUpdated: "Fallback Dataset (Sheet Restricted)",
@@ -186,86 +213,45 @@ export async function getDemergerData(): Promise<{ records: DemergerRecord[]; la
 export const FALLBACK_DEMERGER_RECORDS: DemergerRecord[] = [
     {
         id: "demerger-1",
-        companyName: "Tata Motors Ltd (TATAMOTORS)",
-        symbol: "TATAMOTORS",
+        companyName: "Tata Motors Ltd",
+        symbol: "500570",
         demergedEntity: "Tata Commercial Vehicles & Tata Passenger Electric Vehicles",
+        newTicker: "TBD",
         ratio: "1 : 1",
         status: "NCLT Approval Pending",
+        stageRaw: "2. Regulatory clearance",
         announcementDate: "2024-03-04",
         recordDate: "TBD Q3 FY25",
         listingDate: "TBD Q4 FY25",
         sector: "Automobile & EV",
         marketCap: "₹3,40,000 Cr",
-        rationale: "Separation of Commercial Vehicle (CV) business from Passenger Vehicle (PV + EV + JLR) business to enhance focus, capital allocation, and market valuations.",
+        valuation: "Open SOTP →",
+        rationale: "Separation of Commercial Vehicle (CV) business from Passenger Vehicle (PV + EV + JLR) business to enhance focus and market valuations.",
     },
     {
         id: "demerger-2",
-        companyName: "Raymond Ltd (RAYMOND)",
-        symbol: "RAYMOND",
-        demergedEntity: "Raymond Lifestyle Ltd & Raymond Realty Ltd",
+        companyName: "HEG Ltd",
+        symbol: "509631",
+        demergedEntity: "HEG Graphite Ltd (→ renamed HEG Ltd)",
+        newTicker: "Not yet listed",
         ratio: "1 : 1",
         status: "Record Date Set",
-        announcementDate: "2023-04-27",
-        recordDate: "2024-07-11",
-        listingDate: "2024-09-05",
-        sector: "Textiles & Real Estate",
-        marketCap: "₹21,50,000 Cr",
-        rationale: "Unlocking value by creating three pure-play listed entities: Lifestyle/Apparel, Real Estate, and Engineering.",
+        stageRaw: "6. Effective / Record date",
+        recordDate: "07/09/2026",
+        valuation: "Open SOTP →",
+        sector: "Graphite & Industrial",
     },
     {
         id: "demerger-3",
-        companyName: "ITC Ltd (ITC)",
-        symbol: "ITC",
-        demergedEntity: "ITC Hotels Ltd",
-        ratio: "1 : 10 (1 ITC Hotel share for 10 ITC shares)",
-        status: "Listed",
-        announcementDate: "2023-07-24",
-        recordDate: "2024-06-06",
-        listingDate: "2024-08-14",
-        sector: "FMCG & Hospitality",
-        marketCap: "₹6,10,000 Cr",
-        rationale: "Asset-right strategy for hospitality business while ITC retains 40% strategic stake and 60% directly held by ITC shareholders.",
-    },
-    {
-        id: "demerger-4",
-        companyName: "Reliance Industries Ltd (RELIANCE)",
-        symbol: "RELIANCE",
-        demergedEntity: "Jio Financial Services Ltd (JIOFIN)",
+        companyName: "India Glycols Ltd",
+        symbol: "500201",
+        demergedEntity: "Ennature Bio Pharma + IGL Spirits",
+        newTicker: "see tab",
         ratio: "1 : 1",
-        status: "Listed",
-        announcementDate: "2022-10-21",
-        recordDate: "2023-07-20",
-        listingDate: "2023-08-21",
-        sector: "Conglomerate / Financial Services",
-        marketCap: "₹19,80,000 Cr",
-        rationale: "Creation of a giant tech-enabled NBFC leveraging Jio ecosystem for consumer lending, AMC, insurance, and digital payments.",
-    },
-    {
-        id: "demerger-5",
-        companyName: "Vedanta Ltd (VEDL)",
-        symbol: "VEDL",
-        demergedEntity: "Vedanta Aluminum, Oil & Gas, Power, Steel, and Base Metals",
-        ratio: "1 : 1 for each spin-off",
-        status: "NCLT Approval Pending",
-        announcementDate: "2023-09-29",
-        recordDate: "TBD FY25",
-        listingDate: "TBD FY25",
-        sector: "Metals & Mining",
-        marketCap: "₹1,65,000 Cr",
-        rationale: "Demerger into 6 pure-play commodity sector leaders to unlock sum-of-the-parts (SOTP) value and reduce conglomerate discount.",
-    },
-    {
-        id: "demerger-6",
-        companyName: "Aditya Birla Fashion & Retail Ltd (ABFRL)",
-        symbol: "ABFRL",
-        demergedEntity: "Aditya Birla Lifestyle Brands Ltd",
-        ratio: "1 : 1",
-        status: "Announced",
-        announcementDate: "2024-04-01",
-        recordDate: "TBD Q3 FY25",
-        listingDate: "TBD Q4 FY25",
-        sector: "Retail & Apparel",
-        marketCap: "₹31,000 Cr",
-        rationale: "Separation of high-margin mature Lifestyle brands (Louis Philippe, Van Heusen, Allen Solly) from high-growth digital/ethnic portfolio.",
+        status: "Record Date Set",
+        stageRaw: "6. Effective / Record date",
+        recordDate: "02/09/2026",
+        valuation: "Open SOTP →",
+        sector: "Pharma & Spirits",
     },
 ]

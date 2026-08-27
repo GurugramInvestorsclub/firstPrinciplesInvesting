@@ -226,10 +226,10 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                         <thead>
                             <tr className="border-b border-white/10 bg-white/[0.03] text-xs font-mono text-gold uppercase tracking-wider">
                                 <th className="p-4">Parent Company</th>
-                                <th className="p-4">Demerged Entity</th>
-                                <th className="p-4">Swap Ratio</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4">Record / Listing</th>
+                                <th className="p-4">Resulting Entity (New)</th>
+                                <th className="p-4">Current Stage</th>
+                                <th className="p-4">Record Date</th>
+                                <th className="p-4">Valuation / Disclosure</th>
                                 <th className="p-4 text-right">Details</th>
                             </tr>
                         </thead>
@@ -241,20 +241,27 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                                     className="hover:bg-white/[0.03] transition cursor-pointer group"
                                 >
                                     <td className="p-4 font-semibold text-white group-hover:text-gold transition">
-                                        <div>{item.companyName}</div>
-                                        {item.sector && <span className="text-[10px] font-mono text-neutral-400">{item.sector}</span>}
+                                        <div className="font-bold text-sm text-white">{item.companyName}</div>
+                                        {item.symbol && <span className="text-[10px] font-mono text-gold/80 block">BSE Code: {item.symbol}</span>}
                                     </td>
                                     <td className="p-4 text-neutral-200">
-                                        <div className="flex items-center gap-1.5">
-                                            <Layers className="w-3.5 h-3.5 text-gold/70" />
+                                        <div className="flex items-center gap-1.5 font-medium text-xs sm:text-sm">
+                                            <Layers className="w-3.5 h-3.5 text-gold/80 shrink-0" />
                                             <span>{item.demergedEntity}</span>
                                         </div>
+                                        {item.newTicker && <span className="text-[10px] font-mono text-neutral-400 block pl-5">{item.newTicker}</span>}
                                     </td>
-                                    <td className="p-4 font-mono text-xs font-bold text-gold">{item.ratio}</td>
-                                    <td className="p-4">{renderStatusBadge(item.status)}</td>
+                                    <td className="p-4">
+                                        {renderStatusBadge(item.status)}
+                                        {item.stageRaw && (
+                                            <span className="text-[10px] font-mono text-neutral-400 block mt-1">{item.stageRaw}</span>
+                                        )}
+                                    </td>
+                                    <td className="p-4 font-mono text-xs font-semibold text-gold">
+                                        {item.recordDate || "TBD"}
+                                    </td>
                                     <td className="p-4 font-mono text-xs text-neutral-300">
-                                        <div>{item.recordDate ? `Rec: ${item.recordDate}` : "Rec: TBD"}</div>
-                                        <div className="text-neutral-400">{item.listingDate ? `List: ${item.listingDate}` : ""}</div>
+                                        <div>{item.valuation || item.exchangeLink || "Open SOTP →"}</div>
                                     </td>
                                     <td className="p-4 text-right">
                                         <button className="p-2 rounded-lg bg-white/5 text-neutral-300 group-hover:bg-gold group-hover:text-black transition">
