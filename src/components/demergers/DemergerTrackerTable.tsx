@@ -344,14 +344,18 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02]">
-                                <span className="text-xs font-mono text-neutral-400 block mb-1">Spin-off Entity</span>
+                                <span className="text-xs font-mono text-neutral-400 block mb-1">Resulting Entity (New)</span>
                                 <span className="text-sm font-bold text-white">{selectedRecord.demergedEntity}</span>
                             </div>
                             <div className="p-4 rounded-xl border border-gold/20 bg-gold/[0.05]">
-                                <span className="text-xs font-mono text-gold block mb-1">Entitlement Ratio</span>
-                                <span className="text-sm font-bold text-gold">{selectedRecord.ratio}</span>
+                                <span className="text-xs font-mono text-gold block mb-1">
+                                    {selectedRecord.ratio ? "Entitlement Ratio" : "New Entity Listing Status"}
+                                </span>
+                                <span className="text-sm font-bold text-gold">
+                                    {selectedRecord.ratio || selectedRecord.newTicker || "TBD"}
+                                </span>
                             </div>
                         </div>
 

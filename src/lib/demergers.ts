@@ -113,6 +113,7 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
     const colParentTicker = getFieldIndex(["parenttickerbse", "parentticker", "ticker"])
     const colDemerged = getFieldIndex(["resultingentitynew", "resultingentity", "resulting", "newentity", "spinoff"])
     const colNewTicker = getFieldIndex(["newentityticker", "newticker"])
+    const colRatio = getFieldIndex(["entitlementratio", "swapratio", "entitlement", "ratio", "swap"])
     const colStatus = getFieldIndex(["currentstage", "stage", "status"])
     const colRecord = getFieldIndex(["recorddate", "record"])
     const colFiling = getFieldIndex(["filingdisclosure", "filing", "disclosure"])
@@ -131,6 +132,7 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
         const parentTicker = colParentTicker !== -1 ? row[colParentTicker] : ""
         const demergedEntity = colDemerged !== -1 && row[colDemerged] ? row[colDemerged] : "Spin-off Entity"
         const newTicker = colNewTicker !== -1 ? row[colNewTicker] : ""
+        const ratio = colRatio !== -1 && row[colRatio] ? row[colRatio] : ""
         const rawStage = colStatus !== -1 && row[colStatus] ? row[colStatus] : "Announced"
         const recordDate = colRecord !== -1 ? row[colRecord] : ""
         const filingLink = colFiling !== -1 ? row[colFiling] : ""
@@ -143,7 +145,7 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
             symbol: parentTicker || extractSymbol(companyName),
             demergedEntity: demergedEntity.replace(/^["']|["']$/g, ""),
             newTicker: newTicker || "",
-            ratio: valuation.includes("1:") || valuation.includes("1 :") ? valuation : "1 : 1",
+            ratio: ratio,
             status: normalizeStatus(rawStage),
             stageRaw: rawStage,
             recordDate: recordDate,
