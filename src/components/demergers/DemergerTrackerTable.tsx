@@ -11,6 +11,17 @@ interface DemergerTrackerTableProps {
     isLive: boolean
 }
 
+function isUrl(str?: string): boolean {
+    if (!str) return false
+    const s = str.trim().toLowerCase()
+    return s.startsWith("http://") || s.startsWith("https://") || s.startsWith("www.")
+}
+
+function formatUrl(str: string): string {
+    const s = str.trim()
+    return s.startsWith("www.") ? `https://${s}` : s
+}
+
 export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastUpdated, isLive: initialIsLive }: DemergerTrackerTableProps) {
     const [records, setRecords] = useState<DemergerRecord[]>(initialRecords)
     const [lastUpdated, setLastUpdated] = useState<string>(initialLastUpdated)
@@ -368,6 +379,11 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                             companyName={selectedRecord.companyName}
                             demergedEntity={selectedRecord.demergedEntity}
                             symbol={selectedRecord.symbol}
+                            newTicker={selectedRecord.newTicker}
+                            valuation={selectedRecord.valuation}
+                            stageRaw={selectedRecord.stageRaw}
+                            recordDate={selectedRecord.recordDate}
+                            exchangeLink={selectedRecord.exchangeLink}
                         />
 
                         {/* Rationale */}
@@ -380,18 +396,25 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                             </div>
                         )}
 
-                        {/* Links */}
+                        {/* Links / Disclosures */}
                         {selectedRecord.exchangeLink && (
-                            <div className="pt-2">
-                                <a
-                                    href={selectedRecord.exchangeLink}
-                                    target="_blank"
-                                    rel="noreferrer noopener"
-                                    className="inline-flex items-center gap-2 text-xs font-mono font-bold text-gold hover:underline"
-                                >
-                                    <span>View Official Exchange Filing</span>
-                                    <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
+                            <div className="pt-2 border-t border-white/10">
+                                {isUrl(selectedRecord.exchangeLink) ? (
+                                    <a
+                                        href={formatUrl(selectedRecord.exchangeLink)}
+                                        target="_blank"
+                                        rel="noreferrer noopener"
+                                        className="inline-flex items-center gap-2 text-xs font-mono font-bold text-gold hover:underline"
+                                    >
+                                        <span>View Official Exchange Filing</span>
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                    </a>
+                                ) : (
+                                    <div className="text-xs font-mono text-neutral-400 flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/[0.02]">
+                                        <span className="text-neutral-500 uppercase">Disclosure Reference:</span>
+                                        <span className="text-neutral-200 font-semibold">{selectedRecord.exchangeLink}</span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
