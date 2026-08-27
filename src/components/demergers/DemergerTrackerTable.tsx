@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { Search, Filter, RefreshCw, LayoutGrid, Table as TableIcon, ExternalLink, Calendar, Info, Layers, Tag, CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import { Search, Filter, RefreshCw, LayoutGrid, Table as TableIcon, ExternalLink, Calendar, Info, Layers, Tag, CheckCircle2, Clock, AlertCircle, LineChart } from "lucide-react"
 import { DemergerRecord } from "@/lib/demergers"
+import { SOTPValuationCard } from "./SOTPValuationCard"
 
 interface DemergerTrackerTableProps {
     initialRecords: DemergerRecord[]
@@ -361,6 +362,13 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                                 </div>
                             </div>
                         </div>
+
+                        {/* SOTP Valuation Model Section */}
+                        <SOTPValuationCard
+                            companyName={selectedRecord.companyName}
+                            demergedEntity={selectedRecord.demergedEntity}
+                            symbol={selectedRecord.symbol}
+                        />
 
                         {/* Rationale */}
                         {selectedRecord.rationale && (
