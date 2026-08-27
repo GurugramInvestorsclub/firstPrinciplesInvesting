@@ -111,7 +111,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
     return (
         <nav
             aria-label="Table of contents"
-            className={`w-60 xl:w-64 font-sans text-sm select-none ${className}`}
+            className={`w-full font-sans text-sm select-none ${className}`}
         >
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gold/30">
                 <List className="w-4 h-4 text-gold" />

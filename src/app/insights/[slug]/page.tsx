@@ -74,62 +74,59 @@ export default async function InsightPage({ params }: Props) {
                 {liveWebinar && (
                     <AnnouncementBar event={liveWebinar} isSubscriber={hasSubscriptionAccess} />
                 )}
-                <div className="relative max-w-7xl mx-auto px-4">
-                    {/* Desktop Sticky Left Sidebar Table of Contents */}
-                    {headings.length > 1 && (
-                        <aside className="hidden xl:block absolute left-4 2xl:left-8 top-20 w-60 xl:w-64">
-                            <div className="sticky top-28">
-                                <TableOfContents headings={headings} variant="desktop" />
-                            </div>
-                        </aside>
-                    )}
+                {/* Desktop Fixed Left Sidebar Table of Contents */}
+                {headings.length > 1 && (
+                    <aside className="hidden min-[1320px]:block fixed top-28 left-[max(1rem,calc((100vw-768px)/2-260px))] w-56 z-30 pointer-events-auto">
+                        <TableOfContents headings={headings} variant="desktop" />
+                    </aside>
+                )}
 
-                    <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto blog-article-container">
-                        <header className="mb-12 text-left">
-                            <div className="flex items-center justify-between gap-4 mb-4">
-                                <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
-                                    {post.title}
-                                </h1>
-                            </div>
-                            <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
-                                <span>
-                                    Published: {post.publishedAt ? `${new Date(post.publishedAt).toLocaleDateString("en-US", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })} at ${new Date(post.publishedAt).toLocaleTimeString("en-US", {
-                                        hour: "numeric",
-                                        minute: "2-digit",
-                                        hour12: true,
-                                    })}` : "Date not available"}
-                                </span>
-                                <ArticleThemeToggleButton />
-                            </div>
+                <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto blog-article-container">
+                    <header className="mb-12 text-left">
+                        <div className="flex items-center justify-between gap-4 mb-4">
+                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+                                {post.title}
+                            </h1>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
+                            <span>
+                                Published: {post.publishedAt ? `${new Date(post.publishedAt).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })} at ${new Date(post.publishedAt).toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                })}` : "Date not available"}
+                            </span>
+                            <ArticleThemeToggleButton />
+                        </div>
 
-                            {/* Disclaimer Section */}
-                            <div className="my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[10px] leading-relaxed text-text-primary font-mono">
-                                {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
-                                    <div className="text-[10px] leading-relaxed space-y-2 [&_p]:text-[10px] [&_p]:leading-relaxed [&_strong]:text-[10px] [&_span]:text-[10px]">
-                                        <RichText value={post.disclaimer} />
-                                    </div>
-                                ) : (
-                                    <div className="text-[10px] text-text-primary space-y-2 leading-relaxed">
-                                        <p>
-                                            <strong className="font-bold text-text-primary text-[10px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
-                                        </p>
-                                        <p>
-                                            First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Mobile Collapsible Table of Contents */}
-                            {headings.length > 1 && (
-                                <div className="xl:hidden">
-                                    <TableOfContents headings={headings} variant="mobile" />
+                        {/* Disclaimer Section */}
+                        <div className="my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[10px] leading-relaxed text-text-primary font-mono">
+                            {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
+                                <div className="text-[10px] leading-relaxed space-y-2 [&_p]:text-[10px] [&_p]:leading-relaxed [&_strong]:text-[10px] [&_span]:text-[10px]">
+                                    <RichText value={post.disclaimer} />
+                                </div>
+                            ) : (
+                                <div className="text-[10px] text-text-primary space-y-2 leading-relaxed">
+                                    <p>
+                                        <strong className="font-bold text-text-primary text-[10px] mr-1">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
+                                    </p>
+                                    <p>
+                                        First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
+                                    </p>
                                 </div>
                             )}
+                        </div>
+
+                        {/* Mobile / Tablet Collapsible Table of Contents */}
+                        {headings.length > 1 && (
+                            <div className="min-[1320px]:hidden">
+                                <TableOfContents headings={headings} variant="mobile" />
+                            </div>
+                        )}
 
                             {post.excerpt && (
                                 <p className="text-xl text-muted-foreground leading-relaxed">
@@ -219,7 +216,6 @@ export default async function InsightPage({ params }: Props) {
                             currentUserId={session?.user?.id}
                         />
                     </article>
-                </div>
                 <ShareButton title={post.title} text={post.excerpt || ""} />
             </main>
             <Footer />

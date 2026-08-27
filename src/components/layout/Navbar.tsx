@@ -19,6 +19,7 @@ export function Navbar() {
     const navLinks = [
         { href: "/insights", label: "Insights" },
         { href: "/insights/members-only", label: "Members" },
+        { href: "/demerger-tracker", label: "Demergers" },
         { href: "/events", label: "Events" },
         { href: "/super30", label: "Super 30" },
         { href: "/ask", label: "Ask" },
