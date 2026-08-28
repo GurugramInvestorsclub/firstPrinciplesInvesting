@@ -76,7 +76,7 @@ export default async function InsightPage({ params }: Props) {
                 )}
                 {/* Desktop Fixed Left Sidebar Table of Contents */}
                 {headings.length > 1 && (
-                    <aside className="hidden min-[1320px]:block fixed top-28 left-[max(1rem,calc((100vw-768px)/2-260px))] w-56 z-30 pointer-events-auto">
+                    <aside className="hidden min-[1320px]:block fixed top-28 left-[max(1rem,calc((100vw-768px)/2-260px))] w-60 z-30 pointer-events-auto">
                         <TableOfContents headings={headings} variant="desktop" />
                     </aside>
                 )}
