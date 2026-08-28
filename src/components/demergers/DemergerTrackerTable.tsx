@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
-import { Search, Filter, RefreshCw, LayoutGrid, Table as TableIcon, ExternalLink, Calendar, Info, Layers, Tag, CheckCircle2, Clock, AlertCircle, LineChart } from "lucide-react"
+import { Search, Filter, RefreshCw, LayoutGrid, Table as TableIcon, ExternalLink, Calendar, Info, Layers, Tag, CheckCircle2, Clock, AlertCircle, LineChart, FileSpreadsheet } from "lucide-react"
 import { DemergerRecord } from "@/lib/demergers"
 import { SOTPValuationCard } from "./SOTPValuationCard"
 
@@ -28,6 +28,7 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
     const [isLive, setIsLive] = useState<boolean>(initialIsLive)
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
 
+    const [mainTab, setMainTab] = useState<"tracker" | "sotp_sheet">("tracker")
     const [searchTerm, setSearchTerm] = useState<string>("")
     const [selectedStatus, setSelectedStatus] = useState<string>("ALL")
     const [selectedSector, setSelectedSector] = useState<string>("ALL")
@@ -123,26 +124,80 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
 
     return (
         <div className="space-y-8 font-sans">
-            {/* Sync bar & Stats Overview */}
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
-                <div className="flex items-center gap-3">
-                    <span className={`w-2.5 h-2.5 rounded-full ${isLive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
-                    <span className="text-xs font-mono text-neutral-300">
-                        {isLive ? `Live Sync Active • Updated ${lastUpdated}` : `Dataset Status: ${lastUpdated}`}
-                    </span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium border border-gold/30 bg-gold/10 text-gold hover:bg-gold/20 transition cursor-pointer disabled:opacity-50"
-                    >
-                        <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-                        <span>{isRefreshing ? "Syncing..." : "Refresh Sheet Data"}</span>
-                    </button>
-                </div>
+            {/* Top Navigation Tabs: Demergers Tracker vs Embedded Live Valuation Sheet */}
+            <div className="flex items-center gap-3 border-b border-white/10 pb-4 overflow-x-auto">
+                <button
+                    onClick={() => setMainTab("tracker")}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer shrink-0 ${
+                        mainTab === "tracker"
+                            ? "bg-gold text-black shadow-lg shadow-gold/20"
+                            : "bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white border border-white/10"
+                    }`}
+                >
+                    <TableIcon className="w-4 h-4" />
+                    <span>Demerger Opportunities Tracker</span>
+                </button>
+                <button
+                    onClick={() => setMainTab("sotp_sheet")}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-mono font-bold transition cursor-pointer shrink-0 ${
+                        mainTab === "sotp_sheet"
+                            ? "bg-gold text-black shadow-lg shadow-gold/20"
+                            : "bg-white/5 text-neutral-300 hover:bg-white/10 hover:text-white border border-white/10"
+                    }`}
+                >
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>Live SOTP Valuation Sheet (Full Embed)</span>
+                </button>
             </div>
+
+            {/* TAB CONTENT 2: Embedded Google Sheet */}
+            {mainTab === "sotp_sheet" ? (
+                <div className="space-y-6">
+                    <div className="p-6 rounded-2xl border border-gold/30 bg-gradient-to-br from-gold/[0.05] via-transparent to-black/60 backdrop-blur-xl">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
+                                <FileSpreadsheet className="w-4 h-4 text-gold" />
+                                <span>Sum of the Parts (SOTP) Valuation Model</span>
+                            </div>
+                            <h2 className="text-2xl font-bold text-white tracking-tight">Full Live Valuation Spreadsheet</h2>
+                            <p className="text-xs md:text-sm text-neutral-300 max-w-3xl leading-relaxed">
+                                Direct live interactive embed of the full Sum of the Parts valuation sheet. Scroll, view tabs, target prices, multiples, and arbitrage calculations live on this page.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="w-full rounded-2xl border border-white/10 bg-[#121212] overflow-hidden shadow-2xl">
+                        <iframe
+                            src="https://docs.google.com/spreadsheets/d/1AXHfMMJT8kJHDyyMUltsaKISW-JvryacBI6McPlctiY/htmlview?widget=true&headers=false"
+                            title="Sum of the Parts (SOTP) Valuation Sheet"
+                            className="w-full h-[750px] border-0"
+                            loading="lazy"
+                        />
+                    </div>
+                </div>
+            ) : (
+                /* TAB CONTENT 1: Tracker View */
+                <>
+                    {/* Sync bar & Stats Overview */}
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-4 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
+                        <div className="flex items-center gap-3">
+                            <span className={`w-2.5 h-2.5 rounded-full ${isLive ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+                            <span className="text-xs font-mono text-neutral-300">
+                                {isLive ? `Live Sync Active • Updated ${lastUpdated}` : `Dataset Status: ${lastUpdated}`}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={handleRefresh}
+                                disabled={isRefreshing}
+                                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium border border-gold/30 bg-gold/10 text-gold hover:bg-gold/20 transition cursor-pointer disabled:opacity-50"
+                            >
+                                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                                <span>{isRefreshing ? "Syncing..." : "Refresh Sheet Data"}</span>
+                            </button>
+                        </div>
+                    </div>
 
             {/* Quick Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -324,6 +379,8 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                         </div>
                     ))}
                 </div>
+            )}
+                </>
             )}
 
             {/* DETAIL MODAL DRAWER */}
