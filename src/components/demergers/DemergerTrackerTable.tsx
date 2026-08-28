@@ -168,7 +168,7 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
 
                     <div className="w-full rounded-2xl border border-white/10 bg-[#121212] overflow-hidden shadow-2xl">
                         <iframe
-                            src="https://docs.google.com/spreadsheets/d/1AXHfMMJT8kJHDyyMUltsaKISW-JvryacBI6McPlctiY/htmlview?widget=true&headers=false"
+                            src="https://docs.google.com/spreadsheets/d/1AXHfMMJT8kJHDyyMUltsaKISW-JvryacBI6McPlctiY/preview"
                             title="Sum of the Parts (SOTP) Valuation Sheet"
                             className="w-full h-[750px] border-0"
                             loading="lazy"
