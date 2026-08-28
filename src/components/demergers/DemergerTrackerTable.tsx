@@ -172,6 +172,7 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                             title="Sum of the Parts (SOTP) Valuation Sheet"
                             className="w-full h-[750px] border-0"
                             loading="lazy"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
                         />
                     </div>
                 </div>
