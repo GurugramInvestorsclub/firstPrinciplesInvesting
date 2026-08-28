@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useScroll, useTransform } from "framer-motion"
-import { Calendar, Users } from "lucide-react"
+import { Calendar, Users, Star } from "lucide-react"
 import { Super30Program } from "@/lib/types"
 import { useRef } from "react"
 
@@ -164,7 +164,7 @@ export function Super30Hero({ program }: Super30HeroProps) {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 1, delay: 0.8 }}
-                            className="pt-8"
+                            className="pt-8 flex flex-col items-center gap-5"
                         >
                            <a 
                                 href="#apply"
@@ -172,6 +172,25 @@ export function Super30Hero({ program }: Super30HeroProps) {
                            >
                                {program.ctaText || "Apply Now"}
                            </a>
+
+                           {/* Rating Proof Badge */}
+                           <div className="inline-flex flex-col gap-1.5 px-4.5 py-2.5 rounded-2xl border border-gold/35 bg-[#12110F]/85 shadow-[0_0_20px_rgba(245,184,0,0.08)]">
+                               <div className="flex items-center gap-2.5">
+                                   <div className="flex items-center gap-1">
+                                       {[...Array(5)].map((_, i) => (
+                                           <Star key={i} className="w-4 h-4 fill-gold text-gold drop-shadow-[0_0_4px_rgba(245,184,0,0.6)]" />
+                                       ))}
+                                   </div>
+                                   <div className="flex items-baseline gap-1 font-sans">
+                                       <span className="text-white font-bold text-base">4.9</span>
+                                       <span className="text-gray-400 font-medium text-xs">/ 5.0</span>
+                                   </div>
+                               </div>
+                               <div className="flex items-center justify-end gap-1.5 font-mono text-xs text-gold font-semibold">
+                                   <Users className="w-3.5 h-3.5 text-gold shrink-0" />
+                                   <span>50+ Investors</span>
+                               </div>
+                           </div>
                         </motion.div>
                     </div>
                 </div>

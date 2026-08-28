@@ -5,6 +5,7 @@
 // no shadows; separation is 1px hairlines and 1px grid gaps only.
 
 import { CSSProperties, ReactNode, useEffect, useRef } from "react"
+import { Star, Users } from "lucide-react"
 import { Super30Program, Testimonial } from "@/lib/types"
 import { isEventRegistrationOpen } from "@/lib/utils"
 import { wireReveal } from "./reveal"
@@ -394,6 +395,49 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                             <a href="#frameworks" className="s30l-link-ghost">
                                 Why join ↓
                             </a>
+                        </div>
+
+                        {/* Rating Proof Badge matching design handoff */}
+                        <div
+                            style={{
+                                marginTop: 24,
+                                display: "inline-flex",
+                                flexDirection: "column",
+                                gap: 6,
+                                padding: "10px 18px",
+                                borderRadius: 16,
+                                border: "1px solid rgba(245, 184, 0, 0.35)",
+                                background: "rgba(18, 17, 15, 0.85)",
+                                boxShadow: "0 0 20px rgba(245, 184, 0, 0.08)",
+                                width: "fit-content",
+                            }}
+                        >
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star
+                                            key={i}
+                                            style={{
+                                                width: 16,
+                                                height: 16,
+                                                color: "#F5B800",
+                                                fill: "#F5B800",
+                                                filter: "drop-shadow(0 0 4px rgba(245, 184, 0, 0.6))",
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                                <div style={{ fontFamily: SANS, display: "flex", alignItems: "baseline", gap: 3 }}>
+                                    <span style={{ color: "#FFFFFF", fontWeight: 700, fontSize: 16, lineHeight: 1 }}>4.9</span>
+                                    <span style={{ color: "#8E8B85", fontWeight: 500, fontSize: 13, lineHeight: 1 }}>/ 5.0</span>
+                                </div>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", justifySelf: "end", marginLeft: "auto", gap: 6 }}>
+                                <Users style={{ width: 14, height: 14, color: "#F5B800" }} />
+                                <span style={{ fontFamily: MONO, color: "#F5B800", fontWeight: 600, fontSize: 13, lineHeight: 1 }}>
+                                    50+ Investors
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div className="s30l-hero-fig" style={{ width: "100%", maxWidth: 520, justifySelf: "end", aspectRatio: "560/600" }}>
