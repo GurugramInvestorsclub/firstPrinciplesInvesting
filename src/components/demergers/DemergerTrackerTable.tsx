@@ -328,7 +328,16 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                                         {item.recordDate || "TBD"}
                                     </td>
                                     <td className="p-4 font-mono text-xs text-neutral-300">
-                                        <div>{item.valuation || item.exchangeLink || "Open SOTP →"}</div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setSelectedRecord(item)
+                                            }}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gold/40 bg-gold/10 text-gold hover:bg-gold hover:text-black font-mono text-xs font-semibold transition cursor-pointer"
+                                        >
+                                            <span>View SOTP Model</span>
+                                            <FileSpreadsheet className="w-3.5 h-3.5" />
+                                        </button>
                                     </td>
                                     <td className="p-4 text-right">
                                         <button className="p-2 rounded-lg bg-white/5 text-neutral-300 group-hover:bg-gold group-hover:text-black transition">
