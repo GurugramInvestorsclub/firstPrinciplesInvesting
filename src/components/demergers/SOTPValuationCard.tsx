@@ -22,7 +22,8 @@ export function SOTPValuationCard({
     sheetId = "1AXHfMMJT8kJHDyyMUltsaKISW-JvryacBI6McPlctiY",
     gid = "1568933591",
 }: SOTPValuationCardProps) {
-    const embedUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/preview`
+    const targetGidParam = gid ? `?gid=${gid}` : ""
+    const embedUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/preview${targetGidParam}`
     const directUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${gid}`
 
     return (

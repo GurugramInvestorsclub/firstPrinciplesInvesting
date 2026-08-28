@@ -15,6 +15,7 @@ export interface DemergerRecord {
     rationale?: string
     exchangeLink?: string
     valuation?: string
+    gid?: string
     notes?: string
 }
 
@@ -138,6 +139,7 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
         const filingLink = colFiling !== -1 ? row[colFiling] : ""
         const valuation = colValuation !== -1 ? row[colValuation] : ""
         const sector = colSector !== -1 ? row[colSector] : ""
+        const parsedGid = extractGid(valuation) || extractGid(filingLink)
 
         records.push({
             id: `demerger-${i}`,
@@ -151,12 +153,19 @@ export function parseCSVToDemergers(csvText: string): DemergerRecord[] {
             recordDate: recordDate,
             exchangeLink: filingLink,
             valuation: valuation,
+            gid: parsedGid,
             sector: sector || "Equities",
             rationale: `Demerger of ${demergedEntity} from ${companyName}. Current Stage: ${rawStage}.`,
         })
     }
 
     return records
+}
+
+function extractGid(str?: string): string | undefined {
+    if (!str) return undefined
+    const match = str.match(/gid=([0-9]+)/)
+    return match ? match[1] : undefined
 }
 
 function extractSymbol(name: string): string {

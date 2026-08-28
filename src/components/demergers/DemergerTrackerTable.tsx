@@ -454,6 +454,7 @@ export function DemergerTrackerTable({ initialRecords, lastUpdated: initialLastU
                             stageRaw={selectedRecord.stageRaw}
                             recordDate={selectedRecord.recordDate}
                             exchangeLink={selectedRecord.exchangeLink}
+                            gid={selectedRecord.gid}
                         />
 
                         {/* Rationale */}
