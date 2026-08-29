@@ -28,6 +28,7 @@ export function EventPromoCarousel({ events = [], super30Programs = [] }: EventP
     const [isPaused, setIsPaused] = useState(false)
     const [theme, setTheme] = useState<"dark" | "light">("dark")
     const [mounted, setMounted] = useState(false)
+    const [hasScrolled30Percent, setHasScrolled30Percent] = useState(false)
 
     const now = Date.now()
 
@@ -109,7 +110,7 @@ export function EventPromoCarousel({ events = [], super30Programs = [] }: EventP
     })
 
 
-    // Load theme & dismissed state on mount
+    // Load theme & dismissed state on mount, and track scroll position (30% threshold)
     useEffect(() => {
         setMounted(true)
 
@@ -132,8 +133,25 @@ export function EventPromoCarousel({ events = [], super30Programs = [] }: EventP
             }
         }
 
+        // Track scroll position to only trigger after 30% scroll
+        const handleScroll = () => {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+
+            if (scrollHeight > 0) {
+                const scrollPercent = (scrollTop / scrollHeight) * 100
+                setHasScrolled30Percent(scrollPercent >= 30)
+            }
+        }
+
         window.addEventListener("fpi-article-theme-change", handleThemeChange)
-        return () => window.removeEventListener("fpi-article-theme-change", handleThemeChange)
+        window.addEventListener("scroll", handleScroll, { passive: true })
+        handleScroll() // Check initial scroll state
+
+        return () => {
+            window.removeEventListener("fpi-article-theme-change", handleThemeChange)
+            window.removeEventListener("scroll", handleScroll)
+        }
     }, [])
 
     // Auto-advance slide every 5 seconds unless paused or dismissed
@@ -167,13 +185,17 @@ export function EventPromoCarousel({ events = [], super30Programs = [] }: EventP
     const currentSlide = slides[currentIndex] || slides[0]
     const isLight = theme === "light"
 
+    const isVisible = hasScrolled30Percent && !isDismissed
+
     return (
         <aside
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             aria-label="Promoted Event Sidebar"
-            className={`hidden min-[1320px]:block fixed top-40 right-[max(1rem,calc((100vw-768px)/2-250px))] w-[245px] z-30 pointer-events-auto transition-all duration-300 ${
-                isDismissed ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
+            className={`hidden min-[1320px]:block fixed top-40 right-[max(1rem,calc((100vw-768px)/2-250px))] w-[245px] z-30 transition-all duration-500 ease-out ${
+                isVisible
+                    ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                    : "opacity-0 translate-y-6 scale-95 pointer-events-none"
             }`}
         >
             <div
