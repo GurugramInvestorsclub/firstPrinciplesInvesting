@@ -249,13 +249,19 @@ export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess =
                             >
                                 {/* Cover image if available */}
                                 {report.mainImage && (
-                                    <div className="relative aspect-[16/9] w-full overflow-hidden">
+                                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-950">
                                         <Image
                                             src={urlForImage(report.mainImage).width(400).height(225).fit("crop").url()}
                                             alt={report.title}
                                             fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                            className="object-cover transition-transform duration-500 blur-[14px] scale-110 brightness-[0.8] select-none"
                                         />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10">
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 border border-gold/30 text-gold text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
+                                                <Lock className="w-2.5 h-2.5 text-gold" />
+                                                <span>Members Memo</span>
+                                            </span>
+                                        </div>
                                     </div>
                                 )}
 

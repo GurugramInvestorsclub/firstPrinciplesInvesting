@@ -29,72 +29,85 @@ export function EventPromoCarousel({ events = [], super30Programs = [] }: EventP
     const [theme, setTheme] = useState<"dark" | "light">("dark")
     const [mounted, setMounted] = useState(false)
 
+    const now = Date.now()
+
+    // Strictly filter Super30 programs to only include live, open registrations
+    const openSuper30Programs = (super30Programs || []).filter((prog) => {
+        if (!prog || prog.isActive === false || prog.isSoldOut) return false
+
+        // Filter out past application deadlines
+        if (prog.applicationDeadline) {
+            const deadlineTime = new Date(prog.applicationDeadline).getTime()
+            if (!isNaN(deadlineTime) && deadlineTime < now) {
+                return false
+            }
+        }
+
+        // Explicitly exclude closed batches like Batch 3
+        const batchName = (prog.batchName || "").toLowerCase().trim()
+        if (
+            batchName.includes("closed") ||
+            batchName.includes("sold out") ||
+            batchName.includes("batch 3") ||
+            batchName.includes("batch-3")
+        ) {
+            return false
+        }
+
+        return true
+    })
+
+    // Strictly filter events to only include upcoming live events
+    const openEvents = (events || []).filter((ev) => {
+        if (!ev) return false
+        const title = (ev.title || "").toLowerCase().trim()
+        if (title === "test" || title.startsWith("test ")) return false
+
+        if (ev.date) {
+            const eventTime = new Date(ev.date).getTime()
+            if (!isNaN(eventTime) && eventTime < now) {
+                return false // Event date has passed
+            }
+        }
+
+        return true
+    })
+
     // Build the list of slides dynamically from active Super 30 programs and upcoming events
     const slides: PromoSlide[] = []
 
-    // Add active Super 30 programs first
-    if (super30Programs && super30Programs.length > 0) {
-        super30Programs.slice(0, 2).forEach((prog) => {
-            slides.push({
-                id: `super30-${prog._id}`,
-                category: "SUPER30",
-                badge: prog.batchName || "SUPER 30 COHORT",
-                title: prog.title,
-                tagline: prog.tagline || prog.shortDescription || "Master fundamental equity research & valuation in an exclusive batch.",
-                dateOrSeats: prog.seatsAvailable ? `${prog.seatsAvailable} Seats Left` : "Registrations Open",
-                href: `/super30/${prog.slug?.current || ""}`,
-                buttonText: "Apply Now",
-                isLive: !prog.isSoldOut
-            })
+    // Add active Super 30 programs
+    openSuper30Programs.forEach((prog) => {
+        slides.push({
+            id: `super30-${prog._id}`,
+            category: "SUPER30",
+            badge: prog.batchName || "SUPER 30 COHORT",
+            title: prog.title,
+            tagline: prog.tagline || prog.shortDescription || "Master fundamental equity research & valuation in an exclusive batch.",
+            dateOrSeats: prog.seatsAvailable ? `${prog.seatsAvailable} Seats Left` : "Registrations Open",
+            href: `/super30/${prog.slug?.current || ""}`,
+            buttonText: "Apply Now",
+            isLive: true
         })
-    }
+    })
 
-    // Add upcoming events / webinars
-    if (events && events.length > 0) {
-        events.slice(0, 2).forEach((ev) => {
-            slides.push({
-                id: `event-${ev._id || ev.eventId}`,
-                category: "EVENT",
-                badge: "LIVE WEBINAR",
-                title: ev.title,
-                tagline: ev.shortDescription || "Join our upcoming fundamental equity masterclass and live Q&A session.",
-                dateOrSeats: ev.date
-                    ? new Date(ev.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                    : "Upcoming Event",
-                href: ev.slug?.current ? `/events/${ev.slug.current}` : "/events",
-                buttonText: "Register Now",
-                isLive: true
-            })
+    // Add upcoming live events / webinars
+    openEvents.forEach((ev) => {
+        slides.push({
+            id: `event-${ev._id || ev.eventId}`,
+            category: "EVENT",
+            badge: "LIVE WEBINAR",
+            title: ev.title,
+            tagline: ev.shortDescription || "Join our upcoming fundamental equity masterclass and live Q&A session.",
+            dateOrSeats: ev.date
+                ? new Date(ev.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                : "Upcoming Event",
+            href: ev.slug?.current ? `/events/${ev.slug.current}` : "/events",
+            buttonText: "Register Now",
+            isLive: true
         })
-    }
+    })
 
-    // Fallback slides if no active data available from Sanity
-    if (slides.length === 0) {
-        slides.push(
-            {
-                id: "fallback-super30",
-                category: "SUPER30",
-                badge: "SUPER 30 COHORT",
-                title: "Super-30 Equity Batch",
-                tagline: "Intensive 30-investor program on stock picking & SOTP valuation.",
-                dateOrSeats: "Registrations Open",
-                href: "/super30",
-                buttonText: "Explore Cohort",
-                isLive: true
-            },
-            {
-                id: "fallback-event",
-                category: "EVENT",
-                badge: "MONTHLY MASTERCLASS",
-                title: "Equity Research Webinars",
-                tagline: "Join live monthly fundamental analysis deep-dives & interactive Q&A.",
-                dateOrSeats: "Upcoming Webinar",
-                href: "/events",
-                buttonText: "View Events",
-                isLive: true
-            }
-        )
-    }
 
     // Load theme & dismissed state on mount
     useEffect(() => {

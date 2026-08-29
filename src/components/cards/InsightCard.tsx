@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Lock } from "lucide-react"
 import { Post } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -11,20 +11,36 @@ interface InsightCardProps {
 }
 
 export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess }: InsightCardProps) {
+    const isSubscriber = post.access === "subscriber"
+
     return (
         <div
             data-gsap="grid-card"
             className="insight-card group flex h-full flex-col justify-between overflow-hidden rounded-xl transition-all duration-[250ms] ease-in-out"
         >
-            <div className="relative aspect-[16/9] w-full overflow-hidden">
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-950">
                 {post.mainImage && (
                     <Image
                         src={urlForImage(post.mainImage).width(800).height(450).fit("crop").url()}
                         alt={post.title}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        className={`object-cover transition-all duration-500 ${
+                            isSubscriber
+                                ? "blur-[14px] scale-110 brightness-[0.8] select-none"
+                                : "group-hover:scale-[1.03]"
+                        }`}
                         loading="lazy"
                     />
+                )}
+
+                {/* Subtle lock overlay badge for members-only post thumbnails */}
+                {isSubscriber && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none z-10">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 border border-gold/30 text-gold text-[10px] font-mono font-bold uppercase tracking-wider backdrop-blur-md shadow-lg">
+                            <Lock className="w-3 h-3 text-gold" />
+                            <span>Members Memo</span>
+                        </span>
+                    </div>
                 )}
             </div>
 
@@ -38,7 +54,7 @@ export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess }
                                 day: "numeric",
                             })}
                         </span>
-                        {showSubscriberBadge && post.access === "subscriber" ? (
+                        {showSubscriberBadge && isSubscriber ? (
                             <span className="rounded-full border border-gold/25 bg-gold/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gold">
                                 Members
                             </span>
@@ -65,7 +81,7 @@ export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess }
                         className="insight-cta flex items-center justify-between text-xs font-bold uppercase tracking-[0.15em] transition-colors duration-[250ms]"
                     >
                         <span>
-                            {showSubscriberBadge && post.access === "subscriber"
+                            {showSubscriberBadge && isSubscriber
                                 ? (hasSubscriptionAccess ? "Read Now" : "Open Teaser")
                                 : "Access Note"}
                         </span>

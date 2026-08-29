@@ -70,7 +70,11 @@ export function MemoCard({ post }: { post: Post }) {
                             src={urlForImage(post.mainImage).width(800).height(450).fit("crop").url()}
                             alt={post.title}
                             fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                            className={`object-cover transition-transform duration-700 ${
+                                post.access === "subscriber"
+                                    ? "blur-[14px] scale-110 brightness-[0.8] select-none"
+                                    : "group-hover:scale-[1.03]"
+                            }`}
                             loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/85" />
@@ -82,7 +86,7 @@ export function MemoCard({ post }: { post: Post }) {
                         <div className="absolute inset-0 bg-gradient-to-b from-black/0 to-black/80" />
                     </>
                 )}
-                
+
                 {/* Noise texture overlay */}
                 <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
 
