@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { ChevronDown, PanelLeftClose, PanelLeftOpen, List, ArrowUp } from "lucide-react"
 import { HeadingItem } from "@/lib/toc"
 
@@ -15,6 +15,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
     const [theme, setTheme] = useState<"dark" | "light">("dark")
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const saved = localStorage.getItem("fpi-toc-collapsed")
@@ -60,6 +61,26 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             observer.disconnect()
         }
     }, [headings])
+
+    // Auto scroll active item into view within the sidebar
+    useEffect(() => {
+        if (!activeId || isCollapsed || variant !== "desktop") return
+        const activeEl = document.getElementById(`toc-item-${activeId}`)
+        if (activeEl && scrollContainerRef.current) {
+            const container = scrollContainerRef.current
+            const elTop = activeEl.offsetTop
+            const elHeight = activeEl.offsetHeight
+            const containerTop = container.scrollTop
+            const containerHeight = container.offsetHeight
+
+            if (elTop < containerTop || elTop + elHeight > containerTop + containerHeight) {
+                container.scrollTo({
+                    top: elTop - containerHeight / 2 + elHeight / 2,
+                    behavior: "smooth",
+                })
+            }
+        }
+    }, [activeId, isCollapsed, variant])
 
     useEffect(() => {
         const savedTheme = localStorage.getItem("fpi-article-theme") as "dark" | "light" | null
@@ -177,7 +198,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             : "border-l-2 border-transparent hover:border-neutral-700/60 hover:bg-white/[0.03]"
 
         return (
-            <li key={heading.id} className={spacingClass}>
+            <li key={heading.id} id={`toc-item-${heading.id}`} className={spacingClass}>
                 <a
                     href={`#${heading.id}`}
                     onClick={(e) => scrollToHeading(e, heading.id)}
@@ -208,7 +229,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
                             />
                         ))}
 
-                    <span className={`leading-snug break-words max-w-full select-none ${textStyles}`}>
+                    <span className={`leading-snug break-words max-w-full ${textStyles}`}>
                         {heading.text}
                     </span>
                 </a>
@@ -242,10 +263,10 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
                 </button>
 
                 {isOpen && (
-                    <nav className={`mt-3 pt-2.5 border-t space-y-0.5 max-h-80 overflow-y-auto pr-1 ${
+                    <nav className={`mt-3 pt-2.5 border-t space-y-0.5 max-h-80 overflow-y-auto pr-1 overscroll-contain ${
                         isLight
-                            ? "border-[#E5E1D8] scrollbar-thin scrollbar-thumb-neutral-300"
-                            : "border-white/10 scrollbar-thin scrollbar-thumb-white/10"
+                            ? "border-[#E5E1D8] [scrollbar-width:thin]"
+                            : "border-white/10 [scrollbar-width:thin]"
                     }`}>
                         <ul className="list-none p-0 m-0">
                             {headings.map((heading, index) => renderTOCItem(heading, index))}
@@ -289,14 +310,14 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
     return (
         <aside
             aria-label="Table of contents"
-            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r select-none ${
+            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r pointer-events-auto ${
                 isLight
                     ? "bg-[#F7F7F5]/95 border-[#E5E1D8] text-[#1A1A1A] backdrop-blur-md"
                     : "bg-[#12110F]/95 border-neutral-800/80 text-neutral-200 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
             } ${className}`}
         >
             {/* Sidebar Header */}
-            <div className={`flex items-center justify-between p-3.5 border-b shrink-0 ${
+            <div className={`flex items-center justify-between p-3.5 border-b shrink-0 select-none ${
                 isLight ? "border-[#E5E1D8]" : "border-white/10"
             }`}>
                 <div className="flex items-center gap-2 min-w-0">
@@ -326,19 +347,22 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
                 </button>
             </div>
 
-            {/* Heading List */}
-            <div className={`flex-1 overflow-y-auto p-3.5 pr-2 ${
-                isLight
-                    ? "scrollbar-thin scrollbar-thumb-neutral-300 hover:scrollbar-thumb-neutral-400"
-                    : "scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-gold/30"
-            }`}>
+            {/* Scrollable Heading List */}
+            <div 
+                ref={scrollContainerRef}
+                className={`flex-1 min-h-0 max-h-[calc(100vh-11rem)] overflow-y-auto p-3.5 pr-2 overscroll-contain touch-pan-y ${
+                    isLight
+                        ? "border-[#E5E1D8] [scrollbar-width:thin] [scrollbar-color:#CBD5E1_transparent]"
+                        : "border-white/10 [scrollbar-width:thin] [scrollbar-color:rgba(245,184,0,0.35)_transparent]"
+                }`}
+            >
                 <ul className="list-none p-0 m-0 space-y-0.5">
                     {headings.map((heading, index) => renderTOCItem(heading, index))}
                 </ul>
             </div>
 
             {/* Sidebar Footer */}
-            <div className={`p-2.5 px-3.5 border-t text-[10px] font-mono flex items-center justify-between shrink-0 ${
+            <div className={`p-2.5 px-3.5 border-t text-[10px] font-mono flex items-center justify-between shrink-0 select-none ${
                 isLight ? "border-[#E5E1D8] text-slate-500" : "border-white/5 text-neutral-500"
             }`}>
                 <span className="truncate max-w-[180px]">
