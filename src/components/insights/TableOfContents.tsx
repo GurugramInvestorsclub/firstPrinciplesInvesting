@@ -16,6 +16,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
     const [theme, setTheme] = useState<"dark" | "light">("dark")
     const scrollContainerRef = useRef<HTMLDivElement>(null)
+    const isHoveringRef = useRef<boolean>(false)
 
     useEffect(() => {
         const saved = localStorage.getItem("fpi-toc-collapsed")
@@ -62,9 +63,9 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
         }
     }, [headings])
 
-    // Auto scroll active item into view within the sidebar
+    // Auto scroll active item into view within the sidebar (only when user is not manually hovering/scrolling it)
     useEffect(() => {
-        if (!activeId || isCollapsed || variant !== "desktop") return
+        if (!activeId || isCollapsed || variant !== "desktop" || isHoveringRef.current) return
         const activeEl = document.getElementById(`toc-item-${activeId}`)
         if (activeEl && scrollContainerRef.current) {
             const container = scrollContainerRef.current
@@ -111,11 +112,17 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
         const element = document.getElementById(id)
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "start" })
-            // Update URL hash without triggering default jump
             window.history.pushState(null, "", `#${id}`)
         }
         if (variant === "mobile") {
             setIsOpen(false)
+        }
+    }
+
+    const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        e.stopPropagation()
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop += e.deltaY
         }
     }
 
@@ -124,8 +131,6 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
         const level = heading.level || 2
         const isFirst = index === 0
 
-        // Spacing rules: H2 sections after first get separation (~16px)
-        // H3 items: 6-10px, H4-H6: 4-8px
         let spacingClass = "mt-1"
         if (level <= 2) {
             spacingClass = isFirst ? "mt-0" : "mt-3.5"
@@ -135,7 +140,6 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             spacingClass = "mt-1"
         }
 
-        // Font hierarchy & Indentation rules per theme:
         let textStyles = ""
         let paddingLeft = "pl-2.5"
 
@@ -206,7 +210,6 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
                         isActive ? activeItemClasses : inactiveItemClasses
                     }`}
                 >
-                    {/* Subtle hierarchy guide lines for nested items (H3-H6) */}
                     {lineCount > 0 &&
                         Array.from({ length: lineCount }).map((_, i) => (
                             <span
@@ -310,7 +313,9 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
     return (
         <aside
             aria-label="Table of contents"
-            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r pointer-events-auto ${
+            onMouseEnter={() => { isHoveringRef.current = true }}
+            onMouseLeave={() => { isHoveringRef.current = false }}
+            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r overflow-hidden pointer-events-auto ${
                 isLight
                     ? "bg-[#F7F7F5]/95 border-[#E5E1D8] text-[#1A1A1A] backdrop-blur-md"
                     : "bg-[#12110F]/95 border-neutral-800/80 text-neutral-200 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
@@ -350,7 +355,8 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             {/* Scrollable Heading List */}
             <div 
                 ref={scrollContainerRef}
-                className={`flex-1 min-h-0 max-h-[calc(100vh-11rem)] overflow-y-auto p-3.5 pr-2 overscroll-contain touch-pan-y ${
+                onWheel={handleWheel}
+                className={`flex-1 min-h-0 overflow-y-auto p-3.5 pr-2 overscroll-contain touch-pan-y ${
                     isLight
                         ? "border-[#E5E1D8] [scrollbar-width:thin] [scrollbar-color:#CBD5E1_transparent]"
                         : "border-white/10 [scrollbar-width:thin] [scrollbar-color:rgba(245,184,0,0.35)_transparent]"
