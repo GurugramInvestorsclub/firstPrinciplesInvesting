@@ -1,8 +1,8 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { singlePostQuery, eventsQuery } from "@/lib/sanity.queries"
-import { Post, Event } from "@/lib/types"
+import { singlePostQuery, eventsQuery, allSuper30ProgramsQuery } from "@/lib/sanity.queries"
+import { Post, Event, Super30Program } from "@/lib/types"
 import { AnnouncementBar } from "@/components/insights/AnnouncementBar"
 import { RichText } from "@/components/sanity/RichText"
 import { auth } from "@/auth"
@@ -15,6 +15,7 @@ import { CopyProtection } from "@/components/insights/CopyProtection"
 import { ArticleThemeWrapper, ArticleThemeToggleButton } from "@/components/insights/ArticleThemeWrapper"
 import { extractHeadings } from "@/lib/toc"
 import { TableOfContents } from "@/components/insights/TableOfContents"
+import { EventPromoCarousel } from "@/components/insights/EventPromoCarousel"
 import Link from "next/link"
 import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
@@ -37,12 +38,13 @@ export default async function InsightPage({ params }: Props) {
 
     const startOfDay = getStartOfTodayKolkata().toISOString()
 
-    // Fetch the post contents, auth session, comments, and events in parallel
-    const [post, session, commentsResult, upcomingEvents] = await Promise.all([
+    // Fetch the post contents, auth session, comments, events, and Super30 programs in parallel
+    const [post, session, commentsResult, upcomingEvents, super30Programs] = await Promise.all([
         client.fetch<Post | null>(singlePostQuery, { slug }, { cache: "no-store" }),
         auth(),
         getComments(slug),
-        client.fetch<Event[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } })
+        client.fetch<Event[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
+        client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } })
     ])
 
     const liveWebinar = upcomingEvents?.[0]
@@ -80,6 +82,10 @@ export default async function InsightPage({ params }: Props) {
                         <TableOfContents headings={headings} variant="desktop" />
                     </aside>
                 )}
+
+                {/* Desktop Fixed Right Sidebar Event Promo Carousel */}
+                <EventPromoCarousel events={upcomingEvents} super30Programs={super30Programs} />
+
 
                 <article className="container max-w-3xl px-4 sm:px-8 py-12 md:py-20 mx-auto blog-article-container">
                     <header className="mb-12 text-left">

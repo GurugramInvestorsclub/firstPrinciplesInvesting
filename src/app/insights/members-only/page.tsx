@@ -7,7 +7,9 @@ import { SearchInput } from "@/components/ui/search-input"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
+import { DemergerTrackerCarousel } from "@/components/insights/DemergerTrackerCarousel"
 import { NotesSection } from "@/components/insights/NotesSection"
+import { getDemergerData } from "@/lib/demergers"
 import { auth } from "@/auth"
 import Link from "next/link"
 import { groq } from "next-sanity"
@@ -66,12 +68,24 @@ export default async function MembersOnlyArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    const [hasSubscriptionAccess, premiumPosts, recordings, notes] = await Promise.all([
+    const [hasSubscriptionAccess, premiumPosts, recordings, notes, demergerData] = await Promise.all([
         paywallReady ? userHasInsightsAccess(session.user.id) : Promise.resolve(false),
         client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } }),
-        client.fetch<any[]>(subscriberNotesQuery, { search: search || null }, { next: { revalidate: 60 } })
+        client.fetch<any[]>(subscriberNotesQuery, { search: search || null }, { next: { revalidate: 60 } }),
+        getDemergerData()
     ])
+
+    const filteredDemergers = demergerData.records.filter((item) => {
+        if (!search) return true
+        const s = search.toLowerCase()
+        return (
+            item.companyName.toLowerCase().includes(s) ||
+            item.demergedEntity.toLowerCase().includes(s) ||
+            (item.symbol && item.symbol.toLowerCase().includes(s)) ||
+            (item.sector && item.sector.toLowerCase().includes(s))
+        )
+    })
 
     return (
         <div className="flex flex-col min-h-screen bg-bg-deep text-text-primary selection:bg-gold/20 selection:text-gold">
@@ -108,7 +122,7 @@ export default async function MembersOnlyArchivePage({
                                 </div>
                                 <h2 className="text-2xl md:text-4xl font-sans font-bold text-white tracking-tight">Access Locked</h2>
                                 <p className="text-white/70 max-w-2xl mx-auto leading-relaxed text-sm md:text-base">
-                                    This portal houses our high-conviction fundamental equity research deep-dives, valuation models, and session recordings archive. Unlock full access by starting a quarterly membership below.
+                                    This portal houses our high-conviction fundamental equity research deep-dives, demerger tracker, valuation models, and session recordings archive. Unlock full access by starting a quarterly membership below.
                                 </p>
                                 <div className="max-w-md mx-auto pt-6 text-left">
                                     <InsightsSubscriptionCheckout
@@ -119,6 +133,9 @@ export default async function MembersOnlyArchivePage({
                                     />
                                 </div>
                             </div>
+
+                            {/* Demerger Tracker Carousel Preview */}
+                            <DemergerTrackerCarousel records={demergerData.records} isLocked={true} />
 
                             {/* Locked research notes preview */}
                             <div className="space-y-6">
@@ -140,12 +157,12 @@ export default async function MembersOnlyArchivePage({
                             </div>
                         </div>
                     ) : (
-                        // Active subscribers view: Premium Research Notes & Recordings Carousel
+                        // Active subscribers view: Premium Research Notes, Demergers Carousel & Recordings Carousel
                         <div className="space-y-20">
                             {search && (
                                 <div className="mb-8">
                                     <div className="text-base text-text-secondary font-sans">
-                                        {resultsSummary(premiumPosts.length, recordings.length, notes.length, search)}
+                                        {resultsSummary(premiumPosts.length, recordings.length, notes.length, filteredDemergers.length, search)}
                                     </div>
                                 </div>
                             )}
@@ -165,10 +182,13 @@ export default async function MembersOnlyArchivePage({
                                 )}
                             </section>
 
-                            {/* Section 2: Recordings Archive Carousel (Members Only) */}
+                            {/* Section 2: Demerger Tracker Carousel (Members Only) */}
+                            <DemergerTrackerCarousel records={filteredDemergers} />
+
+                            {/* Section 3: Recordings Archive Carousel (Members Only) */}
                             <RecordingsCarousel recordings={recordings} />
 
-                            {/* Section 3: Notes (Members Only) */}
+                            {/* Section 4: Notes (Members Only) */}
                             <NotesSection notes={notes} />
                         </div>
                     )}
@@ -180,14 +200,15 @@ export default async function MembersOnlyArchivePage({
     )
 }
 
-function resultsSummary(postsCount: number, recordingsCount: number, notesCount: number, search: string) {
-    const total = postsCount + recordingsCount + notesCount
+function resultsSummary(postsCount: number, recordingsCount: number, notesCount: number, demergersCount: number, search: string) {
+    const total = postsCount + recordingsCount + notesCount + demergersCount
     if (total === 0) {
         return <p>No results found for <span className="font-semibold text-white">&quot;{search}&quot;</span></p>
     }
     return (
         <p>
-            Showing {total} result{total === 1 ? "" : "s"} ({postsCount} report{postsCount === 1 ? "" : "s"}, {notesCount} note{notesCount === 1 ? "" : "s"}, {recordingsCount} recording{recordingsCount === 1 ? "" : "s"}) for <span className="font-semibold text-white">&quot;{search}&quot;</span>
+            Showing {total} result{total === 1 ? "" : "s"} ({postsCount} report{postsCount === 1 ? "" : "s"}, {notesCount} note{notesCount === 1 ? "" : "s"}, {recordingsCount} recording{recordingsCount === 1 ? "" : "s"}, {demergersCount} demerger{demergersCount === 1 ? "" : "s"}) for <span className="font-semibold text-white">&quot;{search}&quot;</span>
         </p>
     )
 }
+
