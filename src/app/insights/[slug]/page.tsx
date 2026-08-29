@@ -76,11 +76,9 @@ export default async function InsightPage({ params }: Props) {
                 {liveWebinar && (
                     <AnnouncementBar event={liveWebinar} isSubscriber={hasSubscriptionAccess} />
                 )}
-                {/* Desktop Fixed Left Sidebar Table of Contents */}
+                {/* Desktop Left Sidebar Table of Contents (Claude / Gemini style) */}
                 {headings.length > 1 && (
-                    <aside className="hidden min-[1320px]:block fixed top-40 left-[max(1rem,calc((100vw-768px)/2-250px))] w-[245px] z-30 pointer-events-auto">
-                        <TableOfContents headings={headings} variant="desktop" />
-                    </aside>
+                    <TableOfContents headings={headings} variant="desktop" />
                 )}
 
                 {/* Desktop Fixed Right Sidebar Event Promo Carousel */}

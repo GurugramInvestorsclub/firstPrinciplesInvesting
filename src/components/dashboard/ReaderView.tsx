@@ -5,6 +5,8 @@ import { ArrowLeft, Bookmark, Highlighter, MessageSquare, Lock, Trash2 } from "l
 import { RichText } from "../sanity/RichText"
 import { CopyProtection } from "../insights/CopyProtection"
 import { ArticleThemeWrapper, ArticleThemeToggleButton } from "../insights/ArticleThemeWrapper"
+import { extractHeadings } from "@/lib/toc"
+import { TableOfContents } from "../insights/TableOfContents"
 
 interface ReaderViewProps {
     slug: string
@@ -105,6 +107,7 @@ export function ReaderView({
 
     const rawBlocks = report.body || []
     const bodyBlocks = shouldLockContent ? getPreviewBlocks(rawBlocks) : rawBlocks
+    const headings = extractHeadings(bodyBlocks)
 
     // Load notes & highlights from localStorage
     useEffect(() => {
@@ -202,6 +205,9 @@ export function ReaderView({
     return (
         <ArticleThemeWrapper className="space-y-8 max-w-5xl mx-auto font-sans relative p-4 md:p-8 rounded-3xl">
             <CopyProtection />
+            {headings.length > 1 && (
+                <TableOfContents headings={headings} variant="desktop" />
+            )}
 
             {/* Top Toolbar */}
             <div className="flex items-center justify-between border-b border-white/5 pb-4 select-none">

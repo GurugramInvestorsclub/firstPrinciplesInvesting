@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, PanelLeftClose, PanelLeftOpen, List, ArrowUp } from "lucide-react"
 import { HeadingItem } from "@/lib/toc"
 
 interface TableOfContentsProps {
@@ -13,7 +13,20 @@ interface TableOfContentsProps {
 export function TableOfContents({ headings, variant = "desktop", className = "" }: TableOfContentsProps) {
     const [activeId, setActiveId] = useState<string>("")
     const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(false)
     const [theme, setTheme] = useState<"dark" | "light">("dark")
+
+    useEffect(() => {
+        const saved = localStorage.getItem("fpi-toc-collapsed")
+        if (saved === "true") {
+            setIsCollapsed(true)
+        }
+    }, [])
+
+    const toggleCollapsed = (collapsed: boolean) => {
+        setIsCollapsed(collapsed)
+        localStorage.setItem("fpi-toc-collapsed", collapsed ? "true" : "false")
+    }
 
     useEffect(() => {
         if (!headings || headings.length < 2) return
@@ -94,7 +107,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
         // H3 items: 6-10px, H4-H6: 4-8px
         let spacingClass = "mt-1"
         if (level <= 2) {
-            spacingClass = isFirst ? "mt-0" : "mt-4"
+            spacingClass = isFirst ? "mt-0" : "mt-3.5"
         } else if (level === 3) {
             spacingClass = "mt-1.5"
         } else {
@@ -243,36 +256,103 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
         )
     }
 
-    // Desktop Variant (Sticky Sidebar)
+    // Desktop Variant (Edge-aligned fixed sidebar with close/open toggle)
+    if (isCollapsed) {
+        return (
+            <div className={`hidden lg:block fixed left-0 top-28 z-40 ${className}`}>
+                <button
+                    onClick={() => toggleCollapsed(false)}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-r-xl border border-l-0 shadow-2xl transition-all duration-300 cursor-pointer group select-none ${
+                        isLight
+                            ? "bg-[#F7F7F5] border-[#E5E1D8] text-slate-700 hover:text-black hover:bg-white"
+                            : "bg-[#141414]/95 border-gold/40 text-gold hover:bg-[#1E1E1E] hover:border-gold/70 shadow-[0_0_25px_rgba(245,184,0,0.25)]"
+                    }`}
+                    title="Open Table of Contents"
+                    aria-label="Open Table of Contents"
+                >
+                    <PanelLeftOpen className="w-4 h-4 text-gold shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                    <span className={`text-[11px] font-mono font-semibold uppercase tracking-wider ${
+                        isLight ? "text-slate-800" : "text-neutral-200"
+                    }`}>
+                        Contents
+                    </span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                        isLight ? "bg-slate-200 text-slate-700" : "bg-gold/10 text-gold border border-gold/20"
+                    }`}>
+                        {headings.length}
+                    </span>
+                </button>
+            </div>
+        )
+    }
+
     return (
-        <nav
+        <aside
             aria-label="Table of contents"
-            className={`w-full font-sans select-none rounded-xl border transition-all duration-200 p-3.5 ${
+            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r select-none ${
                 isLight
-                    ? "border-[#E5E1D8] bg-[#F7F7F5] text-[#1A1A1A] shadow-[0_4px_20px_rgba(0,0,0,0.04)]"
-                    : "border-neutral-800/80 bg-[#141414]/95 backdrop-blur-sm text-neutral-200 shadow-xl"
+                    ? "bg-[#F7F7F5]/95 border-[#E5E1D8] text-[#1A1A1A] backdrop-blur-md"
+                    : "bg-[#12110F]/95 border-neutral-800/80 text-neutral-200 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
             } ${className}`}
         >
-            <div className={`flex items-center gap-2 mb-3 pb-2 border-b ${
+            {/* Sidebar Header */}
+            <div className={`flex items-center justify-between p-3.5 border-b shrink-0 ${
                 isLight ? "border-[#E5E1D8]" : "border-white/10"
             }`}>
-                <span className={`${isLight ? "text-[#D97706]" : "text-gold"} text-[12px] font-bold leading-none select-none`}>☷</span>
-                <span className={`text-[11px] font-mono font-semibold uppercase tracking-[0.1em] ${
-                    isLight ? "text-[#1A1A1A]" : "text-gold/90"
-                }`}>
-                    In This Memo
-                </span>
+                <div className="flex items-center gap-2 min-w-0">
+                    <List className={`w-4 h-4 shrink-0 ${isLight ? "text-[#D97706]" : "text-gold"}`} />
+                    <span className={`text-[11px] font-mono font-semibold uppercase tracking-[0.1em] truncate ${
+                        isLight ? "text-[#1A1A1A]" : "text-gold/90"
+                    }`}>
+                        In This Memo
+                    </span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold shrink-0 ${
+                        isLight ? "bg-slate-200 text-slate-700" : "bg-gold/10 text-gold border border-gold/20"
+                    }`}>
+                        {headings.length}
+                    </span>
+                </div>
+                <button
+                    onClick={() => toggleCollapsed(true)}
+                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                        isLight 
+                            ? "hover:bg-slate-200 text-slate-600 hover:text-black" 
+                            : "hover:bg-white/10 text-neutral-400 hover:text-white"
+                    }`}
+                    title="Close sidebar"
+                    aria-label="Close sidebar"
+                >
+                    <PanelLeftClose className="w-4 h-4" />
+                </button>
             </div>
 
-            <ul className={`list-none p-0 m-0 max-h-[calc(100vh-12rem)] overflow-y-auto pr-1 ${
+            {/* Heading List */}
+            <div className={`flex-1 overflow-y-auto p-3.5 pr-2 ${
                 isLight
                     ? "scrollbar-thin scrollbar-thumb-neutral-300 hover:scrollbar-thumb-neutral-400"
                     : "scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-gold/30"
             }`}>
-                {headings.map((heading, index) => renderTOCItem(heading, index))}
-            </ul>
-        </nav>
+                <ul className="list-none p-0 m-0 space-y-0.5">
+                    {headings.map((heading, index) => renderTOCItem(heading, index))}
+                </ul>
+            </div>
+
+            {/* Sidebar Footer */}
+            <div className={`p-2.5 px-3.5 border-t text-[10px] font-mono flex items-center justify-between shrink-0 ${
+                isLight ? "border-[#E5E1D8] text-slate-500" : "border-white/5 text-neutral-500"
+            }`}>
+                <span className="truncate max-w-[180px]">
+                    {headings.find(h => h.id === activeId)?.text || "Top of page"}
+                </span>
+                <button 
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                    className="hover:text-gold transition-colors flex items-center gap-1 cursor-pointer"
+                    title="Scroll to top"
+                >
+                    <ArrowUp className="w-3 h-3" />
+                    <span>Top</span>
+                </button>
+            </div>
+        </aside>
     )
 }
-
-
