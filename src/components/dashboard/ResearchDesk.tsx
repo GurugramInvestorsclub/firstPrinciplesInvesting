@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { 
     Home, FileText, Layers, Calendar, 
-    User, LogOut, Star, Sparkles, BookOpen
+    User, LogOut, Star, Sparkles, BookOpen, GitFork
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -86,6 +86,10 @@ export function ResearchDesk({
             router.push(`/insights/${argId}`)
             return
         }
+        if (tabId === "demergers" || tabId === "demerger-tracker") {
+            router.push("/demerger-tracker")
+            return
+        }
         setActiveTab(tabId)
         setSelectedId(null)
         window.scrollTo({ top: 0, behavior: "smooth" })
@@ -95,6 +99,7 @@ export function ResearchDesk({
         { id: "home", label: "Home", icon: Home },
         { id: "members-only", label: "Members Only", icon: Star },
         { id: "free-research", label: "Free Research", icon: BookOpen },
+        { id: "demergers", label: "Demerger Tracker", icon: GitFork },
         { id: "events", label: "Events", icon: Calendar },
         { id: "industry-research", label: "Industry Research", icon: Layers, isComingSoon: true }
     ]
@@ -255,7 +260,7 @@ export function ResearchDesk({
 
             {/* 3. Mobile Bottom Navigation Bar (Visible only on < lg screen sizes) */}
             <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/5 bg-bg-deep/95 backdrop-blur-xl py-3 px-4 lg:hidden flex justify-around select-none">
-                {navItems.slice(0, 4).map(item => {
+                {navItems.filter(item => !item.isComingSoon).map(item => {
                     const NavIcon = item.icon
                     const isActive = activeTab === item.id
 

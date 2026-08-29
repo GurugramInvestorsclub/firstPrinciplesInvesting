@@ -40,7 +40,7 @@ export default function AboutPage() {
                                         My real education began under a mentor with 20+ years of experience. Together, we built one of India's largest financial literacy programs, training over <span className="text-text-primary font-semibold">500,000+ investors</span>, including personnel from the BSF and state police forces.
                                     </p>
                                     <p>
-                                        By October 2021, at 29, I achieved <span className="text-text-primary font-semibold">financial independence</span> through disciplined SIPs and strategic structural betting.
+                                        By October 2021, at 29, I achieved <span className="text-text-primary font-semibold">financial independence</span> through disciplined SIP and a few lucky investments.
                                     </p>
                                 </div>
 
