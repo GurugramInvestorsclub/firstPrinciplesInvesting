@@ -152,7 +152,7 @@ export default async function InsightPage({ params }: Props) {
                         )}
 
                         {(shouldLockContent ? previewBody : post.body) && (
-                            <div className="prose prose-lg dark:prose-invert mx-auto">
+                            <div className="prose prose-lg dark:prose-invert mx-auto [&>:last-child]:mb-0">
                                 <RichText value={shouldLockContent ? previewBody : post.body} />
                             </div>
                         )}
@@ -197,7 +197,7 @@ export default async function InsightPage({ params }: Props) {
                         ) : null}
 
                         {/* Bottom Disclaimer Section */}
-                        <div className="my-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[10px] leading-relaxed text-text-primary font-mono">
+                        <div className="mt-6 mb-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-[10px] leading-relaxed text-text-primary font-mono">
                             {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
                                 <div className="text-[10px] leading-relaxed space-y-2 [&_p]:text-[10px] [&_p]:leading-relaxed [&_strong]:text-[10px] [&_span]:text-[10px]">
                                     <RichText value={post.disclaimer} />

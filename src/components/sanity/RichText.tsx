@@ -7,6 +7,7 @@ import Link from "next/link"
 function renderHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6", className: string) {
     return ({ children, value }: any) => {
         const text = getPortableTextChildrenText(value?.children)
+        if (!text || !text.trim()) return null
         const id = text ? slugifyHeading(text) : (value?._key ? `heading-${value._key}` : undefined)
         return (
             <Tag id={id} className={`scroll-mt-28 ${className}`}>
@@ -14,6 +15,26 @@ function renderHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6", className: 
             </Tag>
         )
     }
+}
+
+function cleanBlocks(value: any) {
+    if (!Array.isArray(value)) return value
+
+    let lastNonEmptyIndex = value.length - 1
+    while (lastNonEmptyIndex >= 0) {
+        const block = value[lastNonEmptyIndex]
+        if (block && block._type === "block") {
+            const text = getPortableTextChildrenText(block.children)
+            if (!text || !text.trim()) {
+                lastNonEmptyIndex--
+                continue
+            }
+        }
+        break
+    }
+
+    if (lastNonEmptyIndex < 0) return []
+    return value.slice(0, lastNonEmptyIndex + 1)
 }
 
 const components: PortableTextComponents = {
@@ -63,7 +84,13 @@ const components: PortableTextComponents = {
                 {children}
             </blockquote>
         ),
-        normal: ({ children }: any) => <p className="leading-relaxed mb-3 text-lg">{children}</p>,
+        normal: ({ children, value }: any) => {
+            const text = getPortableTextChildrenText(value?.children)
+            if (!text || !text.trim()) {
+                return null
+            }
+            return <p className="leading-relaxed mb-3 text-lg last:mb-0">{children}</p>
+        },
     },
     list: {
         bullet: ({ children }: any) => (
@@ -83,10 +110,15 @@ const components: PortableTextComponents = {
     },
     marks: {
         link: ({ children, value }: any) => {
-            const rel = !value.href.startsWith("/") ? "noreferrer noopener" : undefined
+            const href = value?.href || "#"
+            const isHash = href.startsWith("#")
+            const target = value?.target || (isHash ? undefined : "_blank")
+            const rel = target === "_blank" ? "noopener noreferrer" : (!href.startsWith("/") ? "noreferrer noopener" : undefined)
+
             return (
                 <Link
-                    href={value.href}
+                    href={href}
+                    target={target}
                     rel={rel}
                     className="text-primary underline underline-offset-4 hover:text-primary/80"
                 >
@@ -98,5 +130,6 @@ const components: PortableTextComponents = {
 }
 
 export function RichText({ value }: { value: any }) {
-    return <PortableTextReact value={value} components={components} />
+    const cleanedValue = cleanBlocks(value)
+    return <PortableTextReact value={cleanedValue} components={components} />
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from "framer-motion"
-import { PortableText } from "@portabletext/react"
+import { RichText } from "@/components/sanity/RichText"
 
 export function Super30PhilosophySection({ heading, description }: { heading?: string, description?: any[] }) {
     if (!description || description.length === 0) return null
@@ -22,7 +22,7 @@ export function Super30PhilosophySection({ heading, description }: { heading?: s
                     )}
                     
                     <div className="prose prose-lg prose-invert max-w-none prose-p:text-gray-300 prose-p:font-light prose-p:leading-relaxed prose-headings:text-white prose-strong:text-gold prose-strong:font-semibold">
-                        <PortableText value={description} />
+                        <RichText value={description} />
                     </div>
                 </motion.div>
             </div>
