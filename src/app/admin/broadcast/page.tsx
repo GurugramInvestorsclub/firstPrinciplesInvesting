@@ -26,6 +26,7 @@ interface PreviewPost {
 export default function AdminBroadcastPage() {
   const [postUrl, setPostUrl] = useState("")
   const [title, setTitle] = useState("")
+  const [subject, setSubject] = useState("")
   const [excerpt, setExcerpt] = useState("")
   const [customNote, setCustomNote] = useState("")
   const [testEmail, setTestEmail] = useState("support@firstprinciplesresearch.in")
@@ -141,6 +142,7 @@ export default function AdminBroadcastPage() {
         body: JSON.stringify({
           postUrl: postUrl.trim(),
           title: title.trim() || previewPost?.title,
+          subject: subject.trim() || undefined,
           excerpt: excerpt.trim() || previewPost?.excerpt,
           customNote: customNote.trim() || undefined,
           isTestMode,
@@ -287,7 +289,7 @@ export default function AdminBroadcastPage() {
               </p>
             </div>
 
-            {/* Title & Excerpt Override Fields */}
+            {/* Title, Subject & Excerpt Override Fields */}
             <div className="space-y-4 pt-2">
               <div>
                 <label className="block text-xs font-mono uppercase tracking-wider text-white/60 mb-1.5">
@@ -300,6 +302,23 @@ export default function AdminBroadcastPage() {
                   placeholder={previewPost?.title || "e.g. Valuation Analysis: Sector Q3 Review"}
                   className="w-full px-4 py-2.5 rounded-lg bg-black/40 border border-white/15 text-white text-sm focus:outline-none focus:border-gold transition-colors"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-wider text-white/60 mb-1.5 flex items-center justify-between">
+                  <span>Email Subject Line (Optional)</span>
+                  <span className="text-[10px] text-gold/80 font-normal">Inbox Header</span>
+                </label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder={`Defaults to: "New Members Research Memo: ${previewPost?.title || "Title"}"`}
+                  className="w-full px-4 py-2.5 rounded-lg bg-black/40 border border-white/15 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                />
+                <p className="text-[11px] text-white/40 mt-1">
+                  Custom subject header shown in recipients&apos; inbox lists.
+                </p>
               </div>
 
               <div>
@@ -415,8 +434,20 @@ export default function AdminBroadcastPage() {
           </div>
 
           {/* Email Preview Frame */}
-          <div className="rounded-2xl border border-white/15 bg-[#0A0A0C] p-4 md:p-6 text-left font-sans text-white/90 shadow-2xl space-y-6">
+          <div className="rounded-2xl border border-white/15 bg-[#0A0A0C] p-4 md:p-6 text-left font-sans text-white/90 shadow-2xl space-y-4">
             
+            {/* Subject Line Preview Badge */}
+            <div className="px-4 py-2.5 rounded-xl bg-[#141418] border border-white/10 text-xs font-mono text-white/80 flex items-center gap-2 overflow-hidden">
+              <span className="text-gold font-bold uppercase text-[10px] tracking-wider shrink-0">
+                Subject:
+              </span>
+              <span className="truncate text-white font-medium">
+                {subject.trim()
+                  ? subject.trim()
+                  : `New Members Research Memo: ${effectiveTitle}`}
+              </span>
+            </div>
+
             {/* Top Container */}
             <div className="bg-[#111115] border border-white/10 rounded-xl overflow-hidden shadow-xl">
               
@@ -447,11 +478,11 @@ export default function AdminBroadcastPage() {
                 </h3>
 
                 {effectiveImage && (
-                  <div className="rounded-lg overflow-hidden border border-white/10">
+                  <div className="rounded-lg overflow-hidden border border-white/10 relative">
                     <img
                       src={effectiveImage}
                       alt="Cover Preview"
-                      className="w-full h-auto object-cover max-h-48"
+                      className="w-full h-auto object-cover max-h-48 filter blur-md scale-105"
                     />
                   </div>
                 )}

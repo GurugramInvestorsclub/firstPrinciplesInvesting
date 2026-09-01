@@ -608,6 +608,7 @@ export async function sendManualGrantConfirmationEmail(
 export interface SendMembersPostEmailParams {
   postUrl: string
   title: string
+  subject?: string | null
   excerpt?: string | null
   mainImageUrl?: string | null
   recipients: Array<{ email: string; name?: string | null }>
@@ -640,8 +641,9 @@ export async function sendMembersOnlyPostEmailNotification(
     }
   }
 
-  const subjectPrefix = params.isTest ? "[TEST PREVIEW] " : ""
-  const subject = `${subjectPrefix}New Members Research Memo: ${params.title}`
+  const defaultSubject = `New Members Research Memo: ${params.title}`
+  const rawSubject = params.subject?.trim() || defaultSubject
+  const subject = params.isTest ? `[TEST PREVIEW] ${rawSubject}` : rawSubject
 
   const badgeText = params.isTest
     ? "🧪 TEST PREVIEW — MEMBERS-ONLY RESEARCH"
@@ -665,8 +667,8 @@ export async function sendMembersOnlyPostEmailNotification(
     : ""
 
   const imageHtml = params.mainImageUrl
-    ? `<div style="margin-bottom: 24px; text-align: center;">
-        <img src="${params.mainImageUrl}" alt="${params.title}" width="536" style="width: 100%; max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #27272A; display: block; margin: 0 auto;" />
+    ? `<div style="margin-bottom: 24px; text-align: center; overflow: hidden; border-radius: 12px;">
+        <img src="${params.mainImageUrl}" alt="${params.title}" width="536" style="width: 100%; max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #27272A; display: block; margin: 0 auto; filter: blur(14px); -webkit-filter: blur(14px); transform: scale(1.08);" />
       </div>`
     : ""
 
