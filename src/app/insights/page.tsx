@@ -11,7 +11,7 @@ import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubs
 import { auth } from "@/auth"
 import Link from "next/link"
 import Image from "next/image"
-import { CheckCircle2, Play, Volume2, Users, Flame, BookOpen, FileCheck2, Award, Calendar, BarChart2 } from "lucide-react"
+import { Users, BookOpen, FileCheck2, Award, Calendar, BarChart2 } from "lucide-react"
 import { LogoMarquee } from "@/components/events/LogoMarquee"
 import { StickyFooterCheckout } from "@/components/insights/StickyFooterCheckout"
 import { BonusMarquee } from "@/components/insights/BonusMarquee"
@@ -60,87 +60,46 @@ export default async function InsightsPage({
                 <InsightsAnimations>
 
                     {/* SECTION 1 — HERO */}
-                    <section className="container max-w-7xl mx-auto px-6 pt-24 pb-16 md:pt-36 md:pb-20 min-h-[90vh] flex flex-col justify-center bg-[radial-gradient(circle_at_right_50%_top_50%,rgba(245,184,0,0.04),transparent_60%)]">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-                            {/* Left Text Block */}
-                            <div className="lg:col-span-7 min-w-0 space-y-6 text-left">
-                                {/* Inflection Badge */}
-                                <div>
-                                    <span className="text-white text-sm md:text-[15px] font-semibold uppercase tracking-wider font-sans">
-                                        Deep-Dives on businesses at Inflection points
-                                    </span>
-                                </div>
-
-                                {/* Primary Headline */}
-                                <h1 className="text-[clamp(1.75rem,3.8vw,2.75rem)] font-sans font-semibold tracking-[-0.02em] leading-[1.15] text-text-primary">
-                                    Read two deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change.</span>
-                                </h1>
-
-                                {/* Bonus section */}
-                                <BonusMarquee />
-
-                                {/* CTA Area */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                                    {hasSubscriptionAccess ? (
-                                        <Link 
-                                            href="/insights/members-only" 
-                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
-                                        >
-                                            Go to Members Page
-                                        </Link>
-                                    ) : (
-                                        <Link 
-                                            href="#membership" 
-                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
-                                        >
-                                            Subscribe for ₹23/day
-                                        </Link>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium pt-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-                                    {hasSubscriptionAccess ? "Active Membership Status" : "50+ members have joined in the last month"}
-                                </div>
+                    <section className="container max-w-7xl mx-auto px-6 pt-24 pb-16 md:pt-36 md:pb-20 min-h-[70vh] flex flex-col justify-center bg-[radial-gradient(circle_at_left_50%_top_50%,rgba(245,184,0,0.04),transparent_60%)]">
+                        <div className="max-w-4xl space-y-6 text-left">
+                            {/* Inflection Badge */}
+                            <div>
+                                <span className="text-white text-sm md:text-[15px] font-semibold uppercase tracking-wider font-sans">
+                                    Deep-Dives on businesses at Inflection points
+                                </span>
                             </div>
 
-                            {/* Right Video Mockup */}
-                            <div className="lg:col-span-5 relative w-full aspect-video md:aspect-[4/3] lg:aspect-square flex items-center justify-center p-1">
-                                {/* Glow behind card */}
-                                <div className="absolute inset-0 bg-gold/5 rounded-full blur-[80px] w-[80%] h-[80%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0" />
-                                
-                                <div className="w-full h-full bg-[#16161C] border border-white/8 rounded-[16px] overflow-hidden relative flex flex-col justify-between group z-10 motion-safe:hover:-translate-y-[2px] transition-transform duration-200 ease-out">
-                                    {/* Video Placeholder Header */}
-                                    <div className="p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 flex justify-between items-center text-[10px] font-mono text-white/50 tracking-wider">
-                                        <span>EXPLAINER VIDEO</span>
-                                        <span>0:51</span>
-                                    </div>
+                            {/* Primary Headline */}
+                            <h1 className="text-[clamp(1.85rem,4vw,3.25rem)] font-sans font-semibold tracking-[-0.02em] leading-[1.15] text-text-primary">
+                                Read two deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change.</span>
+                            </h1>
 
-                                    {/* Thumbnail background/art */}
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02),transparent_60%)]" />
-                                        <div className="relative w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center group-hover:scale-105 group-hover:bg-white/20 transition-all duration-300 shadow-xl cursor-pointer z-10">
-                                            <Play className="w-6 h-6 text-white fill-white ml-1" />
-                                        </div>
-                                    </div>
+                            {/* Bonus section */}
+                            <BonusMarquee />
 
-                                    {/* Video Title Card Overlay */}
-                                    <div className="p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent absolute bottom-0 left-0 right-0 space-y-2">
-                                        <span className="text-[10px] font-sans uppercase tracking-[0.25em] text-white/50 block">First Principles Investing</span>
-                                        <h4 className="text-sm font-semibold text-white font-sans">Cutting through financial noise to compound wealth</h4>
-                                        <div className="flex items-center gap-3 pt-2 text-[9px] font-mono text-white/40">
-                                            <div className="flex-1 h-[2px] bg-white/20 rounded-full overflow-hidden">
-                                                <div className="w-1/3 h-full bg-white/80 rounded-full" />
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Volume2 className="w-3.5 h-3.5 text-white/40" />
-                                                <span>0:17 / 0:51</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            {/* CTA Area */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                                {hasSubscriptionAccess ? (
+                                    <Link 
+                                        href="/insights/members-only" 
+                                        className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+                                    >
+                                        Go to Members Page
+                                    </Link>
+                                ) : (
+                                    <Link 
+                                        href="#membership" 
+                                        className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+                                    >
+                                        Subscribe for ₹23/day
+                                    </Link>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium pt-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                                {hasSubscriptionAccess ? "Active Membership Status" : "50+ members have joined in the last month"}
                             </div>
                         </div>
-
                     </section>
 
                     {/* Featured On sliding logos - Full screen width */}
