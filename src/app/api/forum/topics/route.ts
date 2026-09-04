@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { ForumType, Prisma } from "@prisma/client"
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
@@ -17,20 +18,33 @@ function slugify(text: string): string {
 
 export async function checkUserForumAccess(userId: string, forumType: ForumType) {
     if (forumType === ForumType.SUBSCRIBERS) {
-        const sub = await prisma.insightsSubscription.findFirst({
-            where: {
-                userId,
-                status: { in: ["ACTIVE", "AUTHENTICATED"] },
-            },
-        })
-        return Boolean(sub)
+        return userHasInsightsAccess(userId)
     }
 
     if (forumType === ForumType.SUPER_30) {
         const super30Access = await prisma.super30UserAccess.findUnique({
             where: { userId },
         })
-        return Boolean(super30Access)
+        if (super30Access) return true
+
+        // Also check secondary email linkage for Super30 if linked to a primary Super30 user
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { email: true },
+        })
+        if (user?.email) {
+            const secondary = await prisma.userSecondaryEmail.findUnique({
+                where: { email: user.email.toLowerCase().trim() },
+                select: { userId: true },
+            })
+            if (secondary?.userId) {
+                const primarySuper30 = await prisma.super30UserAccess.findUnique({
+                    where: { userId: secondary.userId },
+                })
+                return Boolean(primarySuper30)
+            }
+        }
+        return false
     }
 
     return false

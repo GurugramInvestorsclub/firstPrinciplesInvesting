@@ -770,7 +770,31 @@ export async function getCurrentInsightsMembershipForUser(
   userId: string
 ): Promise<InsightsMembershipSummary | null> {
   await autoSyncCreatedSubscriptionForUser(userId)
-  const subscription = await findCurrentMembershipRecord(userId)
+  let subscription = await findCurrentMembershipRecord(userId)
+
+  if (!subscription || !membershipHasAccess(subscription)) {
+    // Check if user's email is registered as a secondary email under a primary user
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    })
+
+    if (user?.email) {
+      const secondaryRecord = await prisma.userSecondaryEmail.findUnique({
+        where: { email: user.email.toLowerCase().trim() },
+        select: { userId: true },
+      })
+
+      if (secondaryRecord?.userId && secondaryRecord.userId !== userId) {
+        await autoSyncCreatedSubscriptionForUser(secondaryRecord.userId)
+        const primarySubscription = await findCurrentMembershipRecord(secondaryRecord.userId)
+        if (primarySubscription && membershipHasAccess(primarySubscription)) {
+          subscription = primarySubscription
+        }
+      }
+    }
+  }
+
   return subscription ? serializeMembership(subscription) : null
 }
 
@@ -812,47 +836,57 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
     },
   })
 
-  if (subscriptions.length === 0) {
-    return false
-  }
+  if (subscriptions.length > 0) {
+    const now = Date.now()
 
-  const now = Date.now()
-
-  for (const subscription of subscriptions) {
-    // If it's a CREATED subscription, they have access if there's a captured charge
-    if (subscription.status === InsightsSubscriptionStatus.CREATED) {
-      if (subscription.charges.length > 0) {
-        return true
-      }
-      continue
-    }
-
-    if (
-      subscription.status === InsightsSubscriptionStatus.ACTIVE ||
-      subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
-      subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
-      subscription.status === InsightsSubscriptionStatus.CANCELLED
-    ) {
-      if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
-        return true
-      }
-
-      const hasCapturedCharge =
-        subscription.charges.length > 0 || (subscription.paidCount ?? 0) > 0
-
-      if (subscription.status === InsightsSubscriptionStatus.CANCELLED && !hasCapturedCharge) {
+    for (const subscription of subscriptions) {
+      if (subscription.status === InsightsSubscriptionStatus.CREATED) {
+        if (subscription.charges.length > 0) {
+          return true
+        }
         continue
       }
 
-      const effectiveEndAt = getEffectiveEndAt(subscription)
+      if (
+        subscription.status === InsightsSubscriptionStatus.ACTIVE ||
+        subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
+        subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
+        subscription.status === InsightsSubscriptionStatus.CANCELLED
+      ) {
+        if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
+          return true
+        }
 
-      if (!effectiveEndAt) {
-        return true
-      }
+        const hasCapturedCharge =
+          subscription.charges.length > 0 || (subscription.paidCount ?? 0) > 0
 
-      if (effectiveEndAt.getTime() > now) {
-        return true
+        if (subscription.status === InsightsSubscriptionStatus.CANCELLED && !hasCapturedCharge) {
+          continue
+        }
+
+        const effectiveEndAt = getEffectiveEndAt(subscription)
+
+        if (!effectiveEndAt || effectiveEndAt.getTime() > now) {
+          return true
+        }
       }
+    }
+  }
+
+  // Fallback: Check if user's email is linked as a secondary email
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  })
+
+  if (user?.email) {
+    const secondaryRecord = await prisma.userSecondaryEmail.findUnique({
+      where: { email: user.email.toLowerCase().trim() },
+      select: { userId: true },
+    })
+
+    if (secondaryRecord?.userId && secondaryRecord.userId !== userId) {
+      return userHasInsightsAccess(secondaryRecord.userId)
     }
   }
 
@@ -2715,6 +2749,93 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
 
   return Array.from(eligibleUsersMap.values())
 }
+
+export async function addSecondaryEmailForUser(params: {
+  userId: string
+  secondaryEmail: string
+}) {
+  const normalizedEmail = params.secondaryEmail.trim().toLowerCase()
+  if (!normalizedEmail || !normalizedEmail.includes("@")) {
+    throw new InsightsSubscriptionApiError(400, "INVALID_EMAIL", "A valid email address is required")
+  }
+
+  const primaryUser = await prisma.user.findUnique({
+    where: { id: params.userId },
+    select: { id: true, email: true },
+  })
+
+  if (!primaryUser) {
+    throw new InsightsSubscriptionApiError(404, "USER_NOT_FOUND", "User not found")
+  }
+
+  if (primaryUser.email?.toLowerCase() === normalizedEmail) {
+    throw new InsightsSubscriptionApiError(
+      400,
+      "EMAIL_ALREADY_PRIMARY",
+      "This email is already the primary email for this user"
+    )
+  }
+
+  // Check if email is already taken by another primary user
+  const existingUser = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+    select: { id: true },
+  })
+
+  if (existingUser && existingUser.id !== params.userId) {
+    // If the account exists, check if it's already linked
+    const existingSecondary = await prisma.userSecondaryEmail.findUnique({
+      where: { email: normalizedEmail },
+    })
+
+    if (existingSecondary) {
+      if (existingSecondary.userId === params.userId) {
+        return existingSecondary
+      }
+      throw new InsightsSubscriptionApiError(
+        400,
+        "EMAIL_ALREADY_LINKED",
+        "This email is already granted access under another user"
+      )
+    }
+  }
+
+  return prisma.userSecondaryEmail.create({
+    data: {
+      userId: params.userId,
+      email: normalizedEmail,
+    },
+  })
+}
+
+export async function removeSecondaryEmail(params: {
+  id?: string
+  email?: string
+  userId?: string
+}) {
+  if (params.id) {
+    return prisma.userSecondaryEmail.delete({
+      where: { id: params.id },
+    })
+  }
+
+  if (params.email) {
+    const normalized = params.email.trim().toLowerCase()
+    return prisma.userSecondaryEmail.delete({
+      where: { email: normalized },
+    })
+  }
+
+  throw new InsightsSubscriptionApiError(400, "INVALID_PAYLOAD", "Email or ID is required")
+}
+
+export async function getSecondaryEmailsForUser(userId: string) {
+  return prisma.userSecondaryEmail.findMany({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
+  })
+}
+
 
 
 

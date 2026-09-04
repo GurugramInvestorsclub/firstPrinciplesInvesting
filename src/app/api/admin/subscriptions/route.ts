@@ -35,6 +35,13 @@ export async function GET() {
             id: true,
             name: true,
             email: true,
+            secondaryEmails: {
+              select: {
+                id: true,
+                email: true,
+                createdAt: true,
+              },
+            },
           },
         },
         charges: {
@@ -58,6 +65,7 @@ export async function GET() {
           userId: subscription.userId,
           userName: subscription.user.name,
           userEmail: subscription.user.email,
+          secondaryEmails: subscription.user.secondaryEmails || [],
           planKey: planKeyToSlug(subscription.planKey),
           status: subscription.status.toLowerCase(),
           cancelAtCycleEnd: subscription.cancelAtCycleEnd,

@@ -7,6 +7,7 @@ interface SubscriptionRow {
   userId: string
   userName: string | null
   userEmail: string | null
+  secondaryEmails?: Array<{ id: string; email: string; createdAt: string }>
   planKey: "monthly" | "three_monthly" | "yearly"
   status: string
   cancelAtCycleEnd: boolean
@@ -79,6 +80,87 @@ export default function AdminSubscriptionsPage() {
   const [editAdminNotes, setEditAdminNotes] = useState("")
   const [editResendEmail, setEditResendEmail] = useState(false)
   const [submittingEdit, setSubmittingEdit] = useState(false)
+
+  // Secondary Email State
+  const [newSecondaryEmail, setNewSecondaryEmail] = useState("")
+  const [submittingSecondary, setSubmittingSecondary] = useState(false)
+
+  const handleAddSecondaryEmail = async (userId: string, emailToAdd: string) => {
+    if (!emailToAdd.trim() || !emailToAdd.includes("@")) {
+      window.alert("Please enter a valid email address.")
+      return
+    }
+
+    setSubmittingSecondary(true)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/secondary-emails", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          secondaryEmail: emailToAdd.trim(),
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to add secondary email")
+      }
+
+      setActionMessage(payload.data?.message || `Granted access to ${emailToAdd.trim()}`)
+      setNewSecondaryEmail("")
+      await loadData()
+
+      if (editingRow && editingRow.userId === userId) {
+        setEditingRow({
+          ...editingRow,
+          secondaryEmails: [...(editingRow.secondaryEmails || []), payload.data.record],
+        })
+      }
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Failed to add secondary email")
+    } finally {
+      setSubmittingSecondary(false)
+    }
+  }
+
+  const handleRemoveSecondaryEmail = async (secondaryId: string, emailToRemove: string) => {
+    if (!window.confirm(`Revoke secondary access for ${emailToRemove}?`)) {
+      return
+    }
+
+    setSubmittingSecondary(true)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/secondary-emails", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: secondaryId }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to remove secondary email")
+      }
+
+      setActionMessage(`Revoked access for ${emailToRemove}`)
+      await loadData()
+
+      if (editingRow) {
+        setEditingRow({
+          ...editingRow,
+          secondaryEmails: (editingRow.secondaryEmails || []).filter((s) => s.id !== secondaryId),
+        })
+      }
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Failed to remove secondary email")
+    } finally {
+      setSubmittingSecondary(false)
+    }
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -671,6 +753,27 @@ export default function AdminSubscriptionsPage() {
                           <td style={tableCellStyle}>
                             <div style={{ fontWeight: 600 }}>{row.userName || "Unknown"}</div>
                             <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>{row.userEmail || "No email"}</div>
+                            {row.secondaryEmails && row.secondaryEmails.length > 0 ? (
+                              <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
+                                {row.secondaryEmails.map((sec) => (
+                                  <span
+                                    key={sec.id}
+                                    style={{
+                                      fontSize: "11px",
+                                      color: "#6ee7b7",
+                                      background: "rgba(16,185,129,0.12)",
+                                      border: "1px solid rgba(16,185,129,0.3)",
+                                      borderRadius: "4px",
+                                      padding: "2px 6px",
+                                      display: "inline-block",
+                                      width: "fit-content",
+                                    }}
+                                  >
+                                    + Granted: {sec.email}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
                           </td>
                           <td style={tableCellStyle}>
                             <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.planKey}</div>
@@ -1282,6 +1385,16 @@ export default function AdminSubscriptionsPage() {
                 ) : null}
                 <div><strong>Granted / Created At:</strong> {selectedNotesRow.notes?.grantedAt ? formatDate(selectedNotesRow.notes.grantedAt) : formatDate(selectedNotesRow.createdAt)}</div>
                 <div><strong>Valid Until:</strong> {formatDate(selectedNotesRow.currentEndAt)}</div>
+                {selectedNotesRow.secondaryEmails && selectedNotesRow.secondaryEmails.length > 0 ? (
+                  <div style={{ marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed rgba(255,255,255,0.1)" }}>
+                    <strong>Granted Secondary Emails:</strong>
+                    <ul style={{ margin: "4px 0 0 0", paddingLeft: "18px", color: "#6ee7b7" }}>
+                      {selectedNotesRow.secondaryEmails.map((sec) => (
+                        <li key={sec.id}>{sec.email}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginTop: "20px" }}>
@@ -1494,6 +1607,92 @@ export default function AdminSubscriptionsPage() {
                     colorScheme: "dark",
                   }}
                 />
+              </div>
+
+              {/* Granted Secondary Access Emails Section */}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "14px", marginTop: "4px" }}>
+                <label style={{ display: "block", fontSize: "13px", color: "#6ee7b7", fontWeight: 600, marginBottom: "8px" }}>
+                  Grant Access to Additional / Secondary Email(s)
+                </label>
+                
+                {editingRow.secondaryEmails && editingRow.secondaryEmails.length > 0 ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "12px" }}>
+                    {editingRow.secondaryEmails.map((sec) => (
+                      <div
+                        key={sec.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          background: "rgba(16,185,129,0.08)",
+                          border: "1px solid rgba(16,185,129,0.25)",
+                          padding: "6px 12px",
+                          borderRadius: "8px",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <span>{sec.email}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSecondaryEmail(sec.id, sec.email)}
+                          disabled={submittingSecondary}
+                          style={{
+                            background: "rgba(239,68,68,0.15)",
+                            border: "1px solid rgba(239,68,68,0.3)",
+                            color: "#fca5a5",
+                            borderRadius: "6px",
+                            padding: "3px 8px",
+                            fontSize: "11px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Revoke
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "10px" }}>
+                    No secondary emails linked yet. Add an email below to allow them to access this subscription.
+                  </p>
+                )}
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type="email"
+                    placeholder="another.email@example.com"
+                    value={newSecondaryEmail}
+                    onChange={(e) => setNewSecondaryEmail(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "13px",
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddSecondaryEmail(editingRow.userId, newSecondaryEmail)}
+                    disabled={submittingSecondary || !newSecondaryEmail.trim()}
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid #10b981",
+                      background: "rgba(16,185,129,0.2)",
+                      color: "#6ee7b7",
+                      fontWeight: 600,
+                      fontSize: "12px",
+                      cursor: submittingSecondary || !newSecondaryEmail.trim() ? "not-allowed" : "pointer",
+                      opacity: submittingSecondary || !newSecondaryEmail.trim() ? 0.6 : 1,
+                    }}
+                  >
+                    + Grant Access
+                  </button>
+                </div>
               </div>
 
               <div>

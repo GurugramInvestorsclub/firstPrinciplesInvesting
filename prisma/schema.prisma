@@ -51,6 +51,7 @@ model User {
   forumTopics           ForumTopic[]
   forumPosts            ForumPost[]
   super30Access         Super30UserAccess?
+  secondaryEmails       UserSecondaryEmail[]
 }
 
 model Account {
@@ -438,5 +439,16 @@ model Super30UserAccess {
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("super30_user_access")
+}
+
+model UserSecondaryEmail {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_secondary_emails")
 }
 

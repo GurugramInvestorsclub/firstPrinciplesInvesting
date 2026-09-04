@@ -26,9 +26,20 @@ const {
                     return null
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email as string },
+                const inputEmail = (credentials.email as string).trim().toLowerCase()
+                let user = await prisma.user.findUnique({
+                    where: { email: inputEmail },
                 })
+
+                if (!user) {
+                    const secondary = await prisma.userSecondaryEmail.findUnique({
+                        where: { email: inputEmail },
+                        include: { user: true },
+                    })
+                    if (secondary?.user) {
+                        user = secondary.user
+                    }
+                }
 
                 if (!user || !user.password) {
                     return null
