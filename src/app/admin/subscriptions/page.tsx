@@ -23,6 +23,12 @@ interface SubscriptionRow {
   paidCount?: number
   createdAt: string
   updatedAt: string
+  auditLogs?: Array<{
+    id: string
+    action: string
+    metadata: any
+    createdAt: string
+  }>
   latestCharge: {
     amount: number
     currency: string
@@ -32,6 +38,81 @@ interface SubscriptionRow {
     razorpayPaymentId: string | null
     razorpayInvoiceId: string | null
   } | null
+}
+
+function getCancellationReasonDetails(row: SubscriptionRow): {
+  title: string
+  explanation: string
+  type: "bank_mandate" | "dashboard" | "admin_revoked" | "payment_failure" | "expired" | "unknown"
+} | null {
+  const statusUpper = row.status.toUpperCase()
+  if (
+    statusUpper !== "CANCELLED" &&
+    statusUpper !== "CANCEL_REQUESTED" &&
+    statusUpper !== "HALTED" &&
+    statusUpper !== "EXPIRED"
+  ) {
+    return null
+  }
+
+  const isManual = row.source === "manual_neft" || row.razorpayPlanId === "MANUAL_GRANT"
+  const logs = row.auditLogs || []
+  const hasWebhookCancel = logs.some(
+    (l) => l.action.includes("WEBHOOK_SUBSCRIPTION_CANCELLED") || l.action.includes("CANCEL")
+  )
+
+  if (isManual) {
+    if (statusUpper === "CANCELLED") {
+      return {
+        title: "Revoked manually by Admin",
+        explanation: row.notes?.adminNotes
+          ? `Manual offline access was revoked by admin. Notes: "${row.notes.adminNotes}"`
+          : "Manual offline (NEFT) access was revoked by an admin from the dashboard.",
+        type: "admin_revoked",
+      }
+    }
+  }
+
+  if (hasWebhookCancel && !row.cancelRequestedAt) {
+    return {
+      title: "Bank / UPI Autopay Mandate Revocation (Razorpay Webhook)",
+      explanation:
+        "Razorpay issued a subscription.cancelled event. The customer's UPI Autopay / Bank recurring payment mandate was paused, cancelled, or revoked directly inside their UPI app (Google Pay, PhonePe, Paytm) or issuing bank.",
+      type: "bank_mandate",
+    }
+  }
+
+  if (row.cancelRequestedAt || logs.some((l) => l.action === "SUBSCRIPTION_CANCEL_REQUESTED")) {
+    return {
+      title: "Requested by User via Website Dashboard",
+      explanation: `User initiated a cycle-end cancellation from the website dashboard on ${formatDate(row.cancelRequestedAt || row.cancelledAt)}.`,
+      type: "dashboard",
+    }
+  }
+
+  if (statusUpper === "HALTED") {
+    return {
+      title: "Halted (Recurring Charge Failure)",
+      explanation: row.latestCharge?.failureReason
+        ? `Razorpay failed to capture recurring charge: ${row.latestCharge.failureReason}`
+        : "Recurring auto-debit charge failed or exceeded authorization retry limits.",
+      type: "payment_failure",
+    }
+  }
+
+  if (statusUpper === "EXPIRED") {
+    return {
+      title: "Subscription Expired",
+      explanation: "Subscription completed its total allocated plan billing cycles or reached expiration date.",
+      type: "expired",
+    }
+  }
+
+  return {
+    title: "Cancelled via Razorpay Webhook Event",
+    explanation: "Received subscription cancellation notification from the payment gateway.",
+    type: "unknown",
+  }
 }
 
 const tableCellStyle: CSSProperties = {
@@ -802,6 +883,35 @@ export default function AdminSubscriptionsPage() {
                           </td>
                           <td style={tableCellStyle}>
                             <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.status.replace(/_/g, " ")}</div>
+                            {(() => {
+                              const reason = getCancellationReasonDetails(row)
+                              if (!reason) return null
+                              return (
+                                <div style={{ marginTop: "6px" }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedNotesRow(row)}
+                                    style={{
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "4px",
+                                      padding: "3px 8px",
+                                      borderRadius: "6px",
+                                      background: reason.type === "bank_mandate" ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)",
+                                      color: reason.type === "bank_mandate" ? "#fcd34d" : "#fca5a5",
+                                      border: reason.type === "bank_mandate" ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(239,68,68,0.3)",
+                                      fontSize: "11px",
+                                      fontWeight: 600,
+                                      cursor: "pointer",
+                                      textAlign: "left",
+                                    }}
+                                    title={`${reason.title}: ${reason.explanation}`}
+                                  >
+                                    ℹ️ {reason.title}
+                                  </button>
+                                </div>
+                              )
+                            })()}
                             {row.cancelAtCycleEnd ? (
                               <div style={{ color: "#fcd34d", marginTop: "6px" }}>Cycle-end cancellation requested</div>
                             ) : null}
@@ -1396,6 +1506,65 @@ export default function AdminSubscriptionsPage() {
                   </div>
                 ) : null}
               </div>
+
+              {(() => {
+                const cancellationReason = getCancellationReasonDetails(selectedNotesRow)
+                if (!cancellationReason) return null
+
+                return (
+                  <div
+                    style={{
+                      marginTop: "14px",
+                      padding: "14px 16px",
+                      borderRadius: "10px",
+                      background: cancellationReason.type === "bank_mandate" ? "rgba(245,158,11,0.08)" : "rgba(239,68,68,0.08)",
+                      border: cancellationReason.type === "bank_mandate" ? "1px solid rgba(245,158,11,0.25)" : "1px solid rgba(239,68,68,0.25)",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "16px" }}>⚠️</span>
+                      <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: cancellationReason.type === "bank_mandate" ? "#fcd34d" : "#fca5a5" }}>
+                        Cancellation Reason: {cancellationReason.title}
+                      </h4>
+                    </div>
+                    <p style={{ margin: 0, fontSize: "12px", color: "#e2e8f0", lineHeight: "1.6" }}>
+                      {cancellationReason.explanation}
+                    </p>
+                    {selectedNotesRow.cancelledAt ? (
+                      <div style={{ marginTop: "8px", fontSize: "11px", color: "#9ca3af" }}>
+                        <strong>Cancelled On:</strong> {formatDate(selectedNotesRow.cancelledAt)}
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })()}
+
+              {selectedNotesRow.auditLogs && selectedNotesRow.auditLogs.length > 0 ? (
+                <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px dashed rgba(255,255,255,0.1)" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#9ca3af", marginBottom: "8px" }}>
+                    AUDIT & EVENT TIMELINE
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "150px", overflowY: "auto", paddingRight: "4px" }}>
+                    {selectedNotesRow.auditLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        style={{
+                          fontSize: "11px",
+                          background: "rgba(255,255,255,0.03)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                          borderRadius: "6px",
+                          padding: "6px 10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", color: "#d1d5db", fontWeight: 600 }}>
+                          <span>{log.action.replace(/_/g, " ")}</span>
+                          <span style={{ color: "#9ca3af", fontWeight: 400 }}>{formatDate(log.createdAt)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginTop: "20px" }}>
                 <div style={{ display: "flex", gap: "10px" }}>

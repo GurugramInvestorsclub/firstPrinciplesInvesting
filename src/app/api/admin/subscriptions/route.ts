@@ -50,6 +50,12 @@ export async function GET() {
           },
           take: 1,
         },
+        auditLogs: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 10,
+        },
       },
       orderBy: {
         updatedAt: "desc",
@@ -77,6 +83,13 @@ export async function GET() {
           razorpaySubscriptionId: subscription.razorpaySubscriptionId,
           razorpayPlanId: subscription.razorpayPlanId,
           source: subscription.source,
+          notes: subscription.notes,
+          auditLogs: subscription.auditLogs.map((log) => ({
+            id: log.id,
+            action: log.action,
+            metadata: log.metadata,
+            createdAt: log.createdAt,
+          })),
           paidCount: subscription.paidCount || (subscription.charges.length > 0 ? subscription.charges.length : (subscription.status === "ACTIVE" ? 1 : 0)),
           createdAt: subscription.createdAt,
           updatedAt: subscription.updatedAt,
