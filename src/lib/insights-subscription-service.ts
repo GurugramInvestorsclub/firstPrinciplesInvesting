@@ -2308,12 +2308,12 @@ export async function grantManualInsightsSubscription(
         },
       })
 
-      // Create matching charge record
+      // Create matching charge record (ensuring amount >= 1 paise to satisfy DB check constraint for free grants)
       await tx.insightsSubscriptionCharge.create({
         data: {
           subscriptionId: subscription.id,
           razorpayPaymentId: paymentRefId,
-          amount: amountInPaise,
+          amount: Math.max(1, amountInPaise),
           currency: CURRENCY,
           status: InsightsSubscriptionChargeStatus.CAPTURED,
           chargedAt: currentStartAt,
@@ -2594,7 +2594,7 @@ export async function updateSubscriptionDetails(
         await tx.insightsSubscriptionCharge.update({
           where: { id: latestCharge.id },
           data: {
-            amount: amountInPaise,
+            amount: Math.max(1, amountInPaise),
             razorpayPaymentId: utrRef,
           },
         })
@@ -2603,7 +2603,7 @@ export async function updateSubscriptionDetails(
           data: {
             subscriptionId: subscription.id,
             razorpayPaymentId: utrRef,
-            amount: amountInPaise,
+            amount: Math.max(1, amountInPaise),
             currency: CURRENCY,
             status: InsightsSubscriptionChargeStatus.CAPTURED,
             chargedAt: subscription.currentStartAt || subscription.createdAt,
