@@ -10,6 +10,8 @@ import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/ins
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import { CommentsSection, CommentType } from "@/components/insights/CommentsSection"
 import { getComments } from "@/app/actions/comments"
+import { getArticleRating } from "@/app/actions/ratings"
+import { ArticleStarRating } from "@/components/insights/ArticleStarRating"
 import { ShareButton } from "@/components/insights/ShareButton"
 import { CopyProtection } from "@/components/insights/CopyProtection"
 import { ArticleThemeWrapper, ArticleThemeToggleButton } from "@/components/insights/ArticleThemeWrapper"
@@ -54,6 +56,9 @@ export default async function InsightPage({ params }: Props) {
             ? await userHasInsightsAccess(session.user.id)
             : false
 
+    const ratingResult = await getArticleRating(slug, session?.user?.id)
+    const ratingStats = ratingResult.stats
+
     const initialComments = (commentsResult.success ? commentsResult.comments : []) as CommentType[]
 
     if (!post) {
@@ -92,7 +97,7 @@ export default async function InsightPage({ params }: Props) {
                                 {post.title}
                             </h1>
                         </div>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-6">
+                        <div className="flex flex-wrap items-center justify-between text-sm text-muted-foreground mb-6 gap-2">
                             <span>
                                 Published: {post.publishedAt ? `${new Date(post.publishedAt).toLocaleDateString("en-US", {
                                     year: "numeric",
@@ -104,7 +109,10 @@ export default async function InsightPage({ params }: Props) {
                                     hour12: true,
                                 })}` : "Date not available"}
                             </span>
-                            <ArticleThemeToggleButton />
+                            <div className="flex items-center gap-3">
+                                <ArticleStarRating postSlug={slug} initialStats={ratingStats} hasAccess={hasSubscriptionAccess} variant="header" />
+                                <ArticleThemeToggleButton />
+                            </div>
                         </div>
 
                         {/* Disclaimer Section */}
@@ -213,6 +221,14 @@ export default async function InsightPage({ params }: Props) {
                                 </div>
                             )}
                         </div>
+
+                        {/* Interactive 5-Star Rating Card */}
+                        <ArticleStarRating 
+                            postSlug={slug} 
+                            initialStats={ratingStats} 
+                            hasAccess={hasSubscriptionAccess} 
+                            variant="interactive" 
+                        />
 
                         <CommentsSection 
                             postSlug={slug} 

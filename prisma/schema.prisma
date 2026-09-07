@@ -52,6 +52,7 @@ model User {
   forumPosts            ForumPost[]
   super30Access         Super30UserAccess?
   secondaryEmails       UserSecondaryEmail[]
+  articleRatings        ArticleRating[]
 }
 
 model Account {
@@ -450,5 +451,19 @@ model UserSecondaryEmail {
 
   @@index([userId])
   @@map("user_secondary_emails")
+}
+
+model ArticleRating {
+  id        String   @id @default(cuid())
+  postSlug  String   @map("post_slug")
+  userId    String   @map("user_id")
+  rating    Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postSlug, userId])
+  @@index([postSlug])
+  @@map("article_ratings")
 }
 
