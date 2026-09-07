@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Lock } from "lucide-react"
+import { ArrowRight, Lock, Unlock } from "lucide-react"
 import { Post } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -33,11 +33,15 @@ export function FeaturedInsightCard({ post, className, showSubscriberBadge, hasS
                     />
                 )}
 
-                {/* Subtle lock overlay badge for members-only post thumbnails */}
+                {/* Subtle lock/unlock overlay badge for members-only post thumbnails */}
                 {isSubscriber && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none z-10">
                         <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black/60 border border-gold/30 text-gold text-xs font-mono font-bold uppercase tracking-wider backdrop-blur-md shadow-lg">
-                            <Lock className="w-3.5 h-3.5 text-gold" />
+                            {hasSubscriptionAccess ? (
+                                <Unlock className="w-3.5 h-3.5 text-gold" />
+                            ) : (
+                                <Lock className="w-3.5 h-3.5 text-gold" />
+                            )}
                             <span>Members Memo</span>
                         </span>
                     </div>

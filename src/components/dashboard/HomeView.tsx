@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Clock, ArrowRight, Star, Lock } from "lucide-react"
+import { Clock, ArrowRight, Star, Lock, Unlock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { urlForImage } from "@/lib/sanity.image"
@@ -183,7 +183,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents }: HomeVi
                                         {report.access === "subscriber" && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10">
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 border border-gold/30 text-gold text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
-                                                    <Lock className="w-2.5 h-2.5 text-gold" />
+                                                    <Unlock className="w-2.5 h-2.5 text-gold" />
                                                     <span>Members Memo</span>
                                                 </span>
                                             </div>
