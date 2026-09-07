@@ -18,6 +18,59 @@ export default function AdminUsersPage() {
     const [emailSearch, setEmailSearch] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
+    // Password Reset Modal state
+    const [resetUser, setResetUser] = useState<UserData | null>(null);
+    const [customPassword, setCustomPassword] = useState("");
+    const [sendEmail, setSendEmail] = useState(true);
+    const [resetting, setResetting] = useState(false);
+    const [resetError, setResetError] = useState<string | null>(null);
+    const [resetResult, setResetResult] = useState<{ temporaryPassword: string; emailSent: boolean } | null>(null);
+    const [copied, setCopied] = useState(false);
+
+    const openResetModal = (user: UserData) => {
+        setResetUser(user);
+        setCustomPassword("");
+        setSendEmail(true);
+        setResetError(null);
+        setResetResult(null);
+        setCopied(false);
+    };
+
+    const handleResetPassword = async () => {
+        if (!resetUser) return;
+        setResetting(true);
+        setResetError(null);
+        setResetResult(null);
+
+        try {
+            const res = await fetch(`/api/admin/users/${resetUser.id}/reset-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    customPassword: customPassword.trim() || undefined,
+                    sendEmail
+                })
+            });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.error || "Failed to reset password");
+
+            setResetResult({
+                temporaryPassword: json.temporaryPassword,
+                emailSent: json.emailSent
+            });
+        } catch (err) {
+            setResetError(err instanceof Error ? err.message : String(err));
+        } finally {
+            setResetting(false);
+        }
+    };
+
+    const handleCopyPassword = (pwd: string) => {
+        navigator.clipboard.writeText(pwd);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -361,31 +414,55 @@ export default function AdminUsersPage() {
                                                     textAlign: "right",
                                                 }}
                                             >
-                                                <button
-                                                    onClick={() => handleDelete(user.id, user.email)}
-                                                    disabled={deletingId === user.id}
-                                                    style={{
-                                                        padding: "6px 12px",
-                                                        background: "rgba(239, 68, 68, 0.1)",
-                                                        color: "#EF4444",
-                                                        border: "1px solid rgba(239, 68, 68, 0.2)",
-                                                        borderRadius: "6px",
-                                                        fontSize: "12px",
-                                                        fontWeight: 600,
-                                                        cursor: "pointer",
-                                                        transition: "all 0.2s",
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)";
-                                                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
-                                                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)";
-                                                    }}
-                                                >
-                                                    {deletingId === user.id ? "Deleting..." : "Delete"}
-                                                </button>
+                                                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
+                                                    <button
+                                                        onClick={() => openResetModal(user)}
+                                                        style={{
+                                                            padding: "6px 12px",
+                                                            background: "rgba(245, 184, 0, 0.1)",
+                                                            color: "var(--gold)",
+                                                            border: "1px solid rgba(245, 184, 0, 0.25)",
+                                                            borderRadius: "6px",
+                                                            fontSize: "12px",
+                                                            fontWeight: 600,
+                                                            cursor: "pointer",
+                                                            transition: "all 0.2s",
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.background = "rgba(245, 184, 0, 0.2)";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.background = "rgba(245, 184, 0, 0.1)";
+                                                        }}
+                                                    >
+                                                        🔑 Reset Password
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(user.id, user.email)}
+                                                        disabled={deletingId === user.id}
+                                                        style={{
+                                                            padding: "6px 12px",
+                                                            background: "rgba(239, 68, 68, 0.1)",
+                                                            color: "#EF4444",
+                                                            border: "1px solid rgba(239, 68, 68, 0.2)",
+                                                            borderRadius: "6px",
+                                                            fontSize: "12px",
+                                                            fontWeight: 600,
+                                                            cursor: "pointer",
+                                                            transition: "all 0.2s",
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.background = "rgba(239, 68, 68, 0.2)";
+                                                            e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
+                                                            e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.2)";
+                                                        }}
+                                                    >
+                                                        {deletingId === user.id ? "Deleting..." : "Delete"}
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -395,6 +472,224 @@ export default function AdminUsersPage() {
                     </table>
                 </div>
             </div>
+
+            {/* Reset Password Modal */}
+            {resetUser && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: "rgba(0,0,0,0.75)",
+                        backdropFilter: "blur(4px)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 9999,
+                        padding: "16px",
+                    }}
+                >
+                    <div
+                        style={{
+                            background: "#161616",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            borderRadius: "16px",
+                            padding: "28px",
+                            maxWidth: "460px",
+                            width: "100%",
+                            boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+                        }}
+                    >
+                        <h2 style={{ fontSize: "18px", fontWeight: 700, margin: "0 0 8px 0", color: "#fff" }}>
+                            Reset Password for User
+                        </h2>
+                        <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", margin: "0 0 20px 0" }}>
+                            Target Email: <strong style={{ color: "var(--gold)" }}>{resetUser.email}</strong>
+                        </p>
+
+                        {resetError && (
+                            <div
+                                style={{
+                                    padding: "10px 14px",
+                                    background: "rgba(239,68,68,0.1)",
+                                    border: "1px solid rgba(239,68,68,0.25)",
+                                    borderRadius: "8px",
+                                    color: "#f87171",
+                                    fontSize: "13px",
+                                    marginBottom: "16px",
+                                }}
+                            >
+                                {resetError}
+                            </div>
+                        )}
+
+                        {!resetResult ? (
+                            <div>
+                                <div style={{ marginBottom: "16px" }}>
+                                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#aaa", marginBottom: "6px" }}>
+                                        Custom Temporary Password (Optional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Leave blank to auto-generate password"
+                                        value={customPassword}
+                                        onChange={(e) => setCustomPassword(e.target.value)}
+                                        style={{
+                                            width: "100%",
+                                            padding: "10px 14px",
+                                            background: "rgba(255,255,255,0.05)",
+                                            border: "1px solid rgba(255,255,255,0.15)",
+                                            borderRadius: "8px",
+                                            color: "#fff",
+                                            fontSize: "14px",
+                                            outline: "none",
+                                            boxSizing: "border-box",
+                                        }}
+                                    />
+                                    <span style={{ fontSize: "11px", color: "#888", marginTop: "4px", display: "block" }}>
+                                        If left blank, a random password like <code style={{ color: "var(--gold)" }}>FPI-7X9K2M!</code> will be generated.
+                                    </span>
+                                </div>
+
+                                <div style={{ marginBottom: "24px" }}>
+                                    <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#ccc", cursor: "pointer" }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={sendEmail}
+                                            onChange={(e) => setSendEmail(e.target.checked)}
+                                            style={{ accentColor: "var(--gold)" }}
+                                        />
+                                        Send temporary password email notification to user
+                                    </label>
+                                </div>
+
+                                <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                                    <button
+                                        onClick={() => setResetUser(null)}
+                                        disabled={resetting}
+                                        style={{
+                                            padding: "10px 18px",
+                                            background: "transparent",
+                                            border: "1px solid rgba(255,255,255,0.15)",
+                                            borderRadius: "8px",
+                                            color: "#ccc",
+                                            fontSize: "13px",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleResetPassword}
+                                        disabled={resetting}
+                                        style={{
+                                            padding: "10px 20px",
+                                            background: "linear-gradient(135deg, var(--gold), #D49B00)",
+                                            border: "none",
+                                            borderRadius: "8px",
+                                            color: "#111",
+                                            fontWeight: 700,
+                                            fontSize: "13px",
+                                            cursor: "pointer",
+                                            boxShadow: "0 2px 10px rgba(245, 184, 0, 0.25)",
+                                        }}
+                                    >
+                                        {resetting ? "Resetting Password…" : "Reset Password"}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <div
+                                    style={{
+                                        padding: "14px",
+                                        background: "rgba(34,197,94,0.1)",
+                                        border: "1px solid rgba(34,197,94,0.25)",
+                                        borderRadius: "8px",
+                                        color: "#4ade80",
+                                        fontSize: "13px",
+                                        marginBottom: "16px",
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    ✓ Password updated successfully!
+                                </div>
+
+                                <div
+                                    style={{
+                                        background: "rgba(0,0,0,0.4)",
+                                        border: "1px solid rgba(245, 184, 0, 0.3)",
+                                        borderRadius: "10px",
+                                        padding: "16px",
+                                        marginBottom: "16px",
+                                        textAlign: "center",
+                                    }}
+                                >
+                                    <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>
+                                        Temporary Password
+                                    </div>
+                                    <div
+                                        style={{
+                                            fontFamily: "monospace",
+                                            fontSize: "20px",
+                                            fontWeight: "bold",
+                                            color: "var(--gold)",
+                                            letterSpacing: "1px",
+                                            marginBottom: "12px",
+                                            wordBreak: "break-all",
+                                        }}
+                                    >
+                                        {resetResult.temporaryPassword}
+                                    </div>
+                                    <button
+                                        onClick={() => handleCopyPassword(resetResult.temporaryPassword)}
+                                        style={{
+                                            padding: "8px 16px",
+                                            background: copied ? "rgba(34,197,94,0.2)" : "rgba(245,184,0,0.15)",
+                                            color: copied ? "#4ade80" : "var(--gold)",
+                                            border: `1px solid ${copied ? "#4ade80" : "var(--gold)"}`,
+                                            borderRadius: "6px",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            transition: "all 0.2s",
+                                        }}
+                                    >
+                                        {copied ? "✓ Copied to Clipboard!" : "📋 Copy Temporary Password"}
+                                    </button>
+                                </div>
+
+                                <p style={{ fontSize: "12px", color: "#888", marginBottom: "20px", textAlign: "center" }}>
+                                    {resetResult.emailSent
+                                        ? "📧 An email with this temporary password has been sent to the user."
+                                        : "⚠️ Email notification was skipped or not delivered. Please share the password above with the user directly."}
+                                </p>
+
+                                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                    <button
+                                        onClick={() => setResetUser(null)}
+                                        style={{
+                                            padding: "10px 24px",
+                                            background: "rgba(255,255,255,0.1)",
+                                            border: "none",
+                                            borderRadius: "8px",
+                                            color: "#fff",
+                                            fontWeight: 600,
+                                            fontSize: "13px",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
