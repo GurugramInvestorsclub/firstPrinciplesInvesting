@@ -264,7 +264,7 @@ export default async function InsightsPage({
                                 <blockquote className="p-8 border border-white/5 bg-[#16161D]/20 rounded-2xl relative">
                                     <div className="absolute top-0 left-10 transform -translate-y-1/2 text-gold font-serif text-5xl">“</div>
                                     <p className="text-2xl md:text-3xl font-heading font-semibold text-text-primary leading-snug">
-                                        Anyone who is tired of information overload looking for reliable source of high quality research on relatively undiscovered stocks
+                                        <span className="text-gold">First Principles Deep-Dives</span> is for anyone who is tired of information overload looking for reliable source of high quality research on relatively undiscovered stocks
                                     </p>
                                     <div className="absolute bottom-0 right-10 transform translate-y-1/3 text-gold font-serif text-5xl">”</div>
                                 </blockquote>
