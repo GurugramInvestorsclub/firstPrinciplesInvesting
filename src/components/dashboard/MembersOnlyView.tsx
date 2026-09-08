@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Clock, ArrowUpDown, Filter, Lock, Unlock } from "lucide-react"
+import { Search, Clock, ArrowUpDown, Filter, Lock, Unlock, Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { urlForImage } from "@/lib/sanity.image"
@@ -14,6 +14,7 @@ interface MembersOnlyViewProps {
     hasSubscriptionAccess?: boolean
     recordings?: any[]
     notes?: any[]
+    ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
 }
 
 
@@ -63,7 +64,7 @@ function getNotePreview(content: any[] | undefined): string {
     return text.trim()
 }
 
-export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess = false, recordings = [], notes = [] }: MembersOnlyViewProps) {
+export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess = false, recordings = [], notes = [], ratingStatsMap = {} }: MembersOnlyViewProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [sortBy, setSortBy] = useState("newest")
 
@@ -256,6 +257,17 @@ export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess =
                                             fill
                                             className="object-cover transition-transform duration-500 blur-[14px] scale-110 brightness-[0.8] select-none"
                                         />
+                                        {/* Rating badge overlay if article has ratings */}
+                                        {ratingStatsMap[reportSlug] && ratingStatsMap[reportSlug].totalRatings > 0 ? (
+                                            <div className="absolute top-2.5 left-2.5 z-20 pointer-events-none">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/80 border border-gold/40 text-gold text-[9px] font-mono font-bold backdrop-blur-md shadow-lg">
+                                                    <Star className="w-2.5 h-2.5 fill-gold text-gold" />
+                                                    <span>{ratingStatsMap[reportSlug].averageRating.toFixed(1)}</span>
+                                                    <span className="text-white/40 text-[8px] font-normal">({ratingStatsMap[reportSlug].totalRatings})</span>
+                                                </span>
+                                            </div>
+                                        ) : null}
+
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10">
                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 border border-gold/30 text-gold text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">
                                                 {hasSubscriptionAccess ? (

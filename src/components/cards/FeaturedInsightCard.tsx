@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Lock, Unlock } from "lucide-react"
+import { ArrowRight, Lock, Unlock, Star } from "lucide-react"
 import { Post } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -9,9 +9,10 @@ interface FeaturedInsightCardProps {
     className?: string
     showSubscriberBadge?: boolean
     hasSubscriptionAccess?: boolean
+    ratingStats?: { averageRating: number; totalRatings: number }
 }
 
-export function FeaturedInsightCard({ post, className, showSubscriberBadge, hasSubscriptionAccess }: FeaturedInsightCardProps) {
+export function FeaturedInsightCard({ post, className, showSubscriberBadge, hasSubscriptionAccess, ratingStats }: FeaturedInsightCardProps) {
     const isSubscriber = post.access === "subscriber"
 
     return (
@@ -32,6 +33,17 @@ export function FeaturedInsightCard({ post, className, showSubscriberBadge, hasS
                         priority
                     />
                 )}
+
+                {/* Rating badge overlay if article has ratings */}
+                {ratingStats && ratingStats.totalRatings > 0 ? (
+                    <div className="absolute top-4 left-4 z-20 pointer-events-none">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/80 border border-gold/40 text-gold text-xs font-mono font-bold backdrop-blur-md shadow-lg">
+                            <Star className="w-3.5 h-3.5 fill-gold text-gold" />
+                            <span>{ratingStats.averageRating.toFixed(1)}</span>
+                            <span className="text-white/40 text-[10px] font-normal">({ratingStats.totalRatings})</span>
+                        </span>
+                    </div>
+                ) : null}
 
                 {/* Subtle lock/unlock overlay badge for members-only post thumbnails */}
                 {isSubscriber && (

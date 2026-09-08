@@ -139,7 +139,7 @@ export default function AdminSubscriptionsPage() {
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [modalEmail, setModalEmail] = useState("")
   const [modalName, setModalName] = useState("")
-  const [modalDurationPreset, setModalDurationPreset] = useState<"2_months" | "3_months" | "1_year">("3_months")
+  const [modalDurationPreset, setModalDurationPreset] = useState<"1_month" | "2_months" | "3_months" | "1_year">("3_months")
   const [modalPaymentMethod, setModalPaymentMethod] = useState("NEFT")
   const [modalUtrNumber, setModalUtrNumber] = useState("")
   const [modalAmountPaid, setModalAmountPaid] = useState("2999")
@@ -347,8 +347,17 @@ export default function AdminSubscriptionsPage() {
         throw new Error(payload.message || payload.error || "Failed to grant manual access")
       }
 
+      const durationLabel =
+        modalDurationPreset === "1_year"
+          ? "1-Year"
+          : modalDurationPreset === "2_months"
+          ? "2-Month"
+          : modalDurationPreset === "1_month"
+          ? "1-Month"
+          : "3-Month"
+
       setActionMessage(
-        `Successfully granted ${modalDurationPreset === "1_year" ? "1-Year" : "3-Month"} Insights access to ${modalEmail.trim()}!`
+        `Successfully granted ${durationLabel} Insights access to ${modalEmail.trim()}!`
       )
       setShowGrantModal(false)
       setModalEmail("")
@@ -1202,16 +1211,39 @@ export default function AdminSubscriptionsPage() {
                 <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
                   Select Preset Duration *
                 </label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "6px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setModalDurationPreset("1_month")
+                      setModalAmountPaid("0.01")
+                      setModalPaymentMethod("FREE_GRANT")
+                    }}
+                    style={{
+                      padding: "10px 4px",
+                      borderRadius: "10px",
+                      border: modalDurationPreset === "1_month" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
+                      background: modalDurationPreset === "1_month" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
+                      color: modalDurationPreset === "1_month" ? "#FFC72C" : "#ccc",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      textAlign: "center",
+                    }}
+                  >
+                    1 Month Free<br />
+                    <span style={{ fontSize: "10px", fontWeight: 400, opacity: 0.8 }}>₹0 (Complimentary)</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
                       setModalDurationPreset("2_months")
-                      setModalAmountPaid("0")
+                      setModalAmountPaid("0.01")
                       setModalPaymentMethod("FREE_GRANT")
                     }}
                     style={{
-                      padding: "10px 6px",
+                      padding: "10px 4px",
                       borderRadius: "10px",
                       border: modalDurationPreset === "2_months" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
                       background: modalDurationPreset === "2_months" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
@@ -1234,7 +1266,7 @@ export default function AdminSubscriptionsPage() {
                       if (modalPaymentMethod === "FREE_GRANT") setModalPaymentMethod("NEFT")
                     }}
                     style={{
-                      padding: "10px 6px",
+                      padding: "10px 4px",
                       borderRadius: "10px",
                       border: modalDurationPreset === "3_months" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
                       background: modalDurationPreset === "3_months" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",
@@ -1257,7 +1289,7 @@ export default function AdminSubscriptionsPage() {
                       if (modalPaymentMethod === "FREE_GRANT") setModalPaymentMethod("NEFT")
                     }}
                     style={{
-                      padding: "10px 6px",
+                      padding: "10px 4px",
                       borderRadius: "10px",
                       border: modalDurationPreset === "1_year" ? "2px solid #FFC72C" : "1px solid rgba(255,255,255,0.15)",
                       background: modalDurationPreset === "1_year" ? "rgba(255,199,44,0.12)" : "rgba(255,255,255,0.04)",

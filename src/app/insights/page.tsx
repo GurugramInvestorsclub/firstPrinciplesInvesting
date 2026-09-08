@@ -8,6 +8,7 @@ import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { getArticleRatingsMap } from "@/app/actions/ratings"
 import { auth } from "@/auth"
 import Link from "next/link"
 import Image from "next/image"
@@ -39,7 +40,7 @@ export default async function InsightsPage({
             client.fetch<Post[]>(allPostsQuery, {}, { next: { revalidate: 60 } })
           ])
 
-    const [session, sanityResult] = await Promise.all([sessionPromise, sanityPromise])
+    const [session, sanityResult, ratingsMap] = await Promise.all([sessionPromise, sanityPromise, getArticleRatingsMap()])
 
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
@@ -184,7 +185,7 @@ export default async function InsightsPage({
                             <div className="space-y-16">
                                 <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                                     {publicPosts.slice(0, 3).map((post) => (
-                                        <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
+                                        <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} ratingStats={ratingsMap[post.slug.current]} />
                                     ))}
                                 </div>
                                 <div className="flex justify-center">

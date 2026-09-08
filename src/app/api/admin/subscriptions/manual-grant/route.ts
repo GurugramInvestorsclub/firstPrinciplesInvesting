@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
         ? "1_year"
         : body?.durationPreset === "2_months"
         ? "2_months"
+        : body?.durationPreset === "1_month"
+        ? "1_month"
         : "3_months"
     const paymentMethod = parseOptionalString(body?.paymentMethod) || "NEFT"
     const utrNumber = parseOptionalString(body?.utrNumber)

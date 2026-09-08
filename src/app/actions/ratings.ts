@@ -112,3 +112,30 @@ export async function submitArticleRating(
         }
     }
 }
+
+export async function getArticleRatingsMap(slugs?: string[]): Promise<Record<string, { averageRating: number; totalRatings: number }>> {
+    try {
+        const where = slugs && slugs.length > 0 ? { postSlug: { in: slugs } } : undefined
+        const ratings = await prisma.articleRating.groupBy({
+            by: ["postSlug"],
+            where,
+            _avg: { rating: true },
+            _count: { rating: true },
+        })
+
+        const map: Record<string, { averageRating: number; totalRatings: number }> = {}
+        for (const item of ratings) {
+            if (item._count.rating && item._count.rating > 0) {
+                const rawAvg = item._avg.rating || 0
+                map[item.postSlug] = {
+                    averageRating: Math.round(rawAvg * 10) / 10,
+                    totalRatings: item._count.rating,
+                }
+            }
+        }
+        return map
+    } catch (err) {
+        console.error("Error fetching article ratings map:", err)
+        return {}
+    }
+}

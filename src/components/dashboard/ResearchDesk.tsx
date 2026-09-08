@@ -30,6 +30,7 @@ interface ResearchDeskProps {
     initialRecordings?: any[]
     initialNotes?: any[]
     hasSubscriptionAccess?: boolean
+    ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
 }
 
 export function ResearchDesk({ 
@@ -44,7 +45,8 @@ export function ResearchDesk({
     initialPastEvents = [],
     initialRecordings = [],
     initialNotes = [],
-    hasSubscriptionAccess = false
+    hasSubscriptionAccess = false,
+    ratingStatsMap = {}
 }: ResearchDeskProps) {
     const router = useRouter()
     const [activeTab, setActiveTab] = useState("home")
@@ -205,7 +207,7 @@ export function ResearchDesk({
                 {/* Tab Render Area */}
                 <main className="flex-1 p-6 md:p-10 max-w-5xl w-full mx-auto">
                     {activeTab === "home" && (
-                        <HomeView userName={userName} onNavigate={handleNavigate} posts={posts} upcomingEvents={upcomingEvents} />
+                        <HomeView userName={userName} onNavigate={handleNavigate} posts={posts} upcomingEvents={upcomingEvents} ratingStatsMap={ratingStatsMap} />
                     )}
 
                     {(activeTab === "members-only" || activeTab === "free-research") && (
@@ -226,6 +228,7 @@ export function ResearchDesk({
                                 hasSubscriptionAccess={hasSubscriptionAccess}
                                 recordings={initialRecordings}
                                 notes={initialNotes}
+                                ratingStatsMap={ratingStatsMap}
                             />
                         ) : (
                             <FreeResearchView 

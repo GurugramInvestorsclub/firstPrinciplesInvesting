@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Lock, Unlock } from "lucide-react"
+import { ArrowRight, Lock, Unlock, Star } from "lucide-react"
 import { Post } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 
@@ -8,9 +8,10 @@ interface InsightCardProps {
     post: Post
     showSubscriberBadge?: boolean
     hasSubscriptionAccess?: boolean
+    ratingStats?: { averageRating: number; totalRatings: number }
 }
 
-export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess }: InsightCardProps) {
+export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess, ratingStats }: InsightCardProps) {
     const isSubscriber = post.access === "subscriber"
 
     return (
@@ -32,6 +33,17 @@ export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess }
                         loading="lazy"
                     />
                 )}
+
+                {/* Rating badge overlay if article has ratings */}
+                {ratingStats && ratingStats.totalRatings > 0 ? (
+                    <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/80 border border-gold/40 text-gold text-[10px] font-mono font-bold backdrop-blur-md shadow-lg">
+                            <Star className="w-3 h-3 fill-gold text-gold" />
+                            <span>{ratingStats.averageRating.toFixed(1)}</span>
+                            <span className="text-white/40 text-[9px] font-normal">({ratingStats.totalRatings})</span>
+                        </span>
+                    </div>
+                ) : null}
 
                 {/* Subtle lock/unlock overlay badge for members-only post thumbnails */}
                 {isSubscriber && (

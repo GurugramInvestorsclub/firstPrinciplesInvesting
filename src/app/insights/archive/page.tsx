@@ -6,6 +6,7 @@ import { Post } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
+import { getArticleRatingsMap } from "@/app/actions/ratings"
 import { auth } from "@/auth"
 import Link from "next/link"
 
@@ -22,13 +23,13 @@ export default async function InsightsArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    // Run auth check and Sanity content fetching in parallel
+    // Run auth check, Sanity content fetching, and ratings fetch in parallel
     const sessionPromise = auth()
     const sanityPromise = search
         ? client.fetch<Post[]>(postQuery, { search }, { next: { revalidate: 60 } })
         : client.fetch<Post[]>(allPostsQuery, {}, { next: { revalidate: 60 } })
 
-    const [session, gridPosts] = await Promise.all([sessionPromise, sanityPromise])
+    const [session, gridPosts, ratingsMap] = await Promise.all([sessionPromise, sanityPromise, getArticleRatingsMap()])
 
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
@@ -72,7 +73,7 @@ export default async function InsightsArchivePage({
                     {publicPosts.length > 0 ? (
                         <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                             {publicPosts.map((post) => (
-                                <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} />
+                                <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={hasSubscriptionAccess} ratingStats={ratingsMap[post.slug.current]} />
                             ))}
                         </div>
                     ) : (

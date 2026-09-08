@@ -46,10 +46,13 @@ export async function POST(
 
         const hashedPassword = await bcrypt.hash(temporaryPassword, 10)
 
-        // Update the password in database
+        // Update the password and mark emailVerified in database
         await prisma.user.update({
             where: { id },
-            data: { password: hashedPassword }
+            data: { 
+                password: hashedPassword,
+                emailVerified: new Date()
+            }
         })
 
         let emailSent = false

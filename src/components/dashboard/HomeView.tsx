@@ -11,6 +11,7 @@ interface HomeViewProps {
     onNavigate: (tab: string, arg?: string) => void
     posts: any[]
     upcomingEvents: any[]
+    ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
 }
 
 function calculateReadingTime(body: any[] | undefined): string {
@@ -43,7 +44,7 @@ function formatDate(dateStr: string): string {
     }
 }
 
-export function HomeView({ userName, onNavigate, posts, upcomingEvents }: HomeViewProps) {
+export function HomeView({ userName, onNavigate, posts, upcomingEvents, ratingStatsMap = {} }: HomeViewProps) {
     const [lastRead, setLastRead] = useState<{ title: string; slug: string; progress: number; readTime: string } | null>(null)
 
     // Load actual reading progress from localStorage if available
@@ -180,6 +181,17 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents }: HomeVi
                                                     : "group-hover:scale-[1.03]"
                                             }`}
                                         />
+                                        {/* Rating badge overlay if article has ratings */}
+                                        {ratingStatsMap[reportSlug] && ratingStatsMap[reportSlug].totalRatings > 0 ? (
+                                            <div className="absolute top-2.5 left-2.5 z-20 pointer-events-none">
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/80 border border-gold/40 text-gold text-[9px] font-mono font-bold backdrop-blur-md shadow-lg">
+                                                    <Star className="w-2.5 h-2.5 fill-gold text-gold" />
+                                                    <span>{ratingStatsMap[reportSlug].averageRating.toFixed(1)}</span>
+                                                    <span className="text-white/40 text-[8px] font-normal">({ratingStatsMap[reportSlug].totalRatings})</span>
+                                                </span>
+                                            </div>
+                                        ) : null}
+
                                         {report.access === "subscriber" && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10">
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/60 border border-gold/30 text-gold text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md">

@@ -10,6 +10,7 @@ import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
 import { DemergerTrackerCarousel } from "@/components/insights/DemergerTrackerCarousel"
 import { NotesSection } from "@/components/insights/NotesSection"
 import { getDemergerData } from "@/lib/demergers"
+import { getArticleRatingsMap } from "@/app/actions/ratings"
 import { auth } from "@/auth"
 import Link from "next/link"
 import { groq } from "next-sanity"
@@ -68,12 +69,13 @@ export default async function MembersOnlyArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    const [hasSubscriptionAccess, premiumPosts, recordings, notes, demergerData] = await Promise.all([
+    const [hasSubscriptionAccess, premiumPosts, recordings, notes, demergerData, ratingsMap] = await Promise.all([
         paywallReady ? userHasInsightsAccess(session.user.id) : Promise.resolve(false),
         client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(subscriberNotesQuery, { search: search || null }, { next: { revalidate: 60 } }),
-        getDemergerData()
+        getDemergerData(),
+        getArticleRatingsMap()
     ])
 
     const filteredDemergers = demergerData.records.filter((item) => {
@@ -147,7 +149,7 @@ export default async function MembersOnlyArchivePage({
                                     <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3 opacity-40 pointer-events-none select-none">
                                         {premiumPosts.map((post) => (
                                             <div key={post.slug.current} className="blur-[1px]">
-                                                <InsightCard post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={false} />
+                                                <InsightCard post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={false} ratingStats={ratingsMap[post.slug.current]} />
                                             </div>
                                         ))}
                                     </div>
@@ -172,7 +174,7 @@ export default async function MembersOnlyArchivePage({
                                 {premiumPosts.length > 0 ? (
                                     <div className="grid gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-3">
                                         {premiumPosts.map((post) => (
-                                            <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={true} />
+                                            <InsightCard key={post.slug.current} post={post} showSubscriberBadge={paywallReady} hasSubscriptionAccess={true} ratingStats={ratingsMap[post.slug.current]} />
                                         ))}
                                     </div>
                                 ) : (
