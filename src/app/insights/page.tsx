@@ -72,7 +72,7 @@ export default async function InsightsPage({
 
                             {/* Primary Headline */}
                             <h1 className="text-[clamp(1.85rem,4vw,3.25rem)] font-sans font-semibold tracking-[-0.02em] leading-[1.15] text-text-primary">
-                                Read two deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change.</span>
+                                Read 2 deep-dives a month, on businesses undergoing <span className="font-display italic text-gold font-normal">big positive change.</span>
                             </h1>
 
                             {/* Bonus section */}

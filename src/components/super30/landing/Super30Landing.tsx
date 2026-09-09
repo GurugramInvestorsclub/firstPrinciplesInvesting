@@ -374,20 +374,40 @@ export function Super30Landing({ program, siteTestimonials = [] }: { program: Su
                         >
                             Super30
                         </h1>
-                        <p
-                            className="s30l-pretty"
+                        <ul
                             style={{
                                 maxWidth: 680,
                                 fontFamily: SANS,
-                                fontWeight: 400,
-                                fontSize: "clamp(18px,1.8vw,22px)",
-                                lineHeight: 1.6,
+                                fontSize: "clamp(16px, 1.6vw, 19px)",
+                                lineHeight: 1.65,
                                 color: "rgba(244,241,234,.92)",
                                 margin: "0 0 44px",
+                                paddingLeft: 0,
+                                listStyle: "none",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 12,
                             }}
                         >
-                            <span style={{ color: "#F5B800", fontWeight: 600 }}>16 hours of LIVE ONLINE Cohorts</span> on a mission to discover mis-priced businesses using <span style={{ color: "#F5B800", fontWeight: 600 }}>FOUR investment frameworks</span> taught from <span style={{ color: "#F5B800", fontWeight: 600 }}>first principles</span>. Each framework answers <span style={{ color: "#F5B800", fontWeight: 500 }}>What to buy</span>, <span style={{ color: "#F5B800", fontWeight: 500 }}>when to buy</span>, and <span style={{ color: "#F5B800", fontWeight: 500 }}>When to sell</span>.
-                        </p>
+                            <li style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                <span style={{ color: "#F5B800", fontWeight: 700, lineHeight: "1.4" }}>•</span>
+                                <span>
+                                    <span style={{ color: "#F5B800", fontWeight: 600 }}>16 hours of LIVE ONLINE Cohorts</span> on a mission to discover mis-priced businesses
+                                </span>
+                            </li>
+                            <li style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                <span style={{ color: "#F5B800", fontWeight: 700, lineHeight: "1.4" }}>•</span>
+                                <span>
+                                    <span style={{ color: "#F5B800", fontWeight: 600 }}>FOUR investment frameworks</span> taught from <span style={{ color: "#F5B800", fontWeight: 600 }}>first principles</span>
+                                </span>
+                            </li>
+                            <li style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                <span style={{ color: "#F5B800", fontWeight: 700, lineHeight: "1.4" }}>•</span>
+                                <span>
+                                    Each framework answers <span style={{ color: "#F5B800", fontWeight: 500 }}>What to buy</span>, <span style={{ color: "#F5B800", fontWeight: 500 }}>when to buy</span>, and <span style={{ color: "#F5B800", fontWeight: 500 }}>When to sell</span>
+                                </span>
+                            </li>
+                        </ul>
                         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 18 }}>
                             <a href="#register" className="s30l-btn-go">
                                 Register for Super30
