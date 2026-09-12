@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/daily-questions",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/brevo-members-sync",
+      "schedule": "0 4 * * *"
     }
   ]
 }

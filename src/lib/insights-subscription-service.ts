@@ -10,6 +10,10 @@ import type { Subscriptions } from "razorpay/dist/types/subscriptions"
 import { prisma } from "@/lib/prisma"
 import { sendManualGrantConfirmationEmail } from "@/lib/email-service"
 import {
+  addSubscriberToBrevoActiveList,
+  removeSubscriberFromBrevoActiveList,
+} from "@/lib/brevo-crm-service"
+import {
   type InsightsPlanCatalogEntry,
   type InsightsPlanSlug,
   getInsightsSubscriptionKeyId,
@@ -951,6 +955,14 @@ async function triggerSubscriptionConfirmationEmailIfNeeded(params: {
     if (!subscription || !subscription.user?.email) {
       return false
     }
+
+    // Sync subscriber to Brevo Active Members list (non-blocking)
+    addSubscriberToBrevoActiveList({
+      email: subscription.user.email,
+      name: subscription.user.name,
+    }).catch((brevoErr) => {
+      console.error("Failed to sync subscriber to Brevo active members list:", brevoErr)
+    })
 
     const existingAudit = await prisma.insightsSubscriptionAuditLog.findFirst({
       where: {
@@ -2373,6 +2385,14 @@ export async function grantManualInsightsSubscription(
     })
   }
 
+  // 4. Automatically sync to Brevo Active Members list
+  addSubscriberToBrevoActiveList({
+    email,
+    name: user.name,
+  }).catch((err) => {
+    console.error("Failed to add manually granted subscriber to Brevo active members list:", err)
+  })
+
   return serializeMembership(updatedSubscription)
 }
 
@@ -2413,6 +2433,7 @@ export async function revokeManualInsightsSubscription(params: {
       return tx.insightsSubscription.findUniqueOrThrow({
         where: { id: sub.id },
         include: {
+          user: true,
           charges: {
             orderBy: {
               createdAt: "desc",
@@ -2428,6 +2449,14 @@ export async function revokeManualInsightsSubscription(params: {
       timeout: 30000,
     }
   )
+
+  if (updatedSubscription.user?.email) {
+    removeSubscriberFromBrevoActiveList({
+      email: updatedSubscription.user.email,
+    }).catch((err) => {
+      console.error("Failed to remove revoked subscriber from Brevo active members list:", err)
+    })
+  }
 
   return serializeMembership(updatedSubscription)
 }

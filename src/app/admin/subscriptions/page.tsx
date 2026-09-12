@@ -1,6 +1,7 @@
 "use client"
 
 import { CSSProperties, useCallback, useEffect, useState } from "react"
+import BrevoSyncModal from "@/components/admin/BrevoSyncModal"
 
 interface SubscriptionRow {
   id: string
@@ -137,6 +138,7 @@ export default function AdminSubscriptionsPage() {
 
   // Manual Grant Modal State
   const [showGrantModal, setShowGrantModal] = useState(false)
+  const [showBrevoSyncModal, setShowBrevoSyncModal] = useState(false)
   const [modalEmail, setModalEmail] = useState("")
   const [modalName, setModalName] = useState("")
   const [modalDurationPreset, setModalDurationPreset] = useState<"1_month" | "2_months" | "3_months" | "1_year">("3_months")
@@ -561,26 +563,48 @@ export default function AdminSubscriptionsPage() {
               Review premium Insights memberships, current billing windows, and manually grant or manage offline (NEFT) access.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowGrantModal(true)}
-            style={{
-              padding: "10px 18px",
-              borderRadius: "10px",
-              border: "1px solid #FFC72C",
-              background: "linear-gradient(180deg, #FFD54F 0%, #FFC72C 100%)",
-              color: "#000",
-              fontWeight: 700,
-              fontSize: "13px",
-              cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(255,199,44,0.25)",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            + Grant Manual Access (NEFT)
-          </button>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={() => setShowBrevoSyncModal(true)}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "10px",
+                border: "1px solid rgba(0, 146, 255, 0.4)",
+                background: "rgba(0, 146, 255, 0.12)",
+                color: "#60A5FA",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 2px 8px rgba(0, 146, 255, 0.15)",
+              }}
+            >
+              🔄 Sync Brevo CRM List
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowGrantModal(true)}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "10px",
+                border: "1px solid #FFC72C",
+                background: "linear-gradient(180deg, #FFD54F 0%, #FFC72C 100%)",
+                color: "#000",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(255,199,44,0.25)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              + Grant Manual Access (NEFT)
+            </button>
+          </div>
         </div>
         <div style={{ marginTop: "16px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
           <span
@@ -1969,6 +1993,12 @@ export default function AdminSubscriptionsPage() {
           </div>
         </div>
       ) : null}
+
+      <BrevoSyncModal
+        isOpen={showBrevoSyncModal}
+        onClose={() => setShowBrevoSyncModal(false)}
+        onSyncComplete={loadData}
+      />
     </div>
   )
 }

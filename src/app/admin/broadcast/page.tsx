@@ -13,7 +13,9 @@ import {
   FileText,
   Sparkles,
   Info,
+  RefreshCw,
 } from "lucide-react"
+import BrevoSyncModal from "@/components/admin/BrevoSyncModal"
 
 interface PreviewPost {
   title: string
@@ -32,6 +34,7 @@ export default function AdminBroadcastPage() {
   const [testEmail, setTestEmail] = useState("support@firstprinciplesresearch.in")
 
   const [activeSubscriberCount, setActiveSubscriberCount] = useState<number | null>(null)
+  const [showBrevoSyncModal, setShowBrevoSyncModal] = useState(false)
   const [previewPost, setPreviewPost] = useState<PreviewPost | null>(null)
   const [isFetchingPreview, setIsFetchingPreview] = useState(false)
 
@@ -204,15 +207,26 @@ export default function AdminBroadcastPage() {
           </p>
         </div>
 
-        {/* Member Count Pill */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 shrink-0">
-          <div className="p-2.5 rounded-lg bg-gold/10 text-gold">
-            <Users className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xs text-white/50 uppercase tracking-wider font-mono">Active Members</div>
-            <div className="text-xl font-bold text-white">
-              {activeSubscriberCount !== null ? activeSubscriberCount : "..."}
+        {/* Action & Member Count Pill */}
+        <div className="flex items-center gap-3 shrink-0 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setShowBrevoSyncModal(true)}
+            className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[#0092FF]/10 text-[#60A5FA] border border-[#0092FF]/30 text-xs font-bold hover:bg-[#0092FF]/20 transition cursor-pointer shadow-lg shadow-[#0092FF]/10"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Sync Brevo CRM List
+          </button>
+
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 shrink-0">
+            <div className="p-2.5 rounded-lg bg-gold/10 text-gold">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs text-white/50 uppercase tracking-wider font-mono">Active Members</div>
+              <div className="text-xl font-bold text-white">
+                {activeSubscriberCount !== null ? activeSubscriberCount : "..."}
+              </div>
             </div>
           </div>
         </div>
@@ -523,6 +537,12 @@ export default function AdminBroadcastPage() {
         </div>
 
       </div>
+
+      <BrevoSyncModal
+        isOpen={showBrevoSyncModal}
+        onClose={() => setShowBrevoSyncModal(false)}
+        onSyncComplete={fetchSubscriberCount}
+      />
     </div>
   )
 }
