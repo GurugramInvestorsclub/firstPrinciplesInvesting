@@ -1,4 +1,5 @@
 import { getEligibleSubscribersWithActiveTenure } from "@/lib/insights-subscription-service"
+import { prisma } from "@/lib/prisma"
 
 export interface BrevoListSummary {
   id: number
@@ -21,7 +22,20 @@ export interface BrevoSyncResult {
   errors: string[]
 }
 
+export interface BrevoRegisteredUsersSyncResult {
+  success: boolean
+  listId: number
+  listName?: string
+  totalUsersInDb: number
+  previouslyInBrevo: number
+  addedCount: number
+  retainedCount: number
+  addedEmails: string[]
+  errors: string[]
+}
+
 const DEFAULT_BREVO_MEMBERS_LIST_ID = 15
+const DEFAULT_BREVO_REGISTERED_USERS_LIST_ID = 20
 
 export function getBrevoApiKey(): string | null {
   return process.env.BREVO_API_KEY?.trim() || null
@@ -36,6 +50,17 @@ export function getBrevoActiveMembersListId(): number {
     }
   }
   return DEFAULT_BREVO_MEMBERS_LIST_ID
+}
+
+export function getBrevoRegisteredUsersListId(): number {
+  const envVal = process.env.BREVO_REGISTERED_USERS_LIST_ID
+  if (envVal) {
+    const parsed = parseInt(envVal.trim(), 10)
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+  return DEFAULT_BREVO_REGISTERED_USERS_LIST_ID
 }
 
 /**
@@ -395,3 +420,124 @@ export async function syncAllActiveTenureSubscribersToBrevo(options?: {
     return result
   }
 }
+
+/**
+ * Add or update a registered / logged in user in the Brevo Registered Users list.
+ * Safe and non-blocking.
+ */
+export async function addSubscriberToBrevoRegisteredList(params: {
+  email: string
+  name?: string | null
+  listId?: number
+}): Promise<boolean> {
+  const targetListId = params.listId || getBrevoRegisteredUsersListId()
+  return addSubscriberToBrevoActiveList({
+    email: params.email,
+    name: params.name,
+    listId: targetListId,
+  })
+}
+
+/**
+ * Sync all registered users in the database to the Brevo Registered Users list.
+ * Identifies users present in DB but missing from the Brevo list and adds them.
+ */
+export async function syncAllRegisteredUsersToBrevo(options?: {
+  listId?: number
+}): Promise<BrevoRegisteredUsersSyncResult> {
+  const targetListId = options?.listId || getBrevoRegisteredUsersListId()
+  const apiKey = getBrevoApiKey()
+
+  const result: BrevoRegisteredUsersSyncResult = {
+    success: false,
+    listId: targetListId,
+    totalUsersInDb: 0,
+    previouslyInBrevo: 0,
+    addedCount: 0,
+    retainedCount: 0,
+    addedEmails: [],
+    errors: [],
+  }
+
+  if (!apiKey) {
+    result.errors.push("BREVO_API_KEY is not configured")
+    return result
+  }
+
+  try {
+    // 1. Fetch all registered users with an email
+    const users = await prisma.user.findMany({
+      where: {
+        email: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    result.totalUsersInDb = users.length
+
+    const usersMap = new Map<string, { email: string; name: string | null }>()
+    for (const u of users) {
+      if (u.email && u.email.trim().includes("@")) {
+        const norm = u.email.trim().toLowerCase()
+        if (!usersMap.has(norm)) {
+          usersMap.set(norm, {
+            email: norm,
+            name: u.name,
+          })
+        }
+      }
+    }
+
+    // 2. Fetch current contacts in the Brevo list
+    const currentBrevoEmails = await fetchBrevoListContactEmails(targetListId)
+    result.previouslyInBrevo = currentBrevoEmails.size
+
+    // 3. Compute missing users to add
+    const toAdd: Array<{ email: string; name: string | null }> = []
+    for (const [email, info] of usersMap.entries()) {
+      if (!currentBrevoEmails.has(email)) {
+        toAdd.push(info)
+      } else {
+        result.retainedCount++
+      }
+    }
+
+    // 4. Add missing users in concurrent chunks of 10
+    const addChunkSize = 10
+    for (let i = 0; i < toAdd.length; i += addChunkSize) {
+      const chunk = toAdd.slice(i, i + addChunkSize)
+      await Promise.all(
+        chunk.map(async (user) => {
+          const ok = await addSubscriberToBrevoActiveList({
+            email: user.email,
+            name: user.name,
+            listId: targetListId,
+          })
+          if (ok) {
+            result.addedCount++
+            result.addedEmails.push(user.email)
+          } else {
+            result.errors.push(`Failed to add ${user.email} to Brevo list ${targetListId}`)
+          }
+        })
+      )
+    }
+
+    result.success = true
+    return result
+  } catch (error: any) {
+    console.error("syncAllRegisteredUsersToBrevo failed:", error)
+    result.errors.push(error?.message || "Sync failed due to an unexpected error")
+    return result
+  }
+}
+

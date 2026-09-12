@@ -5,6 +5,7 @@ import {
   hashSignupVerificationToken,
   parseSignupVerificationIdentifier,
 } from "@/lib/signup-verification"
+import { addSubscriberToBrevoRegisteredList } from "@/lib/brevo-crm-service"
 
 export const runtime = "nodejs"
 
@@ -90,6 +91,15 @@ export async function GET(request: NextRequest) {
 
       return "success"
     })
+
+    if (outcome === "success") {
+      addSubscriberToBrevoRegisteredList({
+        email: payload.email,
+        name: payload.name,
+      }).catch((err) => {
+        console.error("Failed to add verified user to Brevo registered list:", err)
+      })
+    }
 
     return redirectToLogin(request, outcome)
   } catch (error) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import BrevoSyncModal from "@/components/admin/BrevoSyncModal";
 
 interface UserData {
     id: string;
@@ -17,6 +18,7 @@ export default function AdminUsersPage() {
     const [error, setError] = useState<string | null>(null);
     const [emailSearch, setEmailSearch] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [showBrevoSyncModal, setShowBrevoSyncModal] = useState(false);
 
     // Password Reset Modal state
     const [resetUser, setResetUser] = useState<UserData | null>(null);
@@ -178,30 +180,51 @@ export default function AdminUsersPage() {
                     </p>
                 </div>
 
-                 <button
-                    onClick={handleExport}
-                    style={{
-                        padding: "10px 20px",
-                        background: "linear-gradient(135deg, var(--gold), var(--gold-muted))",
-                        color: "#1A1A1A",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        letterSpacing: "0.02em",
-                        transition: "all 0.2s",
-                        boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
-                    }}
-                    onMouseEnter={(e) =>
-                        (e.currentTarget.style.transform = "translateY(-1px)")
-                    }
-                    onMouseLeave={(e) =>
-                        (e.currentTarget.style.transform = "translateY(0)")
-                    }
-                >
-                    ↓ Export CSV
-                </button>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                    <button
+                        onClick={() => setShowBrevoSyncModal(true)}
+                        style={{
+                            padding: "10px 18px",
+                            background: "rgba(0, 146, 255, 0.12)",
+                            border: "1px solid rgba(0, 146, 255, 0.4)",
+                            color: "#60A5FA",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            boxShadow: "0 2px 8px rgba(0, 146, 255, 0.15)",
+                        }}
+                    >
+                        🔄 Sync Brevo CRM List
+                    </button>
+                    <button
+                        onClick={handleExport}
+                        style={{
+                            padding: "10px 20px",
+                            background: "linear-gradient(135deg, var(--gold), var(--gold-muted))",
+                            color: "#1A1A1A",
+                            border: "none",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            letterSpacing: "0.02em",
+                            transition: "all 0.2s",
+                            boxShadow: "0 2px 8px rgba(245,184,0,0.25)",
+                        }}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.transform = "translateY(-1px)")
+                        }
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.transform = "translateY(0)")
+                        }
+                    >
+                        ↓ Export CSV
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -689,6 +712,13 @@ export default function AdminUsersPage() {
                     </div>
                 </div>
             )}
+
+            <BrevoSyncModal
+                isOpen={showBrevoSyncModal}
+                onClose={() => setShowBrevoSyncModal(false)}
+                initialTab="registered_users"
+                onSyncComplete={fetchUsers}
+            />
         </div>
     );
 }

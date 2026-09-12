@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server"
-import { syncAllActiveTenureSubscribersToBrevo } from "@/lib/brevo-crm-service"
+import {
+  syncAllActiveTenureSubscribersToBrevo,
+  syncAllRegisteredUsersToBrevo,
+} from "@/lib/brevo-crm-service"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -14,14 +17,20 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
-    const syncResult = await syncAllActiveTenureSubscribersToBrevo()
+    const [membersSync, registeredSync] = await Promise.all([
+      syncAllActiveTenureSubscribersToBrevo(),
+      syncAllRegisteredUsersToBrevo(),
+    ])
 
     return NextResponse.json({
-      success: syncResult.success,
-      data: syncResult,
+      success: membersSync.success && registeredSync.success,
+      data: {
+        members: membersSync,
+        registeredUsers: registeredSync,
+      },
     })
   } catch (error: any) {
-    console.error("Brevo members sync cron error:", error)
+    console.error("Brevo members and users sync cron error:", error)
     return NextResponse.json(
       { success: false, error: error?.message || "Internal Server Error" },
       { status: 500 }

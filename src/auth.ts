@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { authConfig } from "./auth.config"
+import { addSubscriberToBrevoRegisteredList } from "@/lib/brevo-crm-service"
 
 const {
     handlers,
@@ -68,6 +69,28 @@ const {
             },
         }),
     ],
+    events: {
+        async signIn({ user }) {
+            if (user?.email) {
+                addSubscriberToBrevoRegisteredList({
+                    email: user.email,
+                    name: user.name,
+                }).catch((err) => {
+                    console.error("Failed to sync sign-in user to Brevo:", err)
+                })
+            }
+        },
+        async createUser({ user }) {
+            if (user?.email) {
+                addSubscriberToBrevoRegisteredList({
+                    email: user.email,
+                    name: user.name,
+                }).catch((err) => {
+                    console.error("Failed to sync created user to Brevo:", err)
+                })
+            }
+        },
+    },
     session: {
         strategy: "jwt",
     },
