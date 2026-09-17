@@ -57,12 +57,14 @@ function formatDate(dateStr: string): string {
         const formattedDate = d.toLocaleDateString("en-US", {
             month: "long",
             day: "numeric",
-            year: "numeric"
+            year: "numeric",
+            timeZone: "Asia/Kolkata"
         })
         const formattedTime = d.toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",
-            hour12: true
+            hour12: true,
+            timeZone: "Asia/Kolkata"
         })
         return `${formattedDate} at ${formattedTime}`
     } catch (e) {

@@ -31,6 +31,7 @@ export default defineType({
             title: 'Excerpt',
             type: 'text',
             rows: 3,
+            description: 'Short summary shown on cards and carousels (not displayed inside the article)',
         }),
         defineField({
             name: 'access',

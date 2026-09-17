@@ -67,6 +67,7 @@ export function FeaturedInsightCard({ post, className, showSubscriberBadge, hasS
                             year: "numeric",
                             month: "long",
                             day: "numeric",
+                            timeZone: "Asia/Kolkata",
                         })}
                     </span>
                     {showSubscriberBadge && isSubscriber ? (

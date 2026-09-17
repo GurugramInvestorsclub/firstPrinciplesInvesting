@@ -68,6 +68,7 @@ export function InsightCard({ post, showSubscriberBadge, hasSubscriptionAccess, 
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric",
+                                timeZone: "Asia/Kolkata",
                             })}
                         </span>
                         {showSubscriberBadge && isSubscriber ? (

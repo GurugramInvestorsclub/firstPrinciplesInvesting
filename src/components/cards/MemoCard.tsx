@@ -47,7 +47,8 @@ export function MemoCard({ post }: { post: Post }) {
     const dateStr = new Date(post.publishedAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
-        year: "numeric"
+        year: "numeric",
+        timeZone: "Asia/Kolkata"
     }).toUpperCase();
     
     const readingTime = 7;

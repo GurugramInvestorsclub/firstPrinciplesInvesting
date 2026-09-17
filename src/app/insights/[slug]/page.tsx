@@ -103,10 +103,12 @@ export default async function InsightPage({ params }: Props) {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
+                                    timeZone: "Asia/Kolkata",
                                 })} at ${new Date(post.publishedAt).toLocaleTimeString("en-US", {
                                     hour: "numeric",
                                     minute: "2-digit",
                                     hour12: true,
+                                    timeZone: "Asia/Kolkata",
                                 })}` : "Date not available"}
                             </span>
                             <div className="flex items-center gap-3">
@@ -140,11 +142,6 @@ export default async function InsightPage({ params }: Props) {
                             </div>
                         )}
 
-                            {post.excerpt && (
-                                <p className="text-xl text-muted-foreground leading-relaxed">
-                                    {post.excerpt}
-                                </p>
-                            )}
                         </header>
 
                         {post.mainImage && (
