@@ -70,7 +70,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents, ratingSt
     }, [posts])
 
     // Filter premium (subscriber) and free (public) articles
-    const premiumArticles = posts.filter(r => r.access === "subscriber").slice(0, 3)
+    const premiumArticles = posts.filter(r => r.access === "subscriber")
     const freeArticles = posts.filter(r => r.access !== "subscriber").slice(0, 3)
 
     // Latest premium article to show as fallback for continue reading
