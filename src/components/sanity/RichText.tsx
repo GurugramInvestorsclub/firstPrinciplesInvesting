@@ -64,7 +64,11 @@ const components: PortableTextComponents = {
                         </div>
                     )}
                     {value.caption && (
-                        <figcaption className="p-3 text-center text-xs font-mono font-medium text-gold tracking-wide bg-[#12110F] border-t border-[#F5B800]/20">
+                        <figcaption className={`p-2.5 text-center tracking-wide bg-[#12110F] border-t border-[#F5B800]/20 ${
+                            /^\s*sources?\s*[:–-]/i.test(value.caption.trim())
+                                ? "!text-[8px] !italic text-neutral-400 dark:text-neutral-400 font-sans [&_a]:!text-neutral-400 [&_a]:underline [&_a]:!text-[8px] [&_a]:!italic"
+                                : "text-xs font-mono font-medium text-gold"
+                        }`}>
                             {value.caption}
                         </figcaption>
                     )}
@@ -88,6 +92,14 @@ const components: PortableTextComponents = {
             const text = getPortableTextChildrenText(value?.children)
             if (!text || !text.trim()) {
                 return null
+            }
+            const isSource = /^\s*sources?\s*[:–-]/i.test(text.trim())
+            if (isSource) {
+                return (
+                    <p className="!text-[8px] !italic text-neutral-400 dark:text-neutral-400 text-neutral-500 -mt-5 mb-5 leading-normal tracking-wide text-left [&_a]:!text-neutral-400 [&_a:hover]:!text-neutral-200 [&_a]:underline [&_a]:!text-[8px] [&_a]:!italic">
+                        {children}
+                    </p>
+                )
             }
             return <p className="leading-relaxed mb-3 text-lg last:mb-0 text-justify hyphens-auto [text-justify:inter-word]">{children}</p>
         },
