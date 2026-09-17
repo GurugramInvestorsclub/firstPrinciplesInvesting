@@ -317,7 +317,7 @@ export function ReaderView({
                                     {/* Paragraph text */}
                                     <div className="flex-1 space-y-4">
                                         <div 
-                                            className={`font-sans leading-relaxed tracking-wide text-neutral-300 font-light ${
+                                            className={`font-sans leading-relaxed tracking-wide text-neutral-300 font-light text-justify ${
                                                 fontSize === "sm" ? "text-sm" : 
                                                 fontSize === "lg" ? "text-lg leading-loose" : "text-base"
                                             } ${isHighlighted ? "bg-gold/10 text-text-primary px-3 py-1.5 rounded-lg border-l-2 border-gold" : ""}`}

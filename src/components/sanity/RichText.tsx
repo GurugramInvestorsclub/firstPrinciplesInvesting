@@ -10,7 +10,7 @@ function renderHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6", className: 
         if (!text || !text.trim()) return null
         const id = text ? slugifyHeading(text) : (value?._key ? `heading-${value._key}` : undefined)
         return (
-            <Tag id={id} className={`scroll-mt-28 ${className}`}>
+            <Tag id={id} className={`scroll-mt-28 text-left ${className}`}>
                 {children}
             </Tag>
         )
@@ -80,7 +80,7 @@ const components: PortableTextComponents = {
         h5: renderHeading("h5", "text-base font-bold text-gold mt-4 mb-2"),
         h6: renderHeading("h6", "text-sm font-bold text-gold mt-4 mb-2"),
         blockquote: ({ children }: any) => (
-            <blockquote className="border-l-4 border-gold pl-4 italic text-muted-foreground my-4">
+            <blockquote className="border-l-4 border-gold pl-4 italic text-muted-foreground my-4 text-justify hyphens-auto [text-justify:inter-word]">
                 {children}
             </blockquote>
         ),
@@ -89,7 +89,7 @@ const components: PortableTextComponents = {
             if (!text || !text.trim()) {
                 return null
             }
-            return <p className="leading-relaxed mb-3 text-lg last:mb-0">{children}</p>
+            return <p className="leading-relaxed mb-3 text-lg last:mb-0 text-justify hyphens-auto [text-justify:inter-word]">{children}</p>
         },
     },
     list: {
@@ -105,8 +105,8 @@ const components: PortableTextComponents = {
         ),
     },
     listItem: {
-        bullet: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed">{children}</li>,
-        number: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed">{children}</li>,
+        bullet: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed text-justify hyphens-auto [text-justify:inter-word]">{children}</li>,
+        number: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed text-justify hyphens-auto [text-justify:inter-word]">{children}</li>,
     },
     marks: {
         link: ({ children, value }: any) => {

@@ -157,7 +157,7 @@ export default async function InsightPage({ params }: Props) {
                         )}
 
                         {(shouldLockContent ? previewBody : post.body) && (
-                            <div className="prose prose-lg dark:prose-invert mx-auto [&>:last-child]:mb-0">
+                            <div className="prose prose-lg dark:prose-invert mx-auto [&>:last-child]:mb-0 text-justify">
                                 <RichText value={shouldLockContent ? previewBody : post.body} />
                             </div>
                         )}
