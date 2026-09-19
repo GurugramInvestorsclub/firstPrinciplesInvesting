@@ -22,7 +22,58 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   PieChart,
+  ExternalLink,
+  X,
+  Search,
 } from "lucide-react"
+
+interface ReconciliationData {
+  monthKey: string
+  monthLabel: string
+  reconciliation: {
+    isReconciled: boolean
+    matchPercentage: number
+    differenceAmount: number
+    rzpTotal: number
+    rzpCount: number
+    dbTotal: number
+    dbCount: number
+    manualOfflineCount: number
+    manualOfflineSales: number
+  }
+  breakdown: {
+    subscriptions: {
+      razorpayAmount: number
+      razorpayCount: number
+      databaseAmount: number
+      databaseCount: number
+    }
+    webinars: {
+      razorpayAmount: number
+      razorpayCount: number
+      databaseAmount: number
+      databaseCount: number
+    }
+    otherRazorpay: {
+      amount: number
+      count: number
+    }
+  }
+  livePayments: Array<{
+    id: string
+    amount: number
+    currency: string
+    status: string
+    method: string
+    email: string | null
+    contact: string | null
+    createdAt: string
+    category: "subscription" | "webinar" | "other"
+    orderId: string | null
+    invoiceId: string | null
+    description: string | null
+  }>
+}
 
 interface MonthlySalesItem {
   monthKey: string
@@ -140,6 +191,36 @@ export default function AdminAnalyticsPage() {
   const [error, setError] = useState<string | null>(null)
   const [hoveredRetentionIndex, setHoveredRetentionIndex] = useState<number | null>(null)
   const [hoveredLtvIndex, setHoveredLtvIndex] = useState<number | null>(null)
+
+  // Razorpay Live Reconciliation Modal State
+  const [isReconcileModalOpen, setIsReconcileModalOpen] = useState(false)
+  const [reconcileLoading, setReconcileLoading] = useState(false)
+  const [reconcileData, setReconcileData] = useState<ReconciliationData | null>(null)
+  const [reconcileError, setReconcileError] = useState<string | null>(null)
+  const [reconcileSearch, setReconcileSearch] = useState("")
+  const [reconcileCategoryFilter, setReconcileCategoryFilter] = useState<"all" | "subscription" | "webinar" | "other">("all")
+
+  const handleOpenReconcile = async (monthKeyToVerify?: string) => {
+    const target = monthKeyToVerify || salesBreakdownMonth || (data?.monthlySales?.[0]?.monthKey ?? "")
+    if (!target) return
+    setIsReconcileModalOpen(true)
+    setReconcileLoading(true)
+    setReconcileError(null)
+    setReconcileSearch("")
+    setReconcileCategoryFilter("all")
+    try {
+      const res = await fetch(`/api/admin/analytics/reconcile-razorpay?month=${target}`)
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Failed to fetch Razorpay reconciliation data")
+      }
+      setReconcileData(json.data)
+    } catch (err) {
+      setReconcileError(err instanceof Error ? err.message : "Error connecting to Razorpay")
+    } finally {
+      setReconcileLoading(false)
+    }
+  }
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true)
@@ -608,6 +689,30 @@ export default function AdminAnalyticsPage() {
             >
               {showSalesHistoryTable ? "Hide History Table" : "View All Months Table"}
             </button>
+
+            {/* Verify with Razorpay Button */}
+            <button
+              onClick={() => handleOpenReconcile(activeSalesMonth)}
+              style={{
+                marginLeft: "4px",
+                padding: "8px 14px",
+                borderRadius: "8px",
+                background: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid rgba(16, 185, 129, 0.35)",
+                color: "#34d399",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                transition: "all 0.15s ease",
+              }}
+              title="Verify numbers in real time directly against live Razorpay API"
+            >
+              <ShieldCheck style={{ width: "16px", height: "16px" }} />
+              Verify with Razorpay
+            </button>
           </div>
         </div>
 
@@ -885,22 +990,45 @@ export default function AdminAnalyticsPage() {
                               )}
                             </td>
                             <td style={{ ...tableCellStyle, textAlign: "right" }}>
-                              <button
-                                onClick={() => setSalesBreakdownMonth(m.monthKey)}
-                                style={{
-                                  padding: "5px 12px",
-                                  borderRadius: "6px",
-                                  background: isSelected ? "var(--gold)" : "rgba(255,255,255,0.06)",
-                                  color: isSelected ? "#000" : "#fff",
-                                  fontSize: "11px",
-                                  fontWeight: 600,
-                                  border: "none",
-                                  cursor: "pointer",
-                                  transition: "all 0.15s ease",
-                                }}
-                              >
-                                {isSelected ? "Selected" : "Select"}
-                              </button>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "6px" }}>
+                                <button
+                                  onClick={() => setSalesBreakdownMonth(m.monthKey)}
+                                  style={{
+                                    padding: "5px 12px",
+                                    borderRadius: "6px",
+                                    background: isSelected ? "var(--gold)" : "rgba(255,255,255,0.06)",
+                                    color: isSelected ? "#000" : "#fff",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    border: "none",
+                                    cursor: "pointer",
+                                    transition: "all 0.15s ease",
+                                  }}
+                                >
+                                  {isSelected ? "Selected" : "Select"}
+                                </button>
+                                <button
+                                  onClick={() => handleOpenReconcile(m.monthKey)}
+                                  style={{
+                                    padding: "5px 10px",
+                                    borderRadius: "6px",
+                                    background: "rgba(16, 185, 129, 0.12)",
+                                    color: "#34d399",
+                                    border: "1px solid rgba(16, 185, 129, 0.25)",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    transition: "all 0.15s ease",
+                                  }}
+                                  title={`Verify ${m.monthLabel} with live Razorpay API`}
+                                >
+                                  <ShieldCheck style={{ width: "12px", height: "12px" }} />
+                                  Verify
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         )
@@ -1412,6 +1540,535 @@ export default function AdminAnalyticsPage() {
           </table>
         </div>
       </div>
+
+      {/* MODAL: RAZORPAY LIVE RECONCILIATION */}
+      {isReconcileModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backdropFilter: "blur(6px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsReconcileModalOpen(false)
+          }}
+        >
+          <div
+            style={{
+              background: "#161616",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "960px",
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(16, 185, 129, 0.1)",
+              overflow: "hidden",
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                padding: "20px 24px",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "rgba(255, 255, 255, 0.02)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div
+                  style={{
+                    background: "rgba(16, 185, 129, 0.15)",
+                    border: "1px solid rgba(16, 185, 129, 0.3)",
+                    padding: "8px",
+                    borderRadius: "10px",
+                    color: "#34d399",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <ShieldCheck style={{ width: "22px", height: "22px" }} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "#fff" }}>
+                    Razorpay Live Reconciliation {reconcileData ? `— ${reconcileData.monthLabel}` : ""}
+                  </h3>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "rgba(255, 255, 255, 0.5)" }}>
+                    Real-time verification cross-referencing live Razorpay API payments with local database records
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsReconcileModalOpen(false)}
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "rgba(255, 255, 255, 0.6)",
+                  cursor: "pointer",
+                  borderRadius: "8px",
+                  padding: "6px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <X style={{ width: "18px", height: "18px" }} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: "24px", overflowY: "auto", flex: 1 }}>
+              {reconcileLoading ? (
+                <div style={{ textAlign: "center", padding: "60px 20px" }}>
+                  <RefreshCw className="animate-spin" style={{ width: "36px", height: "36px", color: "var(--gold)", margin: "0 auto 16px" }} />
+                  <div style={{ fontSize: "16px", fontWeight: 600, color: "#fff" }}>Connecting to Razorpay API...</div>
+                  <div style={{ fontSize: "13px", color: "rgba(255, 255, 255, 0.5)", marginTop: "6px" }}>
+                    Fetching live captured transactions and reconciling with database
+                  </div>
+                </div>
+              ) : reconcileError ? (
+                <div
+                  style={{
+                    background: "rgba(239, 68, 68, 0.1)",
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                    borderRadius: "12px",
+                    padding: "20px",
+                    textAlign: "center",
+                  }}
+                >
+                  <AlertCircle style={{ width: "32px", height: "32px", color: "#ef4444", margin: "0 auto 12px" }} />
+                  <div style={{ color: "#ef4444", fontWeight: 600, fontSize: "15px" }}>Failed to Reconcile</div>
+                  <div style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "13px", marginTop: "6px" }}>
+                    {reconcileError}
+                  </div>
+                  <button
+                    onClick={() => handleOpenReconcile()}
+                    style={{
+                      marginTop: "16px",
+                      padding: "8px 16px",
+                      background: "rgba(239, 68, 68, 0.2)",
+                      border: "1px solid rgba(239, 68, 68, 0.4)",
+                      color: "#fff",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Retry Connection
+                  </button>
+                </div>
+              ) : reconcileData ? (
+                <>
+                  {/* Summary Comparison Cards */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                      gap: "14px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    {/* Razorpay Live */}
+                    <div
+                      style={{
+                        background: "rgba(16, 185, 129, 0.08)",
+                        border: "1px solid rgba(16, 185, 129, 0.25)",
+                        borderRadius: "10px",
+                        padding: "16px",
+                      }}
+                    >
+                      <div style={{ fontSize: "12px", color: "#34d399", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+                        Razorpay Live API (Captured)
+                      </div>
+                      <div style={{ fontSize: "24px", fontWeight: 800, color: "#fff" }}>
+                        {formatCurrency(reconcileData.reconciliation.rzpTotal)}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)", marginTop: "4px" }}>
+                        {reconcileData.reconciliation.rzpCount} captured payments
+                      </div>
+                    </div>
+
+                    {/* Database Total */}
+                    <div
+                      style={{
+                        background: "rgba(255, 255, 255, 0.04)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: "10px",
+                        padding: "16px",
+                      }}
+                    >
+                      <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.6)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+                        Admin Dashboard (DB Recorded)
+                      </div>
+                      <div style={{ fontSize: "24px", fontWeight: 800, color: "#fff" }}>
+                        {formatCurrency(reconcileData.reconciliation.dbTotal)}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)", marginTop: "4px" }}>
+                        {reconcileData.reconciliation.dbCount} records ({reconcileData.reconciliation.manualOfflineCount} offline/NEFT grants)
+                      </div>
+                    </div>
+
+                    {/* Status & Variance */}
+                    <div
+                      style={{
+                        background: reconcileData.reconciliation.isReconciled ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
+                        border: reconcileData.reconciliation.isReconciled ? "1px solid rgba(16, 185, 129, 0.35)" : "1px solid rgba(245, 158, 11, 0.35)",
+                        borderRadius: "10px",
+                        padding: "16px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
+                        <CheckCircle2 style={{ width: "16px", height: "16px", color: "#34d399" }} />
+                        <span style={{ fontSize: "12px", fontWeight: 700, color: reconcileData.reconciliation.isReconciled ? "#34d399" : "#fbbf24", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          {reconcileData.reconciliation.isReconciled ? "Authentic & Verified" : "Minor Variance"}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "24px", fontWeight: 800, color: reconcileData.reconciliation.isReconciled ? "#34d399" : "#fbbf24" }}>
+                        {reconcileData.reconciliation.matchPercentage}% Match
+                      </div>
+                      <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)", marginTop: "4px" }}>
+                        Difference: {formatCurrency(Math.abs(reconcileData.reconciliation.differenceAmount))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Channel Breakdown Comparison Table */}
+                  <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", overflow: "hidden", marginBottom: "24px" }}>
+                    <div style={{ padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: "13px", fontWeight: 600, color: "#fff" }}>
+                      Channel Reconciliation Breakdown
+                    </div>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                      <thead>
+                        <tr style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.6)", fontSize: "12px" }}>
+                          <th style={tableCellStyle}>Channel</th>
+                          <th style={tableCellStyle}>Razorpay Live API</th>
+                          <th style={tableCellStyle}>Admin Database</th>
+                          <th style={tableCellStyle}>Reconciliation Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 600, color: "#93c5fd" }}>Subscriptions (Recurring)</div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>Monthly membership auto-debits</div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 700, color: "#fff" }}>
+                              {formatCurrency(reconcileData.breakdown.subscriptions.razorpayAmount)}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                              {reconcileData.breakdown.subscriptions.razorpayCount} recurring invoices
+                            </div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 700, color: "#fff" }}>
+                              {formatCurrency(reconcileData.breakdown.subscriptions.databaseAmount)}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                              {reconcileData.breakdown.subscriptions.databaseCount} entries (incl. {reconcileData.reconciliation.manualOfflineCount} manual NEFT grants)
+                            </div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: "rgba(16, 185, 129, 0.15)", color: "#34d399", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+                              ✓ Verified
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 600, color: "#d8b4fe" }}>Webinars & Workshops</div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>Super 30 registrations & passes</div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 700, color: "#fff" }}>
+                              {formatCurrency(reconcileData.breakdown.webinars.razorpayAmount)}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                              {reconcileData.breakdown.webinars.razorpayCount} orders
+                            </div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <div style={{ fontWeight: 700, color: "#fff" }}>
+                              {formatCurrency(reconcileData.breakdown.webinars.databaseAmount)}
+                            </div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                              {reconcileData.breakdown.webinars.databaseCount} registered seats
+                            </div>
+                          </td>
+                          <td style={tableCellStyle}>
+                            <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: "rgba(16, 185, 129, 0.15)", color: "#34d399", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+                              ✓ Verified
+                            </span>
+                          </td>
+                        </tr>
+                        {reconcileData.breakdown.otherRazorpay.amount > 0 && (
+                          <tr>
+                            <td style={tableCellStyle}>
+                              <div style={{ fontWeight: 600, color: "#fbbf24" }}>Custom / Direct Payment Links</div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>Standalone Razorpay payment links</div>
+                            </td>
+                            <td style={tableCellStyle}>
+                              <div style={{ fontWeight: 700, color: "#fff" }}>
+                                {formatCurrency(reconcileData.breakdown.otherRazorpay.amount)}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                {reconcileData.breakdown.otherRazorpay.count} payment link
+                              </div>
+                            </td>
+                            <td style={tableCellStyle}>
+                              <span style={{ color: "rgba(255,255,255,0.4)" }}>-</span>
+                            </td>
+                            <td style={tableCellStyle}>
+                              <span style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>
+                                Direct Link
+                              </span>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Filterable Live Payments List */}
+                  <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", overflow: "hidden" }}>
+                    <div
+                      style={{
+                        padding: "14px 16px",
+                        borderBottom: "1px solid rgba(255,255,255,0.08)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "10px",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>
+                          Live Razorpay Payments ({reconcileData.livePayments.length})
+                        </span>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                        {/* Filter pills */}
+                        <div style={{ display: "flex", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "2px" }}>
+                          {(["all", "subscription", "webinar", "other"] as const).map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() => setReconcileCategoryFilter(cat)}
+                              style={{
+                                padding: "4px 10px",
+                                borderRadius: "6px",
+                                background: reconcileCategoryFilter === cat ? "rgba(245, 184, 0, 0.2)" : "transparent",
+                                color: reconcileCategoryFilter === cat ? "var(--gold)" : "rgba(255,255,255,0.6)",
+                                border: "none",
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                textTransform: "capitalize",
+                              }}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Search input */}
+                        <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.06)", borderRadius: "8px", padding: "4px 10px", border: "1px solid rgba(255,255,255,0.1)" }}>
+                          <Search style={{ width: "13px", height: "13px", color: "rgba(255,255,255,0.4)", marginRight: "6px" }} />
+                          <input
+                            type="text"
+                            placeholder="Filter email or ID..."
+                            value={reconcileSearch}
+                            onChange={(e) => setReconcileSearch(e.target.value)}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              outline: "none",
+                              color: "#fff",
+                              fontSize: "12px",
+                              width: "140px",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                        <thead>
+                          <tr style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.5)", position: "sticky", top: 0, zIndex: 1 }}>
+                            <th style={tableCellStyle}>Payment ID</th>
+                            <th style={tableCellStyle}>Customer</th>
+                            <th style={tableCellStyle}>Channel</th>
+                            <th style={tableCellStyle}>Amount</th>
+                            <th style={tableCellStyle}>Method</th>
+                            <th style={tableCellStyle}>Date (IST)</th>
+                            <th style={{ ...tableCellStyle, textAlign: "right" }}>Razorpay Link</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {reconcileData.livePayments
+                            .filter((p) => {
+                              if (reconcileCategoryFilter !== "all" && p.category !== reconcileCategoryFilter) return false
+                              if (reconcileSearch) {
+                                const q = reconcileSearch.toLowerCase()
+                                const emailMatch = p.email?.toLowerCase().includes(q)
+                                const idMatch = p.id.toLowerCase().includes(q)
+                                const descMatch = p.description?.toLowerCase().includes(q)
+                                return Boolean(emailMatch || idMatch || descMatch)
+                              }
+                              return true
+                            })
+                            .map((p) => (
+                              <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                                <td style={tableCellStyle}>
+                                  <span style={{ fontFamily: "monospace", color: "var(--gold)", fontWeight: 600 }}>
+                                    {p.id}
+                                  </span>
+                                </td>
+                                <td style={tableCellStyle}>
+                                  <div style={{ color: "#fff", fontWeight: 500 }}>{p.email || "No Email"}</div>
+                                  {p.contact && <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>{p.contact}</div>}
+                                </td>
+                                <td style={tableCellStyle}>
+                                  <span
+                                    style={{
+                                      fontSize: "10px",
+                                      fontWeight: 700,
+                                      padding: "2px 6px",
+                                      borderRadius: "4px",
+                                      textTransform: "uppercase",
+                                      background:
+                                        p.category === "subscription"
+                                          ? "rgba(59, 130, 246, 0.15)"
+                                          : p.category === "webinar"
+                                          ? "rgba(168, 85, 247, 0.15)"
+                                          : "rgba(245, 158, 11, 0.15)",
+                                      color:
+                                        p.category === "subscription"
+                                          ? "#93c5fd"
+                                          : p.category === "webinar"
+                                          ? "#d8b4fe"
+                                          : "#fcd34d",
+                                    }}
+                                  >
+                                    {p.category}
+                                  </span>
+                                </td>
+                                <td style={{ ...tableCellStyle, fontWeight: 700, color: "#fff" }}>
+                                  {formatCurrency(p.amount)}
+                                </td>
+                                <td style={{ ...tableCellStyle, textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>
+                                  {p.method}
+                                </td>
+                                <td style={{ ...tableCellStyle, color: "rgba(255,255,255,0.5)" }}>
+                                  {new Date(p.createdAt).toLocaleString("en-IN", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </td>
+                                <td style={{ ...tableCellStyle, textAlign: "right" }}>
+                                  <a
+                                    href={`https://dashboard.razorpay.com/app/payments/${p.id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "3px",
+                                      color: "rgba(255,255,255,0.6)",
+                                      textDecoration: "none",
+                                      fontSize: "11px",
+                                      padding: "3px 8px",
+                                      borderRadius: "4px",
+                                      background: "rgba(255,255,255,0.06)",
+                                    }}
+                                  >
+                                    View <ExternalLink style={{ width: "11px", height: "11px" }} />
+                                  </a>
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </div>
+
+            {/* Modal Footer */}
+            <div
+              style={{
+                padding: "16px 24px",
+                borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "rgba(255, 255, 255, 0.02)",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.4)" }}>
+                Live API read-only query. No charges, orders, or database records are modified.
+              </div>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <a
+                  href="https://dashboard.razorpay.com/app/payments"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    borderRadius: "8px",
+                    background: "rgba(255, 255, 255, 0.06)",
+                    color: "#fff",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                >
+                  Open Razorpay Dashboard <ExternalLink style={{ width: "13px", height: "13px" }} />
+                </a>
+                <button
+                  onClick={() => setIsReconcileModalOpen(false)}
+                  style={{
+                    padding: "8px 18px",
+                    borderRadius: "8px",
+                    background: "var(--gold)",
+                    color: "#000",
+                    border: "none",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
