@@ -17,7 +17,25 @@ import {
   ShieldCheck,
   UserX,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  PieChart,
 } from "lucide-react"
+
+interface MonthlySalesItem {
+  monthKey: string
+  monthLabel: string
+  totalSales: number
+  subscriptionSales: number
+  subscriptionCount: number
+  webinarSales: number
+  webinarCount: number
+  subscriptionPct: number
+  webinarPct: number
+  momGrowthPct: number | null
+}
 
 interface RetentionMonthData {
   monthKey: string
@@ -65,6 +83,7 @@ interface AnalyticsPayload {
   availableMonths: string[]
   selectedTimeframe: string
   selectedMonth: string | null
+  monthlySales?: MonthlySalesItem[]
   kpis: {
     averageLtv: number
     totalRevenue: number
@@ -115,6 +134,8 @@ export default function AdminAnalyticsPage() {
   const [data, setData] = useState<AnalyticsPayload | null>(null)
   const [timeframe, setTimeframe] = useState<"3m" | "6m" | "12m" | "all" | "month">("12m")
   const [selectedMonth, setSelectedMonth] = useState<string>("")
+  const [salesBreakdownMonth, setSalesBreakdownMonth] = useState<string>("")
+  const [showSalesHistoryTable, setShowSalesHistoryTable] = useState<boolean>(true)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [hoveredRetentionIndex, setHoveredRetentionIndex] = useState<number | null>(null)
@@ -140,12 +161,15 @@ export default function AdminAnalyticsPage() {
       if (json.data.availableMonths && json.data.availableMonths.length > 0 && !selectedMonth) {
         setSelectedMonth(json.data.availableMonths[0])
       }
+      if (json.data.monthlySales && json.data.monthlySales.length > 0 && !salesBreakdownMonth) {
+        setSalesBreakdownMonth(json.data.monthlySales[0].monthKey)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred")
     } finally {
       setLoading(false)
     }
-  }, [timeframe, selectedMonth])
+  }, [timeframe, selectedMonth, salesBreakdownMonth])
 
   useEffect(() => {
     fetchAnalytics()
@@ -158,6 +182,7 @@ export default function AdminAnalyticsPage() {
   const handleMonthSelectChange = (monthKey: string) => {
     if (!monthKey) return
     setSelectedMonth(monthKey)
+    setSalesBreakdownMonth(monthKey)
     setTimeframe("month")
   }
 
@@ -266,6 +291,27 @@ export default function AdminAnalyticsPage() {
   const ltvPathD = ltvPoints.length > 0
     ? ltvPoints.reduce((acc, pt, idx) => (idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`), "")
     : ""
+
+  // Monthly Sales Breakdown Helpers
+  const monthlySalesList: MonthlySalesItem[] = data?.monthlySales || []
+  const activeSalesMonth = salesBreakdownMonth || (monthlySalesList.length > 0 ? monthlySalesList[0].monthKey : "")
+  const currentSalesData = monthlySalesList.find((m) => m.monthKey === activeSalesMonth) || monthlySalesList[0] || null
+  const currentSalesIndex = monthlySalesList.findIndex((m) => m.monthKey === activeSalesMonth)
+
+  const canGoPrev = currentSalesIndex !== -1 && currentSalesIndex < monthlySalesList.length - 1
+  const canGoNext = currentSalesIndex !== -1 && currentSalesIndex > 0
+
+  const handlePrevMonth = () => {
+    if (canGoPrev) {
+      setSalesBreakdownMonth(monthlySalesList[currentSalesIndex + 1].monthKey)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (canGoNext) {
+      setSalesBreakdownMonth(monthlySalesList[currentSalesIndex - 1].monthKey)
+    }
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "28px", maxWidth: "1400px", margin: "0 auto" }}>
@@ -430,6 +476,446 @@ export default function AdminAnalyticsPage() {
             Total revenue from webinar registrations
           </div>
         </div>
+      </div>
+
+      {/* SECTION: MONTHLY SALES & REVENUE BREAKDOWN */}
+      <div
+        style={{
+          ...cardStyle,
+          border: "1px solid rgba(245, 184, 0, 0.25)",
+          background: "linear-gradient(180deg, rgba(30, 26, 16, 0.85) 0%, rgba(20, 20, 20, 0.95) 100%)",
+        }}
+      >
+        {/* Section Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "22px",
+            flexWrap: "wrap",
+            gap: "16px",
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ background: "rgba(245, 184, 0, 0.15)", padding: "8px", borderRadius: "8px" }}>
+                <DollarSign style={{ width: "20px", height: "20px", color: "var(--gold)" }} />
+              </div>
+              <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#fff", margin: 0, letterSpacing: "-0.01em" }}>
+                Monthly Sales & Channel Breakdown
+              </h2>
+            </div>
+            <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "13px", margin: "6px 0 0 0" }}>
+              Fetch and examine total sales in any specific month, showing revenue through Subscriptions vs Webinar tickets.
+            </p>
+          </div>
+
+          {/* Month Selector Controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            {/* Prev Month Button */}
+            <button
+              onClick={handlePrevMonth}
+              disabled={!canGoPrev}
+              title="Previous Month"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "36px",
+                height: "36px",
+                borderRadius: "8px",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: canGoPrev ? "#fff" : "rgba(255,255,255,0.2)",
+                cursor: canGoPrev ? "pointer" : "not-allowed",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <ChevronLeft style={{ width: "18px", height: "18px" }} />
+            </button>
+
+            {/* Select Dropdown */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "rgba(255,255,255,0.08)",
+                padding: "8px 14px",
+                borderRadius: "8px",
+                border: "1px solid rgba(245, 184, 0, 0.3)",
+              }}
+            >
+              <Calendar style={{ width: "16px", height: "16px", color: "var(--gold)" }} />
+              <select
+                value={activeSalesMonth}
+                onChange={(e) => setSalesBreakdownMonth(e.target.value)}
+                style={{
+                  background: "transparent",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  border: "none",
+                  outline: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {monthlySalesList.map((m) => (
+                  <option key={m.monthKey} value={m.monthKey} style={{ background: "#1a1a1a", color: "#fff" }}>
+                    {m.monthLabel}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Next Month Button */}
+            <button
+              onClick={handleNextMonth}
+              disabled={!canGoNext}
+              title="Next Month"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "36px",
+                height: "36px",
+                borderRadius: "8px",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: canGoNext ? "#fff" : "rgba(255,255,255,0.2)",
+                cursor: canGoNext ? "pointer" : "not-allowed",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <ChevronRight style={{ width: "18px", height: "18px" }} />
+            </button>
+
+            {/* Toggle History Table */}
+            <button
+              onClick={() => setShowSalesHistoryTable(!showSalesHistoryTable)}
+              style={{
+                marginLeft: "4px",
+                padding: "8px 14px",
+                borderRadius: "8px",
+                background: showSalesHistoryTable ? "rgba(245, 184, 0, 0.15)" : "rgba(255,255,255,0.06)",
+                border: showSalesHistoryTable ? "1px solid rgba(245, 184, 0, 0.35)" : "1px solid rgba(255,255,255,0.12)",
+                color: showSalesHistoryTable ? "var(--gold)" : "rgba(255,255,255,0.7)",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {showSalesHistoryTable ? "Hide History Table" : "View All Months Table"}
+            </button>
+          </div>
+        </div>
+
+        {currentSalesData ? (
+          <>
+            {/* 3 Metric Cards for the Selected Month */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: "16px",
+                marginBottom: "20px",
+              }}
+            >
+              {/* Card 1: Total Sales */}
+              <div
+                style={{
+                  background: "rgba(255, 255, 255, 0.04)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: "10px",
+                  padding: "18px 20px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.6)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Total Sales in {currentSalesData.monthLabel}
+                  </span>
+                  {currentSalesData.momGrowthPct !== null ? (
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: "999px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "2px",
+                        background: currentSalesData.momGrowthPct >= 0 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                        color: currentSalesData.momGrowthPct >= 0 ? "#10b981" : "#ef4444",
+                        border: currentSalesData.momGrowthPct >= 0 ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(239, 68, 68, 0.3)",
+                      }}
+                    >
+                      {currentSalesData.momGrowthPct >= 0 ? <ArrowUpRight style={{ width: "12px", height: "12px" }} /> : <ArrowDownRight style={{ width: "12px", height: "12px" }} />}
+                      {currentSalesData.momGrowthPct >= 0 ? `+${currentSalesData.momGrowthPct}%` : `${currentSalesData.momGrowthPct}%`} MoM
+                    </span>
+                  ) : null}
+                </div>
+
+                <div style={{ fontSize: "28px", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
+                  {formatCurrency(currentSalesData.totalSales)}
+                </div>
+
+                <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)", marginTop: "6px" }}>
+                  {currentSalesData.subscriptionCount + currentSalesData.webinarCount} total purchases ({currentSalesData.subscriptionCount} subs, {currentSalesData.webinarCount} webinars)
+                </div>
+              </div>
+
+              {/* Card 2: Subscriptions */}
+              <div
+                style={{
+                  background: "rgba(59, 130, 246, 0.06)",
+                  border: "1px solid rgba(59, 130, 246, 0.25)",
+                  borderRadius: "10px",
+                  padding: "18px 20px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "12px", color: "#93c5fd", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Through Subscriptions
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: "999px",
+                      background: "rgba(59, 130, 246, 0.2)",
+                      color: "#93c5fd",
+                      border: "1px solid rgba(59, 130, 246, 0.35)",
+                    }}
+                  >
+                    {currentSalesData.subscriptionPct}% Share
+                  </span>
+                </div>
+
+                <div style={{ fontSize: "28px", fontWeight: 800, color: "#93c5fd", letterSpacing: "-0.02em" }}>
+                  {formatCurrency(currentSalesData.subscriptionSales)}
+                </div>
+
+                <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)", marginTop: "6px" }}>
+                  {currentSalesData.subscriptionCount} subscription charges & renewals
+                </div>
+              </div>
+
+              {/* Card 3: Webinars */}
+              <div
+                style={{
+                  background: "rgba(168, 85, 247, 0.06)",
+                  border: "1px solid rgba(168, 85, 247, 0.25)",
+                  borderRadius: "10px",
+                  padding: "18px 20px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "12px", color: "#d8b4fe", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Through Webinars
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: "999px",
+                      background: "rgba(168, 85, 247, 0.2)",
+                      color: "#d8b4fe",
+                      border: "1px solid rgba(168, 85, 247, 0.35)",
+                    }}
+                  >
+                    {currentSalesData.webinarPct}% Share
+                  </span>
+                </div>
+
+                <div style={{ fontSize: "28px", fontWeight: 800, color: "#d8b4fe", letterSpacing: "-0.02em" }}>
+                  {formatCurrency(currentSalesData.webinarSales)}
+                </div>
+
+                <div style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)", marginTop: "6px" }}>
+                  {currentSalesData.webinarCount} webinar seat registrations
+                </div>
+              </div>
+            </div>
+
+            {/* Visual Split Bar */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                borderRadius: "10px",
+                padding: "16px 20px",
+                border: "1px solid rgba(255,255,255,0.06)",
+                marginBottom: showSalesHistoryTable ? "20px" : "0",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", fontSize: "12px" }}>
+                <span style={{ fontWeight: 600, color: "#fff" }}>Revenue Distribution in {currentSalesData.monthLabel}</span>
+                <span style={{ color: "rgba(255,255,255,0.5)" }}>Total: {formatCurrency(currentSalesData.totalSales)}</span>
+              </div>
+
+              {/* Dual Color Progress Bar */}
+              <div style={{ display: "flex", width: "100%", height: "12px", borderRadius: "999px", overflow: "hidden", background: "rgba(255,255,255,0.08)" }}>
+                <div
+                  style={{
+                    width: `${currentSalesData.subscriptionPct}%`,
+                    background: "linear-gradient(90deg, #2563eb 0%, #3b82f6 100%)",
+                    transition: "width 0.4s ease",
+                  }}
+                  title={`Subscriptions: ${currentSalesData.subscriptionPct}% (${formatCurrency(currentSalesData.subscriptionSales)})`}
+                />
+                <div
+                  style={{
+                    width: `${currentSalesData.webinarPct}%`,
+                    background: "linear-gradient(90deg, #9333ea 0%, #a855f7 100%)",
+                    transition: "width 0.4s ease",
+                  }}
+                  title={`Webinars: ${currentSalesData.webinarPct}% (${formatCurrency(currentSalesData.webinarSales)})`}
+                />
+              </div>
+
+              {/* Legend */}
+              <div style={{ display: "flex", gap: "24px", marginTop: "12px", fontSize: "12px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#3b82f6" }}></span>
+                  <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                    Subscriptions: <strong>{formatCurrency(currentSalesData.subscriptionSales)}</strong> ({currentSalesData.subscriptionPct}%)
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#a855f7" }}></span>
+                  <span style={{ color: "rgba(255,255,255,0.7)" }}>
+                    Webinars: <strong>{formatCurrency(currentSalesData.webinarSales)}</strong> ({currentSalesData.webinarPct}%)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Monthly Sales History Table */}
+            {showSalesHistoryTable && (
+              <div style={{ borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden", background: "rgba(255,255,255,0.02)" }}>
+                <div style={{ padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>All Historical Monthly Sales</span>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>{monthlySalesList.length} months recorded</span>
+                </div>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.6)", fontSize: "12px" }}>
+                        <th style={tableCellStyle}>Month</th>
+                        <th style={tableCellStyle}>Total Sales</th>
+                        <th style={tableCellStyle}>Subscription Sales</th>
+                        <th style={tableCellStyle}>Webinar Sales</th>
+                        <th style={tableCellStyle}>Split (Subs / Webinars)</th>
+                        <th style={tableCellStyle}>MoM Growth</th>
+                        <th style={{ ...tableCellStyle, textAlign: "right" }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthlySalesList.map((m) => {
+                        const isSelected = m.monthKey === activeSalesMonth
+                        return (
+                          <tr
+                            key={m.monthKey}
+                            style={{
+                              background: isSelected ? "rgba(245, 184, 0, 0.08)" : "transparent",
+                              transition: "background 0.15s ease",
+                            }}
+                          >
+                            <td style={tableCellStyle}>
+                              <div style={{ fontWeight: 600, color: isSelected ? "var(--gold)" : "#fff" }}>
+                                {m.monthLabel}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                {m.monthKey}
+                              </div>
+                            </td>
+                            <td style={tableCellStyle}>
+                              <div style={{ fontWeight: 700, color: "#fff", fontSize: "14px" }}>
+                                {formatCurrency(m.totalSales)}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                {m.subscriptionCount + m.webinarCount} total sales
+                              </div>
+                            </td>
+                            <td style={tableCellStyle}>
+                              <div style={{ color: "#93c5fd", fontWeight: 600 }}>
+                                {formatCurrency(m.subscriptionSales)}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                {m.subscriptionCount} charges ({m.subscriptionPct}%)
+                              </div>
+                            </td>
+                            <td style={tableCellStyle}>
+                              <div style={{ color: "#d8b4fe", fontWeight: 600 }}>
+                                {formatCurrency(m.webinarSales)}
+                              </div>
+                              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                                {m.webinarCount} registrations ({m.webinarPct}%)
+                              </div>
+                            </td>
+                            <td style={{ ...tableCellStyle, minWidth: "140px" }}>
+                              <div style={{ display: "flex", width: "100%", height: "8px", borderRadius: "999px", overflow: "hidden", background: "rgba(255,255,255,0.1)" }}>
+                                <div style={{ width: `${m.subscriptionPct}%`, background: "#3b82f6" }} />
+                                <div style={{ width: `${m.webinarPct}%`, background: "#a855f7" }} />
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "rgba(255,255,255,0.5)", marginTop: "4px" }}>
+                                <span>{m.subscriptionPct}%</span>
+                                <span>{m.webinarPct}%</span>
+                              </div>
+                            </td>
+                            <td style={tableCellStyle}>
+                              {m.momGrowthPct !== null ? (
+                                <span
+                                  style={{
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    padding: "2px 8px",
+                                    borderRadius: "4px",
+                                    background: m.momGrowthPct >= 0 ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)",
+                                    color: m.momGrowthPct >= 0 ? "#10b981" : "#ef4444",
+                                  }}
+                                >
+                                  {m.momGrowthPct >= 0 ? `+${m.momGrowthPct}%` : `${m.momGrowthPct}%`}
+                                </span>
+                              ) : (
+                                <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "11px" }}>-</span>
+                              )}
+                            </td>
+                            <td style={{ ...tableCellStyle, textAlign: "right" }}>
+                              <button
+                                onClick={() => setSalesBreakdownMonth(m.monthKey)}
+                                style={{
+                                  padding: "5px 12px",
+                                  borderRadius: "6px",
+                                  background: isSelected ? "var(--gold)" : "rgba(255,255,255,0.06)",
+                                  color: isSelected ? "#000" : "#fff",
+                                  fontSize: "11px",
+                                  fontWeight: 600,
+                                  border: "none",
+                                  cursor: "pointer",
+                                  transition: "all 0.15s ease",
+                                }}
+                              >
+                                {isSelected ? "Selected" : "Select"}
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{ padding: "32px", textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+            No sales data recorded for the selected month.
+          </div>
+        )}
       </div>
 
       {/* SECTION 1: SUBSCRIPTION RETENTION RATE GRAPH */}

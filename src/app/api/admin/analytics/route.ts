@@ -394,12 +394,119 @@ export async function GET(request: NextRequest) {
             (s) => s.status === "ACTIVE" || s.status === "AUTHENTICATED"
         ).length
 
+        // ==========================================
+        // MONTHLY SALES & REVENUE BREAKDOWN
+        // ==========================================
+        const monthlySalesMap: Record<string, {
+            totalSales: number
+            subscriptionSales: number
+            subscriptionCount: number
+            webinarSales: number
+            webinarCount: number
+        }> = {}
+
+        const ensureMonthSales = (mKey: string) => {
+            if (!monthlySalesMap[mKey]) {
+                monthlySalesMap[mKey] = {
+                    totalSales: 0,
+                    subscriptionSales: 0,
+                    subscriptionCount: 0,
+                    webinarSales: 0,
+                    webinarCount: 0,
+                }
+            }
+            return monthlySalesMap[mKey]
+        }
+
+        allMonthsSorted.forEach((mKey) => ensureMonthSales(mKey))
+
+        // 1. Map Webinar Payments to payment month
+        webinarPayments.forEach((p) => {
+            const date = p.paidAt || p.createdAt
+            if (!date) return
+            const mKey = getMonthKey(date)
+            const rupees = p.amount > 10000 ? Math.round(p.amount / 100) : p.amount
+            const entry = ensureMonthSales(mKey)
+            entry.totalSales += rupees
+            entry.webinarSales += rupees
+            entry.webinarCount++
+        })
+
+        // 2. Map Subscription Charges & Manual Grants to charge month
+        subscriptions.forEach((sub) => {
+            if (sub.charges && sub.charges.length > 0) {
+                sub.charges.forEach((c) => {
+                    if (c.status === "CAPTURED" || c.status === "CREATED") {
+                        const date = c.chargedAt || c.createdAt
+                        if (!date) return
+                        const mKey = getMonthKey(new Date(date))
+                        const rupees = c.amount > 10000 ? Math.round(c.amount / 100) : c.amount
+                        const entry = ensureMonthSales(mKey)
+                        entry.totalSales += rupees
+                        entry.subscriptionSales += rupees
+                        entry.subscriptionCount++
+                    }
+                })
+            } else {
+                const notesObj = sub.notes && typeof sub.notes === "object" && !Array.isArray(sub.notes)
+                    ? (sub.notes as Record<string, unknown>)
+                    : null
+                const amt = typeof notesObj?.amountPaid === "number" ? notesObj.amountPaid : 0
+                if (amt > 0) {
+                    const date = notesObj?.grantedAt ? new Date(notesObj.grantedAt as string) : sub.createdAt
+                    if (date) {
+                        const mKey = getMonthKey(new Date(date))
+                        const entry = ensureMonthSales(mKey)
+                        entry.totalSales += amt
+                        entry.subscriptionSales += amt
+                        entry.subscriptionCount++
+                    }
+                }
+            }
+        })
+
+        // Sort chronologically ascending to calculate month-over-month growth
+        const chronologicalMonths = Object.keys(monthlySalesMap).sort()
+        const allMonthlySalesList = chronologicalMonths.map((mKey, idx) => {
+            const current = monthlySalesMap[mKey]
+            const prevMonthKey = idx > 0 ? chronologicalMonths[idx - 1] : null
+            const prev = prevMonthKey ? monthlySalesMap[prevMonthKey] : null
+
+            let momGrowthPct: number | null = null
+            if (prev && prev.totalSales > 0) {
+                momGrowthPct = Math.round(((current.totalSales - prev.totalSales) / prev.totalSales) * 1000) / 10
+            }
+
+            const subscriptionPct = current.totalSales > 0
+                ? Math.round((current.subscriptionSales / current.totalSales) * 1000) / 10
+                : 0
+            const webinarPct = current.totalSales > 0
+                ? Math.round((current.webinarSales / current.totalSales) * 1000) / 10
+                : 0
+
+            return {
+                monthKey: mKey,
+                monthLabel: formatMonthLabel(mKey),
+                totalSales: current.totalSales,
+                subscriptionSales: current.subscriptionSales,
+                subscriptionCount: current.subscriptionCount,
+                webinarSales: current.webinarSales,
+                webinarCount: current.webinarCount,
+                subscriptionPct,
+                webinarPct,
+                momGrowthPct,
+            }
+        })
+
+        const activeMonthlySales = allMonthlySalesList.filter((m) => m.totalSales > 0 || m.monthKey >= "2026-03")
+
         return NextResponse.json({
             success: true,
             data: {
                 availableMonths: allMonthsSorted.reverse(),
                 selectedTimeframe: timeframe,
                 selectedMonth: selectedMonth || null,
+                monthlySales: [...activeMonthlySales].reverse(),
                 kpis: {
                     averageLtv,
                     totalRevenue,
