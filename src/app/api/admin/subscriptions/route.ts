@@ -48,7 +48,6 @@ export async function GET() {
           orderBy: {
             createdAt: "desc",
           },
-          take: 1,
         },
         auditLogs: {
           orderBy: {
@@ -93,6 +92,17 @@ export async function GET() {
           paidCount: subscription.paidCount || (subscription.charges.length > 0 ? subscription.charges.length : (subscription.status === "ACTIVE" ? 1 : 0)),
           createdAt: subscription.createdAt,
           updatedAt: subscription.updatedAt,
+          charges: subscription.charges.map((charge) => ({
+            id: charge.id,
+            amount: charge.amount,
+            currency: charge.currency,
+            status: charge.status.toLowerCase(),
+            chargedAt: charge.chargedAt,
+            failureReason: charge.failureReason,
+            razorpayPaymentId: charge.razorpayPaymentId,
+            razorpayInvoiceId: charge.razorpayInvoiceId,
+            createdAt: charge.createdAt,
+          })),
           latestCharge: subscription.charges[0]
             ? {
                 amount: subscription.charges[0].amount,

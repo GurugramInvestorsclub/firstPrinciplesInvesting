@@ -3053,6 +3053,262 @@ export async function getSecondaryEmailsForUser(userId: string) {
   })
 }
 
+export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
+  ensureCheckoutConfigured()
+
+  const localSubscription = await prisma.insightsSubscription.findUnique({
+    where: { id: subscriptionId },
+    include: {
+      user: {
+        select: { id: true, email: true, name: true },
+      },
+      charges: true,
+    },
+  })
+
+  if (!localSubscription) {
+    throw new InsightsSubscriptionApiError(404, "SUBSCRIPTION_NOT_FOUND", "Insights subscription not found")
+  }
+
+  if (!localSubscription.razorpaySubscriptionId) {
+    throw new InsightsSubscriptionApiError(
+      400,
+      "MANUAL_SUBSCRIPTION",
+      "This is a manual offline subscription and cannot be synced from Razorpay"
+    )
+  }
+
+  const client = getRazorpayClientOrThrow()
+  const providerSubscription = await client.subscriptions.fetch(localSubscription.razorpaySubscriptionId)
+  if (!providerSubscription) {
+    throw new InsightsSubscriptionApiError(
+      404,
+      "PROVIDER_SUBSCRIPTION_NOT_FOUND",
+      "Subscription not found in Razorpay"
+    )
+  }
+
+  const providerEntity = normalizeProviderSubscriptionEntity(providerSubscription)
+
+  // Fetch all invoices for this subscription
+  const invoicesResult = await client.invoices.all({
+    subscription_id: localSubscription.razorpaySubscriptionId,
+  })
+  const invoices = ((invoicesResult as any)?.items || invoicesResult || []) as Array<any>
+
+  let newlySyncedCharges = 0
+
+  await prisma.$transaction(
+    async (tx) => {
+      await acquireLock(tx, `insights-subscription:sync:${localSubscription.id}`)
+
+      for (const inv of invoices) {
+        if (!inv.payment_id) continue
+
+        const status =
+          inv.status === "paid"
+            ? InsightsSubscriptionChargeStatus.CAPTURED
+            : inv.status === "cancelled" || inv.status === "expired"
+              ? InsightsSubscriptionChargeStatus.FAILED
+              : InsightsSubscriptionChargeStatus.CREATED
+
+        const chargedAt = inv.paid_at
+          ? new Date(inv.paid_at * 1000)
+          : inv.issued_at
+            ? new Date(inv.issued_at * 1000)
+            : new Date()
+
+        const chargeAmount = inv.amount_paid || inv.amount || 0
+
+        const existingCharge = await tx.insightsSubscriptionCharge.findFirst({
+          where: {
+            OR: [
+              { razorpayPaymentId: inv.payment_id },
+              { razorpayInvoiceId: inv.id },
+            ],
+          },
+        })
+
+        if (!existingCharge) {
+          await tx.insightsSubscriptionCharge.create({
+            data: {
+              subscriptionId: localSubscription.id,
+              razorpayPaymentId: inv.payment_id,
+              razorpayInvoiceId: inv.id,
+              amount: chargeAmount,
+              currency: inv.currency || "INR",
+              status,
+              chargedAt,
+            },
+          })
+          newlySyncedCharges++
+        } else {
+          await tx.insightsSubscriptionCharge.update({
+            where: { id: existingCharge.id },
+            data: {
+              razorpayPaymentId: inv.payment_id,
+              razorpayInvoiceId: inv.id,
+              amount: chargeAmount,
+              currency: inv.currency || "INR",
+              status,
+              chargedAt,
+            },
+          })
+        }
+      }
+
+      // Re-query captured charges count
+      const capturedChargesCount = await tx.insightsSubscriptionCharge.count({
+        where: {
+          subscriptionId: localSubscription.id,
+          status: InsightsSubscriptionChargeStatus.CAPTURED,
+        },
+      })
+
+      const finalPaidCount = Math.max(providerEntity.paidCount || 0, capturedChargesCount)
+
+      const cancelAtCycleEnd =
+        localSubscription.cancelAtCycleEnd ||
+        localSubscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
+
+      let mappedStatus = mapProviderStatusToLocal(providerEntity.status, cancelAtCycleEnd)
+      if (mappedStatus === InsightsSubscriptionStatus.PENDING && finalPaidCount > 0) {
+        mappedStatus = InsightsSubscriptionStatus.ACTIVE
+      }
+
+      const terminalStatus =
+        mappedStatus === InsightsSubscriptionStatus.CANCELLED ||
+        mappedStatus === InsightsSubscriptionStatus.COMPLETED ||
+        mappedStatus === InsightsSubscriptionStatus.EXPIRED
+
+      let currentStartAt = providerEntity.currentStartAt ?? localSubscription.currentStartAt ?? null
+      const calculatedEndAt =
+        currentStartAt && localSubscription.planKey
+          ? addPlanInterval(currentStartAt, localSubscription.planKey)
+          : null
+      let currentEndAt = providerEntity.currentEndAt ?? localSubscription.currentEndAt ?? calculatedEndAt
+
+      if (terminalStatus && localSubscription.startAt && localSubscription.planKey) {
+        const expectedPaidEnd = new Date(localSubscription.startAt)
+        for (let i = 0; i < finalPaidCount; i++) {
+          const next = addPlanInterval(expectedPaidEnd, localSubscription.planKey)
+          expectedPaidEnd.setTime(next.getTime())
+        }
+        if (currentEndAt && currentEndAt.getTime() > expectedPaidEnd.getTime()) {
+          currentStartAt = localSubscription.startAt
+          currentEndAt = expectedPaidEnd
+        }
+      } else if (
+        currentEndAt &&
+        currentStartAt &&
+        currentEndAt.getTime() <= currentStartAt.getTime() &&
+        calculatedEndAt
+      ) {
+        currentEndAt = calculatedEndAt
+      }
+
+      await tx.insightsSubscription.update({
+        where: { id: localSubscription.id },
+        data: {
+          status: mappedStatus,
+          currentStartAt,
+          currentEndAt,
+          chargeAt: providerEntity.chargeAt,
+          startAt: providerEntity.startAt ?? localSubscription.startAt,
+          endedAt: providerEntity.endedAt,
+          cancelledAt:
+            mappedStatus === InsightsSubscriptionStatus.CANCELLED
+              ? providerEntity.cancelledAt ?? new Date()
+              : terminalStatus
+                ? providerEntity.endedAt
+                : null,
+          quantity: providerEntity.quantity,
+          totalCount: providerEntity.totalCount,
+          paidCount: finalPaidCount,
+          remainingCount: providerEntity.remainingCount,
+          lastWebhookAt: new Date(),
+        },
+      })
+
+      await logSubscriptionAudit(tx, localSubscription.id, "ADMIN_RAZORPAY_SYNC", {
+        razorpaySubscriptionId: localSubscription.razorpaySubscriptionId,
+        providerStatus: providerEntity.status,
+        mappedStatus,
+        invoicesFound: invoices.length,
+        newlySyncedCharges,
+        paidCount: finalPaidCount,
+      })
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
+    }
+  )
+
+  const refreshed = await prisma.insightsSubscription.findUniqueOrThrow({
+    where: { id: localSubscription.id },
+    include: {
+      charges: {
+        orderBy: { createdAt: "desc" },
+      },
+      auditLogs: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      },
+    },
+  })
+
+  return {
+    subscription: refreshed,
+    invoicesCount: invoices.length,
+    newlySyncedCharges,
+  }
+}
+
+export async function syncAllSubscriptionsFromRazorpay() {
+  ensureCheckoutConfigured()
+
+  const subscriptions = await prisma.insightsSubscription.findMany({
+    where: {
+      razorpaySubscriptionId: { not: null },
+      source: { not: "manual_neft" },
+    },
+    select: {
+      id: true,
+      razorpaySubscriptionId: true,
+      user: { select: { email: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+  })
+
+  let successCount = 0
+  let totalNewCharges = 0
+  const errors: Array<{ subscriptionId: string; email: string | null; error: string }> = []
+
+  for (const sub of subscriptions) {
+    try {
+      const result = await syncSubscriptionFromRazorpay(sub.id)
+      successCount++
+      totalNewCharges += result.newlySyncedCharges
+    } catch (err) {
+      errors.push({
+        subscriptionId: sub.id,
+        email: sub.user.email,
+        error: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+
+  return {
+    totalSubscriptions: subscriptions.length,
+    successCount,
+    totalNewCharges,
+    errors,
+  }
+}
+
+
 
 
 

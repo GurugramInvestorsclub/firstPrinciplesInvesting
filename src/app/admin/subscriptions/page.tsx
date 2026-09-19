@@ -30,6 +30,17 @@ interface SubscriptionRow {
     metadata: any
     createdAt: string
   }>
+  charges?: Array<{
+    id: string
+    amount: number
+    currency: string
+    status: string
+    chargedAt: string | null
+    failureReason: string | null
+    razorpayPaymentId: string | null
+    razorpayInvoiceId: string | null
+    createdAt?: string
+  }>
   latestCharge: {
     amount: number
     currency: string
@@ -164,6 +175,11 @@ export default function AdminSubscriptionsPage() {
   const [editResendEmail, setEditResendEmail] = useState(false)
   const [submittingEdit, setSubmittingEdit] = useState(false)
 
+  // Razorpay Live Sync State
+  const [syncingId, setSyncingId] = useState<string | null>(null)
+  const [syncingAll, setSyncingAll] = useState(false)
+  const [selectedChargesRow, setSelectedChargesRow] = useState<SubscriptionRow | null>(null)
+
   // Secondary Email State
   const [newSecondaryEmail, setNewSecondaryEmail] = useState("")
   const [submittingSecondary, setSubmittingSecondary] = useState(false)
@@ -270,6 +286,80 @@ export default function AdminSubscriptionsPage() {
 
   useEffect(() => {
     loadData()
+  }, [loadData])
+
+  const handleSyncSubscription = useCallback(
+    async (row: SubscriptionRow) => {
+      if (!row.razorpaySubscriptionId) {
+        window.alert("Manual offline subscriptions cannot be synced from Razorpay.")
+        return
+      }
+
+      setSyncingId(row.id)
+      setActionMessage(null)
+
+      try {
+        const response = await fetch("/api/admin/subscriptions/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscriptionId: row.id }),
+        })
+        const payload = await response.json()
+
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || payload.error || "Failed to sync with Razorpay")
+        }
+
+        const { invoicesCount, newlySyncedCharges } = payload.data
+        setActionMessage(
+          `Synced ${row.userEmail || "subscription"} with Razorpay: ${invoicesCount} invoices checked (${newlySyncedCharges} newly recorded charges).`
+        )
+        await loadData()
+      } catch (err) {
+        setActionMessage(err instanceof Error ? err.message : "Sync failed")
+      } finally {
+        setSyncingId(null)
+      }
+    },
+    [loadData]
+  )
+
+  const handleSyncAllSubscriptions = useCallback(async () => {
+    if (
+      !window.confirm(
+        "Sync all Razorpay subscriptions now? This will check Razorpay for any updated renewal payments and invoices."
+      )
+    ) {
+      return
+    }
+
+    setSyncingAll(true)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ syncAll: true }),
+      })
+      const payload = await response.json()
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to sync all subscriptions")
+      }
+
+      const { successCount, totalNewCharges, errors } = payload.data.summary
+      let msg = `Bulk Razorpay sync complete! Checked ${successCount} subscriptions (${totalNewCharges} new charges captured).`
+      if (errors && errors.length > 0) {
+        msg += ` (${errors.length} failed)`
+      }
+      setActionMessage(msg)
+      await loadData()
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Bulk sync failed")
+    } finally {
+      setSyncingAll(false)
+    }
   }, [loadData])
 
   const reconcilePayment = useCallback(
@@ -564,6 +654,29 @@ export default function AdminSubscriptionsPage() {
             </p>
           </div>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={handleSyncAllSubscriptions}
+              disabled={syncingAll}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "10px",
+                border: "1px solid rgba(16, 185, 129, 0.4)",
+                background: "rgba(16, 185, 129, 0.12)",
+                color: "#6ee7b7",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: syncingAll ? "wait" : "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 2px 8px rgba(16, 185, 129, 0.15)",
+                opacity: syncingAll ? 0.7 : 1,
+              }}
+              title="Polls Razorpay for all subscribers to automatically fetch and record newly captured renewal charges"
+            >
+              {syncingAll ? "🔄 Syncing Razorpay..." : "🔄 Sync All from Razorpay"}
+            </button>
             <button
               type="button"
               onClick={() => setShowBrevoSyncModal(true)}
@@ -1026,8 +1139,29 @@ export default function AdminSubscriptionsPage() {
                             ) : null}
                           </td>
                           <td style={tableCellStyle}>
-                            <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--gold)" }}>
-                              {row.paidCount ?? (row.status.toLowerCase() === "active" ? 1 : 0)}
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                              <div style={{ fontWeight: 700, fontSize: "14px", color: "var(--gold)" }}>
+                                {row.paidCount ?? (row.status.toLowerCase() === "active" ? 1 : 0)}
+                              </div>
+                              {row.charges && row.charges.length > 0 ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedChargesRow(row)}
+                                  style={{
+                                    padding: "2px 7px",
+                                    borderRadius: "6px",
+                                    background: "rgba(250,204,21,0.12)",
+                                    border: "1px solid rgba(250,204,21,0.3)",
+                                    color: "#fde68a",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                  }}
+                                  title="View payment & renewal invoice history"
+                                >
+                                  💳 History ({row.charges.length})
+                                </button>
+                              ) : null}
                             </div>
                             <div style={{ color: "var(--text-secondary)", fontSize: "11px", marginTop: "2px" }}>
                               {(row.paidCount ?? (row.status.toLowerCase() === "active" ? 1 : 0)) === 0
@@ -1102,6 +1236,28 @@ export default function AdminSubscriptionsPage() {
                           </td>
                           <td style={tableCellStyle}>
                             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                              {row.razorpaySubscriptionId ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleSyncSubscription(row)}
+                                  disabled={syncingId === row.id}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "6px",
+                                    border: "1px solid rgba(16,185,129,0.35)",
+                                    background: "rgba(16,185,129,0.12)",
+                                    color: "#6ee7b7",
+                                    fontWeight: 600,
+                                    fontSize: "12px",
+                                    cursor: syncingId === row.id ? "wait" : "pointer",
+                                    opacity: syncingId === row.id ? 0.7 : 1,
+                                  }}
+                                  title="Poll Razorpay to sync this subscription and capture new invoices"
+                                >
+                                  {syncingId === row.id ? "Syncing..." : "🔄 Sync Razorpay"}
+                                </button>
+                              ) : null}
+
                               {canReconcile ? (
                                 <button
                                   type="button"
@@ -1764,6 +1920,274 @@ export default function AdminSubscriptionsPage() {
           </div>
         )
       })() : null}
+
+      {/* Payment & Renewal History Modal */}
+      {selectedChargesRow ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: "#121216",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "16px",
+              width: "100%",
+              maxWidth: "680px",
+              maxHeight: "90vh",
+              display: "flex",
+              flexDirection: "column",
+              color: "#fff",
+              overflow: "hidden",
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                padding: "20px 24px",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                  💳 Payment & Renewal History
+                </h2>
+                <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                  {selectedChargesRow.userName || "Subscriber"} ({selectedChargesRow.userEmail})
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedChargesRow(null)}
+                style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "20px", cursor: "pointer" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: "20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "16px" }}>
+              {/* Summary Bar */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "12px",
+                  padding: "12px 16px",
+                  background: "rgba(255,255,255,0.04)",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Razorpay Subscription
+                  </div>
+                  <code style={{ fontSize: "13px", color: "#FFC72C", fontWeight: 600 }}>
+                    {selectedChargesRow.razorpaySubscriptionId || "Manual / Offline Grant"}
+                  </code>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  {selectedChargesRow.razorpaySubscriptionId ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await handleSyncSubscription(selectedChargesRow)
+                        // Refresh selectedChargesRow from updated state
+                        const updated = rows.find((r) => r.id === selectedChargesRow.id)
+                        if (updated) setSelectedChargesRow(updated)
+                      }}
+                      disabled={syncingId === selectedChargesRow.id}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(16,185,129,0.35)",
+                        background: "rgba(16,185,129,0.12)",
+                        color: "#6ee7b7",
+                        fontWeight: 600,
+                        fontSize: "12px",
+                        cursor: syncingId === selectedChargesRow.id ? "wait" : "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      {syncingId === selectedChargesRow.id ? "Syncing..." : "🔄 Sync Live from Razorpay"}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Charges List */}
+              {(!selectedChargesRow.charges || selectedChargesRow.charges.length === 0) ? (
+                <div style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)", fontSize: "13px" }}>
+                  No recorded invoice charges found in the database.
+                  {selectedChargesRow.razorpaySubscriptionId ? (
+                    <div style={{ marginTop: "8px" }}>
+                      Click <strong>"Sync Live from Razorpay"</strong> above to poll all past and current invoices.
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    Invoices & Charges Recorded ({selectedChargesRow.charges.length})
+                  </div>
+                  {selectedChargesRow.charges.map((charge, idx) => {
+                    const isCaptured = charge.status.toLowerCase() === "captured"
+                    const isFailed = charge.status.toLowerCase() === "failed"
+                    // Determine cycle label (charges are ordered descending by createdAt)
+                    const cycleNum = selectedChargesRow.charges!.length - idx
+                    const isRenewal = cycleNum > 1
+
+                    return (
+                      <div
+                        key={charge.id}
+                        style={{
+                          padding: "16px",
+                          borderRadius: "12px",
+                          background: isCaptured
+                            ? "rgba(16,185,129,0.04)"
+                            : isFailed
+                              ? "rgba(239,68,68,0.04)"
+                              : "rgba(255,255,255,0.03)",
+                          border: isCaptured
+                            ? "1px solid rgba(16,185,129,0.2)"
+                            : isFailed
+                              ? "1px solid rgba(239,68,68,0.2)"
+                              : "1px solid rgba(255,255,255,0.08)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span
+                              style={{
+                                padding: "3px 8px",
+                                borderRadius: "6px",
+                                background: isRenewal ? "rgba(250,204,21,0.15)" : "rgba(59,130,246,0.15)",
+                                color: isRenewal ? "#fde68a" : "#93c5fd",
+                                border: isRenewal ? "1px solid rgba(250,204,21,0.3)" : "1px solid rgba(59,130,246,0.3)",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                              }}
+                            >
+                              {isRenewal ? `Cycle #${cycleNum} (Renewal)` : `Cycle #1 (Initial)`}
+                            </span>
+                            <span
+                              style={{
+                                padding: "3px 8px",
+                                borderRadius: "6px",
+                                background: isCaptured
+                                  ? "rgba(16,185,129,0.15)"
+                                  : isFailed
+                                    ? "rgba(239,68,68,0.15)"
+                                    : "rgba(245,158,11,0.15)",
+                                color: isCaptured ? "#6ee7b7" : isFailed ? "#fca5a5" : "#fcd34d",
+                                border: isCaptured
+                                  ? "1px solid rgba(16,185,129,0.3)"
+                                  : isFailed
+                                    ? "1px solid rgba(239,68,68,0.3)"
+                                    : "1px solid rgba(245,158,11,0.3)",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {charge.status}
+                            </span>
+                          </div>
+
+                          <div style={{ fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+                            {charge.currency} {(charge.amount / 100).toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                            gap: "8px",
+                            fontSize: "12px",
+                            color: "var(--text-secondary)",
+                            paddingTop: "6px",
+                            borderTop: "1px solid rgba(255,255,255,0.06)",
+                          }}
+                        >
+                          <div>
+                            <strong>Paid / Charged:</strong>{" "}
+                            <span style={{ color: "#e2e8f0" }}>{formatDate(charge.chargedAt || charge.createdAt || null)}</span>
+                          </div>
+                          {charge.razorpayPaymentId ? (
+                            <div>
+                              <strong>Payment ID:</strong>{" "}
+                              <code style={{ color: "#6ee7b7" }}>{charge.razorpayPaymentId}</code>
+                            </div>
+                          ) : null}
+                          {charge.razorpayInvoiceId ? (
+                            <div>
+                              <strong>Invoice ID:</strong>{" "}
+                              <code style={{ color: "#93c5fd" }}>{charge.razorpayInvoiceId}</code>
+                            </div>
+                          ) : null}
+                          {charge.failureReason ? (
+                            <div style={{ color: "#fca5a5", gridColumn: "1 / -1" }}>
+                              <strong>Failure Reason:</strong> {charge.failureReason}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div
+              style={{
+                padding: "16px 24px",
+                borderTop: "1px solid rgba(255,255,255,0.08)",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedChargesRow(null)}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "rgba(255,255,255,0.08)",
+                  color: "#fff",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Edit Subscription Details Modal */}
       {editingRow ? (
