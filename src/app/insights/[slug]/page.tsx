@@ -66,7 +66,7 @@ export default async function InsightPage({ params }: Props) {
     }
 
     const isSubscriberOnly = post.access === "subscriber"
-    const shouldLockContent = paywallReady && isSubscriberOnly && !hasSubscriptionAccess
+    const shouldLockContent = isSubscriberOnly && !hasSubscriptionAccess
     const previewBody = getPreviewBlocks(post)
     const callbackUrl = `/insights/${slug}`
 
@@ -178,12 +178,18 @@ export default async function InsightPage({ params }: Props) {
 
                                 <div className="mt-6">
                                     {session?.user?.id ? (
-                                        <InsightsSubscriptionCheckout
-                                            callbackUrl={callbackUrl}
-                                            userName={session.user.name}
-                                            userEmail={session.user.email}
-                                            plans={subscriptionUi.plans}
-                                        />
+                                        paywallReady ? (
+                                            <InsightsSubscriptionCheckout
+                                                callbackUrl={callbackUrl}
+                                                userName={session.user.name}
+                                                userEmail={session.user.email}
+                                                plans={subscriptionUi.plans}
+                                            />
+                                        ) : (
+                                            <p className="text-sm text-white/80">
+                                                Subscriptions are currently being updated. Please check back shortly.
+                                            </p>
+                                        )
                                     ) : (
                                         <div className="space-y-4">
                                             <p className="text-sm text-white/80">

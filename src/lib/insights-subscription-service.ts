@@ -494,16 +494,81 @@ async function logSubscriptionAudit(
   })
 }
 
+export const PENDING_GRACE_PERIOD_MS = 7 * 24 * 60 * 60 * 1000
+
+export function getPendingGraceEndAt(subscription: {
+  currentStartAt?: Date | null
+  updatedAt?: Date | null
+  charges?: Array<{ status: InsightsSubscriptionChargeStatus }>
+  paidCount?: number | null
+}): Date | null {
+  const hasCapturedCharge =
+    (subscription.charges &&
+      subscription.charges.some((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED)) ||
+    (subscription.paidCount ?? 0) > 0
+
+  if (!hasCapturedCharge) {
+    return null
+  }
+
+  const anchorDate = subscription.currentStartAt ?? subscription.updatedAt
+  if (!anchorDate) {
+    return null
+  }
+
+  return new Date(new Date(anchorDate).getTime() + PENDING_GRACE_PERIOD_MS)
+}
+
+export function isPendingWithinGracePeriod(
+  subscription: {
+    status?: InsightsSubscriptionStatus
+    currentStartAt?: Date | null
+    updatedAt?: Date | null
+    charges?: Array<{ status: InsightsSubscriptionChargeStatus }>
+    paidCount?: number | null
+  },
+  now: number = Date.now()
+): boolean {
+  if (subscription.status !== InsightsSubscriptionStatus.PENDING) {
+    return false
+  }
+  const graceEnd = getPendingGraceEndAt(subscription)
+  return Boolean(graceEnd && graceEnd.getTime() > now)
+}
+
 function getEffectiveEndAt(subscription: {
   currentStartAt?: Date | null
   currentEndAt?: Date | null
+  updatedAt?: Date | null
   planKey: InsightsPlanKey
+  status?: InsightsSubscriptionStatus
+  paidCount?: number | null
   charges?: Array<{ status: InsightsSubscriptionChargeStatus; chargedAt?: Date | null; createdAt?: Date }>
 }): Date | null {
+  // If subscription is in PENDING renewal status, access is clamped to the 7-day grace period
+  if (subscription.status === InsightsSubscriptionStatus.PENDING) {
+    return getPendingGraceEndAt(subscription)
+  }
+
+  const latestCapturedCharge = subscription.charges?.find(
+    (c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED
+  )
+
+  // If subscription is cancelled, clamp access to the period actually paid for
+  if (subscription.status === InsightsSubscriptionStatus.CANCELLED && latestCapturedCharge) {
+    const chargeDate = latestCapturedCharge.chargedAt ?? latestCapturedCharge.createdAt
+    if (chargeDate) {
+      const paidEnd = addPlanInterval(new Date(chargeDate), subscription.planKey)
+      if (subscription.currentEndAt && subscription.currentEndAt.getTime() > paidEnd.getTime()) {
+        return paidEnd
+      }
+    }
+  }
+
   const start =
     subscription.currentStartAt ??
-    subscription.charges?.find((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED)?.chargedAt ??
-    subscription.charges?.find((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED)?.createdAt ??
+    latestCapturedCharge?.chargedAt ??
+    latestCapturedCharge?.createdAt ??
     subscription.charges?.[0]?.chargedAt ??
     subscription.charges?.[0]?.createdAt
 
@@ -523,13 +588,20 @@ function getEffectiveEndAt(subscription: {
 }
 
 function membershipHasAccess(
-  subscription: Pick<SubscriptionWithLatestCharge, "status" | "currentStartAt" | "currentEndAt" | "planKey" | "paidCount" | "charges">
+  subscription: Pick<SubscriptionWithLatestCharge, "status" | "currentStartAt" | "currentEndAt" | "planKey" | "paidCount" | "charges"> & {
+    updatedAt?: Date | null
+  }
 ): boolean {
   const now = Date.now()
 
   // Fallback for new subscribers: if status is still CREATED but we have a CAPTURED charge, grant access.
   if (subscription.status === InsightsSubscriptionStatus.CREATED) {
     return subscription.charges.some(c => c.status === InsightsSubscriptionChargeStatus.CAPTURED)
+  }
+
+  // Grace period for renewals in PENDING status:
+  if (subscription.status === InsightsSubscriptionStatus.PENDING) {
+    return isPendingWithinGracePeriod(subscription, now)
   }
 
   const entitled =
@@ -765,6 +837,91 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
         }
       )
     }
+
+    // 2. Check for active/pending subscriptions near or past expiration that renewed on Razorpay
+    const expiringSub = await prisma.insightsSubscription.findFirst({
+      where: {
+        userId,
+        status: {
+          in: [
+            InsightsSubscriptionStatus.ACTIVE,
+            InsightsSubscriptionStatus.PENDING,
+            InsightsSubscriptionStatus.CANCEL_REQUESTED,
+          ],
+        },
+        razorpaySubscriptionId: { not: null },
+        OR: [
+          { currentEndAt: null },
+          { currentEndAt: { lte: new Date(Date.now() + 48 * 60 * 60 * 1000) } },
+        ],
+      },
+      select: {
+        id: true,
+        razorpaySubscriptionId: true,
+        status: true,
+        cancelAtCycleEnd: true,
+        paidCount: true,
+        currentEndAt: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    })
+
+    if (expiringSub?.razorpaySubscriptionId) {
+      const client = getRazorpayClientOrThrow()
+      const providerSubscription = await client.subscriptions.fetch(expiringSub.razorpaySubscriptionId)
+      if (providerSubscription) {
+        const providerEntity = normalizeProviderSubscriptionEntity(providerSubscription)
+        const isRenewed = providerEntity.paidCount > (expiringSub.paidCount ?? 0)
+        const isExtended =
+          Boolean(providerEntity.currentEndAt &&
+          expiringSub.currentEndAt &&
+          providerEntity.currentEndAt.getTime() > expiringSub.currentEndAt.getTime())
+
+        if (isRenewed || isExtended) {
+          let providerPayment: ProviderPaymentEntity | null = null
+          const invoicesResult = await client.invoices.all({
+            subscription_id: expiringSub.razorpaySubscriptionId,
+          })
+          const invoices = (invoicesResult?.items || invoicesResult || []) as unknown as Array<any>
+          const paidInvoice = invoices.find(
+            (inv) => (inv.status === "paid" || inv.status === "issued") && inv.payment_id
+          )
+          if (paidInvoice?.payment_id) {
+            providerPayment = await fetchProviderPayment(client, paidInvoice.payment_id as string)
+          }
+
+          await prisma.$transaction(
+            async (tx) => {
+              await acquireLock(tx, `insights-subscription:auto-sync:${expiringSub.id}`)
+              const current = await tx.insightsSubscription.findUnique({
+                where: { id: expiringSub.id },
+                select: { status: true, cancelAtCycleEnd: true },
+              })
+              if (!current) return
+
+              await applyProviderSubscriptionSnapshot(
+                tx,
+                {
+                  id: expiringSub.id,
+                  status: current.status,
+                  cancelAtCycleEnd: current.cancelAtCycleEnd,
+                },
+                providerEntity,
+                "SUBSCRIPTION_AUTO_SYNC_RENEWAL_HEALED",
+                providerPayment
+              )
+            },
+            {
+              isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+              maxWait: 15000,
+              timeout: 30000,
+            }
+          )
+        }
+      }
+    }
   } catch (error) {
     console.error("Error during autoSyncCreatedSubscriptionForUser:", error)
   }
@@ -814,6 +971,7 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
           InsightsSubscriptionStatus.AUTHENTICATED,
           InsightsSubscriptionStatus.CREATED,
           InsightsSubscriptionStatus.CANCELLED,
+          InsightsSubscriptionStatus.PENDING,
         ],
       },
     },
@@ -822,6 +980,7 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
       status: true,
       currentStartAt: true,
       currentEndAt: true,
+      updatedAt: true,
       paidCount: true,
       charges: {
         where: {
@@ -846,6 +1005,13 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
     for (const subscription of subscriptions) {
       if (subscription.status === InsightsSubscriptionStatus.CREATED) {
         if (subscription.charges.length > 0) {
+          return true
+        }
+        continue
+      }
+
+      if (subscription.status === InsightsSubscriptionStatus.PENDING) {
+        if (isPendingWithinGracePeriod(subscription, now)) {
           return true
         }
         continue
@@ -1360,15 +1526,27 @@ async function applyProviderSubscriptionSnapshot(
 
   const currentSub = await tx.insightsSubscription.findUnique({
     where: { id: subscription.id },
-    select: { currentStartAt: true, currentEndAt: true, planKey: true },
+    select: { currentStartAt: true, currentEndAt: true, planKey: true, startAt: true },
   })
 
-  const currentStartAt = providerEntity.currentStartAt ?? currentSub?.currentStartAt ?? null
+  let currentStartAt = providerEntity.currentStartAt ?? currentSub?.currentStartAt ?? null
   const calculatedEndAt =
     currentStartAt && currentSub?.planKey ? addPlanInterval(currentStartAt, currentSub.planKey) : null
 
   let currentEndAt = providerEntity.currentEndAt ?? currentSub?.currentEndAt ?? calculatedEndAt
-  if (
+
+  if (terminalStatus && currentSub?.startAt && currentSub?.planKey) {
+    const paidCount = providerEntity.paidCount || 1
+    const expectedPaidEnd = new Date(currentSub.startAt)
+    for (let i = 0; i < paidCount; i++) {
+      const next = addPlanInterval(expectedPaidEnd, currentSub.planKey)
+      expectedPaidEnd.setTime(next.getTime())
+    }
+    if (currentEndAt && currentEndAt.getTime() > expectedPaidEnd.getTime()) {
+      currentStartAt = currentSub.startAt
+      currentEndAt = expectedPaidEnd
+    }
+  } else if (
     currentEndAt &&
     currentStartAt &&
     currentEndAt.getTime() <= currentStartAt.getTime() &&
@@ -2700,6 +2878,7 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
           InsightsSubscriptionStatus.AUTHENTICATED,
           InsightsSubscriptionStatus.CREATED,
           InsightsSubscriptionStatus.CANCELLED,
+          InsightsSubscriptionStatus.PENDING,
         ],
       },
       user: {
@@ -2714,6 +2893,7 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
       status: true,
       currentStartAt: true,
       currentEndAt: true,
+      updatedAt: true,
       paidCount: true,
       user: {
         select: {
@@ -2748,6 +2928,10 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
 
     if (subscription.status === InsightsSubscriptionStatus.CREATED) {
       if (subscription.charges.length > 0) {
+        hasAccess = true
+      }
+    } else if (subscription.status === InsightsSubscriptionStatus.PENDING) {
+      if (isPendingWithinGracePeriod(subscription, now)) {
         hasAccess = true
       }
     } else if (

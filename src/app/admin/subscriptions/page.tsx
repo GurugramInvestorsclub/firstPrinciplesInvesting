@@ -916,6 +916,77 @@ export default function AdminSubscriptionsPage() {
                           </td>
                           <td style={tableCellStyle}>
                             <div style={{ textTransform: "capitalize", fontWeight: 600 }}>{row.status.replace(/_/g, " ")}</div>
+                            {row.status.toLowerCase() === "pending" ? (() => {
+                              const hasCaptured = (row.paidCount ?? 0) > 0 || row.latestCharge?.status === "captured"
+                              if (!hasCaptured) {
+                                return (
+                                  <div style={{ marginTop: "4px" }}>
+                                    <span
+                                      style={{
+                                        fontSize: "11px",
+                                        color: "#9ca3af",
+                                        background: "rgba(255,255,255,0.06)",
+                                        border: "1px solid rgba(255,255,255,0.12)",
+                                        borderRadius: "4px",
+                                        padding: "2px 6px",
+                                        display: "inline-block",
+                                      }}
+                                    >
+                                      Initial Payment Pending
+                                    </span>
+                                  </div>
+                                )
+                              }
+
+                              const anchorStr = row.currentStartAt || row.updatedAt
+                              const anchorTime = anchorStr ? new Date(anchorStr).getTime() : 0
+                              const graceEnd = anchorTime + 7 * 24 * 60 * 60 * 1000
+                              const msRemaining = graceEnd - Date.now()
+                              const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)))
+                              const isGraceActive = msRemaining > 0
+
+                              return (
+                                <div style={{ marginTop: "6px" }}>
+                                  {isGraceActive ? (
+                                    <span
+                                      style={{
+                                        fontSize: "11px",
+                                        fontWeight: 600,
+                                        color: "#60a5fa",
+                                        background: "rgba(59,130,246,0.15)",
+                                        border: "1px solid rgba(59,130,246,0.3)",
+                                        borderRadius: "4px",
+                                        padding: "2px 6px",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                      }}
+                                      title={`7-day renewal grace period active until ${formatDate(new Date(graceEnd).toISOString())}. Articles access is granted.`}
+                                    >
+                                      🛡️ Grace Active ({daysRemaining}d left)
+                                    </span>
+                                  ) : (
+                                    <span
+                                      style={{
+                                        fontSize: "11px",
+                                        fontWeight: 600,
+                                        color: "#f87171",
+                                        background: "rgba(239,68,68,0.15)",
+                                        border: "1px solid rgba(239,68,68,0.3)",
+                                        borderRadius: "4px",
+                                        padding: "2px 6px",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                      }}
+                                      title={`7-day renewal grace period expired on ${formatDate(new Date(graceEnd).toISOString())}. Articles access is blocked.`}
+                                    >
+                                      ⚠️ Grace Expired
+                                    </span>
+                                  )}
+                                </div>
+                              )
+                            })() : null}
                             {(() => {
                               const reason = getCancellationReasonDetails(row)
                               if (!reason) return null
