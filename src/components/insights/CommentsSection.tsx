@@ -38,14 +38,14 @@ const CommentAvatar = ({ user }: { user: CommentType['user'] }) => {
                 alt={user.name || "User"}
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 object-cover"
+                className="comment-avatar-img w-10 h-10 rounded-full bg-white/10 border border-white/20 object-cover"
                 onError={() => setImgError(true)}
             />
         );
     }
 
     return (
-        <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-gold font-bold shrink-0">
+        <div className="comment-avatar w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-gold font-bold shrink-0">
             {user.name ? user.name.charAt(0).toUpperCase() : "?"}
         </div>
     );
@@ -77,17 +77,17 @@ const CommentItem = ({
 
     return (
         <div className="flex flex-col gap-4 mb-2">
-            <div className="flex gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+            <div className="comment-card flex gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5 transition-colors">
                 <div className="flex-shrink-0">
                     <CommentAvatar user={comment.user} />
                 </div>
                 <div className="flex-grow">
                     <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-white/90">
+                            <span className="comment-author font-bold text-sm text-white/90">
                                 {comment.user.name || "Anonymous User"}
                             </span>
-                            <span className="text-xs text-white/40">
+                            <span className="comment-date text-xs text-white/40">
                                 {new Date(comment.createdAt).toLocaleDateString(undefined, { 
                                     month: 'short', day: 'numeric', year: 'numeric' 
                                 })}
@@ -98,20 +98,20 @@ const CommentItem = ({
                                 type="button"
                                 onClick={() => onDelete(comment.id)}
                                 disabled={isPending}
-                                className="text-white/30 hover:text-red-400 transition-colors"
+                                className="comment-delete-btn text-white/30 hover:text-red-400 transition-colors"
                                 title="Delete comment"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         )}
                     </div>
-                    <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed mb-2">
+                    <p className="comment-content text-sm text-white/80 whitespace-pre-wrap leading-relaxed mb-2">
                         {comment.content}
                     </p>
                     {currentUserId && !isReplying && (
                         <button 
                             onClick={() => setIsReplying(true)}
-                            className="text-xs text-gold hover:text-gold/80 font-semibold"
+                            className="comment-reply-btn text-xs text-gold hover:text-gold/80 font-semibold transition-colors"
                         >
                             Reply
                         </button>
@@ -123,7 +123,7 @@ const CommentItem = ({
                                 value={replyText}
                                 onChange={(e) => setReplyText(e.target.value)}
                                 placeholder="Write a reply..."
-                                className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-gold/50 transition-all min-h-[80px] resize-y"
+                                className="comment-textarea w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-gold/50 transition-all min-h-[80px] resize-y"
                                 disabled={isPending}
                             />
                             <div className="flex justify-end gap-2">
@@ -131,7 +131,7 @@ const CommentItem = ({
                                     type="button" 
                                     onClick={() => setIsReplying(false)}
                                     variant="ghost"
-                                    className="text-white/60 hover:text-white text-xs h-8 px-3"
+                                    className="comment-cancel-btn text-white/60 hover:text-white text-xs h-8 px-3"
                                 >
                                     Cancel
                                 </Button>
@@ -150,21 +150,21 @@ const CommentItem = ({
 
             {/* Render Replies */}
             {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-8 space-y-4 border-l-2 border-white/10 pl-6">
+                <div className="comment-reply-thread ml-8 space-y-4 border-l-2 border-white/10 pl-6">
                     {comment.replies.map(reply => (
-                        <div key={reply.id} className="flex gap-4 p-4 rounded-xl bg-white/[0.01] border border-white/5 relative">
+                        <div key={reply.id} className="comment-reply-card flex gap-4 p-4 rounded-xl bg-white/[0.01] border border-white/5 relative transition-colors">
                             {/* Visual connector line */}
-                            <div className="absolute top-8 -left-6 w-4 h-[2px] bg-white/10"></div>
+                            <div className="comment-reply-line absolute top-8 -left-6 w-4 h-[2px] bg-white/10"></div>
                             <div className="flex-shrink-0">
                                 <CommentAvatar user={reply.user} />
                             </div>
                             <div className="flex-grow">
                                 <div className="flex items-center justify-between mb-1">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-sm text-white/90">
+                                        <span className="comment-author font-bold text-sm text-white/90">
                                             {reply.user.name || "Anonymous User"}
                                         </span>
-                                        <span className="text-xs text-white/40">
+                                        <span className="comment-date text-xs text-white/40">
                                             {new Date(reply.createdAt).toLocaleDateString(undefined, { 
                                                 month: 'short', day: 'numeric', year: 'numeric' 
                                             })}
@@ -175,14 +175,14 @@ const CommentItem = ({
                                             type="button"
                                             onClick={() => onDelete(reply.id)}
                                             disabled={isPending}
-                                            className="text-white/30 hover:text-red-400 transition-colors"
+                                            className="comment-delete-btn text-white/30 hover:text-red-400 transition-colors"
                                             title="Delete reply"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     )}
                                 </div>
-                                <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
+                                <p className="comment-content text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
                                     {reply.content}
                                 </p>
                             </div>
@@ -262,11 +262,11 @@ export function CommentsSection({ postSlug, initialComments, currentUserId }: Co
     }
 
     return (
-        <section className="mt-16 pt-10 border-t border-white/10">
+        <section className="comments-section mt-16 pt-10 border-t border-white/10">
             <div className="flex items-center gap-2 mb-8">
-                <MessageSquare className="w-5 h-5 text-gold" />
-                <h3 className="text-2xl font-bold text-white">Discussion</h3>
-                <span className="bg-white/10 text-white/70 px-2 py-0.5 rounded-full text-xs font-mono ml-2">
+                <MessageSquare className="comments-title-icon w-5 h-5 text-gold shrink-0" />
+                <h3 className="discussion-title text-2xl font-bold text-white">Discussion</h3>
+                <span className="comments-count-badge bg-white/10 text-white/70 px-2 py-0.5 rounded-full text-xs font-mono ml-2">
                     {comments.length + comments.reduce((acc, c) => acc + (c.replies?.length || 0), 0)}
                 </span>
             </div>
@@ -280,7 +280,7 @@ export function CommentsSection({ postSlug, initialComments, currentUserId }: Co
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 placeholder="Share your thoughts on this insight..."
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all min-h-[120px] resize-y"
+                                className="comments-textarea w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all min-h-[120px] resize-y"
                                 disabled={isPending}
                             />
                             {error && <p className="text-red-400 text-xs">{error}</p>}
@@ -300,7 +300,7 @@ export function CommentsSection({ postSlug, initialComments, currentUserId }: Co
                     {/* Comments List */}
                     <div className="space-y-6">
                         {comments.length === 0 ? (
-                            <p className="text-center text-white/40 text-sm py-8 italic">No comments yet. Be the first to share your thoughts!</p>
+                            <p className="comment-empty-text text-center text-white/40 text-sm py-8 italic">No comments yet. Be the first to share your thoughts!</p>
                         ) : (
                             comments.map((comment) => (
                                 <CommentItem
@@ -316,8 +316,8 @@ export function CommentsSection({ postSlug, initialComments, currentUserId }: Co
                     </div>
                 </>
             ) : (
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center my-8">
-                    <p className="text-white/70 mb-4">Log in to view and join the discussion.</p>
+                <div className="comment-login-card bg-white/5 border border-white/10 rounded-xl p-6 text-center my-8">
+                    <p className="comment-login-text text-white/70 mb-4">Log in to view and join the discussion.</p>
                     <Link href={`/login?callbackUrl=/insights/${postSlug}`}>
                         <Button className="bg-gold text-black hover:bg-gold/90 font-bold px-6 rounded-full">
                             Log In To View Comments

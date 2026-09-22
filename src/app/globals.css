@@ -371,6 +371,171 @@
   color: #0F172A !important;
 }
 
+/* ─── Comments Section in Article Light Mode ─── */
+.article-theme-light .comments-section {
+  border-top-color: #E2E8F0 !important;
+}
+
+.article-theme-light .comments-title-icon {
+  color: #D97706 !important;
+}
+
+.article-theme-light .discussion-title {
+  color: #0F172A !important;
+}
+
+.article-theme-light .comments-count-badge {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  border: 1px solid #CBD5E1 !important;
+}
+
+.article-theme-light .comments-textarea,
+.article-theme-light .comment-textarea {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.article-theme-light .comments-textarea::placeholder,
+.article-theme-light .comment-textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+.article-theme-light .comments-textarea:focus,
+.article-theme-light .comment-textarea:focus {
+  border-color: #D97706 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2) !important;
+}
+
+.article-theme-light .comment-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+.article-theme-light .comment-reply-card {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
+}
+
+.article-theme-light .comment-reply-thread {
+  border-left-color: #CBD5E1 !important;
+}
+
+.article-theme-light .comment-reply-line {
+  background-color: #CBD5E1 !important;
+}
+
+.article-theme-light .comment-avatar {
+  background-color: #FEF3C7 !important;
+  border-color: #FDE68A !important;
+  color: #B45309 !important;
+}
+
+.article-theme-light .comment-avatar-img {
+  border-color: #CBD5E1 !important;
+  background-color: #F1F5F9 !important;
+}
+
+.article-theme-light .comment-author {
+  color: #0F172A !important;
+}
+
+.article-theme-light .comment-date {
+  color: #64748B !important;
+}
+
+.article-theme-light .comment-content {
+  color: #1E293B !important;
+}
+
+.article-theme-light .comment-reply-btn {
+  color: #B45309 !important;
+}
+
+.article-theme-light .comment-reply-btn:hover {
+  color: #92400E !important;
+}
+
+.article-theme-light .comment-delete-btn {
+  color: #94A3B8 !important;
+}
+
+.article-theme-light .comment-delete-btn:hover {
+  color: #EF4444 !important;
+}
+
+.article-theme-light .comment-cancel-btn {
+  color: #64748B !important;
+}
+
+.article-theme-light .comment-cancel-btn:hover {
+  color: #0F172A !important;
+  background-color: #F1F5F9 !important;
+}
+
+.article-theme-light .comment-empty-text {
+  color: #64748B !important;
+}
+
+.article-theme-light .comment-login-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.article-theme-light .comment-login-text {
+  color: #334155 !important;
+}
+
+/* Fallback protection for any white text utilities inside comments section */
+.article-theme-light .comments-section .text-white {
+  color: #0F172A !important;
+}
+
+.article-theme-light .comments-section .text-white\/90 {
+  color: #0F172A !important;
+}
+
+.article-theme-light .comments-section .text-white\/80 {
+  color: #1E293B !important;
+}
+
+.article-theme-light .comments-section .text-white\/70 {
+  color: #334155 !important;
+}
+
+.article-theme-light .comments-section .text-white\/60 {
+  color: #475569 !important;
+}
+
+.article-theme-light .comments-section .text-white\/40 {
+  color: #64748B !important;
+}
+
+.article-theme-light .comments-section .text-white\/30 {
+  color: #94A3B8 !important;
+}
+
+/* ─── Rating Card in Article Light Mode ─── */
+.article-theme-light .article-rating-card {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.article-theme-light .article-rating-title {
+  color: #0F172A !important;
+}
+
+.article-theme-light .article-rating-subtext {
+  color: #64748B !important;
+}
+
 /* ─── Article List Typography (Bullets & Numbers) ─── */
 .prose ul,
 .prose-lg ul {

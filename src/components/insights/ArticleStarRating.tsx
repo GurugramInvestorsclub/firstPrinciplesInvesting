@@ -73,7 +73,7 @@ export function ArticleStarRating({
     const currentActiveRating = hoverRating !== null ? hoverRating : (stats.userRating || 0)
 
     return (
-        <section className="my-10 rounded-2xl border border-gold/30 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.08),transparent_60%),rgba(20,20,24,0.6)] p-6 md:p-8 backdrop-blur-md shadow-lg transition-all">
+        <section className="article-rating-card my-10 rounded-2xl border border-gold/30 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.08),transparent_60%),rgba(20,20,24,0.6)] p-6 md:p-8 backdrop-blur-md shadow-lg transition-all">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 {/* Rating Title & Average Stats */}
                 <div className="space-y-1">
@@ -87,10 +87,10 @@ export function ArticleStarRating({
                             </span>
                         )}
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">
+                    <h3 className="article-rating-title text-lg md:text-xl font-bold text-white tracking-tight">
                         Rate this Research Memo
                     </h3>
-                    <p className="text-xs text-white/60">
+                    <p className="article-rating-subtext text-xs text-white/60">
                         {stats.totalRatings > 0 ? (
                             <>
                                 Average rating: <strong className="text-gold font-semibold">{stats.averageRating.toFixed(1)} / 5.0</strong> ({stats.totalRatings} member {stats.totalRatings === 1 ? "rating" : "ratings"})

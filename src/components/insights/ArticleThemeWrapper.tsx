@@ -3,6 +3,18 @@
 import React, { useState, useEffect } from "react"
 import { Sun, Moon } from "lucide-react"
 
+interface ArticleThemeContextType {
+    theme: "dark" | "light"
+    toggleTheme: () => void
+}
+
+export const ArticleThemeContext = React.createContext<ArticleThemeContextType>({
+    theme: "dark",
+    toggleTheme: () => {},
+})
+
+export const useArticleTheme = () => React.useContext(ArticleThemeContext)
+
 interface ArticleThemeWrapperProps {
     children: React.ReactNode
     className?: string
@@ -42,39 +54,41 @@ export function ArticleThemeWrapper({ children, className = "" }: ArticleThemeWr
     }
 
     return (
-        <div className={`transition-colors duration-300 ${theme === "light" ? "article-theme-light bg-[#FAF9F6] text-[#0F172A]" : "article-theme-dark bg-bg-deep text-text-primary"} ${className} relative min-h-screen`}>
-            {/* Sticky Floating Theme Toggle Button */}
-            <div className="fixed bottom-6 right-6 z-40">
-                <button
-                    onClick={toggleTheme}
-                    aria-label={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
-                    title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full shadow-2xl backdrop-blur-xl border transition-all duration-300 cursor-pointer group ${
-                        theme === "light"
-                            ? "bg-white/95 border-slate-300 text-slate-900 hover:bg-slate-100 shadow-slate-400/30"
-                            : "bg-[#1E1E1E]/95 border-white/10 text-neutral-200 hover:bg-[#2E2E2E] shadow-black/80"
-                    }`}
-                >
-                    {theme === "dark" ? (
-                        <>
-                            <Sun className="w-4 h-4 text-gold fill-gold/20" />
-                            <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-200 group-hover:text-white">
-                                Light Mode
-                            </span>
-                        </>
-                    ) : (
-                        <>
-                            <Moon className="w-4 h-4 text-amber-600 fill-amber-500/20" />
-                            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 group-hover:text-black">
-                                Dark Mode
-                            </span>
-                        </>
-                    )}
-                </button>
-            </div>
+        <ArticleThemeContext.Provider value={{ theme, toggleTheme }}>
+            <div className={`transition-colors duration-300 ${theme === "light" ? "article-theme-light bg-[#FAF9F6] text-[#0F172A]" : "article-theme-dark bg-bg-deep text-text-primary"} ${className} relative min-h-screen`}>
+                {/* Sticky Floating Theme Toggle Button */}
+                <div className="fixed bottom-6 right-6 z-40">
+                    <button
+                        onClick={toggleTheme}
+                        aria-label={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+                        title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-full shadow-2xl backdrop-blur-xl border transition-all duration-300 cursor-pointer group ${
+                            theme === "light"
+                                ? "bg-white/95 border-slate-300 text-slate-900 hover:bg-slate-100 shadow-slate-400/30"
+                                : "bg-[#1E1E1E]/95 border-white/10 text-neutral-200 hover:bg-[#2E2E2E] shadow-black/80"
+                        }`}
+                    >
+                        {theme === "dark" ? (
+                            <>
+                                <Sun className="w-4 h-4 text-gold fill-gold/20" />
+                                <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-200 group-hover:text-white">
+                                    Light Mode
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <Moon className="w-4 h-4 text-amber-600 fill-amber-500/20" />
+                                <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 group-hover:text-black">
+                                    Dark Mode
+                                </span>
+                            </>
+                        )}
+                    </button>
+                </div>
 
-            {children}
-        </div>
+                {children}
+            </div>
+        </ArticleThemeContext.Provider>
     )
 }
 
