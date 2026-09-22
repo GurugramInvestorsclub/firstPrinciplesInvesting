@@ -23,6 +23,8 @@ import Image from "next/image"
 import { urlForImage } from "@/lib/sanity.image"
 import { notFound } from "next/navigation"
 import { getStartOfTodayKolkata } from "@/lib/utils"
+import { isAdminAuthenticated } from "@/lib/admin-auth"
+import { AdminPreviewToolbar } from "@/components/insights/AdminPreviewToolbar"
 
 export const dynamic = "force-dynamic"
 
@@ -40,13 +42,14 @@ export default async function InsightPage({ params }: Props) {
 
     const startOfDay = getStartOfTodayKolkata().toISOString()
 
-    // Fetch the post contents, auth session, comments, events, and Super30 programs in parallel
-    const [post, session, commentsResult, upcomingEvents, super30Programs] = await Promise.all([
+    // Fetch the post contents, auth session, comments, events, Super30 programs, and admin session in parallel
+    const [post, session, commentsResult, upcomingEvents, super30Programs, isAdmin] = await Promise.all([
         client.fetch<Post | null>(singlePostQuery, { slug }, { cache: "no-store" }),
         auth(),
         getComments(slug),
         client.fetch<Event[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
-        client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } })
+        client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } }),
+        isAdminAuthenticated(),
     ])
 
     const liveWebinar = upcomingEvents?.[0]
@@ -65,6 +68,12 @@ export default async function InsightPage({ params }: Props) {
         notFound()
     }
 
+    // Live preview enforcement: If post is pending approval, it is strictly visible ONLY to admins.
+    const isPendingApproval = post.approvalStatus === "pending"
+    if (isPendingApproval && !isAdmin) {
+        notFound()
+    }
+
     const isSubscriberOnly = post.access === "subscriber"
     const shouldLockContent = isSubscriberOnly && !hasSubscriptionAccess
     const previewBody = getPreviewBlocks(post)
@@ -75,6 +84,9 @@ export default async function InsightPage({ params }: Props) {
 
     return (
         <ArticleThemeWrapper className="flex flex-col min-h-screen">
+            {isAdmin && (
+                <AdminPreviewToolbar post={post} slug={slug} />
+            )}
             {isSubscriberOnly && <CopyProtection />}
             <Navbar />
             <main className="flex-1 blog-main-container">

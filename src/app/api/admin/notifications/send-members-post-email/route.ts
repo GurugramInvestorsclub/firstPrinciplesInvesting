@@ -50,6 +50,7 @@ export async function GET(request: Request) {
           mainImageUrl,
           slug: sanityPost.slug?.current || slug,
           access: sanityPost.access || null,
+          approvalStatus: sanityPost.approvalStatus || "approved",
         }
       }
     }
@@ -108,6 +109,11 @@ export async function POST(request: Request) {
       try {
         const sanityPost = await client.fetch(singlePostQuery, { slug })
         if (sanityPost) {
+          if (sanityPost.approvalStatus === "pending") {
+            return NextResponse.json({
+              error: `Post "${sanityPost.title || slug}" is currently Pending Approval. Please approve it first before broadcasting to members.`
+            }, { status: 400 })
+          }
           if (!finalTitle) {
             finalTitle = sanityPost.title
           }

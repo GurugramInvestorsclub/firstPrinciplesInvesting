@@ -7,6 +7,8 @@ export interface Post {
     isFeatured?: boolean
     excerpt: string
     access?: "public" | "subscriber"
+    approvalStatus?: "pending" | "approved" | string
+    approvedAt?: string
     mainImage?: any
     publishedAt: string
     body: PortableTextBlock[]

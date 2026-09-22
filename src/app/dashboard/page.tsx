@@ -9,7 +9,7 @@ import { getArticleRatingsMap } from "@/app/actions/ratings"
 import { getStartOfTodayKolkata } from "@/lib/utils"
 
 const dashboardPostsQuery = groq`
-  *[_type == "post"] | order(publishedAt desc) {
+  *[_type == "post" && (!defined(approvalStatus) || approvalStatus != "pending")] | order(publishedAt desc) {
     _id,
     title,
     slug,

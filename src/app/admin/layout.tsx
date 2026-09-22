@@ -64,6 +64,9 @@ export default function AdminLayout({
                     </div>
 
                     <nav style={{ display: "flex", gap: "24px" }}>
+                        <Link href="/admin/posts" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Posts
+                        </Link>
                         <Link href="/admin/registrations" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Registrations
                         </Link>

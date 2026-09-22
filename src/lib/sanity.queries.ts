@@ -1,12 +1,13 @@
 import { groq } from 'next-sanity'
 
 export const postQuery = groq`
-  *[_type == "post" && (!defined($search) || title match $search + "*" || excerpt match $search + "*")] | order(publishedAt desc) {
+  *[_type == "post" && (!defined(approvalStatus) || approvalStatus != "pending") && (!defined($search) || title match $search + "*" || excerpt match $search + "*")] | order(publishedAt desc) {
     title,
     slug,
     isFeatured,
     excerpt,
     access,
+    approvalStatus,
     mainImage,
     publishedAt
   }
@@ -14,36 +15,57 @@ export const postQuery = groq`
 
 // Fetch the single most recently updated featured post
 export const featuredPostQuery = groq`
-  *[_type == "post" && isFeatured == true] | order(_updatedAt desc)[0] {
+  *[_type == "post" && isFeatured == true && (!defined(approvalStatus) || approvalStatus != "pending")] | order(_updatedAt desc)[0] {
     title,
     slug,
     isFeatured,
     excerpt,
     access,
+    approvalStatus,
     mainImage,
     publishedAt
   }
 `
 
-// Fetch ALL posts, ordered by date
+// Fetch ALL public/approved posts, ordered by date
 export const allPostsQuery = groq`
-  *[_type == "post"] | order(publishedAt desc) {
+  *[_type == "post" && (!defined(approvalStatus) || approvalStatus != "pending")] | order(publishedAt desc) {
     title,
     slug,
     isFeatured,
     excerpt,
     access,
+    approvalStatus,
     mainImage,
     publishedAt
+  }
+`
+
+// Fetch ALL posts including pending drafts for the Admin management view
+export const adminAllPostsQuery = groq`
+  *[_type == "post"] | order(_updatedAt desc) {
+    _id,
+    title,
+    slug,
+    isFeatured,
+    excerpt,
+    access,
+    approvalStatus,
+    approvedAt,
+    mainImage,
+    publishedAt,
+    _updatedAt,
+    _createdAt
   }
 `
 
 export const recentPostsQuery = groq`
-  *[_type == "post"] | order(publishedAt desc)[0...3] {
+  *[_type == "post" && (!defined(approvalStatus) || approvalStatus != "pending")] | order(publishedAt desc)[0...3] {
     title,
     slug,
     excerpt,
     access,
+    approvalStatus,
     publishedAt,
     mainImage
   }
@@ -51,10 +73,14 @@ export const recentPostsQuery = groq`
 
 export const singlePostQuery = groq`
   *[_type == "post" && slug.current == $slug][0] {
+    _id,
     title,
     slug,
+    isFeatured,
     excerpt,
     access,
+    approvalStatus,
+    approvedAt,
     mainImage,
     publishedAt,
     body,

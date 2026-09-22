@@ -18,6 +18,27 @@ export default defineType({
             description: 'Mark this insight as featured. Only one insight should be featured at a time.',
         }),
         defineField({
+            name: 'approvalStatus',
+            title: 'Approval Status (Live Website Visibility)',
+            type: 'string',
+            initialValue: 'pending',
+            options: {
+                list: [
+                    { title: '🟡 Pending Admin Approval (Preview Only - Hidden from Public)', value: 'pending' },
+                    { title: '🟢 Approved & Live (Visible on Website)', value: 'approved' },
+                ],
+                layout: 'radio',
+            },
+            description: 'When "Pending", only authenticated admins can preview this post at /insights/[slug]. Once "Approved", it is published live to everyone according to its Access tier.',
+        }),
+        defineField({
+            name: 'approvedAt',
+            title: 'Approved at',
+            type: 'datetime',
+            readOnly: true,
+            description: 'Automatically recorded timestamp when the post was approved.',
+        }),
+        defineField({
             name: 'slug',
             title: 'Slug',
             type: 'slug',

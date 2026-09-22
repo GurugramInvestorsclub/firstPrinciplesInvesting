@@ -10,3 +10,18 @@ export const client = createClient({
   apiVersion,
   useCdn: true,
 })
+
+export function getSanityWriteClient() {
+  const token = process.env.SANITY_API_WRITE_TOKEN || process.env.SANITY_API_TOKEN
+  if (!token) {
+    return null
+  }
+  return createClient({
+    projectId,
+    dataset,
+    apiVersion,
+    token,
+    useCdn: false,
+  })
+}
+

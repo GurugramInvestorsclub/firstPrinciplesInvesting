@@ -20,7 +20,7 @@ import { Lock, FileKey } from "lucide-react"
 export const revalidate = 0
 
 const subscriberPostsQuery = groq`
-  *[_type == "post" && access == "subscriber" && (!defined($search) || title match $search + "*" || excerpt match $search + "*")] | order(publishedAt desc) {
+  *[_type == "post" && access == "subscriber" && (!defined(approvalStatus) || approvalStatus != "pending") && (!defined($search) || title match $search + "*" || excerpt match $search + "*")] | order(publishedAt desc) {
     title,
     slug,
     isFeatured,
