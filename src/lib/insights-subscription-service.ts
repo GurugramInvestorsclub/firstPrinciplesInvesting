@@ -550,12 +550,21 @@ function getEffectiveEndAt(subscription: {
     return getPendingGraceEndAt(subscription)
   }
 
-  const latestCapturedCharge = subscription.charges?.find(
+  const capturedCharges = (subscription.charges ?? []).filter(
     (c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED
   )
+  const latestCapturedCharge = capturedCharges.slice().sort((a, b) => {
+    const timeA = (a.chargedAt ? new Date(a.chargedAt) : a.createdAt ? new Date(a.createdAt) : new Date(0)).getTime()
+    const timeB = (b.chargedAt ? new Date(b.chargedAt) : b.createdAt ? new Date(b.createdAt) : new Date(0)).getTime()
+    return timeB - timeA
+  })[0]
 
-  // If subscription is cancelled, clamp access to the period actually paid for
-  if (subscription.status === InsightsSubscriptionStatus.CANCELLED && latestCapturedCharge) {
+  // If subscription is cancelled or paused, clamp access to the period actually paid for
+  if (
+    (subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+      subscription.status === InsightsSubscriptionStatus.PAUSED) &&
+    latestCapturedCharge
+  ) {
     const chargeDate = latestCapturedCharge.chargedAt ?? latestCapturedCharge.createdAt
     if (chargeDate) {
       const paidEnd = addPlanInterval(new Date(chargeDate), subscription.planKey)
@@ -608,7 +617,8 @@ function membershipHasAccess(
     subscription.status === InsightsSubscriptionStatus.ACTIVE ||
     subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
     subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
-    subscription.status === InsightsSubscriptionStatus.CANCELLED
+    subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+    subscription.status === InsightsSubscriptionStatus.PAUSED
 
   if (!entitled) {
     return false
@@ -622,14 +632,22 @@ function membershipHasAccess(
     subscription.charges.some((c) => c.status === InsightsSubscriptionChargeStatus.CAPTURED) ||
     (subscription.paidCount ?? 0) > 0
 
-  if (subscription.status === InsightsSubscriptionStatus.CANCELLED && !hasCapturedCharge) {
+  if (
+    (subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+      subscription.status === InsightsSubscriptionStatus.PAUSED) &&
+    !hasCapturedCharge
+  ) {
     return false
   }
 
   const effectiveEndAt = getEffectiveEndAt(subscription)
 
   if (!effectiveEndAt) {
-    return hasCapturedCharge || subscription.status !== InsightsSubscriptionStatus.CANCELLED
+    return (
+      hasCapturedCharge ||
+      (subscription.status !== InsightsSubscriptionStatus.CANCELLED &&
+        subscription.status !== InsightsSubscriptionStatus.PAUSED)
+    )
   }
 
   return effectiveEndAt.getTime() > now
@@ -847,6 +865,7 @@ export async function autoSyncCreatedSubscriptionForUser(userId: string): Promis
             InsightsSubscriptionStatus.ACTIVE,
             InsightsSubscriptionStatus.PENDING,
             InsightsSubscriptionStatus.CANCEL_REQUESTED,
+            InsightsSubscriptionStatus.PAUSED,
           ],
         },
         razorpaySubscriptionId: { not: null },
@@ -972,6 +991,7 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
           InsightsSubscriptionStatus.CREATED,
           InsightsSubscriptionStatus.CANCELLED,
           InsightsSubscriptionStatus.PENDING,
+          InsightsSubscriptionStatus.PAUSED,
         ],
       },
     },
@@ -985,6 +1005,9 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
       charges: {
         where: {
           status: InsightsSubscriptionChargeStatus.CAPTURED,
+        },
+        orderBy: {
+          createdAt: "desc",
         },
         select: {
           id: true,
@@ -1021,7 +1044,8 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
         subscription.status === InsightsSubscriptionStatus.ACTIVE ||
         subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
         subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
-        subscription.status === InsightsSubscriptionStatus.CANCELLED
+        subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+        subscription.status === InsightsSubscriptionStatus.PAUSED
       ) {
         if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
           return true
@@ -1030,7 +1054,11 @@ export async function userHasInsightsAccess(userId: string): Promise<boolean> {
         const hasCapturedCharge =
           subscription.charges.length > 0 || (subscription.paidCount ?? 0) > 0
 
-        if (subscription.status === InsightsSubscriptionStatus.CANCELLED && !hasCapturedCharge) {
+        if (
+          (subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+            subscription.status === InsightsSubscriptionStatus.PAUSED) &&
+          !hasCapturedCharge
+        ) {
           continue
         }
 
@@ -1555,6 +1583,16 @@ async function applyProviderSubscriptionSnapshot(
     currentEndAt = calculatedEndAt
   }
 
+  if (
+    (mappedStatus === InsightsSubscriptionStatus.PENDING ||
+      mappedStatus === InsightsSubscriptionStatus.PAUSED) &&
+    (providerEntity.paidCount || 0) > 0 &&
+    currentEndAt &&
+    currentEndAt.getTime() > Date.now()
+  ) {
+    mappedStatus = InsightsSubscriptionStatus.ACTIVE
+  }
+
   await tx.insightsSubscription.update({
     where: { id: subscription.id },
     data: {
@@ -1702,6 +1740,22 @@ export async function createInsightsSubscription(params: {
               })
             }
           }
+        } else if (
+          (existing.status === InsightsSubscriptionStatus.PAUSED ||
+            existing.status === InsightsSubscriptionStatus.HALTED) &&
+          !membershipHasAccess(existing)
+        ) {
+          await tx.insightsSubscription.update({
+            where: { id: existing.id },
+            data: {
+              status: InsightsSubscriptionStatus.EXPIRED,
+              endedAt: new Date(),
+              lastWebhookAt: new Date(),
+            },
+          })
+          await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_PAUSED_EXPIRED_FOR_NEW_PLAN", {
+            previousStatus: existing.status,
+          })
         } else {
           throw new InsightsSubscriptionApiError(
             409,
@@ -2879,6 +2933,7 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
           InsightsSubscriptionStatus.CREATED,
           InsightsSubscriptionStatus.CANCELLED,
           InsightsSubscriptionStatus.PENDING,
+          InsightsSubscriptionStatus.PAUSED,
         ],
       },
       user: {
@@ -2906,9 +2961,14 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
         where: {
           status: InsightsSubscriptionChargeStatus.CAPTURED,
         },
+        orderBy: {
+          createdAt: "desc",
+        },
         select: {
           id: true,
           status: true,
+          chargedAt: true,
+          createdAt: true,
         },
       },
     },
@@ -2938,7 +2998,8 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
       subscription.status === InsightsSubscriptionStatus.ACTIVE ||
       subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED ||
       subscription.status === InsightsSubscriptionStatus.AUTHENTICATED ||
-      subscription.status === InsightsSubscriptionStatus.CANCELLED
+      subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+      subscription.status === InsightsSubscriptionStatus.PAUSED
     ) {
       if (subscription.status === InsightsSubscriptionStatus.AUTHENTICATED) {
         hasAccess = true
@@ -2946,7 +3007,11 @@ export async function getEligibleSubscribersWithActiveTenure(): Promise<ActiveSu
         const hasCapturedCharge =
           subscription.charges.length > 0 || (subscription.paidCount ?? 0) > 0
 
-        if (subscription.status !== InsightsSubscriptionStatus.CANCELLED || hasCapturedCharge) {
+        const isTerminalOrPaused =
+          subscription.status === InsightsSubscriptionStatus.CANCELLED ||
+          subscription.status === InsightsSubscriptionStatus.PAUSED
+
+        if (!isTerminalOrPaused || hasCapturedCharge) {
           const effectiveEndAt = getEffectiveEndAt(subscription)
           if (!effectiveEndAt || effectiveEndAt.getTime() > now) {
             hasAccess = true
@@ -3172,9 +3237,6 @@ export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
         localSubscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
 
       let mappedStatus = mapProviderStatusToLocal(providerEntity.status, cancelAtCycleEnd)
-      if (mappedStatus === InsightsSubscriptionStatus.PENDING && finalPaidCount > 0) {
-        mappedStatus = InsightsSubscriptionStatus.ACTIVE
-      }
 
       const terminalStatus =
         mappedStatus === InsightsSubscriptionStatus.CANCELLED ||
@@ -3205,6 +3267,16 @@ export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
         calculatedEndAt
       ) {
         currentEndAt = calculatedEndAt
+      }
+
+      if (
+        (mappedStatus === InsightsSubscriptionStatus.PENDING ||
+          mappedStatus === InsightsSubscriptionStatus.PAUSED) &&
+        finalPaidCount > 0 &&
+        currentEndAt &&
+        currentEndAt.getTime() > Date.now()
+      ) {
+        mappedStatus = InsightsSubscriptionStatus.ACTIVE
       }
 
       await tx.insightsSubscription.update({
