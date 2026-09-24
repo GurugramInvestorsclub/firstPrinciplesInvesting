@@ -6,8 +6,9 @@ import { Post } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
-import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
+import { getInsightsSubscriptionUiState, userHasInsightsAccess, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { RenewSubscriptionButton } from "@/components/dashboard/RenewSubscriptionButton"
 import { getArticleRatingsMap } from "@/app/actions/ratings"
 import { auth } from "@/auth"
 import Link from "next/link"
@@ -41,6 +42,9 @@ export default async function InsightsPage({
           ])
 
     const [session, sanityResult, ratingsMap] = await Promise.all([sessionPromise, sanityPromise, getArticleRatingsMap()])
+
+    const insightsMembership = session?.user?.id ? await getCurrentInsightsMembershipForUser(session.user.id) : null
+    const isPendingRenewal = insightsMembership?.status === "PENDING"
 
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
@@ -79,23 +83,42 @@ export default async function InsightsPage({
                             <BonusMarquee />
 
                             {/* CTA Area */}
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                                {hasSubscriptionAccess ? (
-                                    <Link 
-                                        href="/insights/members-only" 
-                                        className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
-                                    >
-                                        Go to Members Page
-                                    </Link>
-                                ) : (
-                                    <Link 
-                                        href="#membership" 
-                                        className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
-                                    >
-                                        Subscribe for ₹23/day
-                                    </Link>
-                                )}
-                            </div>
+                            {isPendingRenewal ? (
+                                <div className="p-4 md:p-5 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-2xl">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2 font-bold font-mono text-xs uppercase tracking-wider text-amber-400">
+                                            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                                            <span>Quarterly Renewal Action Required</span>
+                                        </div>
+                                        <p className="text-xs text-neutral-300">
+                                            Automatic renewal on your card was declined. Grace access is currently active. Renew your quarterly subscription below to keep uninterrupted access.
+                                        </p>
+                                    </div>
+                                    <RenewSubscriptionButton
+                                        userName={session?.user?.name ?? undefined}
+                                        userEmail={session?.user?.email ?? undefined}
+                                        buttonText="Renew Subscription (₹2,100)"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+                                    {hasSubscriptionAccess ? (
+                                        <Link 
+                                            href="/insights/members-only" 
+                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+                                        >
+                                            Go to Members Page
+                                        </Link>
+                                    ) : (
+                                        <Link 
+                                            href="/membership" 
+                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
+                                        >
+                                            Subscribe for ₹23/day
+                                        </Link>
+                                    )}
+                                </div>
+                            )}
                             <div className="flex items-center gap-2 text-xs md:text-sm text-white/60 font-medium pt-2">
                                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
                                 {hasSubscriptionAccess ? "Active Membership Status" : "50+ members have joined in the last month"}
@@ -335,7 +358,7 @@ export default async function InsightsPage({
                     {/* Sticky Footer Conversion Bar */}
                     <StickyFooterCheckout
                         paywallReady={paywallReady}
-                        hasSubscriptionAccess={hasSubscriptionAccess}
+                        hasSubscriptionAccess={hasSubscriptionAccess && !isPendingRenewal}
                         session={session}
                         plans={subscriptionUi.plans}
                     />

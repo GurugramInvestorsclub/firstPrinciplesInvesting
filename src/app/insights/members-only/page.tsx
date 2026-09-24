@@ -4,8 +4,9 @@ import { client } from "@/lib/sanity.client"
 import { Post, Recording } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
-import { getInsightsSubscriptionUiState, userHasInsightsAccess } from "@/lib/insights-subscription-service"
+import { getInsightsSubscriptionUiState, userHasInsightsAccess, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { RenewSubscriptionButton } from "@/components/dashboard/RenewSubscriptionButton"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
 import { DemergerTrackerCarousel } from "@/components/insights/DemergerTrackerCarousel"
 import { NotesSection } from "@/components/insights/NotesSection"
@@ -15,7 +16,7 @@ import { auth } from "@/auth"
 import Link from "next/link"
 import { groq } from "next-sanity"
 import { redirect } from "next/navigation"
-import { Lock, FileKey } from "lucide-react"
+import { Lock, FileKey, AlertTriangle } from "lucide-react"
 
 export const revalidate = 0
 
@@ -69,14 +70,17 @@ export default async function MembersOnlyArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    const [hasSubscriptionAccess, premiumPosts, recordings, notes, demergerData, ratingsMap] = await Promise.all([
+    const [hasSubscriptionAccess, premiumPosts, recordings, notes, demergerData, ratingsMap, insightsMembership] = await Promise.all([
         paywallReady ? userHasInsightsAccess(session.user.id) : Promise.resolve(false),
         client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(subscriberNotesQuery, { search: search || null }, { next: { revalidate: 60 } }),
         getDemergerData(),
-        getArticleRatingsMap()
+        getArticleRatingsMap(),
+        getCurrentInsightsMembershipForUser(session.user.id),
     ])
+
+    const isPendingRenewal = insightsMembership?.status === "PENDING"
 
     const filteredDemergers = demergerData.records.filter((item) => {
         if (!search) return true
@@ -103,7 +107,7 @@ export default async function MembersOnlyArchivePage({
                     </div>
 
                     {/* Header with Search */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 pb-8 border-b border-white/5">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 pb-8 border-b border-white/5">
                         <div>
                             <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">MEMBERS PORTAL</span>
                             <h1 className="text-3xl md:text-5xl font-sans font-bold tracking-tight text-white">Premium Research Notes</h1>
@@ -114,6 +118,26 @@ export default async function MembersOnlyArchivePage({
                             </div>
                         )}
                     </div>
+
+                    {/* Pending Renewal Action Banner */}
+                    {isPendingRenewal && (
+                        <div className="mb-12 p-5 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2 font-bold font-mono text-xs uppercase tracking-wider text-amber-400">
+                                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                                    <span>Quarterly Renewal Action Required</span>
+                                </div>
+                                <p className="text-xs text-neutral-300 max-w-2xl leading-relaxed">
+                                    Automatic renewal on your card was declined. Grace period access is currently active. Renew your quarterly subscription below to keep uninterrupted access to research notes & models.
+                                </p>
+                            </div>
+                            <RenewSubscriptionButton
+                                userName={session.user.name ?? undefined}
+                                userEmail={session.user.email ?? undefined}
+                                buttonText="Renew Subscription (₹2,100)"
+                            />
+                        </div>
+                    )}
 
                     {/* Non-members view: Access locked & subscription form */}
                     {!hasSubscriptionAccess ? (
