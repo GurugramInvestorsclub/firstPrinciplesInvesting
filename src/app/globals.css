@@ -532,8 +532,150 @@
   color: #0F172A !important;
 }
 
-.article-theme-light .article-rating-subtext {
-  color: #64748B !important;
+/* ─── Article Updates Block Styles ─── */
+.article-updates-container {
+  background-color: #141311 !important;
+  border-color: rgba(245, 184, 0, 0.35) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+.article-updates-header-border {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.article-updates-header-icon {
+  background-color: rgba(245, 184, 0, 0.15) !important;
+  color: #F5B800 !important;
+  border-color: rgba(245, 184, 0, 0.3) !important;
+}
+
+.article-updates-header-title {
+  color: #F0EDE8 !important;
+}
+
+.article-updates-header-count {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #A3A3A3 !important;
+}
+
+.article-updates-card {
+  background-color: #1D1C18 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #F0EDE8 !important;
+}
+
+.article-updates-card:hover {
+  background-color: #24221C !important;
+  border-color: rgba(245, 184, 0, 0.5) !important;
+}
+
+.article-updates-badge {
+  background-color: rgba(245, 184, 0, 0.15) !important;
+  color: #F5B800 !important;
+  border-color: rgba(245, 184, 0, 0.35) !important;
+}
+
+.article-updates-date {
+  color: #A3A3A3 !important;
+}
+
+.article-updates-title {
+  color: #F0EDE8 !important;
+}
+
+.article-updates-card:hover .article-updates-title {
+  color: #F5B800 !important;
+}
+
+.article-updates-desc {
+  color: #D4D4D4 !important;
+}
+
+.article-updates-cta {
+  background-color: rgba(245, 184, 0, 0.15) !important;
+  color: #F5B800 !important;
+  border-color: rgba(245, 184, 0, 0.35) !important;
+}
+
+.article-updates-card:hover .article-updates-cta {
+  background-color: #F5B800 !important;
+  color: #000000 !important;
+  border-color: #F5B800 !important;
+}
+
+/* ─── Light Mode Overrides for Article Updates Block ─── */
+.article-theme-light .article-updates-container {
+  background-color: #FFFFFF !important;
+  border-color: #FCD34D !important;
+  box-shadow: 0 4px 20px rgba(180, 83, 9, 0.08) !important;
+}
+
+.article-theme-light .article-updates-header-border {
+  border-bottom-color: #E2E8F0 !important;
+}
+
+.article-theme-light .article-updates-header-icon {
+  background-color: #FEF3C7 !important;
+  color: #78350F !important;
+  border-color: #FCD34D !important;
+}
+
+.article-theme-light .article-updates-header-title {
+  color: #0F172A !important;
+}
+
+.article-theme-light .article-updates-header-count {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #475569 !important;
+}
+
+.article-theme-light .article-updates-card {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  color: #0F172A !important;
+}
+
+.article-theme-light .article-updates-card:hover {
+  background-color: #FFFBEB !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12) !important;
+}
+
+.article-theme-light .article-updates-badge {
+  background-color: #FEF3C7 !important;
+  border-color: #FCD34D !important;
+  color: #78350F !important;
+}
+
+.article-theme-light .article-updates-date {
+  color: #475569 !important;
+}
+
+.article-theme-light .article-updates-title {
+  color: #0F172A !important;
+}
+
+.article-theme-light .article-updates-card:hover .article-updates-title {
+  color: #B45309 !important;
+}
+
+.article-theme-light .article-updates-desc {
+  color: #334155 !important;
+}
+
+.article-theme-light .article-updates-cta {
+  background-color: #FEF3C7 !important;
+  border-color: #FCD34D !important;
+  color: #78350F !important;
+}
+
+.article-theme-light .article-updates-card:hover .article-updates-cta {
+  background-color: #D97706 !important;
+  color: #FFFFFF !important;
+  border-color: #D97706 !important;
 }
 
 /* ─── Article List Typography (Bullets & Numbers) ─── */
