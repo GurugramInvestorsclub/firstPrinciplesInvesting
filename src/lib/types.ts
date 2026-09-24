@@ -1,5 +1,21 @@
 import { PortableTextBlock } from "sanity"
 
+export interface ArticleUpdateItem {
+    _key?: string
+    title?: string
+    url?: string
+    badge?: string
+    date?: string
+    description?: string
+    post?: {
+        _id: string
+        title: string
+        slug: { current: string }
+        publishedAt?: string
+        access?: "public" | "subscriber"
+    } | null
+}
+
 export interface Post {
     _id: string
     title: string
@@ -16,6 +32,7 @@ export interface Post {
     paywallHeadline?: string
     paywallCtaText?: string
     disclaimer?: PortableTextBlock[]
+    updates?: ArticleUpdateItem[]
 }
 
 export interface Event {

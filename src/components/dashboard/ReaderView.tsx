@@ -7,6 +7,7 @@ import { CopyProtection } from "../insights/CopyProtection"
 import { ArticleThemeWrapper, ArticleThemeToggleButton } from "../insights/ArticleThemeWrapper"
 import { extractHeadings } from "@/lib/toc"
 import { TableOfContents } from "../insights/TableOfContents"
+import { ArticleUpdatesBlock } from "../insights/ArticleUpdatesBlock"
 
 interface ReaderViewProps {
     slug: string
@@ -270,6 +271,9 @@ export function ReaderView({
                             <span>{calculateReadingTime(rawBlocks)}</span>
                         </div>
                     </div>
+                    
+                    {/* Article Updates Block */}
+                    <ArticleUpdatesBlock updates={report.updates} />
 
                     {/* Markdown Body */}
                     <div className="space-y-3 text-left w-full">

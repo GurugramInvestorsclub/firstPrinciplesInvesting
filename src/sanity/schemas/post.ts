@@ -89,6 +89,77 @@ export default defineType({
             of: [{ type: 'block' }],
         }),
         defineField({
+            name: 'updates',
+            title: 'Article Updates & Linked Coverage',
+            type: 'array',
+            description: 'Add one or more linked updates or related articles. Displayed as a dedicated update block right after the disclaimer.',
+            of: [
+                {
+                    type: 'object',
+                    name: 'updateItem',
+                    title: 'Linked Article / Update',
+                    fields: [
+                        defineField({
+                            name: 'post',
+                            title: 'Select Existing Post (Optional)',
+                            type: 'reference',
+                            to: [{ type: 'post' }],
+                            description: 'Select an existing post from your CMS. If selected, its title and link will be automatically used by default.',
+                        }),
+                        defineField({
+                            name: 'title',
+                            title: 'Title / Custom Label',
+                            type: 'string',
+                            description: 'Title for this update link (optional if an existing post is selected above, or use this to override its title).',
+                        }),
+                        defineField({
+                            name: 'url',
+                            title: 'Custom Link / URL',
+                            type: 'string',
+                            description: 'Direct link or path (e.g. /insights/gocl-deep-dive or full URL). Required if no existing post is selected.',
+                        }),
+                        defineField({
+                            name: 'description',
+                            title: 'Context / Note (Optional)',
+                            type: 'text',
+                            rows: 2,
+                            description: 'Optional note shown with the link (e.g. "GOCL - HNPCL merger/special situation Deep-dive was released on 18th June 2026. This is an update.")',
+                        }),
+                        defineField({
+                            name: 'date',
+                            title: 'Date / Period (Optional)',
+                            type: 'string',
+                            description: 'e.g. "18th June 2026" or "June 2026"',
+                        }),
+                        defineField({
+                            name: 'badge',
+                            title: 'Badge Label (Optional)',
+                            type: 'string',
+                            initialValue: 'Update',
+                            description: 'Label shown on the badge pill (e.g. "Update", "Original Thesis", "Previous Coverage", "Part 1")',
+                        }),
+                    ],
+                    preview: {
+                        select: {
+                            title: 'title',
+                            refTitle: 'post.title',
+                            url: 'url',
+                            refSlug: 'post.slug.current',
+                            badge: 'badge',
+                        },
+                        prepare({ title, refTitle, url, refSlug, badge }) {
+                            const displayTitle = title || refTitle || 'Untitled Update'
+                            const displayLink = url || (refSlug ? `/insights/${refSlug}` : 'No link specified')
+                            return {
+                                title: displayTitle,
+                                subtitle: `[${badge || 'Update'}] → ${displayLink}`,
+                            }
+                        },
+                    },
+                },
+            ],
+        }),
+        defineField({
             name: 'body',
             title: 'Body',
             type: 'array',

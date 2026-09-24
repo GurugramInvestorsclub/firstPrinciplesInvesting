@@ -19,7 +19,22 @@ const dashboardPostsQuery = groq`
     mainImage,
     publishedAt,
     body,
-    disclaimer
+    disclaimer,
+    updates[] {
+      _key,
+      title,
+      url,
+      badge,
+      date,
+      description,
+      post-> {
+        _id,
+        title,
+        slug,
+        publishedAt,
+        access
+      }
+    }
   }
 `
 

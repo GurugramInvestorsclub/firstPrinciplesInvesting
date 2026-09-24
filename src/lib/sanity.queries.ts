@@ -87,7 +87,22 @@ export const singlePostQuery = groq`
     previewBody,
     paywallHeadline,
     paywallCtaText,
-    disclaimer
+    disclaimer,
+    updates[] {
+      _key,
+      title,
+      url,
+      badge,
+      date,
+      description,
+      post-> {
+        _id,
+        title,
+        slug,
+        publishedAt,
+        access
+      }
+    }
   }
 `
 

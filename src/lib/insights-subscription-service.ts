@@ -1546,7 +1546,7 @@ async function applyProviderSubscriptionSnapshot(
     subscription.cancelAtCycleEnd ||
     subscription.status === InsightsSubscriptionStatus.CANCEL_REQUESTED
 
-  const mappedStatus = mapProviderStatusToLocal(providerEntity.status, cancelAtCycleEnd)
+  let mappedStatus = mapProviderStatusToLocal(providerEntity.status, cancelAtCycleEnd)
   const terminalStatus =
     mappedStatus === InsightsSubscriptionStatus.CANCELLED ||
     mappedStatus === InsightsSubscriptionStatus.COMPLETED ||

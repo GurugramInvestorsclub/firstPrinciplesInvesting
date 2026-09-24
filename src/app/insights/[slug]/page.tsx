@@ -25,6 +25,7 @@ import { notFound } from "next/navigation"
 import { getStartOfTodayKolkata } from "@/lib/utils"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { AdminPreviewToolbar } from "@/components/insights/AdminPreviewToolbar"
+import { ArticleUpdatesBlock } from "@/components/insights/ArticleUpdatesBlock"
 
 export const dynamic = "force-dynamic"
 
@@ -146,6 +147,9 @@ export default async function InsightPage({ params }: Props) {
                                 </div>
                             )}
                         </div>
+                        
+                        {/* Article Updates Block */}
+                        <ArticleUpdatesBlock updates={post.updates} />
 
                         {/* Mobile / Tablet Collapsible Table of Contents */}
                         {headings.length > 1 && (
