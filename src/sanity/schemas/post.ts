@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType, defineArrayMember } from 'sanity'
 
 export default defineType({
     name: 'post',
@@ -94,9 +94,8 @@ export default defineType({
             type: 'array',
             description: 'Add one or more linked updates or related articles. Displayed as a dedicated update block right after the disclaimer.',
             of: [
-                {
+                defineArrayMember({
                     type: 'object',
-                    name: 'updateItem',
                     title: 'Linked Article / Update',
                     fields: [
                         defineField({
@@ -156,7 +155,7 @@ export default defineType({
                             }
                         },
                     },
-                },
+                }),
             ],
         }),
         defineField({
