@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ShieldCheck, Receipt, LogOut, AlertTriangle, Loader2, X, Clock } from "lucide-react"
+import { ShieldCheck, Receipt, LogOut, AlertTriangle, Loader2, X, Clock, ExternalLink, CreditCard } from "lucide-react"
 
 interface ProfileViewProps {
     userName: string
@@ -12,6 +12,9 @@ interface ProfileViewProps {
     cancelAtCycleEnd?: boolean
     hasSubscriptionAccess?: boolean
     onSignOut: () => void
+    isPendingRenewal?: boolean
+    graceEndFormatted?: string
+    renewalUrl?: string
 }
 
 export function ProfileView({ 
@@ -19,7 +22,10 @@ export function ProfileView({
     subscriptionEnd, 
     cancelAtCycleEnd = false,
     hasSubscriptionAccess = false,
-    onSignOut 
+    onSignOut,
+    isPendingRenewal = false,
+    graceEndFormatted,
+    renewalUrl
 }: ProfileViewProps) {
     const router = useRouter()
     const [showCancelModal, setShowCancelModal] = useState(false)
@@ -88,8 +94,16 @@ export function ProfileView({
                     <div className="grid grid-cols-2 gap-4 font-mono text-xs text-neutral-400">
                         <div>
                             <span className="text-neutral-500 block">STATUS</span>
-                            <span className={`font-bold uppercase ${isCancelled ? "text-amber-400" : statusLabel.toLowerCase() === "active" ? "text-emerald-400" : "text-neutral-300"}`}>
-                                {statusLabel}
+                            <span className={`font-bold uppercase ${
+                                isPendingRenewal 
+                                    ? "text-amber-400" 
+                                    : isCancelled 
+                                    ? "text-amber-400" 
+                                    : statusLabel.toLowerCase() === "active" 
+                                    ? "text-emerald-400" 
+                                    : "text-neutral-300"
+                            }`}>
+                                {isPendingRenewal ? "Pending Renewal (Grace Active)" : statusLabel}
                             </span>
                         </div>
                         <div>
@@ -99,12 +113,39 @@ export function ProfileView({
                         {subscriptionEnd && (
                             <div className="col-span-2 mt-2">
                                 <span className="text-neutral-500 block">
-                                    {isCancelled ? "ACCESS END DATE" : "EXPIRY DATE"}
+                                    {isCancelled ? "ACCESS END DATE" : isPendingRenewal ? "GRACE PERIOD END" : "EXPIRY DATE"}
                                 </span>
-                                <span className="text-text-primary font-bold">{subscriptionEnd}</span>
+                                <span className="text-text-primary font-bold">{isPendingRenewal && graceEndFormatted ? graceEndFormatted : subscriptionEnd}</span>
                             </div>
                         )}
                     </div>
+
+                    {/* Pending Renewal Action Banner */}
+                    {isPendingRenewal && (
+                        <div className="mt-4 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs space-y-3">
+                            <div className="flex items-center gap-2 font-bold font-mono">
+                                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                                <span>Renewal Action Required</span>
+                            </div>
+                            <p className="text-neutral-300 text-[11px] leading-relaxed">
+                                Automated card renewal failed with your bank. Your membership access is temporarily preserved under grace {graceEndFormatted ? `until ${graceEndFormatted}` : ""}. Please complete renewal to avoid access interruption.
+                            </p>
+                            {renewalUrl && (
+                                <div className="pt-1">
+                                    <a
+                                        href={renewalUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-bold font-mono text-[11px] uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95"
+                                    >
+                                        <CreditCard className="w-3.5 h-3.5" />
+                                        <span>Pay Renewal via UPI / Card</span>
+                                        <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Cancellation Scheduled Alert Banner */}
                     {isCancelled && (

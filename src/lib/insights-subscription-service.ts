@@ -109,6 +109,9 @@ export interface InsightsMembershipSummary {
   endedAt: Date | null
   razorpaySubscriptionId: string | null
   latestCharge: InsightsChargeSummary | null
+  isPendingGrace?: boolean
+  graceEndAt?: Date | null
+  renewalUrl?: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -680,6 +683,17 @@ function serializeCharge(
 function serializeMembership(subscription: SubscriptionWithLatestCharge): InsightsMembershipSummary {
   const planKey = planKeyToSlug(subscription.planKey)
   const currentEndAt = getEffectiveEndAt(subscription)
+  const isPendingGrace = subscription.status === InsightsSubscriptionStatus.PENDING
+  const graceEndAt = isPendingGrace ? getPendingGraceEndAt(subscription) : null
+
+  const notesObj = (subscription.notes && typeof subscription.notes === "object" && !Array.isArray(subscription.notes))
+    ? (subscription.notes as Record<string, unknown>)
+    : {}
+  const renewalUrl = (typeof notesObj.renewalInvoiceUrl === "string" && notesObj.renewalInvoiceUrl)
+    ? notesObj.renewalInvoiceUrl
+    : (typeof notesObj.shortUrl === "string" && notesObj.shortUrl)
+    ? notesObj.shortUrl
+    : null
 
   return {
     id: subscription.id,
@@ -697,6 +711,9 @@ function serializeMembership(subscription: SubscriptionWithLatestCharge): Insigh
     endedAt: subscription.endedAt,
     razorpaySubscriptionId: subscription.razorpaySubscriptionId ?? null,
     latestCharge: serializeCharge(subscription.charges[0]),
+    isPendingGrace,
+    graceEndAt,
+    renewalUrl,
     createdAt: subscription.createdAt,
     updatedAt: subscription.updatedAt,
   }

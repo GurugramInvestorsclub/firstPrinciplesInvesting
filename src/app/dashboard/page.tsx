@@ -60,6 +60,16 @@ export default async function DashboardPage() {
     ])
 
     const subscriptionStatus = insightsMembership?.statusLabel || "Inactive"
+    const isPendingRenewal = insightsMembership?.status === "PENDING"
+    const graceEndFormatted = insightsMembership?.graceEndAt
+        ? new Date(insightsMembership.graceEndAt).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        })
+        : undefined
+    const renewalUrl = insightsMembership?.renewalUrl || undefined
+
     const subscriptionEnd = insightsMembership?.currentEndAt 
         ? new Date(insightsMembership.currentEndAt).toLocaleDateString("en-US", {
             month: "long",
@@ -88,6 +98,9 @@ export default async function DashboardPage() {
             initialNotes={notes}
             hasSubscriptionAccess={insightsMembership?.hasAccess || false}
             ratingStatsMap={ratingsMap}
+            isPendingRenewal={isPendingRenewal}
+            graceEndFormatted={graceEndFormatted}
+            renewalUrl={renewalUrl}
         />
     )
 }

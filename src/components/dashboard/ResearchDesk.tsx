@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { 
     Home, FileText, Layers, Calendar, 
-    User, LogOut, Star, Sparkles, BookOpen, GitFork
+    User, LogOut, Star, Sparkles, BookOpen, GitFork,
+    AlertTriangle, ExternalLink, CreditCard
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -31,6 +32,9 @@ interface ResearchDeskProps {
     initialNotes?: any[]
     hasSubscriptionAccess?: boolean
     ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
+    isPendingRenewal?: boolean
+    graceEndFormatted?: string
+    renewalUrl?: string
 }
 
 export function ResearchDesk({ 
@@ -46,7 +50,10 @@ export function ResearchDesk({
     initialRecordings = [],
     initialNotes = [],
     hasSubscriptionAccess = false,
-    ratingStatsMap = {}
+    ratingStatsMap = {},
+    isPendingRenewal = false,
+    graceEndFormatted,
+    renewalUrl
 }: ResearchDeskProps) {
     const router = useRouter()
     const [activeTab, setActiveTab] = useState("home")
@@ -197,15 +204,66 @@ export function ResearchDesk({
                         </div>
                         <span className="text-xs font-mono uppercase font-bold">First Principles <span className="text-gold">Investing</span></span>
                     </Link>
-                    <span className="text-emerald-400 font-bold text-[8px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase font-mono">
-                        {subscriptionStatus}
+                    <span className={`font-bold text-[8px] px-2 py-0.5 rounded border uppercase font-mono ${
+                        isPendingRenewal 
+                            ? "text-amber-400 bg-amber-500/10 border-amber-500/30" 
+                            : "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                    }`}>
+                        {isPendingRenewal ? "Renewal Pending" : subscriptionStatus}
                     </span>
                 </header>
 
-
-
                 {/* Tab Render Area */}
                 <main className="flex-1 p-6 md:p-10 max-w-5xl w-full mx-auto">
+                    {/* Renewal Alert Banner (Visible ONLY for PENDING status subscribers) */}
+                    {isPendingRenewal && (
+                        <div className="mb-8 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#1e190b] to-amber-950/20 p-5 md:p-6 shadow-[0_8px_30px_rgba(245,158,11,0.12)] relative overflow-hidden">
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                                <div className="space-y-2">
+                                    <div className="flex flex-wrap items-center gap-2.5">
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono tracking-wider uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                                            <AlertTriangle className="w-3 h-3 text-amber-400 animate-pulse" />
+                                            Renewal Action Required
+                                        </span>
+                                        {graceEndFormatted && (
+                                            <span className="text-[11px] font-mono text-neutral-400">
+                                                Grace access active until <strong className="text-amber-200">{graceEndFormatted}</strong>
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h3 className="text-base md:text-lg font-bold text-white tracking-tight">
+                                        Your Quarterly Membership Renewal is Pending
+                                    </h3>
+                                    <p className="text-xs md:text-sm text-neutral-300 max-w-2xl leading-relaxed">
+                                        The automated auto-debit on your card was declined by your bank (common with recurring e-mandates). Your membership access is currently preserved under our grace period. Please complete your renewal to keep access active.
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-3 shrink-0 w-full md:w-auto">
+                                    {renewalUrl ? (
+                                        <a
+                                            href={renewalUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-bold font-mono text-xs uppercase tracking-wider px-5 py-3 rounded-xl shadow-[0_4px_16px_rgba(245,158,11,0.3)] transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                                        >
+                                            <CreditCard className="w-4 h-4" />
+                                            <span>Pay Renewal (UPI / Card)</span>
+                                            <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                                        </a>
+                                    ) : (
+                                        <Link
+                                            href="/contact"
+                                            className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-amber-400 text-black font-bold font-mono text-xs uppercase tracking-wider px-5 py-3 rounded-xl shadow-lg"
+                                        >
+                                            <span>Contact Support to Renew</span>
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === "home" && (
                         <HomeView userName={userName} onNavigate={handleNavigate} posts={posts} upcomingEvents={upcomingEvents} ratingStatsMap={ratingStatsMap} />
                     )}
@@ -256,6 +314,9 @@ export function ResearchDesk({
                             cancelAtCycleEnd={cancelAtCycleEnd}
                             hasSubscriptionAccess={hasSubscriptionAccess}
                             onSignOut={onSignOut}
+                            isPendingRenewal={isPendingRenewal}
+                            graceEndFormatted={graceEndFormatted}
+                            renewalUrl={renewalUrl}
                         />
                     )}
                 </main>
