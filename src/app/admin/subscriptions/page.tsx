@@ -175,6 +175,18 @@ export default function AdminSubscriptionsPage() {
   const [editResendEmail, setEditResendEmail] = useState(false)
   const [submittingEdit, setSubmittingEdit] = useState(false)
 
+  // Extend Subscription Access Modal State
+  const [extendingRow, setExtendingRow] = useState<SubscriptionRow | null>(null)
+  const [extendDurationPreset, setExtendDurationPreset] = useState<"1_month" | "2_months" | "3_months" | "1_year" | "custom">("3_months")
+  const [extendBaseFrom, setExtendBaseFrom] = useState<"current_end" | "today">("current_end")
+  const [extendCustomDate, setExtendCustomDate] = useState("")
+  const [extendPaymentMethod, setExtendPaymentMethod] = useState("UPI_DIRECT")
+  const [extendAmountPaid, setExtendAmountPaid] = useState("2100")
+  const [extendUtrNumber, setExtendUtrNumber] = useState("")
+  const [extendAdminNotes, setExtendAdminNotes] = useState("")
+  const [extendSendEmail, setExtendSendEmail] = useState(true)
+  const [submittingExtend, setSubmittingExtend] = useState(false)
+
   // Razorpay Live Sync State
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [syncingAll, setSyncingAll] = useState(false)
@@ -582,6 +594,105 @@ export default function AdminSubscriptionsPage() {
       setActionMessage(editErr instanceof Error ? editErr.message : "Failed to update subscription details")
     } finally {
       setSubmittingEdit(false)
+    }
+  }
+
+  const openExtendAccessModal = (row: SubscriptionRow) => {
+    setExtendingRow(row)
+    const isYearly = row.planKey === "yearly"
+    setExtendDurationPreset(isYearly ? "1_year" : "3_months")
+
+    const isFuture = Boolean(row.currentEndAt && new Date(row.currentEndAt).getTime() > Date.now())
+    setExtendBaseFrom(isFuture ? "current_end" : "today")
+
+    const defaultAmount = row.latestCharge
+      ? String((row.latestCharge.amount / 100).toFixed(0))
+      : isYearly
+        ? "9999"
+        : "2100"
+    setExtendAmountPaid(defaultAmount)
+
+    const base = isFuture && row.currentEndAt ? new Date(row.currentEndAt) : new Date()
+    const target = new Date(base)
+    if (isYearly) {
+      target.setFullYear(target.getFullYear() + 1)
+    } else {
+      target.setMonth(target.getMonth() + 3)
+    }
+    setExtendCustomDate(getLocalDateString(target.toISOString()))
+
+    setExtendPaymentMethod("UPI_DIRECT")
+    setExtendUtrNumber("")
+    setExtendAdminNotes("")
+    setExtendSendEmail(true)
+  }
+
+  const getCalculatedExtendEndAt = (): Date => {
+    if (!extendingRow) return new Date()
+    const now = new Date()
+    const isFuture = Boolean(extendingRow.currentEndAt && new Date(extendingRow.currentEndAt).getTime() > now.getTime())
+    const base = extendBaseFrom === "current_end" && isFuture && extendingRow.currentEndAt
+      ? new Date(extendingRow.currentEndAt)
+      : now
+
+    if (extendDurationPreset === "custom" && extendCustomDate) {
+      const parsed = new Date(extendCustomDate)
+      if (!isNaN(parsed.getTime())) return parsed
+    }
+
+    const next = new Date(base)
+    if (extendDurationPreset === "1_year") {
+      next.setFullYear(next.getFullYear() + 1)
+    } else if (extendDurationPreset === "2_months") {
+      next.setMonth(next.getMonth() + 2)
+    } else if (extendDurationPreset === "1_month") {
+      next.setMonth(next.getMonth() + 1)
+    } else {
+      next.setMonth(next.getMonth() + 3)
+    }
+    return next
+  }
+
+  const handleConfirmExtendAccess = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!extendingRow) return
+
+    setSubmittingExtend(true)
+    setActionMessage(null)
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/extend-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscriptionId: extendingRow.id,
+          durationPreset: extendDurationPreset,
+          customEndAt: extendDurationPreset === "custom" ? extendCustomDate : undefined,
+          baseFrom: extendBaseFrom,
+          paymentMethod: extendPaymentMethod,
+          utrNumber: extendUtrNumber.trim() || null,
+          amountPaid: extendAmountPaid ? Number(extendAmountPaid) : null,
+          adminNotes: extendAdminNotes.trim() || null,
+          sendEmailNotification: extendSendEmail,
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to extend subscription access")
+      }
+
+      const targetName = extendingRow.userName || extendingRow.userEmail || extendingRow.id
+      const calculatedEnd = getCalculatedExtendEndAt()
+      setActionMessage(
+        `Successfully extended access for ${targetName} until ${formatDate(calculatedEnd.toISOString())}!`
+      )
+      setExtendingRow(null)
+      await loadData()
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Failed to extend access")
+    } finally {
+      setSubmittingExtend(false)
     }
   }
 
@@ -1281,6 +1392,24 @@ export default function AdminSubscriptionsPage() {
 
                               <button
                                 type="button"
+                                onClick={() => openExtendAccessModal(row)}
+                                style={{
+                                  padding: "6px 10px",
+                                  borderRadius: "6px",
+                                  border: "1px solid rgba(16,185,129,0.35)",
+                                  background: "rgba(16,185,129,0.12)",
+                                  color: "#6ee7b7",
+                                  fontWeight: 600,
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                }}
+                                title="Extend membership access for manual or offline payment"
+                              >
+                                ➕ Extend Access
+                              </button>
+
+                              <button
+                                type="button"
                                 onClick={() => setSelectedNotesRow(row)}
                                 style={{
                                   padding: "6px 10px",
@@ -1851,6 +1980,29 @@ export default function AdminSubscriptionsPage() {
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginTop: "20px" }}>
                 <div style={{ display: "flex", gap: "10px" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rowToExtend = selectedNotesRow
+                      setSelectedNotesRow(null)
+                      openExtendAccessModal(rowToExtend)
+                    }}
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(16,185,129,0.4)",
+                      background: "rgba(16,185,129,0.15)",
+                      color: "#6ee7b7",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    ➕ Extend Access
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -2488,6 +2640,396 @@ export default function AdminSubscriptionsPage() {
           </div>
         </div>
       ) : null}
+
+      {/* Extend Subscription Access Modal */}
+      {extendingRow ? (() => {
+        const isFuture = Boolean(extendingRow.currentEndAt && new Date(extendingRow.currentEndAt).getTime() > Date.now())
+        const calculatedEnd = getCalculatedExtendEndAt()
+
+        return (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 9999,
+              background: "rgba(0,0,0,0.8)",
+              backdropFilter: "blur(6px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "16px",
+            }}
+          >
+            <div
+              style={{
+                background: "#141418",
+                border: "1px solid rgba(16,185,129,0.35)",
+                borderRadius: "16px",
+                width: "100%",
+                maxWidth: "560px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                padding: "28px",
+                boxShadow: "0 24px 48px rgba(0,0,0,0.9), 0 0 30px rgba(16,185,129,0.15)",
+                color: "#fff",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+                <div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", borderRadius: "6px", background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", color: "#6ee7b7", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px" }}>
+                    <span>➕ Manual / Offline Access Extension</span>
+                  </div>
+                  <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: "#fff" }}>Extend Membership Access</h2>
+                  <p style={{ color: "#9ca3af", fontSize: "13px", margin: "4px 0 0 0" }}>
+                    {extendingRow.userName ? `${extendingRow.userName} (${extendingRow.userEmail})` : extendingRow.userEmail || extendingRow.id}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setExtendingRow(null)}
+                  style={{ background: "none", border: "none", color: "#9ca3af", fontSize: "22px", cursor: "pointer", padding: "4px" }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Status and Current Expiry Summary Card */}
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "10px",
+                  padding: "12px 16px",
+                  marginBottom: "18px",
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                  fontSize: "12px",
+                }}
+              >
+                <div>
+                  <span style={{ color: "#9ca3af", display: "block", marginBottom: "2px" }}>Current Status</span>
+                  <span style={{ fontWeight: 700, color: extendingRow.status.toLowerCase() === "active" ? "#6ee7b7" : "#fcd34d", textTransform: "uppercase" }}>
+                    {extendingRow.status}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ color: "#9ca3af", display: "block", marginBottom: "2px" }}>Current Period End</span>
+                  <span style={{ fontWeight: 600, color: "#e2e8f0" }}>
+                    {extendingRow.currentEndAt ? formatDate(extendingRow.currentEndAt) : "No end date (expired)"}
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleConfirmExtendAccess} style={{ display: "grid", gap: "16px" }}>
+                {/* Base Date Selector (if current end is in the future) */}
+                {isFuture ? (
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                      Extend Base Point
+                    </label>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                      <button
+                        type="button"
+                        onClick={() => setExtendBaseFrom("current_end")}
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: extendBaseFrom === "current_end" ? "1px solid #10b981" : "1px solid rgba(255,255,255,0.12)",
+                          background: extendBaseFrom === "current_end" ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
+                          color: extendBaseFrom === "current_end" ? "#6ee7b7" : "#9ca3af",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          textAlign: "left",
+                        }}
+                      >
+                        ✓ From Current Expiry
+                        <span style={{ display: "block", fontSize: "10px", color: "#9ca3af", fontWeight: 400 }}>
+                          Adds time on top of existing valid period
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setExtendBaseFrom("today")}
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: extendBaseFrom === "today" ? "1px solid #10b981" : "1px solid rgba(255,255,255,0.12)",
+                          background: extendBaseFrom === "today" ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
+                          color: extendBaseFrom === "today" ? "#6ee7b7" : "#9ca3af",
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          textAlign: "left",
+                        }}
+                      >
+                        ✓ From Today ({new Date().toLocaleDateString("en-IN", { month: "short", day: "numeric" })})
+                        <span style={{ display: "block", fontSize: "10px", color: "#9ca3af", fontWeight: 400 }}>
+                          Starts renewal period from today
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Duration Presets */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "8px" }}>
+                    Extension Duration
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))", gap: "8px" }}>
+                    {[
+                      { key: "1_month", label: "+1 Month" },
+                      { key: "2_months", label: "+2 Months" },
+                      { key: "3_months", label: "+3 Months (Quarter)" },
+                      { key: "1_year", label: "+1 Year (Annual)" },
+                      { key: "custom", label: "Custom Date" },
+                    ].map((p) => {
+                      const isSelected = extendDurationPreset === p.key
+                      return (
+                        <button
+                          key={p.key}
+                          type="button"
+                          onClick={() => setExtendDurationPreset(p.key as any)}
+                          style={{
+                            padding: "9px 8px",
+                            borderRadius: "8px",
+                            border: isSelected ? "1px solid #10b981" : "1px solid rgba(255,255,255,0.12)",
+                            background: isSelected ? "rgba(16,185,129,0.22)" : "rgba(255,255,255,0.04)",
+                            color: isSelected ? "#6ee7b7" : "#d1d5db",
+                            fontSize: "12px",
+                            fontWeight: isSelected ? 700 : 500,
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {p.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Custom Date Input (if Custom selected) */}
+                {extendDurationPreset === "custom" ? (
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                      Select Custom Expiry Date
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={extendCustomDate}
+                      onChange={(e) => setExtendCustomDate(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        color: "#fff",
+                        fontSize: "14px",
+                        outline: "none",
+                        colorScheme: "dark",
+                      }}
+                    />
+                  </div>
+                ) : null}
+
+                {/* Live Calculated New Expiry Banner */}
+                <div
+                  style={{
+                    background: "rgba(16,185,129,0.1)",
+                    border: "1px solid rgba(16,185,129,0.3)",
+                    borderRadius: "10px",
+                    padding: "12px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "10px",
+                  }}
+                >
+                  <div>
+                    <span style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px", color: "#a7f3d0", fontWeight: 700, display: "block" }}>
+                      ✨ New Access Valid Until
+                    </span>
+                    <span style={{ fontSize: "15px", fontWeight: 700, color: "#fff", marginTop: "2px", display: "block" }}>
+                      {formatDate(calculatedEnd.toISOString())}
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      background: "rgba(16,185,129,0.2)",
+                      border: "1px solid rgba(16,185,129,0.4)",
+                      padding: "4px 8px",
+                      borderRadius: "6px",
+                      color: "#6ee7b7",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Status: ACTIVE
+                  </span>
+                </div>
+
+                {/* Payment Method & Amount */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                      Payment Method
+                    </label>
+                    <select
+                      value={extendPaymentMethod}
+                      onChange={(e) => setExtendPaymentMethod(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        background: "#1f1f24",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        color: "#fff",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                    >
+                      <option value="UPI_DIRECT">UPI Direct Transfer (GPay/PhonePe/Paytm)</option>
+                      <option value="NEFT">NEFT / RTGS</option>
+                      <option value="IMPS">IMPS</option>
+                      <option value="BANK_TRANSFER">Direct Bank Transfer</option>
+                      <option value="CASH">Cash / Offline</option>
+                      <option value="RAZORPAY">Razorpay (Direct / Manual)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                      Amount Received (₹)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="2100"
+                      value={extendAmountPaid}
+                      onChange={(e) => setExtendAmountPaid(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        color: "#fff",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* UTR / Transaction Reference */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                    UTR / Transaction Reference (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. UPI Ref #, Bank UTR, or Payment Reference"
+                    value={extendUtrNumber}
+                    onChange={(e) => setExtendUtrNumber(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "14px",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+
+                {/* Admin Notes */}
+                <div>
+                  <label style={{ display: "block", fontSize: "13px", color: "#9ca3af", marginBottom: "6px" }}>
+                    Admin Notes (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Received via UPI directly from member"
+                    value={extendAdminNotes}
+                    onChange={(e) => setExtendAdminNotes(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: "8px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#fff",
+                      fontSize: "14px",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+
+                {/* Send Email Checkbox */}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
+                  <input
+                    type="checkbox"
+                    id="extend-email-check"
+                    checked={extendSendEmail}
+                    onChange={(e) => setExtendSendEmail(e.target.checked)}
+                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                  />
+                  <label htmlFor="extend-email-check" style={{ fontSize: "13px", color: "#d1d5db", cursor: "pointer" }}>
+                    Send renewal &amp; access extension confirmation email to member
+                  </label>
+                </div>
+
+                {/* Modal Actions */}
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "16px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setExtendingRow(null)}
+                    style={{
+                      padding: "10px 18px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#ccc",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingExtend}
+                    style={{
+                      padding: "10px 22px",
+                      borderRadius: "8px",
+                      border: "1px solid #10b981",
+                      background: "linear-gradient(180deg, #10b981 0%, #059669 100%)",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                      cursor: submittingExtend ? "wait" : "pointer",
+                      opacity: submittingExtend ? 0.7 : 1,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: "0 4px 14px rgba(16,185,129,0.35)",
+                    }}
+                  >
+                    {submittingExtend ? "Extending Access..." : "✓ Confirm & Extend Access"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )
+      })() : null}
 
       <BrevoSyncModal
         isOpen={showBrevoSyncModal}

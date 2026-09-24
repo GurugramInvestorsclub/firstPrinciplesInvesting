@@ -1562,6 +1562,13 @@ async function applyProviderSubscriptionSnapshot(
     currentStartAt && currentSub?.planKey ? addPlanInterval(currentStartAt, currentSub.planKey) : null
 
   let currentEndAt = providerEntity.currentEndAt ?? currentSub?.currentEndAt ?? calculatedEndAt
+  if (
+    currentSub?.currentEndAt &&
+    currentEndAt &&
+    currentSub.currentEndAt.getTime() > currentEndAt.getTime()
+  ) {
+    currentEndAt = currentSub.currentEndAt
+  }
 
   if (terminalStatus && currentSub?.startAt && currentSub?.planKey) {
     const paidCount = providerEntity.paidCount || 1
@@ -2782,6 +2789,210 @@ export async function resendSubscriptionConfirmationEmail(params: {
   }
 }
 
+export interface ExtendSubscriptionAccessParams {
+  subscriptionId: string
+  durationPreset?: "1_month" | "2_months" | "3_months" | "1_year" | "custom"
+  customEndAt?: Date | string | null
+  baseFrom?: "current_end" | "today"
+  paymentMethod?: string | null
+  utrNumber?: string | null
+  amountPaid?: number | null
+  adminNotes?: string | null
+  extendedByAdminEmail?: string | null
+  sendEmailNotification?: boolean
+}
+
+export async function extendSubscriptionAccess(
+  params: ExtendSubscriptionAccessParams
+): Promise<InsightsMembershipSummary> {
+  const subscription = await prisma.insightsSubscription.findUnique({
+    where: { id: params.subscriptionId },
+    include: {
+      user: true,
+      charges: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      },
+    },
+  })
+
+  if (!subscription) {
+    throw new InsightsSubscriptionApiError(404, "NOT_FOUND", "Subscription record not found")
+  }
+
+  const now = new Date()
+  let baseDate = now
+  if (
+    params.baseFrom !== "today" &&
+    subscription.currentEndAt &&
+    new Date(subscription.currentEndAt).getTime() > now.getTime()
+  ) {
+    baseDate = new Date(subscription.currentEndAt)
+  }
+
+  let newEndAt: Date
+  if (params.durationPreset === "custom" && params.customEndAt) {
+    newEndAt = new Date(params.customEndAt)
+  } else if (params.durationPreset === "1_year") {
+    newEndAt = new Date(baseDate)
+    newEndAt.setFullYear(newEndAt.getFullYear() + 1)
+  } else if (params.durationPreset === "2_months") {
+    newEndAt = new Date(baseDate)
+    newEndAt.setMonth(newEndAt.getMonth() + 2)
+  } else if (params.durationPreset === "1_month") {
+    newEndAt = new Date(baseDate)
+    newEndAt.setMonth(newEndAt.getMonth() + 1)
+  } else {
+    newEndAt = new Date(baseDate)
+    newEndAt.setMonth(newEndAt.getMonth() + 3)
+  }
+
+  if (isNaN(newEndAt.getTime())) {
+    throw new InsightsSubscriptionApiError(400, "INVALID_DATE", "Invalid extension date calculated")
+  }
+
+  const durationPreset = params.durationPreset || "3_months"
+  const amountInPaise =
+    params.amountPaid !== undefined && params.amountPaid !== null
+      ? Math.round(params.amountPaid * 100)
+      : durationPreset === "1_year"
+        ? 999900
+        : (durationPreset === "2_months" || durationPreset === "1_month")
+          ? 1
+          : 210000
+
+  const paymentRefId = params.utrNumber?.trim()
+    ? (params.utrNumber.trim().startsWith("NEFT_") ||
+       params.utrNumber.trim().startsWith("UPI_") ||
+       params.utrNumber.trim().startsWith("MANUAL_")
+        ? params.utrNumber.trim()
+        : `UPI_${params.utrNumber.trim()}`)
+    : `MANUAL_EXT_${Date.now()}`
+
+  const paymentMethod = (params.paymentMethod || "UPI_DIRECT").trim().toUpperCase()
+
+  const updatedSubscription = await prisma.$transaction(
+    async (tx) => {
+      await acquireLock(tx, `insights-subscription:extend-access:${subscription.id}`)
+
+      const existingNotes = (subscription.notes && typeof subscription.notes === "object" && !Array.isArray(subscription.notes))
+        ? (subscription.notes as Record<string, unknown>)
+        : {}
+
+      const previousHistory = Array.isArray(existingNotes.extensionHistory)
+        ? (existingNotes.extensionHistory as Array<Record<string, unknown>>)
+        : []
+
+      const extensionRecord = {
+        extendedAt: now.toISOString(),
+        extendedBy: params.extendedByAdminEmail ?? "ADMIN",
+        durationPreset,
+        previousEndAt: subscription.currentEndAt ? new Date(subscription.currentEndAt).toISOString() : null,
+        newEndAt: newEndAt.toISOString(),
+        paymentMethod,
+        utrNumber: params.utrNumber?.trim() || null,
+        amountPaid: params.amountPaid ?? null,
+        adminNotes: params.adminNotes?.trim() || null,
+      }
+
+      const updatedNotes = {
+        ...existingNotes,
+        paymentMethod,
+        utrNumber: params.utrNumber?.trim() || (existingNotes.utrNumber as string | null) || null,
+        amountPaid: params.amountPaid ?? (existingNotes.amountPaid as number | null) ?? null,
+        adminNotes: params.adminNotes?.trim() || (existingNotes.adminNotes as string | null) || null,
+        lastExtendedAt: now.toISOString(),
+        lastExtendedBy: params.extendedByAdminEmail ?? "ADMIN",
+        extensionHistory: [...previousHistory, extensionRecord],
+      }
+
+      await tx.insightsSubscription.update({
+        where: { id: subscription.id },
+        data: {
+          status: InsightsSubscriptionStatus.ACTIVE,
+          currentEndAt: newEndAt,
+          endedAt: null,
+          paidCount: (subscription.paidCount ?? 0) + 1,
+          notes: updatedNotes as unknown as Prisma.InputJsonValue,
+        },
+      })
+
+      // Create captured charge record for this offline payment extension
+      await tx.insightsSubscriptionCharge.create({
+        data: {
+          subscriptionId: subscription.id,
+          razorpayPaymentId: paymentRefId,
+          amount: Math.max(1, amountInPaise),
+          currency: CURRENCY,
+          status: InsightsSubscriptionChargeStatus.CAPTURED,
+          chargedAt: now,
+        },
+      })
+
+      // Create audit log
+      await logSubscriptionAudit(tx, subscription.id, "SUBSCRIPTION_ACCESS_EXTENDED", {
+        extendedBy: params.extendedByAdminEmail ?? "ADMIN",
+        email: subscription.user.email,
+        durationPreset,
+        previousEndAt: subscription.currentEndAt,
+        newEndAt,
+        paymentMethod,
+        utrNumber: params.utrNumber ?? null,
+        amountPaid: params.amountPaid ?? null,
+        adminNotes: params.adminNotes ?? null,
+      })
+
+      return tx.insightsSubscription.findUniqueOrThrow({
+        where: { id: subscription.id },
+        include: {
+          charges: {
+            orderBy: { createdAt: "desc" },
+            take: 5,
+          },
+        },
+      })
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 15000,
+      timeout: 30000,
+    }
+  )
+
+  // Send confirmation email if requested
+  if (params.sendEmailNotification !== false && subscription.user.email) {
+    const planSlug: InsightsPlanSlug =
+      subscription.planKey === InsightsPlanKey.YEARLY ? "yearly" : "three_monthly"
+    const planDef = getInsightsSubscriptionPlanDefinition(planSlug)
+
+    sendManualGrantConfirmationEmail({
+      toEmail: subscription.user.email,
+      toName: subscription.user.name,
+      planLabel: planDef.label,
+      currentStartAt: subscription.currentStartAt || now,
+      currentEndAt: newEndAt,
+      paymentMethod,
+      utrNumber: params.utrNumber?.trim() || null,
+      amountPaid: params.amountPaid ?? null,
+      isRenewal: true,
+    }).catch((err) => {
+      console.error("Failed to send access extension confirmation email:", err)
+    })
+  }
+
+  // Automatically sync to Brevo active members list
+  if (subscription.user.email) {
+    addSubscriberToBrevoActiveList({
+      email: subscription.user.email,
+      name: subscription.user.name,
+    }).catch((err) => {
+      console.error("Failed to sync extended subscriber to Brevo active members list:", err)
+    })
+  }
+
+  return serializeMembership(updatedSubscription)
+}
+
 export interface UpdateSubscriptionDetailsParams {
   subscriptionId: string
   paymentMethod?: string | null
@@ -3249,6 +3460,13 @@ export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
           ? addPlanInterval(currentStartAt, localSubscription.planKey)
           : null
       let currentEndAt = providerEntity.currentEndAt ?? localSubscription.currentEndAt ?? calculatedEndAt
+      if (
+        localSubscription.currentEndAt &&
+        currentEndAt &&
+        localSubscription.currentEndAt.getTime() > currentEndAt.getTime()
+      ) {
+        currentEndAt = localSubscription.currentEndAt
+      }
 
       if (terminalStatus && localSubscription.startAt && localSubscription.planKey) {
         const expectedPaidEnd = new Date(localSubscription.startAt)
