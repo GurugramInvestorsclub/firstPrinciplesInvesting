@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ShieldCheck, Receipt, LogOut, AlertTriangle, Loader2, X, Clock, ExternalLink, CreditCard } from "lucide-react"
+import { RenewSubscriptionButton } from "./RenewSubscriptionButton"
 
 interface ProfileViewProps {
     userName: string
@@ -18,6 +19,8 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ 
+    userName,
+    userEmail,
     subscriptionStatus, 
     subscriptionEnd, 
     cancelAtCycleEnd = false,
@@ -130,20 +133,13 @@ export function ProfileView({
                             <p className="text-neutral-300 text-[11px] leading-relaxed">
                                 Automated card renewal failed with your bank. Your membership access is temporarily preserved under grace {graceEndFormatted ? `until ${graceEndFormatted}` : ""}. Please complete renewal to avoid access interruption.
                             </p>
-                            {renewalUrl && (
-                                <div className="pt-1">
-                                    <a
-                                        href={renewalUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-black font-bold font-mono text-[11px] uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95"
-                                    >
-                                        <CreditCard className="w-3.5 h-3.5" />
-                                        <span>Pay Renewal via UPI / Card</span>
-                                        <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
-                                    </a>
-                                </div>
-                            )}
+                            <div className="pt-1">
+                                <RenewSubscriptionButton
+                                    userName={userName}
+                                    userEmail={userEmail}
+                                    buttonText="Renew via Razorpay (₹2,100)"
+                                />
+                            </div>
                         </div>
                     )}
 

@@ -691,7 +691,7 @@ function serializeMembership(subscription: SubscriptionWithLatestCharge): Insigh
     : {}
   const renewalUrl = (typeof notesObj.renewalInvoiceUrl === "string" && notesObj.renewalInvoiceUrl)
     ? notesObj.renewalInvoiceUrl
-    : (typeof notesObj.shortUrl === "string" && notesObj.shortUrl)
+    : (subscription.status !== InsightsSubscriptionStatus.PENDING && typeof notesObj.shortUrl === "string" && notesObj.shortUrl)
     ? notesObj.shortUrl
     : null
 
@@ -720,7 +720,7 @@ function serializeMembership(subscription: SubscriptionWithLatestCharge): Insigh
 }
 
 async function findCurrentMembershipRecord(userId: string): Promise<SubscriptionWithLatestCharge | null> {
-  const open = await prisma.insightsSubscription.findFirst({
+  const openSubs = await prisma.insightsSubscription.findMany({
     where: {
       userId,
       status: {
@@ -740,8 +740,12 @@ async function findCurrentMembershipRecord(userId: string): Promise<Subscription
     },
   })
 
-  if (open) {
-    return open
+  if (openSubs.length > 0) {
+    const withAccess = openSubs.find((s) => membershipHasAccess(s))
+    if (withAccess) {
+      return withAccess
+    }
+    return openSubs[0]
   }
 
   return prisma.insightsSubscription.findFirst({
@@ -1571,7 +1575,7 @@ async function applyProviderSubscriptionSnapshot(
 
   const currentSub = await tx.insightsSubscription.findUnique({
     where: { id: subscription.id },
-    select: { currentStartAt: true, currentEndAt: true, planKey: true, startAt: true },
+    select: { currentStartAt: true, currentEndAt: true, planKey: true, startAt: true, userId: true },
   })
 
   let currentStartAt = providerEntity.currentStartAt ?? currentSub?.currentStartAt ?? null
@@ -1615,6 +1619,45 @@ async function applyProviderSubscriptionSnapshot(
     currentEndAt.getTime() > Date.now()
   ) {
     mappedStatus = InsightsSubscriptionStatus.ACTIVE
+  }
+
+  // When a subscription becomes ACTIVE, expire any older pending, halted, or created subscriptions
+  if (mappedStatus === InsightsSubscriptionStatus.ACTIVE && currentSub?.userId) {
+    const previousSubs = await tx.insightsSubscription.findMany({
+      where: {
+        userId: currentSub.userId,
+        id: { not: subscription.id },
+        status: {
+          in: [
+            InsightsSubscriptionStatus.PENDING,
+            InsightsSubscriptionStatus.HALTED,
+            InsightsSubscriptionStatus.PAUSED,
+            InsightsSubscriptionStatus.CREATED,
+          ],
+        },
+      },
+      select: { id: true, razorpaySubscriptionId: true },
+    })
+
+    if (previousSubs.length > 0) {
+      await tx.insightsSubscription.updateMany({
+        where: {
+          id: { in: previousSubs.map((s) => s.id) },
+        },
+        data: {
+          status: InsightsSubscriptionStatus.EXPIRED,
+          endedAt: new Date(),
+          lastWebhookAt: new Date(),
+        },
+      })
+
+      for (const oldSub of previousSubs) {
+        await logSubscriptionAudit(tx, oldSub.id, "SUBSCRIPTION_SUPERSEDED_BY_RENEWAL", {
+          newSubscriptionId: subscription.id,
+          newRazorpaySubscriptionId: providerEntity.id,
+        })
+      }
+    }
   }
 
   await tx.insightsSubscription.update({
@@ -1765,20 +1808,17 @@ export async function createInsightsSubscription(params: {
             }
           }
         } else if (
-          (existing.status === InsightsSubscriptionStatus.PAUSED ||
-            existing.status === InsightsSubscriptionStatus.HALTED) &&
-          !membershipHasAccess(existing)
+          existing.status === InsightsSubscriptionStatus.PENDING ||
+          existing.status === InsightsSubscriptionStatus.HALTED ||
+          existing.status === InsightsSubscriptionStatus.PAUSED
         ) {
-          await tx.insightsSubscription.update({
-            where: { id: existing.id },
-            data: {
-              status: InsightsSubscriptionStatus.EXPIRED,
-              endedAt: new Date(),
-              lastWebhookAt: new Date(),
-            },
-          })
-          await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_PAUSED_EXPIRED_FOR_NEW_PLAN", {
+          // Subscriptions in PENDING (exhausted auto-debit attempts), HALTED, or PAUSED
+          // cannot accept customer payments on their old subscription mandate in Razorpay.
+          // We allow creating a new Razorpay subscription to establish a fresh recurring mandate.
+          await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_RENEWAL_INITIATED", {
             previousStatus: existing.status,
+            previousRazorpaySubscriptionId: existing.razorpaySubscriptionId,
+            newPlan: params.plan,
           })
         } else {
           throw new InsightsSubscriptionApiError(
@@ -1801,6 +1841,9 @@ export async function createInsightsSubscription(params: {
             plan: params.plan,
             couponCode: testOffer?.couponCode ?? null,
             offerId: testOffer?.offerId ?? null,
+            ...(existing?.razorpaySubscriptionId
+              ? { replacesRazorpaySubscriptionId: existing.razorpaySubscriptionId }
+              : {}),
           },
         },
         include: {
