@@ -7,6 +7,7 @@ interface UserData {
     id: string;
     name: string | null;
     email: string | null;
+    phone?: string | null;
     image: string | null;
     createdAt: string;
     loginMethod: string;
@@ -305,6 +306,7 @@ export default function AdminUsersPage() {
                                 {[
                                     "Name",
                                     "Email",
+                                    "Phone",
                                     "Login Method",
                                     "Date Joined",
                                     "Actions",
@@ -331,7 +333,7 @@ export default function AdminUsersPage() {
                             {loading && users.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={6}
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
@@ -351,7 +353,7 @@ export default function AdminUsersPage() {
                             ) : users.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={6}
                                         style={{
                                             textAlign: "center",
                                             padding: "48px 16px",
@@ -402,6 +404,59 @@ export default function AdminUsersPage() {
                                                 }}
                                             >
                                                 {user.email}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    padding: "14px 16px",
+                                                    color: "var(--text-secondary)",
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            >
+                                                {user.phone ? (
+                                                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                        <span style={{ fontFamily: "monospace", fontSize: "13px" }}>{user.phone}</span>
+                                                        <a
+                                                            href={`https://wa.me/${user.phone.replace(/[^0-9]/g, "")}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            title="Chat on WhatsApp"
+                                                            style={{
+                                                                display: "inline-flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                width: "22px",
+                                                                height: "22px",
+                                                                borderRadius: "4px",
+                                                                background: "rgba(37, 211, 102, 0.12)",
+                                                                color: "#25D366",
+                                                                textDecoration: "none",
+                                                                fontSize: "11px",
+                                                            }}
+                                                        >
+                                                            💬
+                                                        </a>
+                                                        <a
+                                                            href={`tel:${user.phone}`}
+                                                            title="Call phone"
+                                                            style={{
+                                                                display: "inline-flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                width: "22px",
+                                                                height: "22px",
+                                                                borderRadius: "4px",
+                                                                background: "rgba(245, 184, 0, 0.12)",
+                                                                color: "var(--gold)",
+                                                                textDecoration: "none",
+                                                                fontSize: "11px",
+                                                            }}
+                                                        >
+                                                            📞
+                                                        </a>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: "rgba(255,255,255,0.25)" }}>—</span>
+                                                )}
                                             </td>
                                             <td
                                                 style={{

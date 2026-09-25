@@ -8,6 +8,7 @@ interface SubscriptionRow {
   userId: string
   userName: string | null
   userEmail: string | null
+  userPhone?: string | null
   secondaryEmails?: Array<{ id: string; email: string; createdAt: string }>
   planKey: "monthly" | "three_monthly" | "yearly"
   status: string
@@ -723,11 +724,12 @@ export default function AdminSubscriptionsPage() {
     const csvContent =
       "\uFEFF" +
       [
-        ["User Name", "Email", "Billing Window Start", "Billing Window End"].map(escapeCsv).join(","),
+        ["User Name", "Email", "Phone", "Billing Window Start", "Billing Window End"].map(escapeCsv).join(","),
         ...filteredRows.map((row) =>
           [
             row.userName || "Unknown",
             row.userEmail || "No email",
+            row.userPhone || "",
             formatDate(row.currentStartAt),
             formatDate(row.currentEndAt),
           ]
@@ -1091,6 +1093,51 @@ export default function AdminSubscriptionsPage() {
                           <td style={tableCellStyle}>
                             <div style={{ fontWeight: 600 }}>{row.userName || "Unknown"}</div>
                             <div style={{ color: "var(--text-secondary)", marginTop: "4px" }}>{row.userEmail || "No email"}</div>
+                            {row.userPhone ? (
+                              <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                <span style={{ fontSize: "12px", fontFamily: "monospace", color: "var(--text-primary)" }}>
+                                  {row.userPhone}
+                                </span>
+                                <a
+                                  href={`https://wa.me/${row.userPhone.replace(/[^0-9]/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title="Chat on WhatsApp"
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: "20px",
+                                    height: "20px",
+                                    borderRadius: "4px",
+                                    background: "rgba(37, 211, 102, 0.15)",
+                                    color: "#25D366",
+                                    textDecoration: "none",
+                                    fontSize: "11px",
+                                  }}
+                                >
+                                  💬
+                                </a>
+                                <a
+                                  href={`tel:${row.userPhone}`}
+                                  title="Call phone"
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: "20px",
+                                    height: "20px",
+                                    borderRadius: "4px",
+                                    background: "rgba(245, 184, 0, 0.15)",
+                                    color: "var(--gold)",
+                                    textDecoration: "none",
+                                    fontSize: "11px",
+                                  }}
+                                >
+                                  📞
+                                </a>
+                              </div>
+                            ) : null}
                             {row.secondaryEmails && row.secondaryEmails.length > 0 ? (
                               <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
                                 {row.secondaryEmails.map((sec) => (
@@ -1899,6 +1946,30 @@ export default function AdminSubscriptionsPage() {
               <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "16px", fontSize: "13px", lineHeight: "1.8" }}>
                 <div><strong>User Email:</strong> {selectedNotesRow.userEmail || "-"}</div>
                 <div><strong>User Name:</strong> {selectedNotesRow.userName || "-"}</div>
+                <div>
+                  <strong>Phone:</strong>{" "}
+                  {selectedNotesRow.userPhone ? (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", marginLeft: "4px" }}>
+                      <span style={{ fontFamily: "monospace" }}>{selectedNotesRow.userPhone}</span>
+                      <a
+                        href={`https://wa.me/${selectedNotesRow.userPhone.replace(/[^0-9]/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#25D366", textDecoration: "underline", fontSize: "12px" }}
+                      >
+                        WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${selectedNotesRow.userPhone}`}
+                        style={{ color: "var(--gold)", textDecoration: "underline", fontSize: "12px" }}
+                      >
+                        Call
+                      </a>
+                    </span>
+                  ) : (
+                    "-"
+                  )}
+                </div>
                 <div><strong>Payment Method:</strong> <span style={{ color: isManualRow ? "#93c5fd" : "#6ee7b7", fontWeight: 600 }}>{paymentMethodDisplay}</span></div>
                 <div><strong>{utrLabel}:</strong> <code style={{ color: "#FFC72C" }}>{utrDisplay}</code></div>
                 <div><strong>Amount Paid:</strong> ₹{selectedNotesRow.notes?.amountPaid || (selectedNotesRow.latestCharge ? (selectedNotesRow.latestCharge.amount / 100).toFixed(0) : "-")}</div>
@@ -2373,6 +2444,7 @@ export default function AdminSubscriptionsPage() {
                 <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>Edit Subscription Details</h2>
                 <p style={{ color: "#9ca3af", fontSize: "13px", margin: "4px 0 0 0" }}>
                   {editingRow.userEmail || editingRow.userName || editingRow.id}
+                  {editingRow.userPhone ? ` • ${editingRow.userPhone}` : ""}
                 </p>
               </div>
               <button

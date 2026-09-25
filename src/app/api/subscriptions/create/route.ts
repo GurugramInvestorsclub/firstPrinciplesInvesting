@@ -24,11 +24,16 @@ export async function POST(request: NextRequest) {
       typeof body?.couponCode === "string" && body.couponCode.trim().length > 0
         ? body.couponCode.trim()
         : null
+    const phone =
+      typeof body?.phone === "string" && body.phone.trim().length > 0
+        ? body.phone.trim()
+        : null
 
     const result = await createInsightsSubscription({
       userId: session.user.id,
       email: session.user.email ?? null,
       name: session.user.name ?? null,
+      phone,
       plan,
       couponCode,
     })
@@ -40,6 +45,7 @@ export async function POST(request: NextRequest) {
         membership: result.membership,
         razorpayKeyId: result.razorpayKeyId,
         reused: result.reused,
+        userPhone: result.userPhone ?? null,
       },
     })
   } catch (error) {

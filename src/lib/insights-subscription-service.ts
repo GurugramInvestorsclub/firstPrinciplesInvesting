@@ -80,6 +80,8 @@ interface ProviderPaymentEntity {
   status: string | null
   failureReason: string | null
   chargedAt: Date | null
+  contact?: string | null
+  email?: string | null
 }
 
 export interface InsightsChargeSummary {
@@ -121,6 +123,7 @@ export interface CreateInsightsSubscriptionResult {
   razorpaySubscriptionId: string
   razorpayKeyId: string
   reused: boolean
+  userPhone?: string | null
 }
 
 export class InsightsSubscriptionApiError extends Error {
@@ -371,6 +374,8 @@ function normalizeProviderPaymentEntity(value: unknown): ProviderPaymentEntity |
       explicitFailureReason ??
       (status && status !== "captured" ? "PAYMENT_NOT_CAPTURED" : null),
     chargedAt: toDateFromUnixSeconds(raw?.created_at),
+    contact: asString(raw?.contact),
+    email: asString(raw?.email),
   }
 }
 
@@ -1697,6 +1702,26 @@ async function applyProviderSubscriptionSnapshot(
 
   await upsertChargeFromProvider(tx, subscription.id, paymentEntity ?? null)
 
+  if (paymentEntity?.contact && currentSub?.userId) {
+    const rawContact = paymentEntity.contact.trim()
+    if (rawContact) {
+      try {
+        const existingUser = await tx.user.findUnique({
+          where: { id: currentSub.userId },
+          select: { phone: true },
+        })
+        if (existingUser && !existingUser.phone) {
+          await tx.user.update({
+            where: { id: currentSub.userId },
+            data: { phone: rawContact },
+          })
+        }
+      } catch (err) {
+        console.error("Failed to backfill user phone from provider payment:", err)
+      }
+    }
+  }
+
   await logSubscriptionAudit(tx, subscription.id, auditAction, {
     providerStatus: providerEntity.status,
     razorpaySubscriptionId: providerEntity.id,
@@ -1708,6 +1733,7 @@ export async function createInsightsSubscription(params: {
   userId: string
   email: string | null
   name: string | null
+  phone?: string | null
   plan: InsightsPlanSlug
   couponCode?: string | null
 }): Promise<CreateInsightsSubscriptionResult> {
@@ -1730,6 +1756,24 @@ export async function createInsightsSubscription(params: {
   const prepared = await prisma.$transaction(
     async (tx) => {
       await acquireLock(tx, `insights-subscription:create:${params.userId}`)
+
+      let resolvedPhone = params.phone?.trim() || null
+      if (resolvedPhone) {
+        try {
+          await tx.user.update({
+            where: { id: params.userId },
+            data: { phone: resolvedPhone },
+          })
+        } catch (err) {
+          console.error("Failed to update user phone during subscription creation:", err)
+        }
+      } else {
+        const u = await tx.user.findUnique({
+          where: { id: params.userId },
+          select: { phone: true },
+        })
+        resolvedPhone = u?.phone ?? null
+      }
 
       const existing = await tx.insightsSubscription.findFirst({
         where: {
@@ -1790,7 +1834,7 @@ export async function createInsightsSubscription(params: {
                 razorpaySubscriptionId: existing.razorpaySubscriptionId,
               })
             } else if (existing.planKey === slugToPlanKey(params.plan)) {
-              return { type: "reuse", subscription: existing }
+              return { type: "reuse", subscription: existing, userPhone: resolvedPhone }
             } else {
               await tx.insightsSubscription.update({
                 where: { id: existing.id },
@@ -1838,6 +1882,7 @@ export async function createInsightsSubscription(params: {
           notes: {
             userEmail: params.email,
             userName: params.name,
+            userPhone: resolvedPhone,
             plan: params.plan,
             couponCode: testOffer?.couponCode ?? null,
             offerId: testOffer?.offerId ?? null,
@@ -1860,7 +1905,7 @@ export async function createInsightsSubscription(params: {
         plan: params.plan,
       })
 
-      return { type: "new", subscription: localSubscription }
+      return { type: "new", subscription: localSubscription, userPhone: resolvedPhone }
     },
     {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
@@ -1875,6 +1920,7 @@ export async function createInsightsSubscription(params: {
       razorpaySubscriptionId: prepared.subscription.razorpaySubscriptionId!,
       razorpayKeyId: getRazorpaySubscriptionKeyIdOrThrow(),
       reused: true,
+      userPhone: prepared.userPhone,
     }
   }
 
@@ -1893,6 +1939,7 @@ export async function createInsightsSubscription(params: {
         localSubscriptionId: prepared.subscription.id,
         userId: params.userId,
         userEmail: params.email ?? "",
+        userPhone: prepared.userPhone ?? "",
         plan: params.plan,
         couponCode: testOffer?.couponCode ?? "",
         offerId: testOffer?.offerId ?? "",
@@ -1973,6 +2020,7 @@ export async function createInsightsSubscription(params: {
     razorpaySubscriptionId: providerEntity.id,
     razorpayKeyId: getRazorpaySubscriptionKeyIdOrThrow(),
     reused: false,
+    userPhone: prepared.userPhone,
   }
 }
 

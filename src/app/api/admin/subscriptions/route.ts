@@ -35,6 +35,7 @@ export async function GET() {
             id: true,
             name: true,
             email: true,
+            phone: true,
             secondaryEmails: {
               select: {
                 id: true,
@@ -70,6 +71,7 @@ export async function GET() {
           userId: subscription.userId,
           userName: subscription.user.name,
           userEmail: subscription.user.email,
+          userPhone: subscription.user.phone || ((subscription.notes as any)?.userPhone as string) || null,
           secondaryEmails: subscription.user.secondaryEmails || [],
           planKey: planKeyToSlug(subscription.planKey),
           status: subscription.status.toLowerCase(),

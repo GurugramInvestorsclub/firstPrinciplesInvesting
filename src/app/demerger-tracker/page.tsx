@@ -65,6 +65,7 @@ export default async function DemergerTrackerPage() {
                                         callbackUrl="/demerger-tracker"
                                         userName={session.user.name}
                                         userEmail={session.user.email}
+                                        userPhone={(session.user as any)?.phone ?? undefined}
                                         plans={subscriptionUi.plans}
                                     />
                                 </div>

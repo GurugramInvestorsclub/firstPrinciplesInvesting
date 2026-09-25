@@ -14,6 +14,7 @@ interface RazorpaySubscriptionCheckoutOptions {
     prefill?: {
         name?: string
         email?: string
+        contact?: string
     }
     modal?: {
         ondismiss?: () => void
@@ -58,6 +59,7 @@ function loadRazorpayCheckoutScript(): Promise<boolean> {
 export function PricingSection() {
     const router = useRouter()
     const { data: session, status: sessionStatus } = useSession()
+    const [phone, setPhone] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
@@ -80,6 +82,16 @@ export function PricingSection() {
             return
         }
 
+        const rawPhone = phone.replace(/[^0-9]/g, "")
+        if (phone.trim() && rawPhone.length < 10) {
+            setError("Please enter a valid 10-digit mobile number")
+            return
+        }
+
+        const formattedPhone = rawPhone.length >= 10
+            ? (phone.trim().startsWith("+") ? phone.trim() : `+91${rawPhone.slice(-10)}`)
+            : null
+
         setIsSubmitting(true)
 
         try {
@@ -91,6 +103,7 @@ export function PricingSection() {
                 body: JSON.stringify({
                     plan: "three_monthly",
                     couponCode: null,
+                    phone: formattedPhone,
                 }),
             })
 
@@ -121,6 +134,7 @@ export function PricingSection() {
                 prefill: {
                     name: session?.user?.name ?? undefined,
                     email: session?.user?.email ?? undefined,
+                    contact: formattedPhone ?? createPayload.data?.userPhone ?? undefined,
                 },
                 modal: {
                     ondismiss: () => {
@@ -179,7 +193,7 @@ export function PricingSection() {
         } finally {
             setIsSubmitting(false)
         }
-    }, [session, sessionStatus, router])
+    }, [session, sessionStatus, router, phone])
 
     return (
         <section id="pricing" className="py-24 md:py-32 bg-bg-deep relative overflow-hidden">
@@ -279,6 +293,29 @@ export function PricingSection() {
 
                         {/* Checkout CTA */}
                         <div className="pt-8 border-t border-[#2E2E2E] space-y-4">
+                            {/* Phone Input */}
+                            <div className="space-y-1.5 text-left">
+                                <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400">
+                                    WhatsApp / Mobile Number <span className="text-neutral-500 font-normal lowercase">(for reports & updates)</span>
+                                </label>
+                                <div className="relative flex items-center">
+                                    <span className="absolute left-4 text-xs font-mono text-neutral-400 select-none">
+                                        +91
+                                    </span>
+                                    <input
+                                        type="tel"
+                                        value={phone.startsWith("+91") ? phone.slice(3).trim() : phone}
+                                        onChange={(e) => {
+                                            const clean = e.target.value.replace(/[^0-9]/g, "").slice(0, 10)
+                                            setPhone(clean ? `+91${clean}` : "")
+                                        }}
+                                        placeholder="Enter 10-digit mobile number"
+                                        disabled={isSubmitting}
+                                        className="w-full bg-[#141416] border border-[#2E2E2E] focus:border-gold/60 text-text-primary rounded-xl pl-14 pr-4 py-3 text-sm font-mono outline-none transition placeholder:text-neutral-600"
+                                    />
+                                </div>
+                            </div>
+
                             <button
                                 onClick={handleCheckout}
                                 disabled={isSubmitting}

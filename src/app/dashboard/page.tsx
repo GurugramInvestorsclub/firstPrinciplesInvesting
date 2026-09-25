@@ -2,6 +2,7 @@ import { auth, signOut } from "@/auth"
 import { redirect } from "next/navigation"
 import { groq } from "next-sanity"
 import { client } from "@/lib/sanity.client"
+import { prisma } from "@/lib/prisma"
 import { eventsQuery, pastEventsQuery, recordingsQuery, notesQuery } from "@/lib/sanity.queries"
 import { getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
 import { ResearchDesk } from "@/components/dashboard/ResearchDesk"
@@ -48,15 +49,19 @@ export default async function DashboardPage() {
     const userId = session.user.id
     const startOfDay = getStartOfTodayKolkata().toISOString()
     
-    // Fetch user membership status and Sanity contents in parallel
-    const [insightsMembership, sanityPosts, upcomingEvents, pastEvents, recordings, notes, ratingsMap] = await Promise.all([
+    // Fetch user membership status, Sanity contents, and user profile phone in parallel
+    const [insightsMembership, sanityPosts, upcomingEvents, pastEvents, recordings, notes, ratingsMap, dbUser] = await Promise.all([
         getCurrentInsightsMembershipForUser(userId),
         client.fetch<any[]>(dashboardPostsQuery, {}, { cache: "no-store" }),
         client.fetch<any[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(pastEventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(recordingsQuery, { search: null }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(notesQuery, { search: null }, { next: { revalidate: 60 } }),
-        getArticleRatingsMap()
+        getArticleRatingsMap(),
+        prisma.user.findUnique({
+            where: { id: userId },
+            select: { phone: true },
+        }),
     ])
 
     const subscriptionStatus = insightsMembership?.statusLabel || "Inactive"
@@ -87,6 +92,7 @@ export default async function DashboardPage() {
         <ResearchDesk
             userName={session.user.name || "Investor"}
             userEmail={session.user.email || ""}
+            userPhone={dbUser?.phone || undefined}
             subscriptionStatus={subscriptionStatus}
             subscriptionEnd={subscriptionEnd}
             cancelAtCycleEnd={insightsMembership?.cancelAtCycleEnd || false}

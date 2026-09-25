@@ -74,6 +74,7 @@ export async function GET(request: NextRequest) {
           data: {
             emailVerified: new Date(),
             name: existingUser.name ?? payload.name,
+            phone: existingUser.phone ?? payload.phone,
             password: payload.passwordHash,
           },
         })
@@ -84,6 +85,7 @@ export async function GET(request: NextRequest) {
         data: {
           email: payload.email,
           name: payload.name,
+          phone: payload.phone,
           password: payload.passwordHash,
           emailVerified: new Date(),
         },

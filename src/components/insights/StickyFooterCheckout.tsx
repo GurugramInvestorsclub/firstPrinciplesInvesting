@@ -24,6 +24,7 @@ interface RazorpaySubscriptionCheckoutOptions {
   prefill?: {
     name?: string
     email?: string
+    contact?: string
   }
   modal?: {
     ondismiss?: () => void
@@ -52,6 +53,7 @@ interface StickyFooterCheckoutProps {
       id?: string | null
       name?: string | null
       email?: string | null
+      phone?: string | null
     } | null
   } | null
   plans: PlanOption[]
@@ -164,6 +166,7 @@ export function StickyFooterCheckout({
         prefill: {
           name: session.user.name ?? undefined,
           email: session.user.email ?? undefined,
+          contact: (session.user as any)?.phone ?? createPayload.data?.userPhone ?? undefined,
         },
         modal: {
           ondismiss: () => {

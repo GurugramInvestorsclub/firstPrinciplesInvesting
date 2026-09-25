@@ -13,6 +13,7 @@ interface RazorpaySubscriptionCheckoutOptions {
     prefill?: {
         name?: string
         email?: string
+        contact?: string
     }
     modal?: {
         ondismiss?: () => void
@@ -57,6 +58,7 @@ function loadRazorpayCheckoutScript(): Promise<boolean> {
 interface RenewSubscriptionButtonProps {
     userName?: string
     userEmail?: string
+    userPhone?: string
     className?: string
     buttonText?: string
 }
@@ -64,6 +66,7 @@ interface RenewSubscriptionButtonProps {
 export function RenewSubscriptionButton({
     userName,
     userEmail,
+    userPhone,
     className,
     buttonText = "Renew Subscription (₹2,100 / Qtr)",
 }: RenewSubscriptionButtonProps) {
@@ -85,6 +88,7 @@ export function RenewSubscriptionButton({
                 body: JSON.stringify({
                     plan: "three_monthly",
                     couponCode: null,
+                    phone: userPhone?.trim() || null,
                 }),
             })
 
@@ -115,6 +119,7 @@ export function RenewSubscriptionButton({
                 prefill: {
                     name: userName ?? undefined,
                     email: userEmail ?? undefined,
+                    contact: userPhone ?? createPayload.data?.userPhone ?? undefined,
                 },
                 modal: {
                     ondismiss: () => {

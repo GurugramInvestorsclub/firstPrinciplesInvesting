@@ -134,6 +134,7 @@ export default async function MembersOnlyArchivePage({
                             <RenewSubscriptionButton
                                 userName={session.user.name ?? undefined}
                                 userEmail={session.user.email ?? undefined}
+                                userPhone={(session.user as any)?.phone ?? undefined}
                                 buttonText="Renew Subscription (₹2,100)"
                             />
                         </div>
@@ -155,6 +156,7 @@ export default async function MembersOnlyArchivePage({
                                         callbackUrl="/insights/members-only"
                                         userName={session.user.name}
                                         userEmail={session.user.email}
+                                        userPhone={(session.user as any)?.phone ?? undefined}
                                         plans={subscriptionUi.plans}
                                     />
                                 </div>

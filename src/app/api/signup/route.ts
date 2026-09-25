@@ -54,6 +54,10 @@ export async function POST(req: Request) {
             typeof body?.name === "string" && body.name.trim().length > 0
                 ? body.name.trim().slice(0, 100)
                 : null
+        const phone =
+            typeof body?.phone === "string" && body.phone.trim().length > 0
+                ? body.phone.trim().slice(0, 20)
+                : null
 
         if (!email || !password) {
             return NextResponse.json(
@@ -85,6 +89,7 @@ export async function POST(req: Request) {
         }
 
         const normalizedName = name?.trim() ? name.trim() : null
+        const normalizedPhone = phone?.trim() ? phone.trim() : null
 
         // Existing verified users should receive a generic response to prevent enumeration.
         const existingUser = await prisma.user.findUnique({
@@ -99,6 +104,7 @@ export async function POST(req: Request) {
         const verificationRecord = createSignupVerificationRecord({
             email,
             name: normalizedName,
+            phone: normalizedPhone,
             passwordHash: hashedPassword,
         })
 
@@ -125,12 +131,14 @@ export async function POST(req: Request) {
                     where: { email },
                     update: {
                         name: normalizedName,
+                        phone: normalizedPhone,
                         password: hashedPassword,
                         emailVerified: new Date(),
                     },
                     create: {
                         email,
                         name: normalizedName,
+                        phone: normalizedPhone,
                         password: hashedPassword,
                         emailVerified: new Date(),
                     },

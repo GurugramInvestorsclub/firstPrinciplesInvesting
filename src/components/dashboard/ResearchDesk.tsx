@@ -22,6 +22,7 @@ import { RenewSubscriptionButton } from "./RenewSubscriptionButton"
 interface ResearchDeskProps {
     userName: string
     userEmail: string
+    userPhone?: string
     subscriptionStatus: string
     subscriptionEnd?: string
     cancelAtCycleEnd?: boolean
@@ -41,6 +42,7 @@ interface ResearchDeskProps {
 export function ResearchDesk({ 
     userName, 
     userEmail, 
+    userPhone,
     subscriptionStatus, 
     subscriptionEnd, 
     cancelAtCycleEnd = false,
@@ -244,6 +246,7 @@ export function ResearchDesk({
                                     <RenewSubscriptionButton
                                         userName={userName}
                                         userEmail={userEmail}
+                                        userPhone={userPhone}
                                         buttonText="Renew Subscription (₹2,100)"
                                     />
                                     <Link
@@ -302,6 +305,7 @@ export function ResearchDesk({
                         <ProfileView 
                             userName={userName}
                             userEmail={userEmail}
+                            userPhone={userPhone}
                             subscriptionStatus={subscriptionStatus}
                             subscriptionEnd={subscriptionEnd}
                             cancelAtCycleEnd={cancelAtCycleEnd}

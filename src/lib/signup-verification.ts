@@ -7,6 +7,7 @@ interface SignupVerificationPayload {
   email: string
   name: string | null
   passwordHash: string
+  phone?: string | null
 }
 
 function getVerificationSecret(): string {

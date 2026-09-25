@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ShieldCheck, Receipt, LogOut, AlertTriangle, Loader2, X, Clock, ExternalLink, CreditCard } from "lucide-react"
+import { ShieldCheck, Receipt, LogOut, AlertTriangle, Loader2, X, Clock, ExternalLink, CreditCard, User } from "lucide-react"
 import { RenewSubscriptionButton } from "./RenewSubscriptionButton"
 
 interface ProfileViewProps {
     userName: string
     userEmail: string
+    userPhone?: string
     subscriptionStatus: string
     subscriptionEnd?: string
     cancelAtCycleEnd?: boolean
@@ -21,6 +22,7 @@ interface ProfileViewProps {
 export function ProfileView({ 
     userName,
     userEmail,
+    userPhone,
     subscriptionStatus, 
     subscriptionEnd, 
     cancelAtCycleEnd = false,
@@ -85,6 +87,31 @@ export function ProfileView({
             {/* Profile Content List */}
             <div className="space-y-6">
                 
+                {/* Account Details */}
+                <div className="p-6 rounded-2xl border border-white/5 bg-[#1E1E1E] space-y-4">
+                    <h3 className="text-sm font-bold text-text-primary font-mono uppercase tracking-wider flex items-center justify-between border-b border-[#2E2E2E] pb-3">
+                        <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-gold" />
+                            <span>Account Profile</span>
+                        </div>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs text-neutral-400">
+                        <div>
+                            <span className="text-neutral-500 block">FULL NAME</span>
+                            <span className="text-text-primary font-bold">{userName || "Investor"}</span>
+                        </div>
+                        <div>
+                            <span className="text-neutral-500 block">PRIMARY EMAIL</span>
+                            <span className="text-text-primary font-bold">{userEmail}</span>
+                        </div>
+                        <div className="sm:col-span-2">
+                            <span className="text-neutral-500 block">MOBILE / WHATSAPP NUMBER</span>
+                            <span className="text-text-primary font-bold">{userPhone || "Not configured (will be requested at checkout)"}</span>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Membership Details */}
                 <div className="p-6 rounded-2xl border border-white/5 bg-[#1E1E1E] space-y-4">
                     <h3 className="text-sm font-bold text-text-primary font-mono uppercase tracking-wider flex items-center justify-between border-b border-[#2E2E2E] pb-3">
@@ -137,6 +164,7 @@ export function ProfileView({
                                 <RenewSubscriptionButton
                                     userName={userName}
                                     userEmail={userEmail}
+                                    userPhone={userPhone}
                                     buttonText="Renew via Razorpay (₹2,100)"
                                 />
                             </div>

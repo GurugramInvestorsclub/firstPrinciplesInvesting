@@ -23,6 +23,7 @@ interface RazorpaySubscriptionCheckoutOptions {
   prefill?: {
     name?: string
     email?: string
+    contact?: string
   }
   modal?: {
     ondismiss?: () => void
@@ -47,6 +48,7 @@ interface Props {
   callbackUrl: string
   userName?: string | null
   userEmail?: string | null
+  userPhone?: string | null
   compact?: boolean
   initialPlan?: PlanKey
   plans: PlanOption[]
@@ -77,6 +79,7 @@ export function InsightsSubscriptionCheckout({
   callbackUrl,
   userName,
   userEmail,
+  userPhone,
   compact = false,
   initialPlan = "three_monthly",
   plans,
@@ -84,6 +87,7 @@ export function InsightsSubscriptionCheckout({
   const router = useRouter()
   const defaultPlan = plans.find((entry) => entry.key === initialPlan) ?? plans[0]
   const [plan, setPlan] = useState<PlanKey>(defaultPlan?.key ?? "three_monthly")
+  const [phone, setPhone] = useState(userPhone ?? "")
   const [couponCode, setCouponCode] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -93,6 +97,17 @@ export function InsightsSubscriptionCheckout({
   const startCheckout = async () => {
     setError(null)
     setSuccess(null)
+
+    const rawPhone = phone.replace(/[^0-9]/g, "")
+    if (phone.trim() && rawPhone.length < 10) {
+      setError("Please enter a valid 10-digit mobile number")
+      return
+    }
+
+    const formattedPhone = rawPhone.length >= 10
+      ? (phone.trim().startsWith("+") ? phone.trim() : `+91${rawPhone.slice(-10)}`)
+      : null
+
     setIsSubmitting(true)
 
     try {
@@ -104,6 +119,7 @@ export function InsightsSubscriptionCheckout({
         body: JSON.stringify({
           plan,
           couponCode: couponCode.trim() || null,
+          phone: formattedPhone,
         }),
       })
 
@@ -130,6 +146,7 @@ export function InsightsSubscriptionCheckout({
         prefill: {
           name: userName ?? undefined,
           email: userEmail ?? undefined,
+          contact: formattedPhone ?? createPayload.data?.userPhone ?? undefined,
         },
         modal: {
           ondismiss: () => {
@@ -234,6 +251,28 @@ export function InsightsSubscriptionCheckout({
           disabled={isSubmitting}
         />
       </label>
+
+      <div className="space-y-1.5 text-left">
+        <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-white/60">
+          WhatsApp / Mobile Number <span className="text-white/40 font-normal lowercase">(for reports & updates)</span>
+        </label>
+        <div className="relative flex items-center">
+          <span className="absolute left-3.5 text-xs font-mono text-white/50 select-none">
+            +91
+          </span>
+          <input
+            type="tel"
+            value={phone.startsWith("+91") ? phone.slice(3).trim() : phone}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9]/g, "").slice(0, 10)
+              setPhone(val ? `+91${val}` : "")
+            }}
+            placeholder="Enter 10-digit mobile number"
+            disabled={isSubmitting}
+            className="h-11 w-full rounded-xl border border-white/10 bg-black/20 pl-14 pr-4 text-sm font-mono text-white outline-none transition placeholder:text-white/30 focus:border-gold/60"
+          />
+        </div>
+      </div>
 
       <button
         type="button"

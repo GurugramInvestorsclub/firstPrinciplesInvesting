@@ -97,6 +97,7 @@ export default async function InsightsPage({
                                     <RenewSubscriptionButton
                                         userName={session?.user?.name ?? undefined}
                                         userEmail={session?.user?.email ?? undefined}
+                                        userPhone={(session?.user as any)?.phone ?? undefined}
                                         buttonText="Renew Subscription (₹2,100)"
                                     />
                                 </div>

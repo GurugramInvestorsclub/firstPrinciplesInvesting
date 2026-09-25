@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
             id: user.id,
             name: user.name,
             email: user.email,
+            phone: user.phone || null,
             image: user.image,
             createdAt: user.createdAt,
             // If they have accounts, it's likely Google. If they have a password, it's Credentials.

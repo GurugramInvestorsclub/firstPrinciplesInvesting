@@ -199,6 +199,7 @@ export default async function InsightPage({ params }: Props) {
                                                 callbackUrl={callbackUrl}
                                                 userName={session.user.name}
                                                 userEmail={session.user.email}
+                                                userPhone={(session.user as any)?.phone ?? undefined}
                                                 plans={subscriptionUi.plans}
                                             />
                                         ) : (
