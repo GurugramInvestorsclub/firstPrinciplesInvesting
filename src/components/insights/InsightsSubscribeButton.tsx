@@ -1,19 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { AlertCircle, CheckCircle } from "lucide-react"
-
-type PlanKey = "monthly" | "three_monthly" | "yearly"
-
-interface PlanOption {
-  key: PlanKey
-  label: string
-  description: string
-  cadence: string
-  priceLabel: string
-  badge: string | null
-}
 
 interface RazorpaySubscriptionCheckoutOptions {
   key: string
@@ -45,20 +34,6 @@ type RazorpaySubscriptionCheckoutConstructor = new (
   options: RazorpaySubscriptionCheckoutOptions
 ) => RazorpaySubscriptionCheckoutInstance
 
-interface StickyFooterCheckoutProps {
-  paywallReady: boolean
-  hasSubscriptionAccess: boolean
-  session: {
-    user?: {
-      id?: string | null
-      name?: string | null
-      email?: string | null
-      phone?: string | null
-    } | null
-  } | null
-  plans: PlanOption[]
-}
-
 let scriptLoaderPromise: Promise<boolean> | null = null
 
 function loadRazorpayCheckoutScript(): Promise<boolean> {
@@ -80,56 +55,51 @@ function loadRazorpayCheckoutScript(): Promise<boolean> {
   return scriptLoaderPromise
 }
 
-export function StickyFooterCheckout({
-  paywallReady,
-  hasSubscriptionAccess,
+export interface InsightsSubscribeButtonProps {
+  session?: {
+    user?: {
+      id?: string | null
+      name?: string | null
+      email?: string | null
+      phone?: string | null
+    } | null
+  } | null
+  paywallReady?: boolean
+  buttonText?: string
+  className?: string
+  planKey?: "monthly" | "three_monthly" | "yearly"
+  autoOpenOnParam?: boolean
+}
+
+export function InsightsSubscribeButton({
   session,
-  plans,
-}: StickyFooterCheckoutProps) {
+  paywallReady = true,
+  buttonText = "Subscribe for ₹23/day",
+  className = "inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] cursor-pointer",
+  planKey = "three_monthly",
+  autoOpenOnParam = true,
+}: InsightsSubscribeButtonProps) {
   const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
 
-  // Only target the active plan (three_monthly)
-  const targetPlanKey: PlanKey = "three_monthly"
-  const selectedPlan = plans.find((entry) => entry.key === targetPlanKey) ?? plans[0]
-
-  // Show footer only after scrolling past the hero section (~600px)
-  useEffect(() => {
-    if (typeof window === "undefined" || hasSubscriptionAccess) return
-
-    const handleScroll = () => {
-      if (window.scrollY > 600) {
-        setIsVisible(true)
-      } else {
-        setIsVisible(false)
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll() // Check immediately on mount
-
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [hasSubscriptionAccess])
-
-  const handleCheckout = useCallback(async () => {
+  const handleSubscribe = useCallback(async () => {
     setError(null)
     setSuccess(null)
 
     // Redirect to login if user is not authenticated
     if (!session?.user?.id) {
-      router.push(`/login?callbackUrl=${encodeURIComponent("/insights")}`)
+      router.push(`/login?callbackUrl=${encodeURIComponent("/insights?subscribe=true")}`)
       return
     }
 
     if (!paywallReady) {
-      setError("Subscriptions are currently disabled.")
+      setError("Subscriptions are currently disabled. Please try again shortly.")
       return
     }
 
-    setIsSubmitting(true)
+    setIsLoading(true)
 
     try {
       const createResponse = await fetch("/api/subscriptions/create", {
@@ -138,13 +108,18 @@ export function StickyFooterCheckout({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          plan: targetPlanKey,
+          plan: planKey,
           couponCode: null,
+          phone: (session.user as any)?.phone || null,
         }),
       })
 
       const createPayload = await createResponse.json()
       if (!createResponse.ok || !createPayload.success) {
+        if (createResponse.status === 401) {
+          router.push(`/login?callbackUrl=${encodeURIComponent("/insights?subscribe=true")}`)
+          return
+        }
         throw new Error(createPayload.message ?? "Unable to create subscription")
       }
 
@@ -161,7 +136,7 @@ export function StickyFooterCheckout({
         key: createPayload.data.razorpayKeyId,
         subscription_id: createPayload.data.subscriptionId,
         name: "First Principles Investing",
-        description: `Insights ${selectedPlan?.label ?? "Quarterly"} Membership`,
+        description: "Insights Quarterly Membership",
         recurring: true,
         prefill: {
           name: session.user.name ?? undefined,
@@ -170,7 +145,7 @@ export function StickyFooterCheckout({
         },
         modal: {
           ondismiss: () => {
-            setError("Checkout was closed before completion")
+            setIsLoading(false)
           },
         },
         handler: async (checkoutResponse) => {
@@ -192,17 +167,18 @@ export function StickyFooterCheckout({
               throw new Error(verifyPayload.message ?? "Subscription verification failed")
             }
 
-            setSuccess("Membership activated. Redirecting to members portal...")
+            setSuccess("Membership activated! Redirecting to members portal...")
             setTimeout(() => {
               router.push("/insights/members-only")
               router.refresh()
-            }, 1500)
+            }, 1200)
           } catch (verificationError) {
             setError(
               verificationError instanceof Error
                 ? verificationError.message
                 : "Subscription verification failed"
             )
+            setIsLoading(false)
           }
         },
       })
@@ -217,42 +193,33 @@ export function StickyFooterCheckout({
             : "Subscription payment failed"
 
         setError(errorMessage)
+        setIsLoading(false)
       })
 
       checkout.open()
     } catch (checkoutError) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Unable to start checkout")
-    } finally {
-      setIsSubmitting(false)
+      setIsLoading(false)
     }
-  }, [session, paywallReady, router, selectedPlan, targetPlanKey])
+  }, [session, paywallReady, router, planKey])
 
-  // Global click interceptor to catch clicks on any CTA anchor and trigger Razorpay directly without jumps/scrolls
+  // Auto-open checkout if user was redirected from login with ?subscribe=true
   useEffect(() => {
-    if (typeof window === "undefined" || hasSubscriptionAccess) return
+    if (!autoOpenOnParam || typeof window === "undefined") return
 
-    const handleGlobalClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('[data-insights-subscribe="true"]')) return
-
-      const anchor = target.closest('a[href="#membership"], a[href="/membership"]')
-      if (anchor) {
-        e.preventDefault() // Prevent native hash jump / page scroll
-        handleCheckout()
-      }
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("subscribe") === "true" && session?.user?.id && paywallReady) {
+      // Clean query parameter from URL cleanly without reload
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, "", newUrl)
+      handleSubscribe()
     }
-
-    document.addEventListener("click", handleGlobalClick)
-    return () => document.removeEventListener("click", handleGlobalClick)
-  }, [hasSubscriptionAccess, handleCheckout])
-
-  // Hide the footer completely if the user already has full subscription access
-  if (hasSubscriptionAccess) return null
+  }, [autoOpenOnParam, session?.user?.id, paywallReady, handleSubscribe])
 
   return (
     <>
       {/* Golden Brand Loading Overlay */}
-      {isSubmitting && (
+      {isLoading && (
         <div className="fixed inset-0 bg-[#0C0C0E]/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-4 transition-all duration-300">
           <div className="relative flex items-center justify-center">
             {/* Pulsing Backglow */}
@@ -284,16 +251,15 @@ export function StickyFooterCheckout({
         </div>
       )}
 
-      {/* Floating Bottom Sticky Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 bg-[#0e0e12]/95 border-t border-white/10 backdrop-blur-md z-45 py-4 px-6 flex items-center justify-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"}`}>
-        <button
-          onClick={handleCheckout}
-          disabled={isSubmitting}
-          className="w-full sm:w-auto min-w-[280px] sm:min-w-[340px] inline-flex items-center justify-center gap-3 rounded-[10px] bg-gold text-[#16161C] px-8 py-3.5 font-sans font-bold tracking-wide hover:brightness-[1.06] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none shadow-lg shadow-gold/10"
-        >
-          <span>Subscribe Quarterly (₹23/day)</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleSubscribe}
+        disabled={isLoading}
+        className={className}
+        data-insights-subscribe="true"
+      >
+        <span>{buttonText}</span>
+      </button>
     </>
   )
 }

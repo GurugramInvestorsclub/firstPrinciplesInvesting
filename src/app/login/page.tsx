@@ -14,10 +14,16 @@ function LoginContent() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [notice, setNotice] = useState("")
+    const [callbackUrl, setCallbackUrl] = useState("/dashboard")
     const router = useRouter()
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
+        const paramCallback = params.get("callbackUrl")
+        if (paramCallback && paramCallback.startsWith("/")) {
+            setCallbackUrl(paramCallback)
+        }
+
         const errorState = params.get("error")
         if (errorState === "OAuthAccountNotLinked") {
             setError("An account with this email already exists using a different sign-in method. Please log in with your email and password.")
@@ -61,7 +67,7 @@ function LoginContent() {
                 setError("Invalid email or password")
                 setLoading(false)
             } else {
-                router.push("/dashboard")
+                router.push(callbackUrl)
             }
         } else {
             // Signup flow
@@ -213,7 +219,7 @@ function LoginContent() {
                     </div>
 
                     <button
-                        onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                        onClick={() => signIn("google", { callbackUrl })}
                         className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-text-primary font-medium py-3 rounded-xl flex items-center justify-center gap-3 transition-all"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">

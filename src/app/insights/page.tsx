@@ -7,7 +7,7 @@ import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
-import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
+import { InsightsSubscribeButton } from "@/components/insights/InsightsSubscribeButton"
 import { RenewSubscriptionButton } from "@/components/dashboard/RenewSubscriptionButton"
 import { getArticleRatingsMap } from "@/app/actions/ratings"
 import { auth } from "@/auth"
@@ -111,12 +111,12 @@ export default async function InsightsPage({
                                             Go to Members Page
                                         </Link>
                                     ) : (
-                                        <Link 
-                                            href="/membership" 
-                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A]"
-                                        >
-                                            Subscribe for ₹23/day
-                                        </Link>
+                                        <InsightsSubscribeButton
+                                            paywallReady={paywallReady}
+                                            session={session}
+                                            buttonText="Subscribe for ₹23/day"
+                                            className="inline-flex items-center justify-center rounded-[10px] bg-gold text-[#16161C] px-7 py-3.5 font-semibold tracking-wide hover:brightness-[1.06] motion-safe:hover:-translate-y-[1px] transition-[transform,filter] duration-150 ease-out text-center shadow-lg shadow-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] cursor-pointer"
+                                        />
                                     )}
                                 </div>
                             )}
@@ -343,12 +343,12 @@ export default async function InsightsPage({
                                                 Go to Members Page
                                             </Link>
                                         ) : (
-                                            <Link 
-                                                href="#membership" 
-                                                className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center"
-                                            >
-                                                Subscribe now for just ₹23 per day
-                                            </Link>
+                                            <InsightsSubscribeButton
+                                                paywallReady={paywallReady}
+                                                session={session}
+                                                buttonText="Subscribe now for just ₹23 per day"
+                                                className="inline-flex items-center justify-center rounded-sm bg-gold text-bg-deep px-6 py-3 font-bold tracking-wide transition-all duration-300 hover:bg-gold-muted hover:scale-[1.02] text-center cursor-pointer"
+                                            />
                                         )}
                                     </div>
                                 </div>
