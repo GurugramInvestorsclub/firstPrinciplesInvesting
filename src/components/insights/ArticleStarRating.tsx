@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Star } from "lucide-react"
 import { submitArticleRating, RatingStats } from "@/app/actions/ratings"
+import { useArticleTheme } from "./ArticleThemeWrapper"
 
 interface ArticleStarRatingProps {
     postSlug: string
@@ -17,6 +18,9 @@ export function ArticleStarRating({
     hasAccess,
     variant = "interactive",
 }: ArticleStarRatingProps) {
+    const { theme } = useArticleTheme()
+    const isLight = theme === "light"
+
     const [stats, setStats] = useState<RatingStats>(initialStats)
     const [hoverRating, setHoverRating] = useState<number | null>(null)
     const [submitting, setSubmitting] = useState(false)
@@ -56,13 +60,15 @@ export function ArticleStarRating({
         }
 
         return (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 border border-gold/30 backdrop-blur-md shadow-sm text-xs font-mono">
+            <div className={`article-rating-header-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border backdrop-blur-md shadow-sm text-xs font-mono ${
+                isLight ? "bg-slate-100 border-slate-300 text-slate-800" : "bg-black/40 border-gold/30 text-white"
+            }`}>
                 <div className="flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 fill-gold text-gold" />
                     <span className="font-bold text-gold">{stats.averageRating.toFixed(1)}</span>
                 </div>
-                <span className="text-white/40">•</span>
-                <span className="text-white/70 text-[11px]">
+                <span className={`article-rating-header-divider ${isLight ? "text-slate-400" : "text-white/40"}`}>•</span>
+                <span className={`article-rating-header-count text-[11px] ${isLight ? "text-slate-600 font-medium" : "text-white/70"}`}>
                     {stats.totalRatings} {stats.totalRatings === 1 ? "rating" : "ratings"}
                 </span>
             </div>
@@ -82,7 +88,11 @@ export function ArticleStarRating({
                             Member Feedback
                         </span>
                         {stats.userRating && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                                isLight
+                                    ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                            }`}>
                                 Rated {stats.userRating} ★
                             </span>
                         )}
@@ -90,7 +100,7 @@ export function ArticleStarRating({
                     <h3 className="article-rating-title text-lg md:text-xl font-bold text-white tracking-tight">
                         Rate this Research Memo
                     </h3>
-                    <p className="article-rating-subtext text-xs text-white/60">
+                    <p className={`article-rating-subtext text-xs ${isLight ? "text-slate-600" : "text-white/60"}`}>
                         {stats.totalRatings > 0 ? (
                             <>
                                 Average rating: <strong className="text-gold font-semibold">{stats.averageRating.toFixed(1)} / 5.0</strong> ({stats.totalRatings} member {stats.totalRatings === 1 ? "rating" : "ratings"})
@@ -122,10 +132,12 @@ export function ArticleStarRating({
                                         aria-label={`Rate ${starIndex} out of 5 stars`}
                                     >
                                         <Star
-                                            className={`w-6 h-6 md:w-7 md:h-7 transition-colors ${
+                                            className={`w-6 h-6 md:w-7 md:h-7 transition-colors article-rating-star ${
                                                 isFilled
-                                                    ? "fill-gold text-gold drop-shadow-[0_0_8px_rgba(245,184,0,0.5)]"
-                                                    : "text-white/20 hover:text-gold/60"
+                                                    ? "fill-gold text-gold drop-shadow-[0_0_8px_rgba(245,184,0,0.5)] article-rating-star-filled"
+                                                    : isLight
+                                                    ? "text-slate-400 hover:text-gold hover:fill-gold/20 article-rating-star-empty"
+                                                    : "text-white/20 hover:text-gold/60 article-rating-star-empty"
                                             }`}
                                         />
                                     </button>
@@ -133,7 +145,9 @@ export function ArticleStarRating({
                             })}
                         </div>
                     ) : (
-                        <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/50 font-mono">
+                        <div className={`article-rating-locked px-3 py-1.5 rounded-lg border text-xs font-mono ${
+                            isLight ? "bg-slate-100 border-slate-200 text-slate-600" : "bg-white/5 border-white/10 text-white/50"
+                        }`}>
                             🔒 Insights membership required to rate
                         </div>
                     )}
