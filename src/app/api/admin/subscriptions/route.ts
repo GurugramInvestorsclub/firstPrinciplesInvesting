@@ -28,39 +28,52 @@ export async function GET() {
       return unauthorized()
     }
 
-    const subscriptions = await prisma.insightsSubscription.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            secondaryEmails: {
-              select: {
-                id: true,
-                email: true,
-                createdAt: true,
+    const [subscriptions, registrationsWithPhone] = await Promise.all([
+      prisma.insightsSubscription.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              secondaryEmails: {
+                select: {
+                  id: true,
+                  email: true,
+                  createdAt: true,
+                },
               },
             },
           },
-        },
-        charges: {
-          orderBy: {
-            createdAt: "desc",
+          charges: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+          auditLogs: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 10,
           },
         },
-        auditLogs: {
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 10,
+        orderBy: {
+          updatedAt: "desc",
         },
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    })
+      }),
+      prisma.registration.findMany({
+        where: { phone: { not: null } },
+        select: { email: true, phone: true },
+      }),
+    ])
+
+    const regPhoneMap = new Map<string, string>()
+    for (const reg of registrationsWithPhone) {
+      if (reg.email && reg.phone && reg.phone.trim().length >= 8) {
+        regPhoneMap.set(reg.email.toLowerCase().trim(), reg.phone.trim())
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -71,7 +84,11 @@ export async function GET() {
           userId: subscription.userId,
           userName: subscription.user.name,
           userEmail: subscription.user.email,
-          userPhone: subscription.user.phone || ((subscription.notes as any)?.userPhone as string) || null,
+          userPhone:
+            subscription.user.phone ||
+            ((subscription.notes as any)?.userPhone as string) ||
+            (subscription.user.email ? regPhoneMap.get(subscription.user.email.toLowerCase().trim()) : null) ||
+            null,
           secondaryEmails: subscription.user.secondaryEmails || [],
           planKey: planKeyToSlug(subscription.planKey),
           status: subscription.status.toLowerCase(),

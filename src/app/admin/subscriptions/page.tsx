@@ -191,6 +191,7 @@ export default function AdminSubscriptionsPage() {
   // Razorpay Live Sync State
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [syncingAll, setSyncingAll] = useState(false)
+  const [isFetchingPhones, setIsFetchingPhones] = useState(false)
   const [selectedChargesRow, setSelectedChargesRow] = useState<SubscriptionRow | null>(null)
 
   // Secondary Email State
@@ -372,6 +373,40 @@ export default function AdminSubscriptionsPage() {
       setActionMessage(err instanceof Error ? err.message : "Bulk sync failed")
     } finally {
       setSyncingAll(false)
+    }
+  }, [loadData])
+
+  const handleFetchAllPhones = useCallback(async () => {
+    if (
+      !window.confirm(
+        "Fetch and backfill mobile numbers for all subscribers?\n\nThis will scan workshop registrations and Razorpay payments/subscriptions to automatically populate missing mobile numbers for all users."
+      )
+    ) {
+      return
+    }
+
+    setIsFetchingPhones(true)
+    setActionMessage("Fetching subscriber mobile numbers from workshop registrations and Razorpay...")
+
+    try {
+      const response = await fetch("/api/admin/subscriptions/fetch-phones", {
+        method: "POST",
+      })
+      const payload = await response.json()
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || payload.error || "Failed to fetch mobile numbers")
+      }
+
+      const { totalUpdated, matchedFromRegistrations, fetchedFromRazorpay, totalSubscribers, alreadyHadPhone } = payload.data
+      setActionMessage(
+        `✓ Mobile number sync complete: ${totalUpdated} subscriber phone numbers updated (${matchedFromRegistrations} from registrations, ${fetchedFromRazorpay} from Razorpay). Total with phone: ${alreadyHadPhone + totalUpdated} of ${totalSubscribers}.`
+      )
+      await loadData()
+    } catch (err) {
+      setActionMessage(err instanceof Error ? err.message : "Failed to fetch mobile numbers")
+    } finally {
+      setIsFetchingPhones(false)
     }
   }, [loadData])
 
@@ -812,6 +847,28 @@ export default function AdminSubscriptionsPage() {
             </button>
             <button
               type="button"
+              onClick={handleFetchAllPhones}
+              disabled={isFetchingPhones}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "10px",
+                border: "1px solid rgba(16, 185, 129, 0.4)",
+                background: "rgba(16, 185, 129, 0.12)",
+                color: "#6ee7b7",
+                fontWeight: 700,
+                fontSize: "13px",
+                cursor: isFetchingPhones ? "not-allowed" : "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 2px 8px rgba(16, 185, 129, 0.15)",
+                opacity: isFetchingPhones ? 0.6 : 1,
+              }}
+            >
+              {isFetchingPhones ? "📞 Fetching Mobile Numbers..." : "📞 Fetch All Mobile Numbers"}
+            </button>
+            <button
+              type="button"
               onClick={() => setShowGrantModal(true)}
               style={{
                 padding: "10px 18px",
@@ -1058,6 +1115,33 @@ export default function AdminSubscriptionsPage() {
                   }}
                 >
                   Export to Excel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFetchAllPhones}
+                  disabled={isFetchingPhones}
+                  style={{
+                    marginLeft: "8px",
+                    padding: "6px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(16,185,129,0.35)",
+                    background: "rgba(16,185,129,0.12)",
+                    color: "#6ee7b7",
+                    fontWeight: 600,
+                    fontSize: "13px",
+                    cursor: isFetchingPhones ? "not-allowed" : "pointer",
+                    outline: "none",
+                    transition: "all 0.2s",
+                    opacity: isFetchingPhones ? 0.6 : 1,
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = "rgba(16,185,129,0.2)"
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = "rgba(16,185,129,0.12)"
+                  }}
+                >
+                  {isFetchingPhones ? "Fetching Phones..." : "📞 Fetch Mobile Numbers"}
                 </button>
               </div>
             </div>

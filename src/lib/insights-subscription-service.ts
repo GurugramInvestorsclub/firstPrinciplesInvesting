@@ -3437,6 +3437,23 @@ export async function getSecondaryEmailsForUser(userId: string) {
   })
 }
 
+export function normalizePhoneFormat(phone: unknown): string | null {
+  if (phone === null || phone === undefined) return null
+  const trimmed = String(phone).trim()
+  if (!trimmed) return null
+  const digits = trimmed.replace(/[^0-9]/g, "")
+  if (digits.length === 10) {
+    return `+91${digits}`
+  }
+  if (digits.length === 12 && digits.startsWith("91")) {
+    return `+${digits}`
+  }
+  if (trimmed.startsWith("+")) {
+    return trimmed
+  }
+  return digits.length >= 10 ? `+91${digits.slice(-10)}` : trimmed
+}
+
 export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
   ensureCheckoutConfigured()
 
@@ -3444,7 +3461,7 @@ export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
     where: { id: subscriptionId },
     include: {
       user: {
-        select: { id: true, email: true, name: true },
+        select: { id: true, email: true, name: true, phone: true },
       },
       charges: true,
     },
@@ -3482,9 +3499,60 @@ export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
 
   let newlySyncedCharges = 0
 
+  // Attempt to recover user phone if currently missing
+  let recoveredPhone: string | null = null
+  if (!localSubscription.user.phone) {
+    if ((providerSubscription as any).customer_contact) {
+      recoveredPhone = normalizePhoneFormat((providerSubscription as any).customer_contact)
+    } else if (providerSubscription.customer_id) {
+      try {
+        const cust = await client.customers.fetch(providerSubscription.customer_id)
+        if (cust?.contact) {
+          recoveredPhone = normalizePhoneFormat(cust.contact)
+        }
+      } catch (e) {}
+    }
+
+    if (!recoveredPhone && invoices.length > 0) {
+      for (const inv of invoices) {
+        if (inv.payment_id) {
+          try {
+            const pay = await client.payments.fetch(inv.payment_id)
+            if (pay?.contact) {
+              recoveredPhone = normalizePhoneFormat(pay.contact)
+              break
+            }
+          } catch (e) {}
+        }
+      }
+    }
+
+    if (!recoveredPhone && localSubscription.user.email) {
+      try {
+        const reg = await prisma.registration.findFirst({
+          where: {
+            email: { equals: localSubscription.user.email, mode: "insensitive" },
+            phone: { not: null },
+          },
+          select: { phone: true },
+        })
+        if (reg?.phone) {
+          recoveredPhone = normalizePhoneFormat(reg.phone)
+        }
+      } catch (e) {}
+    }
+  }
+
   await prisma.$transaction(
     async (tx) => {
       await acquireLock(tx, `insights-subscription:sync:${localSubscription.id}`)
+
+      if (recoveredPhone && !localSubscription.user.phone) {
+        await tx.user.update({
+          where: { id: localSubscription.user.id },
+          data: { phone: recoveredPhone },
+        })
+      }
 
       for (const inv of invoices) {
         if (!inv.payment_id) continue
@@ -3661,6 +3729,7 @@ export async function syncSubscriptionFromRazorpay(subscriptionId: string) {
     subscription: refreshed,
     invoicesCount: invoices.length,
     newlySyncedCharges,
+    userPhone: recoveredPhone || localSubscription.user.phone || null,
   }
 }
 
@@ -3703,6 +3772,197 @@ export async function syncAllSubscriptionsFromRazorpay() {
     successCount,
     totalNewCharges,
     errors,
+  }
+}
+
+export interface BackfillSubscriberPhonesResult {
+  totalSubscribers: number
+  alreadyHadPhone: number
+  matchedFromRegistrations: number
+  fetchedFromRazorpay: number
+  totalUpdated: number
+  stillMissingPhone: number
+}
+
+export async function backfillSubscriberPhoneNumbers(): Promise<BackfillSubscriberPhonesResult> {
+  const subscriberUsers = await prisma.user.findMany({
+    where: {
+      insightsSubscriptions: { some: {} },
+    },
+    select: {
+      id: true,
+      email: true,
+      phone: true,
+      insightsSubscriptions: {
+        select: {
+          id: true,
+          status: true,
+          razorpaySubscriptionId: true,
+          charges: {
+            where: { razorpayPaymentId: { not: null } },
+            select: { razorpayPaymentId: true },
+            take: 2,
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      },
+    },
+  })
+
+  let alreadyHadPhone = 0
+  let matchedFromRegistrations = 0
+  let fetchedFromRazorpay = 0
+
+  // 1. Pass 1: Local Registration table match
+  const registrationsWithPhone = await prisma.registration.findMany({
+    where: { phone: { not: null } },
+    select: { email: true, phone: true },
+  })
+
+  const regMap = new Map<string, string>()
+  for (const reg of registrationsWithPhone) {
+    if (reg.email && reg.phone && reg.phone.trim().length >= 8) {
+      const norm = normalizePhoneFormat(reg.phone)
+      if (norm) {
+        regMap.set(reg.email.toLowerCase().trim(), norm)
+      }
+    }
+  }
+
+  const usersNeedingRazorpay: typeof subscriberUsers = []
+
+  for (const user of subscriberUsers) {
+    if (user.phone) {
+      alreadyHadPhone++
+      continue
+    }
+
+    const emailKey = user.email?.toLowerCase().trim()
+    if (emailKey && regMap.has(emailKey)) {
+      const phoneFromReg = regMap.get(emailKey)!
+      try {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { phone: phoneFromReg },
+        })
+        user.phone = phoneFromReg
+        matchedFromRegistrations++
+      } catch (err) {
+        console.error(`Failed to update phone from registration for ${user.email}:`, err)
+      }
+    } else {
+      usersNeedingRazorpay.push(user)
+    }
+  }
+
+  // 2. Pass 2: Razorpay API lookup
+  if (usersNeedingRazorpay.length > 0) {
+    let client: any = null
+    try {
+      client = getRazorpayClientOrThrow()
+    } catch (e) {
+      console.warn("Razorpay client not configured for phone backfill:", e)
+    }
+
+    if (client) {
+      // Prioritize users with charges or active/halted/cancelled subscriptions
+      usersNeedingRazorpay.sort((a, b) => {
+        const aHasCharges = a.insightsSubscriptions.some((s) => s.charges.length > 0)
+        const bHasCharges = b.insightsSubscriptions.some((s) => s.charges.length > 0)
+        if (aHasCharges && !bHasCharges) return -1
+        if (!aHasCharges && bHasCharges) return 1
+        return 0
+      })
+
+      for (const user of usersNeedingRazorpay) {
+        let foundPhone: string | null = null
+
+        for (const sub of user.insightsSubscriptions) {
+          if (foundPhone) break
+
+          // Try charge payment
+          for (const charge of sub.charges) {
+            if (charge.razorpayPaymentId) {
+              try {
+                const payment = await client.payments.fetch(charge.razorpayPaymentId)
+                if (payment?.contact && payment.contact.trim().length >= 8) {
+                  foundPhone = normalizePhoneFormat(payment.contact)
+                  break
+                }
+              } catch (err) {
+                // continue
+              }
+            }
+          }
+
+          // Try subscription entity
+          if (!foundPhone && sub.razorpaySubscriptionId) {
+            try {
+              const rSub = await client.subscriptions.fetch(sub.razorpaySubscriptionId)
+              if (rSub?.customer_contact && rSub.customer_contact.trim().length >= 8) {
+                foundPhone = normalizePhoneFormat(rSub.customer_contact)
+              } else if (rSub?.customer_id) {
+                try {
+                  const cust = await client.customers.fetch(rSub.customer_id)
+                  if (cust?.contact && cust.contact.trim().length >= 8) {
+                    foundPhone = normalizePhoneFormat(cust.contact)
+                  }
+                } catch (e) {}
+              }
+
+              // Try invoices if still not found
+              if (!foundPhone) {
+                try {
+                  const invResult = await client.invoices.all({ subscription_id: sub.razorpaySubscriptionId })
+                  const invoices = ((invResult as any)?.items || invResult || []) as Array<any>
+                  for (const inv of invoices) {
+                    if (inv.payment_id) {
+                      try {
+                        const pay = await client.payments.fetch(inv.payment_id)
+                        if (pay?.contact && pay.contact.trim().length >= 8) {
+                          foundPhone = normalizePhoneFormat(pay.contact)
+                          break
+                        }
+                      } catch (e) {}
+                    }
+                  }
+                } catch (e) {}
+              }
+            } catch (err) {
+              // ignore
+            }
+          }
+        }
+
+        if (foundPhone) {
+          try {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { phone: foundPhone },
+            })
+            user.phone = foundPhone
+            fetchedFromRazorpay++
+          } catch (err) {
+            console.error(`Failed to update phone from Razorpay for ${user.email}:`, err)
+          }
+        }
+
+        // Controlled delay to respect Razorpay rate limits
+        await new Promise((resolve) => setTimeout(resolve, 40))
+      }
+    }
+  }
+
+  const totalUpdated = matchedFromRegistrations + fetchedFromRazorpay
+  const stillMissingPhone = Math.max(0, subscriberUsers.length - alreadyHadPhone - totalUpdated)
+
+  return {
+    totalSubscribers: subscriberUsers.length,
+    alreadyHadPhone,
+    matchedFromRegistrations,
+    fetchedFromRazorpay,
+    totalUpdated,
+    stillMissingPhone,
   }
 }
 
