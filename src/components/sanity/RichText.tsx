@@ -121,6 +121,11 @@ const components: PortableTextComponents = {
         number: ({ children }: any) => <li className="pl-1 mb-1 leading-relaxed text-justify hyphens-auto [text-justify:inter-word]">{children}</li>,
     },
     marks: {
+        highlight: ({ children }: any) => (
+            <mark className="bg-[#FFE600] text-black px-1.5 py-0.5 rounded-[3px] font-medium leading-normal selection:bg-black selection:text-[#FFE600]">
+                {children}
+            </mark>
+        ),
         link: ({ children, value }: any) => {
             const href = value?.href || "#"
             const isHash = href.startsWith("#")

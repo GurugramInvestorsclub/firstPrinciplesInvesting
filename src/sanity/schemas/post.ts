@@ -1,4 +1,5 @@
 import { defineField, defineType, defineArrayMember } from 'sanity'
+import { customBlock } from './customBlock'
 
 export default defineType({
     name: 'post',
@@ -86,7 +87,7 @@ export default defineType({
             title: 'Disclaimer',
             type: 'array',
             description: 'Optional custom disclaimer shown below the date. If left empty, the standard default SEBI educational disclaimer is shown.',
-            of: [{ type: 'block' }],
+            of: [customBlock],
         }),
         defineField({
             name: 'updates',
@@ -162,14 +163,14 @@ export default defineType({
             name: 'body',
             title: 'Body',
             type: 'array',
-            of: [{ type: 'block' }, { type: 'image' }],
+            of: [customBlock, { type: 'image' }],
         }),
         defineField({
             name: 'previewBody',
             title: 'Preview Body',
             type: 'array',
             description: 'Optional teaser shown before the paywall for subscriber-only insights. If left empty, the frontend falls back to the opening portion of the body.',
-            of: [{ type: 'block' }, { type: 'image' }],
+            of: [customBlock, { type: 'image' }],
             hidden: ({ parent }) => parent?.access !== 'subscriber',
         }),
         defineField({

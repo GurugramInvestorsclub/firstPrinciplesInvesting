@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity'
+import { customBlock } from './customBlock'
 
 export default defineType({
     name: 'note',
@@ -21,7 +22,7 @@ export default defineType({
             name: 'content',
             title: 'Content',
             type: 'array',
-            of: [{ type: 'block' }, { type: 'image' }],
+            of: [customBlock, { type: 'image' }],
             validation: (Rule) => Rule.required(),
         }),
     ],
