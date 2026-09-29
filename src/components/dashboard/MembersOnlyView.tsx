@@ -7,11 +7,16 @@ import Link from "next/link"
 import { urlForImage } from "@/lib/sanity.image"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
 import { NotesSection } from "@/components/insights/NotesSection"
+import { RenewSubscriptionButton } from "./RenewSubscriptionButton"
 
 interface MembersOnlyViewProps {
     onSelectReport: (slug: string) => void
     posts: any[]
     hasSubscriptionAccess?: boolean
+    isRenewalRequired?: boolean
+    userName?: string
+    userEmail?: string
+    userPhone?: string
     recordings?: any[]
     notes?: any[]
     ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
@@ -65,7 +70,18 @@ function getNotePreview(content: any[] | undefined): string {
     return text.trim()
 }
 
-export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess = false, recordings = [], notes = [], ratingStatsMap = {} }: MembersOnlyViewProps) {
+export function MembersOnlyView({ 
+    onSelectReport, 
+    posts, 
+    hasSubscriptionAccess = false, 
+    isRenewalRequired = false,
+    userName,
+    userEmail,
+    userPhone,
+    recordings = [], 
+    notes = [], 
+    ratingStatsMap = {} 
+}: MembersOnlyViewProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [sortBy, setSortBy] = useState("newest")
 
@@ -91,19 +107,32 @@ export function MembersOnlyView({ onSelectReport, posts, hasSubscriptionAccess =
                     </div>
                     
                     <div className="space-y-3">
-                        <h2 className="text-2xl md:text-3xl font-sans font-bold text-white tracking-tight">Access Locked</h2>
+                        <h2 className="text-2xl md:text-3xl font-sans font-bold text-white tracking-tight">
+                            {isRenewalRequired ? "Membership Renewal Required" : "Access Locked"}
+                        </h2>
                         <p className="text-neutral-400 max-w-lg mx-auto leading-relaxed text-xs md:text-sm font-light">
-                            This exclusive section contains our private institutional-quality research memos, deep-dive valuation models, session recordings, and research notes. Start your membership to unlock instant access.
+                            {isRenewalRequired
+                                ? "Your quarterly renewal is pending or halted due to bank mandate decline. Renew your subscription below to instantly restore full access."
+                                : "This exclusive section contains our private institutional-quality research memos, deep-dive valuation models, session recordings, and research notes. Start your membership to unlock instant access."}
                         </p>
                     </div>
 
-                    <div className="pt-6">
-                        <a
-                            href="/membership"
-                            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-gold hover:bg-[#E0A800] text-bg-deep font-bold text-xs tracking-wider uppercase transition-all duration-300 shadow-lg active:scale-[0.98]"
-                        >
-                            <span>Subscribe Now</span>
-                        </a>
+                    <div className="pt-6 flex justify-center">
+                        {isRenewalRequired ? (
+                            <RenewSubscriptionButton
+                                userName={userName}
+                                userEmail={userEmail}
+                                userPhone={userPhone}
+                                buttonText="Renew Subscription (₹2,100)"
+                            />
+                        ) : (
+                            <a
+                                href="/membership"
+                                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-gold hover:bg-[#E0A800] text-bg-deep font-bold text-xs tracking-wider uppercase transition-all duration-300 shadow-lg active:scale-[0.98]"
+                            >
+                                <span>Subscribe Now</span>
+                            </a>
+                        )}
                     </div>
                 </div>
             </div>

@@ -35,6 +35,7 @@ interface ResearchDeskProps {
     hasSubscriptionAccess?: boolean
     ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
     isPendingRenewal?: boolean
+    isHalted?: boolean
     graceEndFormatted?: string
     renewalUrl?: string
 }
@@ -55,9 +56,11 @@ export function ResearchDesk({
     hasSubscriptionAccess = false,
     ratingStatsMap = {},
     isPendingRenewal = false,
+    isHalted = false,
     graceEndFormatted,
     renewalUrl
 }: ResearchDeskProps) {
+    const isRenewalRequired = isPendingRenewal || isHalted
     const router = useRouter()
     const [activeTab, setActiveTab] = useState("home")
     const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -176,6 +179,28 @@ export function ResearchDesk({
 
                 {/* Footer Section */}
                 <div className="space-y-2 font-mono text-[10px] text-neutral-500 border-t border-white/5 pt-4">
+                    {isRenewalRequired && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const banner = document.getElementById("renewal-alert-banner")
+                                if (banner) {
+                                    banner.scrollIntoView({ behavior: "smooth" })
+                                } else {
+                                    handleNavigate("profile")
+                                }
+                            }}
+                            className="w-full mb-2 p-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-left transition-all cursor-pointer group"
+                        >
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                                <AlertTriangle className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
+                                <span>{isHalted ? "Renewal Halted" : "Renewal Pending"}</span>
+                            </div>
+                            <span className="text-[9px] text-amber-200/80 block mt-0.5 group-hover:text-amber-100">
+                                Click here to renew &rarr;
+                            </span>
+                        </button>
+                    )}
                     <button
                         onClick={() => handleNavigate("profile")}
                         className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl transition-colors cursor-pointer text-left ${
@@ -207,38 +232,65 @@ export function ResearchDesk({
                         </div>
                         <span className="text-xs font-mono uppercase font-bold">First Principles <span className="text-gold">Investing</span></span>
                     </Link>
-                    <span className={`font-bold text-[8px] px-2 py-0.5 rounded border uppercase font-mono ${
-                        isPendingRenewal 
-                            ? "text-amber-400 bg-amber-500/10 border-amber-500/30" 
-                            : "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-                    }`}>
-                        {isPendingRenewal ? "Renewal Pending" : subscriptionStatus}
-                    </span>
+                    {isRenewalRequired ? (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const banner = document.getElementById("renewal-alert-banner")
+                                if (banner) {
+                                    banner.scrollIntoView({ behavior: "smooth" })
+                                } else {
+                                    handleNavigate("profile")
+                                }
+                            }}
+                            className="font-bold text-[9px] px-2.5 py-1 rounded-full border uppercase font-mono text-amber-300 bg-amber-500/20 border-amber-500/40 hover:bg-amber-500/30 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                            <span>{isHalted ? "Renewal Halted · Tap to Renew" : "Renewal Pending · Tap to Renew"}</span>
+                        </button>
+                    ) : (
+                        <span className={`font-bold text-[8px] px-2 py-0.5 rounded border uppercase font-mono ${
+                            subscriptionStatus.toLowerCase() === "active"
+                                ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                                : "text-neutral-400 bg-white/5 border-white/10"
+                        }`}>
+                            {subscriptionStatus}
+                        </span>
+                    )}
                 </header>
 
                 {/* Tab Render Area */}
                 <main className="flex-1 p-6 md:p-10 max-w-5xl w-full mx-auto">
-                    {/* Renewal Alert Banner (Visible ONLY for PENDING status subscribers) */}
-                    {isPendingRenewal && (
-                        <div className="mb-8 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#1e190b] to-amber-950/20 p-5 md:p-6 shadow-[0_8px_30px_rgba(245,158,11,0.12)] relative overflow-hidden">
+                    {/* Renewal Alert Banner (Visible for PENDING and HALTED status subscribers) */}
+                    {isRenewalRequired && (
+                        <div id="renewal-alert-banner" className="mb-8 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#1e190b] to-amber-950/20 p-5 md:p-6 shadow-[0_8px_30px_rgba(245,158,11,0.12)] relative overflow-hidden">
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
                                 <div className="space-y-2">
                                     <div className="flex flex-wrap items-center gap-2.5">
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono tracking-wider uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30">
                                             <AlertTriangle className="w-3 h-3 text-amber-400 animate-pulse" />
-                                            Renewal Action Required
+                                            {isHalted ? "Renewal Halted — Action Required" : "Renewal Action Required"}
                                         </span>
-                                        {graceEndFormatted && (
+                                        {isPendingRenewal && graceEndFormatted && (
                                             <span className="text-[11px] font-mono text-neutral-400">
                                                 Grace access active until <strong className="text-amber-200">{graceEndFormatted}</strong>
                                             </span>
                                         )}
+                                        {isHalted && (
+                                            <span className="text-[11px] font-mono text-neutral-400">
+                                                Card auto-debit retries exhausted
+                                            </span>
+                                        )}
                                     </div>
                                     <h3 className="text-base md:text-lg font-bold text-white tracking-tight">
-                                        Your Quarterly Membership Renewal is Pending
+                                        {isHalted 
+                                            ? "Your Quarterly Membership Renewal is Halted" 
+                                            : "Your Quarterly Membership Renewal is Pending"}
                                     </h3>
                                     <p className="text-xs md:text-sm text-neutral-300 max-w-2xl leading-relaxed">
-                                        The automated auto-debit on your card was declined by your bank (common with recurring e-mandates). Your membership access is currently preserved under our grace period. Please complete your renewal to keep access active.
+                                        {isHalted
+                                            ? "The automated auto-debit retries on your card were exhausted by your bank. Please complete your renewal below to reactivate full member access to deep-dives, models, and recordings."
+                                            : "The automated auto-debit on your card was declined by your bank (common with recurring e-mandates). Your membership access is currently preserved under our grace period. Please complete your renewal to keep access active."}
                                     </p>
                                 </div>
 
@@ -280,6 +332,10 @@ export function ResearchDesk({
                                 onSelectReport={(slug) => handleNavigate("members-only", slug)}
                                 posts={posts}
                                 hasSubscriptionAccess={hasSubscriptionAccess}
+                                isRenewalRequired={isRenewalRequired}
+                                userName={userName}
+                                userEmail={userEmail}
+                                userPhone={userPhone}
                                 recordings={initialRecordings}
                                 notes={initialNotes}
                                 ratingStatsMap={ratingStatsMap}
@@ -312,6 +368,7 @@ export function ResearchDesk({
                             hasSubscriptionAccess={hasSubscriptionAccess}
                             onSignOut={onSignOut}
                             isPendingRenewal={isPendingRenewal}
+                            isHalted={isHalted}
                             graceEndFormatted={graceEndFormatted}
                             renewalUrl={renewalUrl}
                         />

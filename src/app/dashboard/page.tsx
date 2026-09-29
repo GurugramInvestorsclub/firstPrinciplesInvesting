@@ -66,6 +66,7 @@ export default async function DashboardPage() {
 
     const subscriptionStatus = insightsMembership?.statusLabel || "Inactive"
     const isPendingRenewal = insightsMembership?.status === "PENDING"
+    const isHalted = insightsMembership?.status === "HALTED"
     const graceEndFormatted = insightsMembership?.graceEndAt
         ? new Date(insightsMembership.graceEndAt).toLocaleDateString("en-IN", {
             day: "numeric",
@@ -105,6 +106,7 @@ export default async function DashboardPage() {
             hasSubscriptionAccess={insightsMembership?.hasAccess || false}
             ratingStatsMap={ratingsMap}
             isPendingRenewal={isPendingRenewal}
+            isHalted={isHalted}
             graceEndFormatted={graceEndFormatted}
             renewalUrl={renewalUrl}
         />

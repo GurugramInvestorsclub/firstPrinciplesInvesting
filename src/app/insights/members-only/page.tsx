@@ -81,6 +81,8 @@ export default async function MembersOnlyArchivePage({
     ])
 
     const isPendingRenewal = insightsMembership?.status === "PENDING"
+    const isHalted = insightsMembership?.status === "HALTED"
+    const isRenewalRequired = isPendingRenewal || isHalted
 
     const filteredDemergers = demergerData.records.filter((item) => {
         if (!search) return true
@@ -119,16 +121,18 @@ export default async function MembersOnlyArchivePage({
                         )}
                     </div>
 
-                    {/* Pending Renewal Action Banner */}
-                    {isPendingRenewal && (
+                    {/* Pending or Halted Renewal Action Banner */}
+                    {isRenewalRequired && (
                         <div className="mb-12 p-5 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2 font-bold font-mono text-xs uppercase tracking-wider text-amber-400">
                                     <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                                    <span>Quarterly Renewal Action Required</span>
+                                    <span>{isHalted ? "Renewal Halted — Action Required" : "Quarterly Renewal Action Required"}</span>
                                 </div>
                                 <p className="text-xs text-neutral-300 max-w-2xl leading-relaxed">
-                                    Automatic renewal on your card was declined. Grace period access is currently active. Renew your quarterly subscription below to keep uninterrupted access to research notes & models.
+                                    {isHalted
+                                        ? "Automatic renewal retries on your card were exhausted by your bank. Renew your quarterly subscription below to restore uninterrupted access to research notes & models."
+                                        : "Automatic renewal on your card was declined. Grace period access is currently active. Renew your quarterly subscription below to keep uninterrupted access to research notes & models."}
                                 </p>
                             </div>
                             <RenewSubscriptionButton

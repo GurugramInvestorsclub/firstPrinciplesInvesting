@@ -163,7 +163,7 @@ export function RenewSubscriptionButton({
             setIsLoading(false)
             setError(err instanceof Error ? err.message : "Something went wrong while initiating renewal")
         }
-    }, [userName, userEmail, router])
+    }, [userName, userEmail, userPhone, router])
 
     if (success) {
         return (

@@ -45,6 +45,8 @@ export default async function InsightsPage({
 
     const insightsMembership = session?.user?.id ? await getCurrentInsightsMembershipForUser(session.user.id) : null
     const isPendingRenewal = insightsMembership?.status === "PENDING"
+    const isHalted = insightsMembership?.status === "HALTED"
+    const isRenewalRequired = isPendingRenewal || isHalted
 
     const hasSubscriptionAccess =
         paywallReady && session?.user?.id
@@ -83,15 +85,17 @@ export default async function InsightsPage({
                             <BonusMarquee />
 
                             {/* CTA Area */}
-                            {isPendingRenewal ? (
+                            {isRenewalRequired ? (
                                 <div className="p-4 md:p-5 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-2xl">
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2 font-bold font-mono text-xs uppercase tracking-wider text-amber-400">
                                             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                                            <span>Quarterly Renewal Action Required</span>
+                                            <span>{isHalted ? "Renewal Halted — Action Required" : "Quarterly Renewal Action Required"}</span>
                                         </div>
                                         <p className="text-xs text-neutral-300">
-                                            Automatic renewal on your card was declined. Grace access is currently active. Renew your quarterly subscription below to keep uninterrupted access.
+                                            {isHalted
+                                                ? "Automatic renewal attempts on your card were exhausted by your bank. Renew your quarterly subscription below to restore full member access."
+                                                : "Automatic renewal on your card was declined. Grace access is currently active. Renew your quarterly subscription below to keep uninterrupted access."}
                                         </p>
                                     </div>
                                     <RenewSubscriptionButton
@@ -359,7 +363,7 @@ export default async function InsightsPage({
                     {/* Sticky Footer Conversion Bar */}
                     <StickyFooterCheckout
                         paywallReady={paywallReady}
-                        hasSubscriptionAccess={hasSubscriptionAccess && !isPendingRenewal}
+                        hasSubscriptionAccess={hasSubscriptionAccess && !isRenewalRequired}
                         session={session}
                         plans={subscriptionUi.plans}
                     />

@@ -15,6 +15,7 @@ interface ProfileViewProps {
     hasSubscriptionAccess?: boolean
     onSignOut: () => void
     isPendingRenewal?: boolean
+    isHalted?: boolean
     graceEndFormatted?: string
     renewalUrl?: string
 }
@@ -29,9 +30,11 @@ export function ProfileView({
     hasSubscriptionAccess = false,
     onSignOut,
     isPendingRenewal = false,
+    isHalted = false,
     graceEndFormatted,
     renewalUrl
 }: ProfileViewProps) {
+    const isRenewalRequired = isPendingRenewal || isHalted
     const router = useRouter()
     const [showCancelModal, setShowCancelModal] = useState(false)
     const [isCancelling, setIsCancelling] = useState(false)
@@ -127,13 +130,19 @@ export function ProfileView({
                             <span className={`font-bold uppercase ${
                                 isPendingRenewal 
                                     ? "text-amber-400" 
+                                    : isHalted
+                                    ? "text-rose-400"
                                     : isCancelled 
                                     ? "text-amber-400" 
                                     : statusLabel.toLowerCase() === "active" 
                                     ? "text-emerald-400" 
                                     : "text-neutral-300"
                             }`}>
-                                {isPendingRenewal ? "Pending Renewal (Grace Active)" : statusLabel}
+                                {isPendingRenewal 
+                                    ? "Pending Renewal (Grace Active)" 
+                                    : isHalted 
+                                    ? "Renewal Halted (Action Required)" 
+                                    : statusLabel}
                             </span>
                         </div>
                         <div>
@@ -150,15 +159,17 @@ export function ProfileView({
                         )}
                     </div>
 
-                    {/* Pending Renewal Action Banner */}
-                    {isPendingRenewal && (
+                    {/* Pending or Halted Renewal Action Banner */}
+                    {isRenewalRequired && (
                         <div className="mt-4 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs space-y-3">
                             <div className="flex items-center gap-2 font-bold font-mono">
                                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                                <span>Renewal Action Required</span>
+                                <span>{isHalted ? "Renewal Halted — Card Retries Exhausted" : "Renewal Action Required"}</span>
                             </div>
                             <p className="text-neutral-300 text-[11px] leading-relaxed">
-                                Automated card renewal failed with your bank. Your membership access is temporarily preserved under grace {graceEndFormatted ? `until ${graceEndFormatted}` : ""}. Please complete renewal to avoid access interruption.
+                                {isHalted
+                                    ? "Automated renewal attempts on your card were exhausted by your bank. Complete your quarterly renewal below to instantly reactivate full member access."
+                                    : `Automated card renewal failed with your bank. Your membership access is temporarily preserved under grace ${graceEndFormatted ? `until ${graceEndFormatted}` : ""}. Please complete renewal to avoid access interruption.`}
                             </p>
                             <div className="pt-1">
                                 <RenewSubscriptionButton
@@ -166,6 +177,27 @@ export function ProfileView({
                                     userEmail={userEmail}
                                     userPhone={userPhone}
                                     buttonText="Renew via Razorpay (₹2,100)"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Inactive Membership Action Banner */}
+                    {!hasSubscriptionAccess && !isRenewalRequired && (
+                        <div className="mt-4 p-4 rounded-xl border border-white/10 bg-white/5 text-neutral-300 text-xs space-y-3">
+                            <div className="flex items-center gap-2 font-bold font-mono text-gold">
+                                <ShieldCheck className="w-4 h-4 text-gold shrink-0" />
+                                <span>Membership Inactive</span>
+                            </div>
+                            <p className="text-neutral-400 text-[11px] leading-relaxed">
+                                Subscribe to unlock instant access to institutional-quality research memos, deep-dive valuation models, and session recordings.
+                            </p>
+                            <div className="pt-1">
+                                <RenewSubscriptionButton
+                                    userName={userName}
+                                    userEmail={userEmail}
+                                    userPhone={userPhone}
+                                    buttonText="Subscribe Now (₹2,100 / Qtr)"
                                 />
                             </div>
                         </div>
