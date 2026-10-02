@@ -40,6 +40,8 @@ function formatEventDate(dateString: string): string {
 export async function triggerRegistrationEmail(params: SendEmailParams): Promise<boolean> {
   const brevoApiKey = process.env.BREVO_API_KEY
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
+  const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
+  const moveToPrimaryImageUrl = `${siteUrl.replace(/\/$/, "")}/images/move-to-primary.jpg`
 
   if (!brevoApiKey) {
     console.error("BREVO_API_KEY is not configured. Email skipped.")
@@ -299,6 +301,35 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
             </td>
           </tr>
 
+          <!-- Move to Primary Inbox Callout -->
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #17171C; border: 1px solid #2A2A32; border-radius: 12px; padding: 20px;">
+                <tr>
+                  <td style="text-align: left;">
+                    <h4 style="color: #FFFFFF; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+                      📬 Never miss important session links
+                    </h4>
+                    <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
+                      Move this email to your <strong>Primary</strong> tab (as shown below) so future event links and premium research aren&apos;t buried in Promotions.
+                    </p>
+                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
+                      <img 
+                        src="${moveToPrimaryImageUrl}" 
+                        alt="Move email from Promotions to Primary in Gmail" 
+                        width="536" 
+                        style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;" 
+                      />
+                    </div>
+                    <p style="color: #71717A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
+                      <em>On mobile: Tap the <strong>&vellip;</strong> (three dots) in the top right &rarr; select <strong>&quot;Move to Primary&quot;</strong>.</em>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
           <!-- Need Help Section -->
           <tr>
             <td style="padding: 0 32px 24px 32px;">
@@ -394,6 +425,7 @@ export async function sendManualGrantConfirmationEmail(
   const resendApiKey = process.env.RESEND_API_KEY
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
   const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
+  const moveToPrimaryImageUrl = `${siteUrl.replace(/\/$/, "")}/images/move-to-primary.jpg`
 
   if (!brevoApiKey && !resendApiKey) {
     console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured. Subscription email skipped.")
@@ -519,6 +551,31 @@ export async function sendManualGrantConfirmationEmail(
                   Explore Premium Insights
                 </a>
               </div>
+
+              <!-- Move to Primary Inbox Callout -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161B; border: 1px solid #2A2A32; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <tr>
+                  <td style="text-align: left;">
+                    <h4 style="color: #FFFFFF; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+                      📬 Never miss important research &amp; member updates
+                    </h4>
+                    <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
+                      Move this email to your <strong>Primary</strong> tab (as shown below) so future research memos and subscriber alerts aren&apos;t buried in Promotions.
+                    </p>
+                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
+                      <img 
+                        src="${moveToPrimaryImageUrl}" 
+                        alt="Move email from Promotions to Primary in Gmail" 
+                        width="536" 
+                        style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;" 
+                      />
+                    </div>
+                    <p style="color: #71717A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
+                      <em>On mobile: Tap the <strong>&vellip;</strong> (three dots) in the top right &rarr; select <strong>&quot;Move to Primary&quot;</strong>.</em>
+                    </p>
+                  </td>
+                </tr>
+              </table>
 
               <p style="color: #71717A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
                 If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>.
