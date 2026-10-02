@@ -26,6 +26,7 @@ import {
   X,
   Search,
 } from "lucide-react"
+import PostHogAnalyticsDashboard from "@/components/admin/PostHogAnalyticsDashboard"
 
 interface ReconciliationData {
   monthKey: string
@@ -182,6 +183,7 @@ const tableCellStyle: CSSProperties = {
 }
 
 export default function AdminAnalyticsPage() {
+  const [analyticsTab, setAnalyticsTab] = useState<"posthog" | "reconciliation">("posthog")
   const [data, setData] = useState<AnalyticsPayload | null>(null)
   const [timeframe, setTimeframe] = useState<"3m" | "6m" | "12m" | "all" | "month">("12m")
   const [selectedMonth, setSelectedMonth] = useState<string>("")
@@ -396,8 +398,67 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "28px", maxWidth: "1400px", margin: "0 auto" }}>
-      {/* Page Header */}
-      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+      {/* Top Level Section Navigation Tabs */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          paddingBottom: "14px",
+          flexWrap: "wrap",
+        }}
+      >
+        <button
+          onClick={() => setAnalyticsTab("posthog")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "9px 18px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: 600,
+            cursor: "pointer",
+            border: "1px solid",
+            borderColor: analyticsTab === "posthog" ? "var(--gold)" : "rgba(255, 255, 255, 0.12)",
+            background: analyticsTab === "posthog" ? "rgba(201, 168, 76, 0.15)" : "rgba(255, 255, 255, 0.03)",
+            color: analyticsTab === "posthog" ? "var(--gold)" : "rgba(255, 255, 255, 0.7)",
+            transition: "all 0.15s ease",
+          }}
+        >
+          <BarChart3 style={{ width: "16px", height: "16px" }} />
+          PostHog Analytics & User Funnels
+        </button>
+        <button
+          onClick={() => setAnalyticsTab("reconciliation")}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "9px 18px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: 600,
+            cursor: "pointer",
+            border: "1px solid",
+            borderColor: analyticsTab === "reconciliation" ? "var(--gold)" : "rgba(255, 255, 255, 0.12)",
+            background: analyticsTab === "reconciliation" ? "rgba(201, 168, 76, 0.15)" : "rgba(255, 255, 255, 0.03)",
+            color: analyticsTab === "reconciliation" ? "var(--gold)" : "rgba(255, 255, 255, 0.7)",
+            transition: "all 0.15s ease",
+          }}
+        >
+          <DollarSign style={{ width: "16px", height: "16px" }} />
+          Sales & Razorpay Reconciliation
+        </button>
+      </div>
+
+      {analyticsTab === "posthog" ? (
+        <PostHogAnalyticsDashboard />
+      ) : (
+        <>
+          {/* Page Header */}
+          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
         <div>
           <h1 style={{ fontSize: "26px", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em", margin: 0 }}>
             Analytics Dashboard
@@ -2068,6 +2129,8 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   )

@@ -26,6 +26,7 @@ import { getStartOfTodayKolkata } from "@/lib/utils"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { AdminPreviewToolbar } from "@/components/insights/AdminPreviewToolbar"
 import { ArticleUpdatesBlock } from "@/components/insights/ArticleUpdatesBlock"
+import { ArticleTracker } from "@/components/analytics/ArticleTracker"
 
 export const dynamic = "force-dynamic"
 
@@ -85,6 +86,12 @@ export default async function InsightPage({ params }: Props) {
 
     return (
         <ArticleThemeWrapper className="flex flex-col min-h-screen">
+            <ArticleTracker
+                articleId={post._id || slug}
+                title={post.title}
+                category={post.access || "insights"}
+                isPremium={isSubscriberOnly}
+            />
             {isAdmin && (
                 <AdminPreviewToolbar post={post} slug={slug} />
             )}

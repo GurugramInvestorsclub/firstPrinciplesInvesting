@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import { analytics } from "@/lib/analytics"
 
 function LoginContent() {
     const [isLogin, setIsLogin] = useState(true)
@@ -67,6 +68,7 @@ function LoginContent() {
                 setError("Invalid email or password")
                 setLoading(false)
             } else {
+                analytics.track("login_completed", { method: "credentials", user_type: "free" })
                 router.push(callbackUrl)
             }
         } else {
@@ -84,6 +86,7 @@ function LoginContent() {
                     setError(data.error || "Something went wrong")
                     setLoading(false)
                 } else {
+                    analytics.track("signup_completed", { signup_method: "credentials", user_type: "free" })
                     setNotice(
                         data.message ||
                             "If your email can receive messages, a verification link has been sent."
@@ -219,7 +222,10 @@ function LoginContent() {
                     </div>
 
                     <button
-                        onClick={() => signIn("google", { callbackUrl })}
+                        onClick={() => {
+                            analytics.track("login_completed", { method: "google", user_type: "free" })
+                            signIn("google", { callbackUrl })
+                        }}
                         className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-text-primary font-medium py-3 rounded-xl flex items-center justify-center gap-3 transition-all"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">

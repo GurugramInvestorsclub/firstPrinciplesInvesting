@@ -1,9 +1,10 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { AlertCircle, Check, CheckCircle, ShieldCheck, Zap } from "lucide-react"
+import { analytics } from "@/lib/analytics"
 
 interface RazorpaySubscriptionCheckoutOptions {
     key: string
@@ -73,6 +74,16 @@ export function PricingSection() {
         "Valuation models (Excel / Google Sheets)"
     ]
 
+    useEffect(() => {
+        analytics.track("product_viewed", {
+            product_id: "insights_membership",
+            product_name: "Insights Membership",
+            plan: "three_monthly",
+            amount: 2100,
+            currency: "INR",
+        })
+    }, [])
+
     const handleCheckout = useCallback(async () => {
         setError(null)
         setSuccess(null)
@@ -93,6 +104,18 @@ export function PricingSection() {
             : null
 
         setIsSubmitting(true)
+        analytics.track("checkout_started", {
+            product_id: "insights_membership",
+            product_name: "Insights Quarterly Membership",
+            plan: "three_monthly",
+            amount: 2100,
+            currency: "INR",
+            billing_period: "3 months",
+        })
+        analytics.track("subscription_started", {
+            plan: "three_monthly",
+            billing_period: "3 months",
+        })
 
         try {
             const createResponse = await fetch("/api/subscriptions/create", {
@@ -160,6 +183,17 @@ export function PricingSection() {
                             throw new Error(verifyPayload.message ?? "Subscription verification failed")
                         }
 
+                        analytics.track("payment_success", {
+                            product_id: "insights_membership",
+                            product_name: "Insights Quarterly Membership",
+                            plan: "three_monthly",
+                            amount: 2100,
+                            currency: "INR",
+                            subscription_id: checkoutResponse.razorpay_subscription_id,
+                            payment_id: checkoutResponse.razorpay_payment_id,
+                            payment_provider: "razorpay",
+                        })
+
                         setSuccess("Membership activated. Redirecting to members portal...")
                         setTimeout(() => {
                             router.push("/insights/members-only")
@@ -184,6 +218,12 @@ export function PricingSection() {
                         ? (failure as { error: { description: string } }).error.description
                         : "Subscription payment failed"
 
+                analytics.track("payment_failed", {
+                    product_id: "insights_membership",
+                    plan: "three_monthly",
+                    reason: errorMessage,
+                    payment_provider: "razorpay",
+                })
                 setError(errorMessage)
             })
 

@@ -7,6 +7,7 @@ import {
   verifyInsightsSubscriptionWebhookSignature,
 } from "@/lib/insights-subscription-service"
 import { NextRequest, NextResponse } from "next/server"
+import { trackServerEvent } from "@/lib/analytics/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -71,6 +72,51 @@ export async function POST(request: NextRequest) {
       subscriptionEntity,
       paymentEntity,
     })
+
+    if (result.handled) {
+      const planSlug = result.membership?.planKey ?? "three_monthly"
+      const distinctId = result.membership?.userId || razorpaySubscriptionId || "unknown_subscriber"
+      const amount = paymentEntity?.amount ? paymentEntity.amount / 100 : 2100
+
+      if (eventType === "subscription.charged" || eventType === "subscription.activated") {
+        trackServerEvent({
+          distinctId,
+          event: "payment_success",
+          properties: {
+            product_id: `insights_${planSlug}`,
+            product_name: "Insights Membership",
+            plan: planSlug,
+            amount,
+            currency: "INR",
+            subscription_id: razorpaySubscriptionId,
+            payment_id: razorpayPaymentId,
+            payment_provider: "razorpay",
+          },
+        }).catch((err) => console.error("Subscription webhook payment tracking failed:", err))
+
+        if (eventType === "subscription.charged") {
+          trackServerEvent({
+            distinctId,
+            event: "subscription_renewed",
+            properties: {
+              plan: planSlug,
+              amount,
+              currency: "INR",
+              payment_provider: "razorpay",
+            },
+          }).catch((err) => console.error("Subscription webhook renewal tracking failed:", err))
+        }
+      } else if (eventType === "subscription.cancelled") {
+        trackServerEvent({
+          distinctId,
+          event: "subscription_cancelled",
+          properties: {
+            plan: planSlug,
+            reason: "webhook_cancelled",
+          },
+        }).catch((err) => console.error("Subscription webhook cancellation tracking failed:", err))
+      }
+    }
 
     await markInsightsWebhookEventProcessed(webhookEventId)
 

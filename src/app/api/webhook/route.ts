@@ -13,6 +13,7 @@ import {
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { triggerRegistrationEmail } from "@/lib/email-service"
+import { trackServerEvent } from "@/lib/analytics/server"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -94,6 +95,20 @@ export async function POST(request: NextRequest) {
       }
 
       if (captureResult.ok && !captureResult.idempotent) {
+        trackServerEvent({
+          distinctId: captureResult.paymentId || razorpayPaymentId,
+          event: "payment_success",
+          properties: {
+            product_id: captureResult.eventId,
+            product_name: `Webinar / Event: ${captureResult.eventId}`,
+            amount: paiseToRupees(captureResult.amount),
+            currency: "INR",
+            order_id: razorpayOrderId,
+            payment_id: razorpayPaymentId,
+            payment_provider: "razorpay",
+          },
+        }).catch((err) => console.error("Webhook analytics tracking failed:", err))
+
         prisma.registration
           .findFirst({
             where: {

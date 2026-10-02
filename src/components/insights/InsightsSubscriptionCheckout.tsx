@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { analytics } from "@/lib/analytics"
 
 type PlanKey = "monthly" | "three_monthly" | "yearly"
 
@@ -109,6 +110,18 @@ export function InsightsSubscriptionCheckout({
       : null
 
     setIsSubmitting(true)
+    analytics.track("checkout_started", {
+      product_id: `insights_${plan}`,
+      product_name: `Insights ${selectedPlan?.label ?? "Membership"}`,
+      plan,
+      amount: plan === "yearly" ? 7999 : 2100,
+      currency: "INR",
+      billing_period: selectedPlan?.cadence || plan,
+    })
+    analytics.track("subscription_started", {
+      plan,
+      billing_period: selectedPlan?.cadence || plan,
+    })
 
     try {
       const createResponse = await fetch("/api/subscriptions/create", {
@@ -172,6 +185,17 @@ export function InsightsSubscriptionCheckout({
               throw new Error(verifyPayload.message ?? "Subscription verification failed")
             }
 
+            analytics.track("payment_success", {
+              product_id: `insights_${plan}`,
+              product_name: `Insights ${selectedPlan?.label ?? "Membership"}`,
+              plan,
+              amount: plan === "yearly" ? 7999 : 2100,
+              currency: "INR",
+              subscription_id: checkoutResponse.razorpay_subscription_id,
+              payment_id: checkoutResponse.razorpay_payment_id,
+              payment_provider: "razorpay",
+            })
+
             setSuccess("Membership activated. Refreshing access...")
             setTimeout(() => {
               router.push(callbackUrl)
@@ -196,6 +220,12 @@ export function InsightsSubscriptionCheckout({
             ? (failure as { error: { description: string } }).error.description
             : "Subscription payment failed"
 
+        analytics.track("payment_failed", {
+          product_id: `insights_${plan}`,
+          plan,
+          reason: errorMessage,
+          payment_provider: "razorpay",
+        })
         setError(errorMessage)
       })
 

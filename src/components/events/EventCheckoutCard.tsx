@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { isEventRegistrationOpen } from "@/lib/utils"
+import { analytics } from "@/lib/analytics"
 
 declare global {
   interface Window {
@@ -126,6 +127,15 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
   }, [event.eventId])
 
   useEffect(() => {
+    if (event?.eventId) {
+      analytics.track("webinar_viewed", {
+        webinar_id: event.eventId,
+        webinar_name: event.title,
+        price: event.price,
+        currency: "INR",
+      })
+    }
+
     if (status === "loading") {
       setIsPricingLoading(true)
       return
@@ -265,6 +275,10 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
     }
 
     setIsCreatingOrder(true)
+    analytics.track("webinar_registration_started", {
+      webinar_id: event.eventId,
+      webinar_name: event.title,
+    })
 
     try {
       const orderResponse = await fetch("/api/create-order", {
@@ -282,6 +296,14 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
       if (!orderResponse.ok || !orderPayload.success) {
         throw new Error(orderPayload.message ?? "Failed to create order")
       }
+
+      analytics.track("webinar_checkout_started", {
+        webinar_id: event.eventId,
+        webinar_name: event.title,
+        amount: orderPayload.data.amount / 100,
+        currency: orderPayload.data.currency,
+        coupon_applied: Boolean(pricing?.couponCode),
+      })
 
       const scriptReady = await loadRazorpayCheckoutScript()
       if (!scriptReady || !window.Razorpay) {
@@ -327,6 +349,22 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
               throw new Error(verifyPayload.message ?? "Payment verification failed")
             }
 
+            analytics.track("webinar_payment_success", {
+              webinar_id: event.eventId,
+              webinar_name: event.title,
+              amount: orderPayload.data.amount / 100,
+              currency: orderPayload.data.currency,
+              order_id: checkoutResponse.razorpay_order_id,
+              payment_id: checkoutResponse.razorpay_payment_id,
+              payment_provider: "razorpay",
+            })
+            analytics.track("webinar_registered", {
+              webinar_id: event.eventId,
+              webinar_name: event.title,
+              amount: orderPayload.data.amount / 100,
+              currency: orderPayload.data.currency,
+            })
+
             // Redirect to the thank-you page with event details
             const searchParams = new URLSearchParams({
               type: "event",
@@ -355,6 +393,11 @@ export function EventCheckoutCard({ event, minimal }: { event: Event, minimal?: 
             ? (failure as { error: { description: string } }).error.description
             : "Payment failed"
 
+        analytics.track("webinar_payment_failed", {
+          webinar_id: event.eventId,
+          webinar_name: event.title,
+          reason: errorMessage,
+        })
         setError(errorMessage)
       })
 
