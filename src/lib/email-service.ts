@@ -311,7 +311,7 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                       📬 Never miss important session links
                     </h4>
                     <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
-                      Move this email to your <strong>Primary</strong> tab (as shown below) so future event links and premium research aren&apos;t buried in Promotions.
+                      Don&apos;t forget to move this email to your <strong>Primary</strong> tab (as shown below) so future event links and session updates aren&apos;t buried in Promotions.
                     </p>
                     <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
                       <img 
@@ -560,7 +560,7 @@ export async function sendManualGrantConfirmationEmail(
                       📬 Never miss important research &amp; member updates
                     </h4>
                     <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
-                      Move this email to your <strong>Primary</strong> tab (as shown below) so future research memos and subscriber alerts aren&apos;t buried in Promotions.
+                      Don&apos;t forget to move this email to your <strong>Primary</strong> tab (as shown below) so future research memos and subscriber alerts aren&apos;t buried in Promotions.
                     </p>
                     <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
                       <img 
