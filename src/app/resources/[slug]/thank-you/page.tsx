@@ -11,13 +11,13 @@ import { getStartOfTodayKolkata } from "@/lib/utils"
 import {
   CheckCircle2,
   Mail,
-  Download,
   ArrowRight,
   Star,
   Calendar,
   Sparkles,
   ExternalLink,
 } from "lucide-react"
+
 
 export const dynamic = "force-dynamic"
 
@@ -64,7 +64,6 @@ export default async function LeadMagnetThankYouPage({ params, searchParams }: P
       : (fallbackPosts || []).slice(0, 3)
 
   const liveWebinar = upcomingEvents && upcomingEvents.length > 0 ? upcomingEvents[0] : null
-  const pdfUrl = leadMagnet.pdfFile?.asset?.url
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-deep text-text-primary">
@@ -111,23 +110,9 @@ export default async function LeadMagnetThankYouPage({ params, searchParams }: P
                   <span>If you don&apos;t see it immediately, please check your Promotions or Spam folder and move it to Primary to ensure future memos reach you.</span>
                 </div>
               </div>
-
-              {/* Instant Download Convenience Button */}
-              {pdfUrl && (
-                <div className="pt-2">
-                  <a
-                    href={pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-mono font-medium px-6 py-3 rounded-xl text-xs sm:text-sm transition-all hover:border-gold/40"
-                  >
-                    <Download className="w-4 h-4 text-gold" />
-                    <span>Download PDF Directly (Instant Access)</span>
-                  </a>
-                </div>
-              )}
             </div>
           </div>
+
 
           {/* 2. Paid Subscription Upsell Banner */}
           <div className="p-2 rounded-[2.5rem] bg-white/5 border border-white/10 shadow-2xl">
