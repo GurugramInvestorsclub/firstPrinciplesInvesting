@@ -131,4 +131,30 @@ export interface Note {
     content: any[] // PortableTextBlock[] or any[] for flexibility with portable text renderer
 }
 
+export interface LeadMagnet {
+    _id: string
+    title: string
+    slug: { current: string }
+    badge?: string
+    heroHeadline?: string
+    heroSubtitle?: string
+    keyTakeaways?: string[]
+    mainImage?: any
+    pdfFile?: {
+        asset?: {
+            _id: string
+            url: string
+            originalFilename?: string
+            size?: number
+            mimeType?: string
+        }
+    }
+    formCtaText?: string
+    emailSubject?: string
+    emailPreviewText?: string
+    publishedAt?: string
+    sampleInsights?: Post[]
+}
+
+
 

@@ -263,4 +263,40 @@ export const notesQuery = groq`
   }
 `
 
+export const singleLeadMagnetQuery = groq`
+  *[_type == "leadMagnet" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    badge,
+    heroHeadline,
+    heroSubtitle,
+    keyTakeaways,
+    mainImage,
+    pdfFile {
+      asset-> {
+        _id,
+        url,
+        originalFilename,
+        size,
+        mimeType
+      }
+    },
+    formCtaText,
+    emailSubject,
+    emailPreviewText,
+    publishedAt,
+    sampleInsights[]-> {
+      _id,
+      title,
+      slug,
+      excerpt,
+      access,
+      mainImage,
+      publishedAt
+    }
+  }
+`
+
+
 

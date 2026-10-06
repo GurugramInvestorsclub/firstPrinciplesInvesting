@@ -468,3 +468,18 @@ model ArticleRating {
   @@map("article_ratings")
 }
 
+model LeadMagnetSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  slug      String
+  source    String?  @default("website")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([email, slug])
+  @@index([email])
+  @@index([slug])
+  @@map("lead_magnet_submissions")
+}
+
+

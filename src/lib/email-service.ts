@@ -901,4 +901,216 @@ export async function sendMembersOnlyPostEmailNotification(
   }
 }
 
+export interface SendLeadMagnetDeliveryEmailParams {
+  toEmail: string
+  toName: string
+  reportTitle: string
+  pdfUrl: string
+  customSubject?: string
+  customPreviewText?: string
+}
+
+/**
+ * Sends the downloadable PDF Lead Magnet report to a user via Brevo transactional email
+ * and includes a high-converting membership upsell.
+ */
+export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDeliveryEmailParams): Promise<boolean> {
+  const brevoApiKey = process.env.BREVO_API_KEY
+  const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
+  const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
+  const membershipUrl = `${siteUrl.replace(/\/$/, "")}/insights`
+
+  if (!brevoApiKey) {
+    console.error("BREVO_API_KEY is not configured. Lead magnet delivery email skipped.")
+    return false
+  }
+
+  const subject = params.customSubject?.trim() || `Your Free Report: ${params.reportTitle} | First Principles Investing`
+  const sanitizedFilename = `${params.reportTitle.replace(/[^a-zA-Z0-9_\-\s]/g, "").trim().replace(/\s+/g, "_") || "Report"}.pdf`
+
+  const emailHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0B0B0E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0B0B0E; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #121216; border: 1px solid #1E1E24; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          
+          <!-- Header Bar -->
+          <tr>
+            <td style="padding: 28px 32px 20px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+              <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                FIRST PRINCIPLES INVESTING
+              </span>
+            </td>
+          </tr>
+
+          <!-- Hero Section -->
+          <tr>
+            <td style="padding: 32px 32px 16px 32px; text-align: left;">
+              <div style="display: inline-block; padding: 6px 14px; background-color: rgba(255, 199, 44, 0.12); border: 1px solid rgba(255, 199, 44, 0.3); border-radius: 20px; color: #FFC72C; font-size: 12px; font-weight: 700; margin-bottom: 16px;">
+                📥 COMPLIMENTARY RESEARCH REPORT
+              </div>
+              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 12px 0; line-height: 1.35;">
+                Your report is ready: <span style="color: #FFC72C;">${params.reportTitle}</span>
+              </h1>
+              <p style="color: #D4D4D8; font-size: 15px; line-height: 1.6; margin: 0;">
+                Hi ${params.toName || "there"},
+              </p>
+              <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin: 10px 0 0 0;">
+                ${params.customPreviewText ? params.customPreviewText : "Thank you for requesting this special institutional research report. We have put together key market context, fundamental analysis, and actionable takeaways for you."}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Download Action Card -->
+          <tr>
+            <td style="padding: 16px 32px 28px 32px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #17171C; border: 1px solid #2A2A32; border-radius: 12px; padding: 24px; text-align: center;">
+                <tr>
+                  <td>
+                    <p style="color: #E4E4E7; font-size: 14px; margin: 0 0 16px 0; line-height: 1.5;">
+                      Click below to view and download your full PDF research memo:
+                    </p>
+                    <a href="${params.pdfUrl}" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 14px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(255, 199, 44, 0.25);">
+                      ⬇️ Download PDF Report
+                    </a>
+                    <p style="color: #71717A; font-size: 12px; margin: 14px 0 0 0;">
+                      The document is also attached directly to this email for your offline reading.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Primary Inbox Callout -->
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: rgba(255, 199, 44, 0.05); border: 1px dashed rgba(255, 199, 44, 0.25); border-radius: 10px; padding: 16px;">
+                <tr>
+                  <td style="text-align: left;">
+                    <p style="color: #E4E4E7; font-size: 13px; line-height: 1.5; margin: 0;">
+                      💡 <strong style="color: #FFC72C;">Quick Tip:</strong> To make sure you never miss future reports and market alerts, please drag this email to your <strong>Primary</strong> tab or add us to your VIP contacts.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Membership Upsell Section -->
+          <tr>
+            <td style="padding: 8px 32px 32px 32px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161A; border: 1px solid #2E2E36; border-radius: 12px; padding: 24px;">
+                <tr>
+                  <td style="text-align: left;">
+                    <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 8px;">
+                      GO BEYOND THE CONSENSUS
+                    </span>
+                    <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0 0 10px 0;">
+                      Build True Investing Conviction
+                    </h3>
+                    <p style="color: #A1A1AA; font-size: 13px; line-height: 1.6; margin: 0 0 16px 0;">
+                      Our research members get 2 deep-dive investment memos every month, complete financial models, private community discussions, and direct access to founder notes.
+                    </p>
+                    <a href="${membershipUrl}" target="_blank" style="background-color: transparent; border: 1px solid #FFC72C; color: #FFC72C; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 13px;">
+                      Explore Full Membership →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 32px; border-top: 1px solid #1E1E24; text-align: center; background-color: #0E0E11;">
+              <p style="color: #D4D4D8; font-size: 12px; font-weight: 700; margin: 0 0 4px 0;">
+                First Principles Investing
+              </p>
+              <p style="color: #71717A; font-size: 11px; line-height: 1.5; margin: 0;">
+                For educational purposes only. You received this email because you requested a research report on our website.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `
+
+  try {
+    const payload: any = {
+      sender: {
+        name: "First Principles Investing",
+        email: emailFrom,
+      },
+      to: [
+        {
+          email: params.toEmail,
+          name: params.toName,
+        },
+      ],
+      subject,
+      htmlContent: emailHtml,
+    }
+
+    // Attach PDF directly if URL is provided
+    if (params.pdfUrl) {
+      payload.attachment = [
+        {
+          url: params.pdfUrl,
+          name: sanitizedFilename,
+        },
+      ]
+    }
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": brevoApiKey,
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Brevo SMTP API failed for Lead Magnet (${response.status}): ${errorText}`)
+      // Try fallback without attachment if Brevo rejected due to attachment size/policy
+      if (payload.attachment) {
+        delete payload.attachment
+        const retryRes = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: {
+            "api-key": brevoApiKey,
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        })
+        return retryRes.ok
+      }
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error("Error executing sendLeadMagnetDeliveryEmail:", error)
+    return false
+  }
+}
+
+
 
