@@ -298,5 +298,21 @@ export const singleLeadMagnetQuery = groq`
   }
 `
 
+export const allLeadMagnetsQuery = groq`
+  *[_type == "leadMagnet"] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    badge,
+    heroHeadline,
+    heroSubtitle,
+    keyTakeaways,
+    mainImage,
+    formCtaText,
+    publishedAt
+  }
+`
+
+
 
 

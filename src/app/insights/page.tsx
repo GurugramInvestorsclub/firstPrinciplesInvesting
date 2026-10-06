@@ -1,9 +1,10 @@
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { client } from "@/lib/sanity.client"
-import { postQuery, featuredPostQuery, allPostsQuery } from "@/lib/sanity.queries"
-import { Post } from "@/lib/types"
+import { postQuery, featuredPostQuery, allPostsQuery, allLeadMagnetsQuery } from "@/lib/sanity.queries"
+import { Post, LeadMagnet } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
+import { LeadMagnetCard } from "@/components/cards/LeadMagnetCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
 import { getInsightsSubscriptionUiState, userHasInsightsAccess, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
@@ -40,8 +41,15 @@ export default async function InsightsPage({
             client.fetch<Post | null>(featuredPostQuery, {}, { next: { revalidate: 60 } }),
             client.fetch<Post[]>(allPostsQuery, {}, { next: { revalidate: 60 } })
           ])
+    const leadMagnetsPromise = client.fetch<LeadMagnet[]>(allLeadMagnetsQuery, {}, { next: { revalidate: 60 } }).catch(() => [])
 
-    const [session, sanityResult, ratingsMap] = await Promise.all([sessionPromise, sanityPromise, getArticleRatingsMap()])
+    const [session, sanityResult, ratingsMap, leadMagnets] = await Promise.all([
+        sessionPromise,
+        sanityPromise,
+        getArticleRatingsMap(),
+        leadMagnetsPromise,
+    ])
+
 
     const insightsMembership = session?.user?.id ? await getCurrentInsightsMembershipForUser(session.user.id) : null
     const isPendingRenewal = insightsMembership?.status === "PENDING"
@@ -202,8 +210,34 @@ export default async function InsightsPage({
                         </div>
                     </section>
 
+                    {/* COMPLIMENTARY SPECIAL REPORTS & TOOLKITS */}
+                    {leadMagnets && leadMagnets.length > 0 && (
+                        <section id="free-reports" className="container max-w-7xl mx-auto px-6 py-20 border-t border-white/5">
+                            <div className="mb-14 text-center md:text-left">
+                                <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">
+                                    COMPLIMENTARY DOWNLOADS
+                                </span>
+                                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                                    <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">
+                                        Special Reports & Playbooks
+                                    </h2>
+                                    <p className="text-xs sm:text-sm text-neutral-400 max-w-md">
+                                        In-depth institutional playbooks, case studies, and models. Delivered straight to your inbox as free PDF downloads.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                                {leadMagnets.map((lm) => (
+                                    <LeadMagnetCard key={lm._id || lm.slug.current} leadMagnet={lm} />
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
                     {/* SECTION 3 — READ OUR FREE INSIGHTS */}
                     <section id="free-research" className="container max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+
                         <div className="mb-16 text-center md:text-left">
                             <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-gold/80 block mb-3">PUBLIC ARCHIVE</span>
                             <h2 className="text-3xl md:text-5xl font-heading font-bold tracking-tight text-white">Read our Free Insights</h2>
