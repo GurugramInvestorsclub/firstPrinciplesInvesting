@@ -138,6 +138,7 @@ export interface LeadMagnet {
     badge?: string
     heroHeadline?: string
     heroSubtitle?: string
+    disclaimer?: string
     keyTakeaways?: string[]
     mainImage?: any
     pdfFile?: {

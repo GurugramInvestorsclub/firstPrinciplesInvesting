@@ -44,6 +44,13 @@ export default defineType({
             description: 'Compelling 2-3 sentence overview highlighting what investors will uncover in this free report.',
         }),
         defineField({
+            name: 'disclaimer',
+            title: 'Report Disclaimer (Optional)',
+            type: 'text',
+            rows: 2,
+            description: 'Custom regulatory or disclosure notice (e.g. "This is NOT a recommendation. We are NOT SEBI registered. We are invested."). Rendered prominently with a gold border highlight.',
+        }),
+        defineField({
             name: 'keyTakeaways',
             title: 'Key Takeaways / Highlights',
             type: 'array',

@@ -8,7 +8,22 @@ import { singleLeadMagnetQuery } from "@/lib/sanity.queries"
 import { LeadMagnet } from "@/lib/types"
 import { urlForImage } from "@/lib/sanity.image"
 import { LeadMagnetForm } from "@/components/resources/LeadMagnetForm"
-import { CheckCircle2, FileText, Download, Sparkles } from "lucide-react"
+import { CheckCircle2, FileText, Download, Sparkles, ShieldAlert } from "lucide-react"
+
+function isDisclaimerText(text?: string | null): boolean {
+  if (!text) return false
+  const lower = text.trim().toLowerCase()
+  return (
+    lower.startsWith("disclaimer") ||
+    lower.startsWith("disclosure") ||
+    lower.includes("not a recommendation") ||
+    lower.includes("sebi registered")
+  )
+}
+
+function cleanDisclaimer(text: string): string {
+  return text.replace(/^(disclaimer|disclosure)\s*[:\-]\s*/i, "").trim()
+}
 
 export const dynamic = "force-dynamic"
 
@@ -56,6 +71,9 @@ export default async function LeadMagnetLandingPage({ params }: Props) {
   const badgeText = leadMagnet.badge || "Free Special Research Report"
   const headline = leadMagnet.heroHeadline || leadMagnet.title
   const subtitle = leadMagnet.heroSubtitle
+  const isSubtitleDisclaimer = isDisclaimerText(subtitle)
+  const disclaimerText = leadMagnet.disclaimer || (isSubtitleDisclaimer ? subtitle : null)
+  const displaySubtitle = isSubtitleDisclaimer ? null : subtitle
   const takeaways = leadMagnet.keyTakeaways || []
   const ctaButtonText = leadMagnet.formCtaText || "Get Free PDF Report"
 
@@ -80,10 +98,22 @@ export default async function LeadMagnetLandingPage({ params }: Props) {
               {headline}
             </h1>
 
-            {subtitle && (
-              <p className="text-base sm:text-lg md:text-xl text-neutral-300 font-light leading-relaxed max-w-4xl">
-                {subtitle}
+            {displaySubtitle && (
+              <p className="text-base sm:text-lg md:text-xl text-neutral-200 font-light leading-relaxed max-w-4xl">
+                {displaySubtitle}
               </p>
+            )}
+
+            {disclaimerText && (
+              <div className="inline-flex items-start sm:items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gold/40 bg-[radial-gradient(ellipse_at_top_left,rgba(245,184,0,0.12),transparent_70%),rgba(20,20,24,0.7)] backdrop-blur-md shadow-[0_0_20px_rgba(245,184,0,0.1)] max-w-4xl">
+                <ShieldAlert className="w-4 h-4 text-gold shrink-0 mt-0.5 sm:mt-0" />
+                <p className="text-xs sm:text-sm text-neutral-100 font-medium leading-relaxed">
+                  <strong className="text-gold font-bold mr-1.5 font-mono uppercase tracking-wider text-[11px]">
+                    Disclaimer:
+                  </strong>
+                  <span>{cleanDisclaimer(disclaimerText)}</span>
+                </p>
+              </div>
             )}
           </div>
 
@@ -149,9 +179,10 @@ export default async function LeadMagnetLandingPage({ params }: Props) {
           </div>
 
           {/* Compliance & Independence Note */}
-          <p className="mt-6 text-center sm:text-left text-[11px] text-neutral-500 font-mono leading-relaxed">
-            Prepared by First Principles Research. For educational purposes only. Zero sponsored content.
-          </p>
+          <div className="mt-6 flex items-center justify-center sm:justify-start gap-2 text-xs text-neutral-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
+            <span>Prepared by First Principles Research. For educational purposes only. Zero sponsored content.</span>
+          </div>
 
           {/* Key Takeaways Checklist (if present) */}
           {takeaways.length > 0 && (

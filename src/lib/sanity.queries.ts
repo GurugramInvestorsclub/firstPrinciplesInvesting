@@ -271,6 +271,7 @@ export const singleLeadMagnetQuery = groq`
     badge,
     heroHeadline,
     heroSubtitle,
+    disclaimer,
     keyTakeaways,
     mainImage,
     pdfFile {
@@ -306,6 +307,7 @@ export const allLeadMagnetsQuery = groq`
     badge,
     heroHeadline,
     heroSubtitle,
+    disclaimer,
     keyTakeaways,
     mainImage,
     formCtaText,

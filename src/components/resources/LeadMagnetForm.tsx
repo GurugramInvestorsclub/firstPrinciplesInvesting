@@ -71,11 +71,8 @@ export function LeadMagnetForm({ slug, ctaText = "Get Free PDF Report" }: LeadMa
             Instant PDF Delivery
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Where should we send your copy?
+            Get your FREE pdf copy
           </h3>
-          <p className="text-xs sm:text-sm text-neutral-400 font-light leading-relaxed">
-            Enter your details below to receive the complete, unabridged research memo directly in your inbox.
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
