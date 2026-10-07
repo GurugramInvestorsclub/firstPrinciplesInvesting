@@ -1092,7 +1092,7 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
                       Subscribe to Our Deep Dives
                     </h3>
                     <p style="color: #A0A0A0; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">
-                      Our research members get 2 deep-dive investment memos every month, complete financial models, private community discussions and a monthly meetup.
+                      Our research members get 2 deep-dive investment memos every month, private community discussions and a monthly meetup.
                     </p>
                     <a href="${membershipUrl}" target="_blank" style="background-color: transparent; border: 1px solid #F5B800; color: #F5B800; padding: 9px 20px; text-decoration: none; border-radius: 20px; font-weight: 600; display: inline-block; font-size: 13px;">
                       Explore Full Membership &rarr;
