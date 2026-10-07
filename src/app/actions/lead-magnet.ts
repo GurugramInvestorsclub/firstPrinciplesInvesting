@@ -83,6 +83,15 @@ export async function submitLeadMagnet(params: LeadMagnetSubmitParams): Promise<
     const pdfUrl = leadMagnet.pdfFile?.asset?.url
     if (pdfUrl) {
       try {
+        const resolvedDisclaimer = leadMagnet.disclaimer || (
+          leadMagnet.heroSubtitle && (
+            leadMagnet.heroSubtitle.toLowerCase().includes("not a recommendation") ||
+            leadMagnet.heroSubtitle.toLowerCase().includes("sebi registered") ||
+            leadMagnet.heroSubtitle.toLowerCase().startsWith("disclaimer") ||
+            leadMagnet.heroSubtitle.toLowerCase().startsWith("disclosure")
+          ) ? leadMagnet.heroSubtitle : null
+        )
+
         await sendLeadMagnetDeliveryEmail({
           toEmail: email,
           toName: name,
@@ -90,6 +99,7 @@ export async function submitLeadMagnet(params: LeadMagnetSubmitParams): Promise<
           pdfUrl,
           customSubject: leadMagnet.emailSubject,
           customPreviewText: leadMagnet.emailPreviewText,
+          disclaimer: resolvedDisclaimer,
         })
       } catch (emailError) {
         console.error("Failed to send lead magnet email via Brevo:", emailError)

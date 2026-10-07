@@ -965,6 +965,7 @@ export interface SendLeadMagnetDeliveryEmailParams {
   pdfUrl: string
   customSubject?: string
   customPreviewText?: string
+  disclaimer?: string | null
 }
 
 /**
@@ -1021,18 +1022,12 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
 
           <!-- Hero Section -->
           <tr>
-            <td style="padding: 28px 28px 16px 28px; text-align: left;">
-              <div style="display: inline-block; padding: 4px 12px; background-color: rgba(245, 184, 0, 0.1); border: 1px solid rgba(245, 184, 0, 0.25); border-radius: 20px; color: #F5B800; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px;">
-                ✦ COMPLIMENTARY RESEARCH REPORT
-              </div>
-              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.35; letter-spacing: -0.3px;">
-                Your report is ready: <span style="color: #F5B800;">${params.reportTitle}</span>
-              </h1>
-              <p style="color: #FFFFFF; font-size: 14px; line-height: 1.6; margin: 0;">
+            <td style="padding: 28px 28px 12px 28px; text-align: left;">
+              <p style="color: #FFFFFF; font-size: 15px; font-weight: 500; line-height: 1.6; margin: 0 0 6px 0;">
                 Hi ${params.toName || "there"},
               </p>
-              <p style="color: #A0A0A0; font-size: 14px; line-height: 1.6; margin: 10px 0 0 0;">
-                ${params.customPreviewText ? params.customPreviewText : "Thank you for requesting this special institutional research report. We have put together key market context, fundamental analysis, and actionable takeaways for you."}
+              <p style="color: #A0A0A0; font-size: 14px; line-height: 1.6; margin: 0;">
+                ${params.customPreviewText ? params.customPreviewText : "Here is your free report"}
               </p>
             </td>
           </tr>
@@ -1043,15 +1038,12 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
               <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #222222; border: 1px solid #2E2E2E; border-radius: 10px; padding: 22px; text-align: center;">
                 <tr>
                   <td>
-                    <p style="color: #E0E0E0; font-size: 14px; margin: 0 0 16px 0; line-height: 1.5;">
-                      Click below to view and download your full PDF research memo:
-                    </p>
+                    <h2 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0 0 16px 0; line-height: 1.4; letter-spacing: -0.2px;">
+                      ${params.reportTitle}
+                    </h2>
                     <a href="${params.pdfUrl}" target="_blank" style="background-color: #F5B800; color: #121212; padding: 12px 28px; text-decoration: none; border-radius: 20px; font-weight: 700; display: inline-block; font-size: 14px; letter-spacing: 0.2px;">
                       Download PDF Report &rarr;
                     </a>
-                    <p style="color: #777777; font-size: 12px; margin: 12px 0 0 0;">
-                      The document is also attached directly to this email for your offline reading.
-                    </p>
                   </td>
                 </tr>
               </table>
@@ -1061,7 +1053,7 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
           <!-- Move to Primary Inbox Callout -->
           <tr>
             <td style="padding: 0 28px 20px 28px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202020; border: 1px solid #2C2C2C; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202020; border: 1px solid #2C2C2C; border-radius: 10px; padding: 18px;">
                 <tr>
                   <td style="text-align: left;">
                     <h4 style="color: #FFFFFF; font-size: 14px; font-weight: 700; margin: 0 0 8px 0;">
@@ -1084,16 +1076,12 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
                   </td>
                 </tr>
               </table>
-
-              <p style="color: #777777; font-size: 12px; line-height: 1.5; margin: 0; text-align: center;">
-                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #F5B800; text-decoration: none;">support@firstprinciplesresearch.in</a>.
-              </p>
             </td>
           </tr>
 
           <!-- Membership Upsell Section -->
           <tr>
-            <td style="padding: 4px 28px 28px 28px;">
+            <td style="padding: 4px 28px ${params.disclaimer ? '20px' : '28px'} 28px;">
               <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #1E1E1E; border: 1px solid rgba(245, 184, 0, 0.3); border-radius: 10px; padding: 20px;">
                 <tr>
                   <td style="text-align: left;">
@@ -1115,9 +1103,29 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
             </td>
           </tr>
 
+          ${params.disclaimer ? `
+          <!-- Report Disclaimer Section -->
+          <tr>
+            <td style="padding: 0 28px 24px 28px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #1A1A20; border: 1px solid rgba(245, 184, 0, 0.25); border-radius: 10px; padding: 14px 18px;">
+                <tr>
+                  <td style="text-align: left;">
+                    <p style="color: #CCCCCC; font-size: 12px; line-height: 1.55; margin: 0;">
+                      <strong style="color: #F5B800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; margin-right: 6px;">Disclaimer:</strong>
+                      ${params.disclaimer.replace(/^(disclaimer|disclosure)\s*[:\-]\s*/i, "").trim()}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>` : ""}
+
           <!-- Footer -->
           <tr>
-            <td style="padding: 20px 28px; border-top: 1px solid #242424; text-align: center; background-color: #161616;">
+            <td style="padding: 24px 28px 20px 28px; border-top: 1px solid #242424; text-align: center; background-color: #161616;">
+              <p style="color: #888888; font-size: 12px; line-height: 1.5; margin: 0 0 16px 0; text-align: center;">
+                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #F5B800; text-decoration: none;">support@firstprinciplesresearch.in</a>.
+              </p>
               <table border="0" cellspacing="0" cellpadding="0" align="center" style="display: inline-table; margin: 0 auto 6px auto;">
                 <tr>
                   <td style="vertical-align: middle; padding-right: 8px; line-height: 1;">
