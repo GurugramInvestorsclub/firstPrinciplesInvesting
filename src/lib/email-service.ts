@@ -141,24 +141,39 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registration Confirmed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+    .font-serif, h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
+<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 40px 16px;">
     <tr>
       <td align="center">
         <!-- Main Email Container -->
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #111115; border: 1px solid #27272A; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="vertical-align: middle; padding-right: 12px;">
                     <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
                   </td>
                   <td style="vertical-align: middle;">
-                    <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
                       FIRST PRINCIPLES INVESTING
                     </span>
                   </td>
@@ -170,16 +185,16 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           <!-- Confirmation Hero Section -->
           <tr>
             <td style="padding: 32px 32px 16px 32px; text-align: left;">
-              <div style="display: inline-block; padding: 6px 14px; background-color: rgba(37, 211, 102, 0.12); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 20px; color: #25D366; font-size: 13px; font-weight: 600; margin-bottom: 16px;">
-                ✅ Registration Confirmed
+              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 9999px; color: #25D366; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 16px;">
+                ✅ REGISTRATION CONFIRMED
               </div>
-              <h1 style="color: #FFFFFF; font-size: 26px; font-weight: 800; margin: 0 0 12px 0; line-height: 1.3;">
-                You&apos;re Registered!
+              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 32px; font-weight: 600; margin: 0 0 12px 0; line-height: 1.2; letter-spacing: -0.01em;">
+                You&apos;re <span style="color: #F5B800; font-style: italic;">Registered!</span>
               </h1>
-              <p style="color: #D4D4D8; font-size: 16px; line-height: 1.6; margin: 0;">
+              <p style="color: #F0EDE8; font-size: 15px; line-height: 1.6; margin: 0;">
                 Hi ${params.toName},
               </p>
-              <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; margin: 8px 0 0 0;">
+              <p style="color: #9E9EA4; font-size: 14px; line-height: 1.6; margin: 8px 0 0 0;">
                 Your payment has been verified successfully and your seat for <strong>${event.title}</strong> has been reserved.
               </p>
             </td>
@@ -188,13 +203,13 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           <!-- Event Details Card -->
           <tr>
             <td style="padding: 16px 32px 24px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #17171C; border: 1px solid #2A2A32; border-radius: 12px; padding: 24px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202026; border: 1px solid #2B2B34; border-radius: 14px; padding: 24px;">
                 <tr>
-                  <td style="padding-bottom: 16px; border-bottom: 1px solid #26262E;">
-                    <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 6px;">
+                  <td style="padding-bottom: 16px; border-bottom: 1px solid #2B2B34;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; color: #F5B800; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 6px;">
                       EVENT DETAILS
                     </span>
-                    <span style="font-size: 18px; font-weight: 700; color: #FFFFFF; display: block;">
+                    <span class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 600; color: #F0EDE8; display: block; letter-spacing: -0.01em;">
                       ${event.title}
                     </span>
                   </td>
@@ -207,8 +222,8 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                         formattedDate
                           ? `
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">📅 Date & Time:</td>
-                        <td style="padding: 6px 0; color: #FFFFFF; font-size: 14px; font-weight: 600;">${formattedDate}</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">📅 Date & Time:</td>
+                        <td style="padding: 7px 0; color: #F0EDE8; font-size: 14px; font-weight: 600;">${formattedDate}</td>
                       </tr>
                       `
                           : ""
@@ -218,8 +233,8 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                         speakerName
                           ? `
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">👤 Speaker:</td>
-                        <td style="padding: 6px 0; color: #FFFFFF; font-size: 14px; font-weight: 600;">${speakerName}</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">👤 Speaker:</td>
+                        <td style="padding: 7px 0; color: #F0EDE8; font-size: 14px; font-weight: 600;">${speakerName}</td>
                       </tr>
                       `
                           : ""
@@ -229,8 +244,8 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                         event.location
                           ? `
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">📍 Platform / Venue:</td>
-                        <td style="padding: 6px 0; color: #FFFFFF; font-size: 14px; font-weight: 600;">${event.location}</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">📍 Platform / Venue:</td>
+                        <td style="padding: 7px 0; color: #F0EDE8; font-size: 14px; font-weight: 600;">${event.location}</td>
                       </tr>
                       `
                           : ""
@@ -240,24 +255,24 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                         params.eventId
                           ? `
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">🎟️ Event ID:</td>
-                        <td style="padding: 6px 0; color: #E4E4E7; font-size: 14px; font-family: monospace;">${params.eventId}</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">🎟️ Event ID:</td>
+                        <td class="font-mono" style="padding: 7px 0; color: #E6E4E0; font-size: 13px; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${params.eventId}</td>
                       </tr>
                       `
                           : ""
                       }
 
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">💳 Payment Status:</td>
-                        <td style="padding: 6px 0; color: #25D366; font-size: 14px; font-weight: 700;">Verified ✅</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">💳 Payment Status:</td>
+                        <td style="padding: 7px 0; color: #25D366; font-size: 14px; font-weight: 700;">Verified ✅</td>
                       </tr>
 
                       ${
                         amountDisplay
                           ? `
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">💰 Amount Paid:</td>
-                        <td style="padding: 6px 0; color: #FFFFFF; font-size: 14px; font-weight: 600;">${amountDisplay}</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">💰 Amount Paid:</td>
+                        <td style="padding: 7px 0; color: #F0EDE8; font-size: 14px; font-weight: 600;">${amountDisplay}</td>
                       </tr>
                       `
                           : ""
@@ -267,8 +282,8 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                         transactionId
                           ? `
                       <tr>
-                        <td style="padding: 6px 0; color: #A1A1AA; font-size: 14px; width: 140px; font-weight: 500;">🧾 Transaction ID:</td>
-                        <td style="padding: 6px 0; color: #E4E4E7; font-size: 13px; font-family: monospace;">${transactionId}</td>
+                        <td style="padding: 7px 0; color: #9E9EA4; font-size: 14px; width: 140px; font-weight: 500;">🧾 Transaction ID:</td>
+                        <td class="font-mono" style="padding: 7px 0; color: #E6E4E0; font-size: 13px; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${transactionId}</td>
                       </tr>
                       `
                           : ""
@@ -281,12 +296,12 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                   event.whatsappLink
                     ? `
                 <tr>
-                  <td style="padding-top: 20px; border-top: 1px solid #26262E; margin-top: 16px;">
-                    <p style="font-size: 14px; color: #E4E4E7; margin: 0 0 12px 0; line-height: 1.5;">
+                  <td style="padding-top: 20px; border-top: 1px solid #2B2B34; margin-top: 16px;">
+                    <p style="font-size: 14px; color: #E6E4E0; margin: 0 0 14px 0; line-height: 1.5;">
                       Join our official WhatsApp group for live session access links and real-time updates:
                     </p>
-                    <a href="${event.whatsappLink}" target="_blank" style="background-color: #25D366; color: #FFFFFF; padding: 12px 22px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 14px;">
-                      Join WhatsApp Group
+                    <a href="${event.whatsappLink}" target="_blank" style="background-color: #25D366; color: #0C0C0E; padding: 12px 24px; text-decoration: none; border-radius: 9999px; font-weight: 700; display: inline-block; font-size: 14px; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;">
+                      Join WhatsApp Group &rarr;
                     </a>
                   </td>
                 </tr>
@@ -301,10 +316,10 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           <!-- What Happens Next Section -->
           <tr>
             <td style="padding: 8px 32px 24px 32px;">
-              <h3 style="color: #FFFFFF; font-size: 16px; font-weight: 700; margin: 0 0 12px 0;">
+              <h3 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 19px; font-weight: 600; margin: 0 0 12px 0;">
                 What happens next?
               </h3>
-              <ul style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+              <ul style="color: #9E9EA4; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                 <li style="margin-bottom: 8px;">A reminder email will be sent before the event.</li>
                 <li style="margin-bottom: 8px;">Meeting link will be shared before the session (or pinned in the WhatsApp group).</li>
                 <li>Keep this email for future reference.</li>
@@ -315,16 +330,16 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           <!-- Move to Primary Inbox Callout -->
           <tr>
             <td style="padding: 0 32px 24px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #17171C; border: 1px solid #2A2A32; border-radius: 12px; padding: 20px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202026; border: 1px solid #2B2B34; border-radius: 14px; padding: 22px;">
                 <tr>
                   <td style="text-align: left;">
-                    <h4 style="color: #FFFFFF; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+                    <h4 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 19px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.01em;">
                       📬 Never miss important session links
                     </h4>
-                    <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
+                    <p style="color: #B0B0B5; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
                       Don&apos;t forget to move this email to your <strong>Primary</strong> tab (as shown below) so future event links and session updates aren&apos;t buried in Promotions.
                     </p>
-                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
+                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2B2B34; background-color: #121215; line-height: 0;">
                       <img 
                         src="${moveToPrimaryImageUrl}" 
                         alt="Move email from Promotions to Primary in Gmail" 
@@ -332,7 +347,7 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
                         style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;" 
                       />
                     </div>
-                    <p style="color: #71717A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
+                    <p style="color: #72727A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
                       <em>On mobile: Tap the <strong>&vellip;</strong> (three dots) in the top right &rarr; select <strong>&quot;Move to Primary&quot;</strong>.</em>
                     </p>
                   </td>
@@ -344,9 +359,9 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           <!-- Need Help Section -->
           <tr>
             <td style="padding: 0 32px 24px 32px;">
-              <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 8px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                <p style="color: #A1A1AA; font-size: 14px; margin: 0; line-height: 1.5;">
-                  <strong style="color: #FFFFFF;">Questions?</strong> Simply reply to this email or contact us at <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>
+              <div style="background-color: rgba(255, 255, 255, 0.02); border-radius: 10px; padding: 16px; border: 1px solid #2B2B34;">
+                <p style="color: #9E9EA4; font-size: 14px; margin: 0; line-height: 1.5;">
+                  <strong style="color: #F0EDE8;">Questions?</strong> Simply reply to this email or contact us at <a href="mailto:support@firstprinciplesresearch.in" style="color: #F5B800; text-decoration: none;">support@firstprinciplesresearch.in</a>
                 </p>
               </div>
             </td>
@@ -355,20 +370,20 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           <!-- SINGLE TASTEFUL UPSELL SECTION -->
           <tr>
             <td style="padding: 8px 32px 32px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161A; border: 1px solid #2E2E36; border-radius: 12px; padding: 24px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #1B1B20; border: 1px solid rgba(245, 184, 0, 0.3); border-radius: 14px; padding: 26px;">
                 <tr>
                   <td style="text-align: left;">
-                    <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 8px;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; color: #F5B800; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 8px;">
                       CONTINUE LEARNING
                     </span>
-                    <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0 0 10px 0;">
+                    <h3 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 22px; font-weight: 600; margin: 0 0 10px 0; letter-spacing: -0.01em;">
                       Continue Learning Beyond This Event
                     </h3>
-                    <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin: 0 0 18px 0;">
+                    <p style="color: #9E9EA4; font-size: 13px; line-height: 1.6; margin: 0 0 18px 0;">
                       Get access to in-depth company research, sector reports, member-only webinars and exclusive investing insights through the First Principles Investing Subscription.
                     </p>
-                    <a href="https://firstprinciplesinvesting.com/membership" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 14px;">
-                      Explore Membership
+                    <a href="https://firstprinciplesinvesting.com/membership" target="_blank" class="font-sans" style="background-color: #F5B800; color: #141416; padding: 12px 26px; text-decoration: none; border-radius: 9999px; font-weight: 700; display: inline-block; font-size: 14px; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;">
+                      Explore Membership &rarr;
                     </a>
                   </td>
                 </tr>
@@ -378,11 +393,11 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 32px; border-top: 1px solid #1E1E24; text-align: center; background-color: #0E0E11;">
-              <p style="color: #D4D4D8; font-size: 13px; font-weight: 700; margin: 0 0 6px 0;">
-                First Principles Investing
+            <td style="padding: 24px 32px; border-top: 1px solid #26262E; text-align: center; background-color: #121215;">
+              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #F0EDE8; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px 0;">
+                FIRST PRINCIPLES INVESTING
               </p>
-              <p style="color: #71717A; font-size: 12px; line-height: 1.5; margin: 0;">
+              <p style="color: #72727A; font-size: 11px; line-height: 1.5; margin: 0;">
                 Thank you for being part of our community.<br/>
                 This is an automated transactional email regarding your registration.
               </p>
@@ -435,8 +450,9 @@ export async function sendManualGrantConfirmationEmail(
   const brevoApiKey = process.env.BREVO_API_KEY
   const resendApiKey = process.env.RESEND_API_KEY
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
-  const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
-  const moveToPrimaryImageUrl = `${siteUrl.replace(/\/$/, "")}/images/move-to-primary.jpg`
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in").replace(/\/$/, "")
+  const logoUrl = `${siteUrl}/logo.png`
+  const moveToPrimaryImageUrl = `${siteUrl}/images/move-to-primary.jpg`
 
   if (!brevoApiKey && !resendApiKey) {
     console.error("Neither BREVO_API_KEY nor RESEND_API_KEY is configured. Subscription email skipped.")
@@ -485,8 +501,8 @@ export async function sendManualGrantConfirmationEmail(
       : `We have verified your payment (${displayPaymentMethod}${cleanUtr ? ` — Ref: ${cleanUtr}` : ""}) and activated your Insights membership. Below are your access details:`
 
   const heroHeading = params.isRenewal
-    ? `Insights Membership Renewed 🎉`
-    : `Insights Membership Details 🎉`
+    ? `Insights Membership Renewed`
+    : `Insights Membership Details`
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -495,23 +511,56 @@ export async function sendManualGrantConfirmationEmail(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${heroHeading}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+    .font-serif, h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
+<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 40px 16px;">
     <tr>
       <td align="center">
-        <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #121216; border: 1px solid #24242C; border-radius: 16px; overflow: hidden;">
+        <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
           
-          <!-- Header Banner -->
+          <!-- Header Bar -->
           <tr>
-            <td style="padding: 36px 32px; background: linear-gradient(180deg, #1A1A22 0%, #121216 100%); text-align: center; border-bottom: 1px solid #24242C;">
-              <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 12px;">
-                FIRST PRINCIPLES INVESTING
-              </span>
-              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 10px 0; letter-spacing: -0.5px;">
-                ${heroHeading}
+            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="vertical-align: middle; padding-right: 12px;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
+                      FIRST PRINCIPLES INVESTING
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Hero Section -->
+          <tr>
+            <td style="padding: 32px 32px 16px 32px; text-align: left;">
+              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 9999px; color: #F5B800; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;">
+                ✦ INSIGHTS MEMBERSHIP
+              </div>
+              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 32px; font-weight: 600; margin: 0 0 10px 0; letter-spacing: -0.01em; line-height: 1.2;">
+                ${heroHeading} <span style="font-style: italic; color: #F5B800;">✨</span>
               </h1>
-              <p style="color: #A1A1AA; font-size: 15px; margin: 0;">
+              <p style="color: #9E9EA4; font-size: 15px; margin: 0; line-height: 1.6;">
                 ${subHeader}
               </p>
             </td>
@@ -519,61 +568,61 @@ export async function sendManualGrantConfirmationEmail(
 
           <!-- Details Table -->
           <tr>
-            <td style="padding: 32px;">
-              <p style="color: #E4E4E7; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            <td style="padding: 16px 32px 32px 32px;">
+              <p style="color: #F0EDE8; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">
                 Hello <strong>${params.toName || params.toEmail}</strong>,
               </p>
-              <p style="color: #A1A1AA; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+              <p style="color: #9E9EA4; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
                 ${introText}
               </p>
 
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #18181F; border-radius: 12px; border: 1px solid #292934; margin-bottom: 28px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202026; border-radius: 14px; border: 1px solid #2B2B34; margin-bottom: 28px;">
                 <tr>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #A1A1AA; font-size: 14px;">Membership Plan</td>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${params.planLabel}</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #2B2B34; color: #9E9EA4; font-size: 14px;">Membership Plan</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #2B2B34; color: #F0EDE8; font-weight: 600; font-size: 14px; text-align: right;">${params.planLabel}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #A1A1AA; font-size: 14px;">Access Start Date</td>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid #24242C; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${formattedStartDate}</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #2B2B34; color: #9E9EA4; font-size: 14px;">Access Start Date</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid #2B2B34; color: #F0EDE8; font-weight: 600; font-size: 14px; text-align: right;">${formattedStartDate}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 18px; ${displayPaymentMethod || cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Valid Until</td>
-                  <td style="padding: 14px 18px; ${displayPaymentMethod || cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFC72C; font-weight: 700; font-size: 14px; text-align: right;">${formattedEndDate}</td>
+                  <td style="padding: 14px 18px; ${displayPaymentMethod || cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #2B2B34;' : ''} color: #9E9EA4; font-size: 14px;">Valid Until</td>
+                  <td style="padding: 14px 18px; ${displayPaymentMethod || cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #2B2B34;' : ''} color: #F5B800; font-weight: 700; font-size: 14px; text-align: right;">${formattedEndDate}</td>
                 </tr>
                 ${displayPaymentMethod ? `
                 <tr>
-                  <td style="padding: 14px 18px; ${cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Payment Method</td>
-                  <td style="padding: 14px 18px; ${cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${displayPaymentMethod}</td>
+                  <td style="padding: 14px 18px; ${cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #2B2B34;' : ''} color: #9E9EA4; font-size: 14px;">Payment Method</td>
+                  <td style="padding: 14px 18px; ${cleanUtr || params.amountPaid ? 'border-bottom: 1px solid #2B2B34;' : ''} color: #F0EDE8; font-weight: 600; font-size: 14px; text-align: right;">${displayPaymentMethod}</td>
                 </tr>` : ''}
                 ${cleanUtr ? `
                 <tr>
-                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #A1A1AA; font-size: 14px;">Transaction UTR / Ref</td>
-                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #24242C;' : ''} color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">${cleanUtr}</td>
+                  <td style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #2B2B34;' : ''} color: #9E9EA4; font-size: 14px;">Transaction UTR / Ref</td>
+                  <td class="font-mono" style="padding: 14px 18px; ${params.amountPaid ? 'border-bottom: 1px solid #2B2B34;' : ''} color: #E6E4E0; font-size: 13px; text-align: right; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">${cleanUtr}</td>
                 </tr>` : ''}
                 ${params.amountPaid ? `
                 <tr>
-                  <td style="padding: 14px 18px; color: #A1A1AA; font-size: 14px;">Amount Received</td>
-                  <td style="padding: 14px 18px; color: #FFFFFF; font-weight: 600; font-size: 14px; text-align: right;">₹${params.amountPaid}</td>
+                  <td style="padding: 14px 18px; color: #9E9EA4; font-size: 14px;">Amount Received</td>
+                  <td style="padding: 14px 18px; color: #F0EDE8; font-weight: 600; font-size: 14px; text-align: right;">₹${params.amountPaid}</td>
                 </tr>` : ''}
               </table>
 
               <div style="text-align: center; margin-bottom: 28px;">
-                <a href="${siteUrl}/insights/members-only" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 15px;">
-                  Explore Premium Insights
+                <a href="${siteUrl}/insights/members-only" target="_blank" class="font-sans" style="background-color: #F5B800; color: #141416; padding: 14px 32px; text-decoration: none; border-radius: 9999px; font-weight: 700; display: inline-block; font-size: 14px; letter-spacing: 0.3px; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;">
+                  Explore Premium Insights &rarr;
                 </a>
               </div>
 
               <!-- Move to Primary Inbox Callout -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161B; border: 1px solid #2A2A32; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202026; border: 1px solid #2B2B34; border-radius: 14px; padding: 22px; margin-bottom: 24px;">
                 <tr>
                   <td style="text-align: left;">
-                    <h4 style="color: #FFFFFF; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+                    <h4 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 19px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.01em;">
                       📬 Never miss important research &amp; member updates
                     </h4>
-                    <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
+                    <p style="color: #B0B0B5; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
                       Don&apos;t forget to move this email to your <strong>Primary</strong> tab (as shown below) so future research memos and subscriber alerts aren&apos;t buried in Promotions.
                     </p>
-                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
+                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2B2B34; background-color: #121215; line-height: 0;">
                       <img 
                         src="${moveToPrimaryImageUrl}" 
                         alt="Move email from Promotions to Primary in Gmail" 
@@ -581,26 +630,26 @@ export async function sendManualGrantConfirmationEmail(
                         style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;" 
                       />
                     </div>
-                    <p style="color: #71717A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
+                    <p style="color: #72727A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
                       <em>On mobile: Tap the <strong>&vellip;</strong> (three dots) in the top right &rarr; select <strong>&quot;Move to Primary&quot;</strong>.</em>
                     </p>
                   </td>
                 </tr>
               </table>
 
-              <p style="color: #71717A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
-                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>.
+              <p style="color: #72727A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
+                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #F5B800; text-decoration: none;">support@firstprinciplesresearch.in</a>.
               </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 32px; border-top: 1px solid #1E1E24; text-align: center; background-color: #0E0E11;">
-              <p style="color: #D4D4D8; font-size: 13px; font-weight: 700; margin: 0 0 4px 0;">
-                First Principles Investing
+            <td style="padding: 24px 32px; border-top: 1px solid #26262E; text-align: center; background-color: #121215;">
+              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #F0EDE8; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px 0;">
+                FIRST PRINCIPLES INVESTING
               </p>
-              <p style="color: #71717A; font-size: 12px; margin: 0;">
+              <p style="color: #72727A; font-size: 11px; line-height: 1.5; margin: 0;">
                 Automated Transactional Membership Confirmation
               </p>
             </td>
@@ -718,25 +767,25 @@ export async function sendMembersOnlyPostEmailNotification(
     : "🔒 MEMBERS-ONLY RESEARCH MEMO"
 
   const excerptHtml = params.excerpt
-    ? `<div style="padding: 16px 20px; background-color: #17171C; border-left: 3px solid #FFC72C; border-radius: 6px; margin-bottom: 24px;">
-        <p style="color: #D4D4D8; font-size: 15px; line-height: 1.6; margin: 0; font-style: italic;">
+    ? `<div style="padding: 16px 20px; background-color: #202026; border-left: 3px solid #F5B800; border-radius: 8px; margin-bottom: 24px;">
+        <p style="color: #F0EDE8; font-size: 15px; line-height: 1.6; margin: 0; font-style: italic; font-family: 'Cormorant Garamond', Georgia, serif;">
           &ldquo;${params.excerpt.trim()}&rdquo;
         </p>
       </div>`
     : ""
 
   const customNoteHtml = params.customNote
-    ? `<div style="padding: 16px 20px; background-color: rgba(255, 199, 44, 0.08); border: 1px solid rgba(255, 199, 44, 0.25); border-radius: 8px; margin-bottom: 24px;">
-        <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px;">NOTE FROM EDITOR</span>
-        <p style="color: #E4E4E7; font-size: 14px; line-height: 1.5; margin: 0;">
+    ? `<div style="padding: 16px 20px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 10px; margin-bottom: 24px;">
+        <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; color: #F5B800; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 6px;">NOTE FROM EDITOR</span>
+        <p style="color: #F0EDE8; font-size: 14px; line-height: 1.5; margin: 0;">
           ${params.customNote.trim()}
         </p>
       </div>`
     : ""
 
   const imageHtml = params.mainImageUrl
-    ? `<div style="margin-bottom: 24px; text-align: center; overflow: hidden; border-radius: 12px;">
-        <img src="${params.mainImageUrl}" alt="${params.title}" width="536" style="width: 100%; max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #27272A; display: block; margin: 0 auto; filter: blur(14px); -webkit-filter: blur(14px); transform: scale(1.08);" />
+    ? `<div style="margin-bottom: 24px; text-align: center; overflow: hidden; border-radius: 14px;">
+        <img src="${params.mainImageUrl}" alt="${params.title}" width="536" style="width: 100%; max-width: 100%; height: auto; border-radius: 14px; border: 1px solid #2B2B34; display: block; margin: 0 auto; filter: blur(14px); -webkit-filter: blur(14px); transform: scale(1.08);" />
       </div>`
     : ""
 
@@ -750,24 +799,39 @@ export async function sendMembersOnlyPostEmailNotification(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${params.title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+    .font-serif, h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0C; padding: 40px 16px;">
+<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 40px 16px;">
     <tr>
       <td align="center">
         <!-- Main Email Container -->
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #111115; border: 1px solid #27272A; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="vertical-align: middle; padding-right: 12px;">
                     <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
                   </td>
                   <td style="vertical-align: middle;">
-                    <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
                       FIRST PRINCIPLES INVESTING
                     </span>
                   </td>
@@ -779,15 +843,15 @@ export async function sendMembersOnlyPostEmailNotification(
           <!-- Hero Content Section -->
           <tr>
             <td style="padding: 32px 32px 24px 32px; text-align: left;">
-              <div style="display: inline-block; padding: 6px 14px; background-color: rgba(255, 199, 44, 0.12); border: 1px solid rgba(255, 199, 44, 0.3); border-radius: 20px; color: #FFC72C; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 20px;">
+              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 9999px; color: #F5B800; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 18px;">
                 ${badgeText}
               </div>
               
-              <p style="color: #E4E4E7; font-size: 16px; font-weight: 600; line-height: 1.5; margin: 0 0 16px 0;">
-                Dear investor, we just released a new deep-dive !
+              <p style="color: #9E9EA4; font-size: 15px; font-weight: 500; line-height: 1.5; margin: 0 0 14px 0;">
+                Dear investor, we just released a new deep-dive!
               </p>
 
-              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 16px 0; line-height: 1.3; letter-spacing: -0.01em;">
+              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 30px; font-weight: 600; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em;">
                 ${params.title}
               </h1>
 
@@ -796,10 +860,10 @@ export async function sendMembersOnlyPostEmailNotification(
               ${excerptHtml}
 
               <!-- CTA Button -->
-              <table border="0" cellspacing="0" cellpadding="0" style="margin: 8px 0 16px 0;">
+              <table border="0" cellspacing="0" cellpadding="0" style="margin: 12px 0 16px 0;">
                 <tr>
-                  <td align="center" style="border-radius: 10px; background-color: #FFC72C;">
-                    <a href="${params.postUrl}" target="_blank" style="font-size: 15px; font-weight: 700; color: #0A0A0C; text-decoration: none; padding: 14px 28px; border-radius: 10px; border: 1px solid #FFC72C; display: inline-block;">
+                  <td align="center">
+                    <a href="${params.postUrl}" target="_blank" class="font-sans" style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 14px; font-weight: 700; color: #141416; text-decoration: none; padding: 14px 32px; border-radius: 9999px; background-color: #F5B800; display: inline-block; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); letter-spacing: 0.3px;">
                       Read Full Research Memo &rarr;
                     </a>
                   </td>
@@ -810,12 +874,12 @@ export async function sendMembersOnlyPostEmailNotification(
 
           <!-- Footer Bar -->
           <tr>
-            <td style="padding: 24px 32px; background-color: #0E0E12; border-top: 1px solid #1E1E24; text-align: left;">
-              <p style="color: #71717A; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+            <td style="padding: 24px 32px; background-color: #121215; border-top: 1px solid #26262E; text-align: left;">
+              <p style="color: #72727A; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
                 You are receiving this notification as an active subscriber of First Principles Investing.
               </p>
-              <p style="color: #52525B; font-size: 11px; margin: 0;">
-                First Principles Investing &bull; Members Only Research
+              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #52525B; font-size: 11px; letter-spacing: 1px; margin: 0; text-transform: uppercase;">
+                FIRST PRINCIPLES INVESTING &bull; MEMBERS ONLY RESEARCH
               </p>
             </td>
           </tr>
@@ -948,23 +1012,41 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+    .font-serif, h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
+    }
+    .font-sans {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0B0B0E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0B0B0E; padding: 32px 16px;">
+<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 32px 16px;">
     <tr>
       <td align="center">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #121216; border: 1px solid #1E1E24; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="vertical-align: middle; padding-right: 12px;">
                     <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
                   </td>
                   <td style="vertical-align: middle;">
-                    <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
                       FIRST PRINCIPLES INVESTING
                     </span>
                   </td>
@@ -976,16 +1058,16 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
           <!-- Hero Section -->
           <tr>
             <td style="padding: 32px 32px 16px 32px; text-align: left;">
-              <div style="display: inline-block; padding: 6px 14px; background-color: rgba(255, 199, 44, 0.12); border: 1px solid rgba(255, 199, 44, 0.3); border-radius: 20px; color: #FFC72C; font-size: 12px; font-weight: 700; margin-bottom: 16px;">
-                📥 COMPLIMENTARY RESEARCH REPORT
+              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 9999px; color: #F5B800; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;">
+                ✦ COMPLIMENTARY RESEARCH REPORT
               </div>
-              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 800; margin: 0 0 12px 0; line-height: 1.35;">
-                Your report is ready: <span style="color: #FFC72C;">${params.reportTitle}</span>
+              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 30px; font-weight: 600; margin: 0 0 12px 0; line-height: 1.25; letter-spacing: -0.01em;">
+                Your report is ready: <span style="color: #F5B800; font-style: italic;">${params.reportTitle}</span>
               </h1>
-              <p style="color: #D4D4D8; font-size: 15px; line-height: 1.6; margin: 0;">
+              <p style="color: #F0EDE8; font-size: 15px; line-height: 1.6; margin: 0;">
                 Hi ${params.toName || "there"},
               </p>
-              <p style="color: #A1A1AA; font-size: 14px; line-height: 1.6; margin: 10px 0 0 0;">
+              <p style="color: #9E9EA4; font-size: 14px; line-height: 1.6; margin: 10px 0 0 0;">
                 ${params.customPreviewText ? params.customPreviewText : "Thank you for requesting this special institutional research report. We have put together key market context, fundamental analysis, and actionable takeaways for you."}
               </p>
             </td>
@@ -994,16 +1076,16 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
           <!-- Download Action Card -->
           <tr>
             <td style="padding: 16px 32px 28px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #17171C; border: 1px solid #2A2A32; border-radius: 12px; padding: 24px; text-align: center;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202026; border: 1px solid #2B2B34; border-radius: 14px; padding: 26px; text-align: center;">
                 <tr>
                   <td>
-                    <p style="color: #E4E4E7; font-size: 14px; margin: 0 0 16px 0; line-height: 1.5;">
+                    <p style="color: #E6E4E0; font-size: 14px; margin: 0 0 18px 0; line-height: 1.5;">
                       Click below to view and download your full PDF research memo:
                     </p>
-                    <a href="${params.pdfUrl}" target="_blank" style="background-color: #FFC72C; color: #0C0C0E; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 800; display: inline-block; font-size: 14px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(255, 199, 44, 0.25);">
+                    <a href="${params.pdfUrl}" target="_blank" class="font-sans" style="background-color: #F5B800; color: #141416; padding: 14px 34px; text-decoration: none; border-radius: 9999px; font-weight: 700; display: inline-block; font-size: 14px; letter-spacing: 0.3px; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;">
                       ⬇️ Download PDF Report
                     </a>
-                    <p style="color: #71717A; font-size: 12px; margin: 14px 0 0 0;">
+                    <p style="color: #72727A; font-size: 12px; margin: 14px 0 0 0;">
                       The document is also attached directly to this email for your offline reading.
                     </p>
                   </td>
@@ -1015,16 +1097,16 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
           <!-- Move to Primary Inbox Callout -->
           <tr>
             <td style="padding: 0 32px 24px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161B; border: 1px solid #2A2A32; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #202026; border: 1px solid #2B2B34; border-radius: 14px; padding: 22px; margin-bottom: 24px;">
                 <tr>
                   <td style="text-align: left;">
-                    <h4 style="color: #FFFFFF; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+                    <h4 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 19px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.01em;">
                       📬 Never miss important research &amp; member updates
                     </h4>
-                    <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
+                    <p style="color: #B0B0B5; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
                       Don&apos;t forget to move this email to your <strong>Primary</strong> tab (as shown below) so future research memos and subscriber alerts aren&apos;t buried in Promotions.
                     </p>
-                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
+                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2B2B34; background-color: #121215; line-height: 0;">
                       <img 
                         src="${moveToPrimaryImageUrl}" 
                         alt="Move email from Promotions to Primary in Gmail" 
@@ -1032,15 +1114,15 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
                         style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;" 
                       />
                     </div>
-                    <p style="color: #71717A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
+                    <p style="color: #72727A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
                       <em>On mobile: Tap the <strong>&vellip;</strong> (three dots) in the top right &rarr; select <strong>&quot;Move to Primary&quot;</strong>.</em>
                     </p>
                   </td>
                 </tr>
               </table>
 
-              <p style="color: #71717A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
-                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>.
+              <p style="color: #72727A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
+                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #F5B800; text-decoration: none;">support@firstprinciplesresearch.in</a>.
               </p>
             </td>
           </tr>
@@ -1048,20 +1130,20 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
           <!-- Membership Upsell Section -->
           <tr>
             <td style="padding: 8px 32px 32px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161A; border: 1px solid #2E2E36; border-radius: 12px; padding: 24px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #1B1B20; border: 1px solid rgba(245, 184, 0, 0.3); border-radius: 14px; padding: 26px;">
                 <tr>
                   <td style="text-align: left;">
-                    <span style="font-size: 11px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 8px;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; color: #F5B800; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 8px;">
                       GO BEYOND THE CONSENSUS
                     </span>
-                    <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0 0 10px 0;">
+                    <h3 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 22px; font-weight: 600; margin: 0 0 10px 0; letter-spacing: -0.01em;">
                       Subscribe to Our Deep Dives
                     </h3>
-                    <p style="color: #A1A1AA; font-size: 13px; line-height: 1.6; margin: 0 0 16px 0;">
+                    <p style="color: #9E9EA4; font-size: 13px; line-height: 1.6; margin: 0 0 18px 0;">
                       Our research members get 2 deep-dive investment memos every month, complete financial models, private community discussions and a monthly meetup.
                     </p>
-                    <a href="${membershipUrl}" target="_blank" style="background-color: transparent; border: 1px solid #FFC72C; color: #FFC72C; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: 700; display: inline-block; font-size: 13px;">
-                      Explore Full Membership →
+                    <a href="${membershipUrl}" target="_blank" class="font-sans" style="background-color: transparent; border: 1.5px solid #F5B800; color: #F5B800; padding: 11px 24px; text-decoration: none; border-radius: 9999px; font-weight: 700; display: inline-block; font-size: 13px; letter-spacing: 0.3px; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;">
+                      Explore Full Membership &rarr;
                     </a>
                   </td>
                 </tr>
@@ -1071,11 +1153,11 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 32px; border-top: 1px solid #1E1E24; text-align: center; background-color: #0E0E11;">
-              <p style="color: #D4D4D8; font-size: 12px; font-weight: 700; margin: 0 0 4px 0;">
-                First Principles Investing
+            <td style="padding: 24px 32px; border-top: 1px solid #26262E; text-align: center; background-color: #121215;">
+              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #F0EDE8; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px 0;">
+                FIRST PRINCIPLES INVESTING
               </p>
-              <p style="color: #71717A; font-size: 11px; line-height: 1.5; margin: 0;">
+              <p style="color: #72727A; font-size: 11px; line-height: 1.6; margin: 0;">
                 For educational purposes only. You received this email because you requested a research report on our website.
               </p>
             </td>

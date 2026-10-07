@@ -109,11 +109,105 @@ export async function sendSignupVerificationEmail(params: {
     return false
   }
 
-  const subject = "Verify your email - First Principles Investing"
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in").replace(/\/$/, "")
+  const logoUrl = `${siteUrl}/logo.png`
+  const subject = "Verify your email | First Principles Investing"
   const htmlContent = `
-    <p>Click the link below to verify your email and activate your account:</p>
-    <p><a href="${params.verificationUrl}">${params.verificationUrl}</a></p>
-    <p>This link expires in 24 hours.</p>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+    .font-serif, h1, h2, h3, h4 {
+      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+          
+          <!-- Header Bar -->
+          <tr>
+            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="vertical-align: middle; padding-right: 12px;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
+                      FIRST PRINCIPLES INVESTING
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Content Section -->
+          <tr>
+            <td style="padding: 36px 32px 28px 32px; text-align: left;">
+              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 9999px; color: #F5B800; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 18px;">
+                ✦ ACCOUNT VERIFICATION
+              </div>
+
+              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 32px; font-weight: 600; margin: 0 0 14px 0; line-height: 1.25; letter-spacing: -0.01em;">
+                Verify Your <span style="color: #F5B800; font-style: italic;">Email Address</span>
+              </h1>
+
+              <p style="color: #9E9EA4; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                Click the button below to complete your registration and activate your account. This verification link expires in 24 hours.
+              </p>
+
+              <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 24px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${params.verificationUrl}" target="_blank" style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 14px; font-weight: 700; color: #141416; text-decoration: none; padding: 14px 34px; border-radius: 9999px; background-color: #F5B800; display: inline-block; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); letter-spacing: 0.3px;">
+                      Verify Email Address &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #72727A; font-size: 13px; line-height: 1.5; margin: 0;">
+                If you did not sign up for First Principles Investing, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 32px; border-top: 1px solid #26262E; text-align: center; background-color: #121215;">
+              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #F0EDE8; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px 0;">
+                FIRST PRINCIPLES INVESTING
+              </p>
+              <p style="color: #72727A; font-size: 11px; line-height: 1.6; margin: 0;">
+                Automated Transactional Account Verification
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `
 
   if (brevoApiKey) {
