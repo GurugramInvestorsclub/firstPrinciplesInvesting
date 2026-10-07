@@ -919,6 +919,7 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
   const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
   const membershipUrl = `${siteUrl.replace(/\/$/, "")}/insights`
+  const moveToPrimaryImageUrl = `${siteUrl.replace(/\/$/, "")}/images/move-to-primary.jpg`
 
   if (!brevoApiKey) {
     console.error("BREVO_API_KEY is not configured. Lead magnet delivery email skipped.")
@@ -990,18 +991,36 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
             </td>
           </tr>
 
-          <!-- Primary Inbox Callout -->
+          <!-- Move to Primary Inbox Callout -->
           <tr>
             <td style="padding: 0 32px 24px 32px;">
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: rgba(255, 199, 44, 0.05); border: 1px dashed rgba(255, 199, 44, 0.25); border-radius: 10px; padding: 16px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #16161B; border: 1px solid #2A2A32; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                 <tr>
                   <td style="text-align: left;">
-                    <p style="color: #E4E4E7; font-size: 13px; line-height: 1.5; margin: 0;">
-                      💡 <strong style="color: #FFC72C;">Quick Tip:</strong> To make sure you never miss future reports and market alerts, please drag this email to your <strong>Primary</strong> tab or add us to your VIP contacts.
+                    <h4 style="color: #FFFFFF; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+                      📬 Never miss important research &amp; member updates
+                    </h4>
+                    <p style="color: #D4D4D8; font-size: 14px; line-height: 1.5; margin: 0 0 14px 0;">
+                      Don&apos;t forget to move this email to your <strong>Primary</strong> tab (as shown below) so future research memos and subscriber alerts aren&apos;t buried in Promotions.
+                    </p>
+                    <div style="text-align: center; border-radius: 8px; overflow: hidden; border: 1px solid #2A2A32; background-color: #0E0E11; line-height: 0;">
+                      <img 
+                        src="${moveToPrimaryImageUrl}" 
+                        alt="Move email from Promotions to Primary in Gmail" 
+                        width="536" 
+                        style="width: 100%; max-width: 100%; height: auto; display: block; border-radius: 8px;" 
+                      />
+                    </div>
+                    <p style="color: #71717A; font-size: 12px; margin: 10px 0 0 0; line-height: 1.4;">
+                      <em>On mobile: Tap the <strong>&vellip;</strong> (three dots) in the top right &rarr; select <strong>&quot;Move to Primary&quot;</strong>.</em>
                     </p>
                   </td>
                 </tr>
               </table>
+
+              <p style="color: #71717A; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;">
+                If you have questions, reply directly to this email or write to <a href="mailto:support@firstprinciplesresearch.in" style="color: #FFC72C; text-decoration: none;">support@firstprinciplesresearch.in</a>.
+              </p>
             </td>
           </tr>
 
