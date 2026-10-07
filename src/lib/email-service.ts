@@ -111,6 +111,8 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
 
     const amountDisplay = resolvedAmountPaid != null ? `₹${resolvedAmountPaid}` : null
     const transactionId = params.paymentId || params.orderId || null
+    const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in").replace(/\/$/, "")
+    const logoUrl = `${siteUrl}/logo.png`
 
     // 2. Call Brevo Transactional SMTP API
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -149,10 +151,19 @@ export async function triggerRegistrationEmail(params: SendEmailParams): Promise
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 32px 32px 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
-              <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
-                FIRST PRINCIPLES INVESTING
-              </span>
+            <td style="padding: 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="vertical-align: middle; padding-right: 12px;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                      FIRST PRINCIPLES INVESTING
+                    </span>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
@@ -917,9 +928,10 @@ export interface SendLeadMagnetDeliveryEmailParams {
 export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDeliveryEmailParams): Promise<boolean> {
   const brevoApiKey = process.env.BREVO_API_KEY
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
-  const siteUrl = process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in"
-  const membershipUrl = `${siteUrl.replace(/\/$/, "")}/insights`
-  const moveToPrimaryImageUrl = `${siteUrl.replace(/\/$/, "")}/images/move-to-primary.jpg`
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "https://www.firstprinciplesinvesting.in").replace(/\/$/, "")
+  const logoUrl = `${siteUrl}/logo.png`
+  const membershipUrl = `${siteUrl}/insights`
+  const moveToPrimaryImageUrl = `${siteUrl}/images/move-to-primary.jpg`
 
   if (!brevoApiKey) {
     console.error("BREVO_API_KEY is not configured. Lead magnet delivery email skipped.")
@@ -945,10 +957,19 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 28px 32px 20px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
-              <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
-                FIRST PRINCIPLES INVESTING
-              </span>
+            <td style="padding: 24px 32px; border-bottom: 1px solid #1E1E24; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="vertical-align: middle; padding-right: 12px;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <span style="font-size: 13px; font-weight: 700; color: #FFC72C; letter-spacing: 1.5px; text-transform: uppercase;">
+                      FIRST PRINCIPLES INVESTING
+                    </span>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
