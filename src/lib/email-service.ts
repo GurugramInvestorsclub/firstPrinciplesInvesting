@@ -1055,7 +1055,7 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
                       GO BEYOND THE CONSENSUS
                     </span>
                     <h3 style="color: #FFFFFF; font-size: 18px; font-weight: 700; margin: 0 0 10px 0;">
-                      Build True Investing Conviction
+                      Subscribe to Our Deep Dives
                     </h3>
                     <p style="color: #A1A1AA; font-size: 13px; line-height: 1.6; margin: 0 0 16px 0;">
                       Our research members get 2 deep-dive investment memos every month, complete financial models, private community discussions, and direct access to founder notes.
