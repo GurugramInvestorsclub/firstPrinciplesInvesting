@@ -31,13 +31,10 @@ export async function sendDailyQuestionReport(questions: Question[]) {
 
     const subject = `Daily Question Report: ${questions.length} new questions`;
     const html = `
-        <div style="font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 0 auto; padding: 24px; color: #111;">
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 24px; color: #111;">
             <div style="border-bottom: 2px solid #F5B800; padding-bottom: 12px; margin-bottom: 16px;">
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">FIRST PRINCIPLES INVESTING</span>
-                <h2 style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; color: #1A1A1A; margin: 6px 0 0 0;">Daily Question Report</h2>
+                <span style="font-size: 11px; font-weight: 700; color: #F5B800; letter-spacing: 1.5px; text-transform: uppercase;">FIRST PRINCIPLES INVESTING</span>
+                <h2 style="font-size: 22px; font-weight: 700; color: #1A1A1A; margin: 6px 0 0 0;">Daily Question Report</h2>
             </div>
             <p style="color: #444; font-size: 14px;">You have received <strong>${questions.length}</strong> new questions in the last 24 hours.</p>
             

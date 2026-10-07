@@ -64,39 +64,25 @@ export async function sendPasswordResetEmail(params: {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-    }
-    .font-serif, h1, h2, h3, h4 {
-      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
-    }
-    .font-mono {
-      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
-    }
-  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 40px 16px;">
+<body style="margin: 0; padding: 0; background-color: #121212; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #FFFFFF; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121212; padding: 36px 16px;">
     <tr>
       <td align="center">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+        <!-- Main Email Container -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.45);">
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
-              <table border="0" cellspacing="0" cellpadding="0">
+            <td style="padding: 20px 28px; border-bottom: 1px solid #262626; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0" style="display: inline-table; vertical-align: middle;">
                 <tr>
-                  <td style="vertical-align: middle; padding-right: 12px;">
-                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  <td style="vertical-align: middle; padding-right: 10px; line-height: 1;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="28" height="28" style="width: 28px; height: 28px; display: block; border-radius: 6px; object-fit: contain;" />
                   </td>
-                  <td style="vertical-align: middle;">
-                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
-                      FIRST PRINCIPLES INVESTING
+                  <td style="vertical-align: middle; white-space: nowrap; line-height: 1;">
+                    <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.2px; white-space: nowrap;">
+                      First Principles <span style="color: #F5B800;">Investing</span>
                     </span>
                   </td>
                 </tr>
@@ -106,23 +92,23 @@ export async function sendPasswordResetEmail(params: {
 
           <!-- Content Section -->
           <tr>
-            <td style="padding: 36px 32px 28px 32px; text-align: left;">
-              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 9999px; color: #F5B800; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 18px;">
+            <td style="padding: 28px 28px; text-align: left;">
+              <div style="display: inline-block; padding: 4px 12px; background-color: rgba(245, 184, 0, 0.1); border: 1px solid rgba(245, 184, 0, 0.25); border-radius: 20px; color: #F5B800; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px;">
                 ✦ SECURITY NOTIFICATION
               </div>
 
-              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 32px; font-weight: 600; margin: 0 0 14px 0; line-height: 1.25; letter-spacing: -0.01em;">
-                Reset Your <span style="color: #F5B800; font-style: italic;">Password</span>
+              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.3; letter-spacing: -0.3px;">
+                Reset Your <span style="color: #F5B800;">Password</span>
               </h1>
 
-              <p style="color: #9E9EA4; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+              <p style="color: #A0A0A0; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
                 We received a request to reset the password for your account. Click the button below to set a new password. This link will expire in 1 hour.
               </p>
 
               <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 24px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${params.resetUrl}" target="_blank" style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 14px; font-weight: 700; color: #141416; text-decoration: none; padding: 14px 34px; border-radius: 9999px; background-color: #F5B800; display: inline-block; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); letter-spacing: 0.3px;">
+                    <a href="${params.resetUrl}" target="_blank" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 700; color: #141416; text-decoration: none; padding: 13px 32px; border-radius: 9999px; background-color: #F5B800; display: inline-block; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); letter-spacing: 0.3px;">
                       Reset Password &rarr;
                     </a>
                   </td>
@@ -137,11 +123,11 @@ export async function sendPasswordResetEmail(params: {
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 32px; border-top: 1px solid #26262E; text-align: center; background-color: #121215;">
-              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #F0EDE8; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px 0;">
+            <td style="padding: 20px 28px; border-top: 1px solid #262626; text-align: center; background-color: #151515;">
+              <p style="color: #A0A0A0; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 4px 0;">
                 FIRST PRINCIPLES INVESTING
               </p>
-              <p style="color: #72727A; font-size: 11px; line-height: 1.6; margin: 0;">
+              <p style="color: #666666; font-size: 11px; line-height: 1.5; margin: 0;">
                 Automated Transactional Security Request
               </p>
             </td>
@@ -244,39 +230,25 @@ export async function sendAdminGeneratedPasswordEmail(params: {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-    }
-    .font-serif, h1, h2, h3, h4 {
-      font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif !important;
-    }
-    .font-mono {
-      font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace !important;
-    }
-  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #121215; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #F0EDE8; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121215; padding: 40px 16px;">
+<body style="margin: 0; padding: 0; background-color: #121212; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #FFFFFF; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #121212; padding: 36px 16px;">
     <tr>
       <td align="center">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #18181D; border: 1px solid #282832; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.5);">
+        <!-- Main Email Container -->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #1A1A1A; border: 1px solid #2A2A2A; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.45);">
           
           <!-- Header Bar -->
           <tr>
-            <td style="padding: 24px 32px; border-bottom: 1px solid #26262E; text-align: left;">
-              <table border="0" cellspacing="0" cellpadding="0">
+            <td style="padding: 20px 28px; border-bottom: 1px solid #262626; text-align: left;">
+              <table border="0" cellspacing="0" cellpadding="0" style="display: inline-table; vertical-align: middle;">
                 <tr>
-                  <td style="vertical-align: middle; padding-right: 12px;">
-                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="32" height="32" style="width: 32px; height: 32px; display: block; border-radius: 6px; object-fit: contain;" />
+                  <td style="vertical-align: middle; padding-right: 10px; line-height: 1;">
+                    <img src="${logoUrl}" alt="First Principles Investing Logo" width="28" height="28" style="width: 28px; height: 28px; display: block; border-radius: 6px; object-fit: contain;" />
                   </td>
-                  <td style="vertical-align: middle;">
-                    <span class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 12px; font-weight: 700; color: #F5B800; letter-spacing: 2px; text-transform: uppercase;">
-                      FIRST PRINCIPLES INVESTING
+                  <td style="vertical-align: middle; white-space: nowrap; line-height: 1;">
+                    <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.2px; white-space: nowrap;">
+                      First Principles <span style="color: #F5B800;">Investing</span>
                     </span>
                   </td>
                 </tr>
@@ -286,36 +258,36 @@ export async function sendAdminGeneratedPasswordEmail(params: {
 
           <!-- Content Section -->
           <tr>
-            <td style="padding: 36px 32px 28px 32px; text-align: left;">
-              <div class="font-mono" style="display: inline-block; padding: 5px 14px; background-color: rgba(245, 184, 0, 0.08); border: 1px solid rgba(245, 184, 0, 0.28); border-radius: 9999px; color: #F5B800; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 18px;">
+            <td style="padding: 28px 28px; text-align: left;">
+              <div style="display: inline-block; padding: 4px 12px; background-color: rgba(245, 184, 0, 0.1); border: 1px solid rgba(245, 184, 0, 0.25); border-radius: 20px; color: #F5B800; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px;">
                 ✦ ACCOUNT CREDENTIALS
               </div>
 
-              <h1 class="font-serif" style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; color: #F0EDE8; font-size: 32px; font-weight: 600; margin: 0 0 14px 0; line-height: 1.25; letter-spacing: -0.01em;">
-                Password <span style="color: #F5B800; font-style: italic;">Notification</span>
+              <h1 style="color: #FFFFFF; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; line-height: 1.3; letter-spacing: -0.3px;">
+                Password <span style="color: #F5B800;">Notification</span>
               </h1>
 
-              <p style="color: #9E9EA4; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+              <p style="color: #A0A0A0; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
                 Hello ${params.name || "there"}, your password for your account has been reset by an administrator.
               </p>
 
-              <div style="background-color: #202026; border: 1px solid #2B2B34; border-radius: 12px; padding: 20px; margin: 0 0 24px 0; text-align: center;">
-                <p class="font-mono" style="margin: 0; font-size: 11px; color: #9E9EA4; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;">
+              <div style="background-color: #222222; border: 1px solid #2E2E2E; border-radius: 10px; padding: 18px; margin: 0 0 24px 0; text-align: center;">
+                <p style="margin: 0; font-size: 11px; color: #A0A0A0; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">
                   Your Temporary Password
                 </p>
-                <p class="font-mono" style="margin: 10px 0 0 0; font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; font-size: 22px; font-weight: 700; color: #F5B800; letter-spacing: 2px;">
+                <p style="margin: 10px 0 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; font-weight: 700; color: #F5B800; letter-spacing: 2px;">
                   ${params.temporaryPassword}
                 </p>
               </div>
 
-              <p style="color: #9E9EA4; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
-                Please log in using your email (<strong style="color: #F0EDE8;">${params.toEmail}</strong>) and this temporary password. We recommend updating your password once logged in.
+              <p style="color: #A0A0A0; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0;">
+                Please log in using your email (<strong style="color: #FFFFFF;">${params.toEmail}</strong>) and this temporary password. We recommend updating your password once logged in.
               </p>
 
               <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 0 24px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${siteUrl}/login" target="_blank" style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; font-size: 14px; font-weight: 700; color: #141416; text-decoration: none; padding: 14px 34px; border-radius: 9999px; background-color: #F5B800; display: inline-block; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); letter-spacing: 0.3px;">
+                    <a href="${siteUrl}/login" target="_blank" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 700; color: #141416; text-decoration: none; padding: 13px 32px; border-radius: 9999px; background-color: #F5B800; display: inline-block; box-shadow: 0 4px 18px rgba(245, 184, 0, 0.25); letter-spacing: 0.3px;">
                       Log In Now &rarr;
                     </a>
                   </td>
@@ -330,11 +302,11 @@ export async function sendAdminGeneratedPasswordEmail(params: {
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 24px 32px; border-top: 1px solid #26262E; text-align: center; background-color: #121215;">
-              <p class="font-mono" style="font-family: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace; color: #F0EDE8; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 6px 0;">
+            <td style="padding: 20px 28px; border-top: 1px solid #262626; text-align: center; background-color: #151515;">
+              <p style="color: #A0A0A0; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 4px 0;">
                 FIRST PRINCIPLES INVESTING
               </p>
-              <p style="color: #72727A; font-size: 11px; line-height: 1.6; margin: 0;">
+              <p style="color: #666666; font-size: 11px; line-height: 1.5; margin: 0;">
                 Automated Transactional Password Management
               </p>
             </td>
