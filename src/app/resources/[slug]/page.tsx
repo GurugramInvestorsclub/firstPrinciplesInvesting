@@ -178,11 +178,6 @@ export default async function LeadMagnetLandingPage({ params }: Props) {
 
           </div>
 
-          {/* Compliance & Independence Note */}
-          <div className="mt-6 flex items-center justify-center sm:justify-start gap-2 text-xs text-neutral-300 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
-            <span>Prepared by First Principles Research. For educational purposes only. Zero sponsored content.</span>
-          </div>
 
           {/* Key Takeaways Checklist (if present) */}
           {takeaways.length > 0 && (
