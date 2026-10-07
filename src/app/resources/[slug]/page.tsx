@@ -69,82 +69,107 @@ export default async function LeadMagnetLandingPage({ params }: Props) {
         <div className="absolute top-1/2 right-10 w-[500px] h-[500px] bg-white/5 rounded-full blur-[140px] pointer-events-none" />
 
         <div className="container max-w-6xl px-4 sm:px-6 md:px-8 mx-auto relative z-10">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+          {/* Hero Header: Title & Subtitle occupying full width */}
+          <div className="space-y-4 mb-8 md:mb-12 text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-gold" />
+              <span>{badgeText}</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
+              {headline}
+            </h1>
+
+            {subtitle && (
+              <p className="text-base sm:text-lg md:text-xl text-neutral-300 font-light leading-relaxed max-w-4xl">
+                {subtitle}
+              </p>
+            )}
+          </div>
+
+          {/* Symmetrical Two-Column Section: Left Mockup & Right Form with matching bottom alignment */}
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
             
-            {/* Left Column: Value Proposition & Teaser (7 cols) */}
-            <div className="lg:col-span-7 space-y-8 text-left">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-mono font-bold tracking-widest uppercase shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-gold" />
-                  <span>{badgeText}</span>
-                </div>
-
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
-                  {headline}
-                </h1>
-
-                {subtitle && (
-                  <p className="text-base sm:text-lg text-neutral-300 font-light leading-relaxed">
-                    {subtitle}
-                  </p>
-                )}
-              </div>
-
-              {/* Cover Mockup / Image (if present) */}
-              {leadMagnet.mainImage && (
-                <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#141418]">
+            {/* Left Column: Cover Mockup / Teaser (7 cols) */}
+            <div className="lg:col-span-7 flex flex-col">
+              {leadMagnet.mainImage ? (
+                <div className="relative w-full h-full min-h-[380px] lg:min-h-0 rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#141418] flex flex-col justify-between group">
                   <Image
-                    src={urlForImage(leadMagnet.mainImage).width(1200).height(675).url()}
+                    src={urlForImage(leadMagnet.mainImage).width(1200).url()}
                     alt={leadMagnet.title}
                     fill
-                    className="object-cover"
+                    className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
                     priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0E]/80 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[11px] font-mono text-neutral-300">
-                    <span className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0E]/90 via-[#0B0B0E]/20 to-transparent pointer-events-none" />
+                  
+                  {/* Top space filler */}
+                  <div className="relative z-10 p-6 pointer-events-none" />
+
+                  {/* Bottom badges */}
+                  <div className="relative z-10 p-6 sm:p-8 flex items-center justify-between text-xs font-mono text-neutral-300">
+                    <span className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-neutral-200 shadow-lg">
                       <FileText className="w-3.5 h-3.5 text-gold" />
                       PDF Research Memo
                     </span>
-                    <span className="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10 text-gold">
+                    <span className="bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 text-gold font-semibold shadow-lg">
                       Free Download
                     </span>
                   </div>
                 </div>
-              )}
-
-              {/* Key Takeaways Checklist */}
-              {takeaways.length > 0 && (
-                <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4">
-                  <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-gold flex items-center gap-2">
-                    <Download className="w-3.5 h-3.5" />
-                    What You&apos;ll Discover Inside This Report
-                  </h2>
-                  <ul className="space-y-3">
-                    {takeaways.map((item, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm text-neutral-300 leading-snug">
-                        <CheckCircle2 className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+              ) : (
+                <div className="relative w-full h-full min-h-[380px] lg:min-h-0 rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#141418] p-6 sm:p-8 md:p-10 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                      {leadMagnet.title}
+                    </h3>
+                    <p className="text-sm text-neutral-400 font-light leading-relaxed">
+                      Exclusive deep-dive institutional research memo prepared by First Principles Research.
+                    </p>
+                  </div>
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between text-xs font-mono text-neutral-400">
+                    <span className="flex items-center gap-1.5 text-gold">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Verified Analysis
+                    </span>
+                    <span>PDF Format</span>
+                  </div>
                 </div>
               )}
-
-              {/* Compliance & Independence Note */}
-              <p className="text-[11px] text-neutral-500 font-mono leading-relaxed">
-                Prepared by First Principles Research. For educational purposes only. Zero sponsored content.
-              </p>
             </div>
 
             {/* Right Column: High-Converting Lead Capture Card (5 cols) */}
-            <div className="lg:col-span-5 w-full">
-              <div className="sticky top-28">
-                <LeadMagnetForm slug={slug} ctaText={ctaButtonText} />
-              </div>
+            <div className="lg:col-span-5 flex flex-col">
+              <LeadMagnetForm slug={slug} ctaText={ctaButtonText} />
             </div>
 
           </div>
+
+          {/* Compliance & Independence Note */}
+          <p className="mt-6 text-center sm:text-left text-[11px] text-neutral-500 font-mono leading-relaxed">
+            Prepared by First Principles Research. For educational purposes only. Zero sponsored content.
+          </p>
+
+          {/* Key Takeaways Checklist (if present) */}
+          {takeaways.length > 0 && (
+            <div className="mt-12 md:mt-16 p-6 sm:p-8 md:p-10 rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/10 space-y-6">
+              <h2 className="text-xs font-mono font-bold uppercase tracking-widest text-gold flex items-center gap-2">
+                <Download className="w-3.5 h-3.5" />
+                What You&apos;ll Discover Inside This Report
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {takeaways.map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-[#141418]/60 border border-white/5">
+                    <CheckCircle2 className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                    <span className="text-sm text-neutral-300 leading-snug">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

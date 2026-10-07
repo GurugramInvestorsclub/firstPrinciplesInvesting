@@ -59,12 +59,13 @@ export function LeadMagnetForm({ slug, ctaText = "Get Free PDF Report" }: LeadMa
   }
 
   return (
-    <div className="w-full rounded-2xl md:rounded-3xl bg-[#141418] border border-white/10 p-6 sm:p-8 md:p-10 shadow-2xl relative overflow-hidden backdrop-blur-md">
+    <div className="w-full h-full rounded-2xl md:rounded-3xl bg-[#141418] border border-white/10 p-6 sm:p-8 md:p-10 shadow-2xl relative overflow-hidden backdrop-blur-md flex flex-col justify-between">
       {/* Decorative background ambient glow */}
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 space-y-6">
+      <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
+        <div className="space-y-6">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-[11px] font-mono font-bold tracking-widest uppercase">
             Instant PDF Delivery
@@ -144,8 +145,9 @@ export function LeadMagnetForm({ slug, ctaText = "Get Free PDF Report" }: LeadMa
             )}
           </button>
         </form>
+        </div>
 
-        <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-[11px] text-neutral-400 font-mono">
+        <div className="pt-4 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-[11px] text-neutral-400 font-mono">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-gold" />
             <span>Zero Spam · Pure Research</span>
