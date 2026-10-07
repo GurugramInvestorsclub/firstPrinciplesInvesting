@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { RefreshCw, CheckCircle2, AlertCircle, Users, X, ChevronDown, ShieldCheck, UserCheck } from "lucide-react"
+import { RefreshCw, CheckCircle2, AlertCircle, Users, X, ChevronDown, ShieldCheck, UserCheck, FileDown } from "lucide-react"
 
 interface BrevoListSummary {
   id: number
@@ -16,11 +16,13 @@ interface ListStatusData {
   subscribersInBrevoList: number | null
   activeCountInDb?: number
   registeredCountInDb?: number
+  leadsCountInDb?: number
 }
 
 interface BrevoSyncStatusPayload {
   members: ListStatusData
   registeredUsers: ListStatusData
+  leads: ListStatusData
   availableLists: BrevoListSummary[]
 }
 
@@ -29,6 +31,7 @@ interface BrevoSyncResult {
   listId: number
   totalEligibleInDb?: number
   totalUsersInDb?: number
+  totalLeadsInDb?: number
   previouslyInBrevo: number
   addedCount: number
   removedCount?: number
@@ -42,7 +45,7 @@ interface BrevoSyncModalProps {
   isOpen: boolean
   onClose: () => void
   onSyncComplete?: () => void
-  initialTab?: "members" | "registered_users"
+  initialTab?: "members" | "registered_users" | "leads"
 }
 
 export default function BrevoSyncModal({
@@ -51,7 +54,7 @@ export default function BrevoSyncModal({
   onSyncComplete,
   initialTab = "members",
 }: BrevoSyncModalProps) {
-  const [activeTab, setActiveTab] = useState<"members" | "registered_users">(initialTab)
+  const [activeTab, setActiveTab] = useState<"members" | "registered_users" | "leads">(initialTab)
   const [loading, setLoading] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [status, setStatus] = useState<BrevoSyncStatusPayload | null>(null)
@@ -77,7 +80,11 @@ export default function BrevoSyncModal({
       if (res.ok && json.success) {
         setStatus(json.data)
         const currentTarget =
-          targetTab === "members" ? json.data.members : json.data.registeredUsers
+          targetTab === "members"
+            ? json.data.members
+            : targetTab === "registered_users"
+            ? json.data.registeredUsers
+            : json.data.leads
         setSelectedListId(currentTarget.configuredListId)
       } else {
         setErrorMessage(json.error || "Failed to fetch Brevo sync status")
@@ -89,12 +96,17 @@ export default function BrevoSyncModal({
     }
   }
 
-  const handleTabSwitch = (tab: "members" | "registered_users") => {
+  const handleTabSwitch = (tab: "members" | "registered_users" | "leads") => {
     setActiveTab(tab)
     setSyncResult(null)
     setErrorMessage(null)
     if (status) {
-      const currentTarget = tab === "members" ? status.members : status.registeredUsers
+      const currentTarget =
+        tab === "members"
+          ? status.members
+          : tab === "registered_users"
+          ? status.registeredUsers
+          : status.leads
       setSelectedListId(currentTarget.configuredListId)
     }
   }
@@ -135,7 +147,11 @@ export default function BrevoSyncModal({
   if (!isOpen) return null
 
   const currentListData =
-    activeTab === "members" ? status?.members : status?.registeredUsers
+    activeTab === "members"
+      ? status?.members
+      : activeTab === "registered_users"
+      ? status?.registeredUsers
+      : status?.leads
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -164,31 +180,44 @@ export default function BrevoSyncModal({
         </div>
 
         {/* Tab Selection */}
-        <div className="flex p-1 bg-white/[0.04] border border-white/10 rounded-xl">
+        <div className="flex p-1 bg-white/[0.04] border border-white/10 rounded-xl gap-1">
           <button
             type="button"
             onClick={() => handleTabSwitch("members")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg transition ${
               activeTab === "members"
                 ? "bg-gold text-black shadow-md"
                 : "text-white/60 hover:text-white"
             }`}
           >
-            <ShieldCheck className="w-4 h-4" />
-            Active Members List
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Active Members</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabSwitch("registered_users")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg transition ${
               activeTab === "registered_users"
                 ? "bg-[#0092FF] text-white shadow-md"
                 : "text-white/60 hover:text-white"
             }`}
           >
-            <UserCheck className="w-4 h-4" />
-            Registered Users List
+            <UserCheck className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Registered Users</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTabSwitch("leads")}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 text-xs font-bold rounded-lg transition ${
+              activeTab === "leads"
+                ? "bg-emerald-400 text-black shadow-md"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <FileDown className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Lead Magnet</span>
           </button>
         </div>
 
@@ -219,17 +248,25 @@ export default function BrevoSyncModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
                 <div className="text-xs text-white/50 font-mono uppercase tracking-wider mb-1">
-                  {activeTab === "members" ? "Active Tenure in DB" : "Registered in DB"}
+                  {activeTab === "members"
+                    ? "Active Tenure in DB"
+                    : activeTab === "registered_users"
+                    ? "Registered in DB"
+                    : "Leads in DB"}
                 </div>
                 <div className="text-2xl font-bold text-emerald-400">
                   {activeTab === "members"
                     ? currentListData.activeCountInDb
-                    : currentListData.registeredCountInDb}
+                    : activeTab === "registered_users"
+                    ? currentListData.registeredCountInDb
+                    : currentListData.leadsCountInDb}
                 </div>
                 <div className="text-[11px] text-white/40 mt-1">
                   {activeTab === "members"
                     ? "Includes active & cancelled with valid tenure"
-                    : "All verified accounts and Google sign-ins"}
+                    : activeTab === "registered_users"
+                    ? "All verified accounts and Google sign-ins"
+                    : "Unique lead magnet report requests"}
                 </div>
               </div>
 
@@ -323,7 +360,9 @@ export default function BrevoSyncModal({
                   ? "Syncing with Brevo..."
                   : activeTab === "members"
                   ? "Sync Active Members to Brevo"
-                  : "Sync Registered Users to Brevo"}
+                  : activeTab === "registered_users"
+                  ? "Sync Registered Users to Brevo"
+                  : "Sync Lead Contacts to Brevo"}
               </button>
             </div>
           </div>

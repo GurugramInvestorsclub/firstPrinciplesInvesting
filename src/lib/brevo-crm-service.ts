@@ -34,8 +34,21 @@ export interface BrevoRegisteredUsersSyncResult {
   errors: string[]
 }
 
+export interface BrevoLeadsSyncResult {
+  success: boolean
+  listId: number
+  listName?: string
+  totalLeadsInDb: number
+  previouslyInBrevo: number
+  addedCount: number
+  retainedCount: number
+  addedEmails: string[]
+  errors: string[]
+}
+
 const DEFAULT_BREVO_MEMBERS_LIST_ID = 15
 const DEFAULT_BREVO_REGISTERED_USERS_LIST_ID = 20
+const DEFAULT_BREVO_LEADS_LIST_ID = 15
 
 export function getBrevoApiKey(): string | null {
   return process.env.BREVO_API_KEY?.trim() || null
@@ -61,6 +74,17 @@ export function getBrevoRegisteredUsersListId(): number {
     }
   }
   return DEFAULT_BREVO_REGISTERED_USERS_LIST_ID
+}
+
+export function getBrevoLeadsListId(): number {
+  const envVal = process.env.BREVO_LEADS_LIST_ID
+  if (envVal) {
+    const parsed = parseInt(envVal.trim(), 10)
+    if (!isNaN(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+  return DEFAULT_BREVO_LEADS_LIST_ID
 }
 
 /**
@@ -536,6 +560,106 @@ export async function syncAllRegisteredUsersToBrevo(options?: {
     return result
   } catch (error: any) {
     console.error("syncAllRegisteredUsersToBrevo failed:", error)
+    result.errors.push(error?.message || "Sync failed due to an unexpected error")
+    return result
+  }
+}
+
+/**
+ * Sync all lead magnet submissions in the database to a Brevo contact list.
+ * Deduplicates by email, identifies leads missing from the Brevo list, and adds them.
+ */
+export async function syncAllLeadMagnetSubmissionsToBrevo(options?: {
+  listId?: number
+}): Promise<BrevoLeadsSyncResult> {
+  const targetListId = options?.listId || getBrevoLeadsListId()
+  const apiKey = getBrevoApiKey()
+
+  const result: BrevoLeadsSyncResult = {
+    success: false,
+    listId: targetListId,
+    totalLeadsInDb: 0,
+    previouslyInBrevo: 0,
+    addedCount: 0,
+    retainedCount: 0,
+    addedEmails: [],
+    errors: [],
+  }
+
+  if (!apiKey) {
+    result.errors.push("BREVO_API_KEY is not configured")
+    return result
+  }
+
+  try {
+    // 1. Fetch all lead magnet submissions
+    const submissions = await prisma.leadMagnetSubmission.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        slug: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    result.totalLeadsInDb = submissions.length
+
+    // Deduplicate by email
+    const leadsMap = new Map<string, { email: string; name: string }>()
+    for (const s of submissions) {
+      if (s.email && s.email.trim().includes("@")) {
+        const norm = s.email.trim().toLowerCase()
+        if (!leadsMap.has(norm)) {
+          leadsMap.set(norm, {
+            email: norm,
+            name: s.name,
+          })
+        }
+      }
+    }
+
+    // 2. Fetch current contacts in the Brevo list
+    const currentBrevoEmails = await fetchBrevoListContactEmails(targetListId)
+    result.previouslyInBrevo = currentBrevoEmails.size
+
+    // 3. Compute missing leads to add
+    const toAdd: Array<{ email: string; name: string }> = []
+    for (const [email, info] of leadsMap.entries()) {
+      if (!currentBrevoEmails.has(email)) {
+        toAdd.push(info)
+      } else {
+        result.retainedCount++
+      }
+    }
+
+    // 4. Add missing leads in concurrent chunks of 10
+    const addChunkSize = 10
+    for (let i = 0; i < toAdd.length; i += addChunkSize) {
+      const chunk = toAdd.slice(i, i + addChunkSize)
+      await Promise.all(
+        chunk.map(async (lead) => {
+          const ok = await addSubscriberToBrevoActiveList({
+            email: lead.email,
+            name: lead.name,
+            listId: targetListId,
+          })
+          if (ok) {
+            result.addedCount++
+            result.addedEmails.push(lead.email)
+          } else {
+            result.errors.push(`Failed to add ${lead.email} to Brevo list ${targetListId}`)
+          }
+        })
+      )
+    }
+
+    result.success = true
+    return result
+  } catch (error: any) {
+    console.error("syncAllLeadMagnetSubmissionsToBrevo failed:", error)
     result.errors.push(error?.message || "Sync failed due to an unexpected error")
     return result
   }

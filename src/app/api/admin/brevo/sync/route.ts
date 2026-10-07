@@ -4,8 +4,10 @@ import {
   fetchBrevoLists,
   getBrevoActiveMembersListId,
   getBrevoRegisteredUsersListId,
+  getBrevoLeadsListId,
   syncAllActiveTenureSubscribersToBrevo,
   syncAllRegisteredUsersToBrevo,
+  syncAllLeadMagnetSubmissionsToBrevo,
 } from "@/lib/brevo-crm-service"
 import { getEligibleSubscribersWithActiveTenure } from "@/lib/insights-subscription-service"
 import { prisma } from "@/lib/prisma"
@@ -22,15 +24,18 @@ export async function GET() {
   try {
     const membersListId = getBrevoActiveMembersListId()
     const usersListId = getBrevoRegisteredUsersListId()
+    const leadsListId = getBrevoLeadsListId()
 
-    const [lists, eligibleSubscribers, totalRegisteredUsers] = await Promise.all([
+    const [lists, eligibleSubscribers, totalRegisteredUsers, totalLeads] = await Promise.all([
       fetchBrevoLists(),
       getEligibleSubscribersWithActiveTenure(),
       prisma.user.count({ where: { email: { not: null } } }),
+      prisma.leadMagnetSubmission.count(),
     ])
 
     const membersList = lists.find((l) => l.id === membersListId)
     const usersList = lists.find((l) => l.id === usersListId)
+    const leadsList = lists.find((l) => l.id === leadsListId)
 
     return NextResponse.json({
       success: true,
@@ -46,6 +51,12 @@ export async function GET() {
           configuredListName: usersList?.name || `List #${usersListId}`,
           subscribersInBrevoList: usersList?.uniqueSubscribers ?? null,
           registeredCountInDb: totalRegisteredUsers,
+        },
+        leads: {
+          configuredListId: leadsListId,
+          configuredListName: leadsList?.name || `List #${leadsListId}`,
+          subscribersInBrevoList: leadsList?.uniqueSubscribers ?? null,
+          leadsCountInDb: totalLeads,
         },
         availableLists: lists,
       },
@@ -67,7 +78,7 @@ export async function POST(request: Request) {
 
   try {
     let listId: number | undefined = undefined
-    let syncType: "members" | "registered_users" = "members"
+    let syncType: "members" | "registered_users" | "leads" = "members"
 
     try {
       const body = await request.json()
@@ -76,12 +87,20 @@ export async function POST(request: Request) {
       }
       if (body?.type === "registered_users") {
         syncType = "registered_users"
+      } else if (body?.type === "leads") {
+        syncType = "leads"
       }
     } catch {
       // Body may be empty
     }
 
-    if (syncType === "registered_users") {
+    if (syncType === "leads") {
+      const result = await syncAllLeadMagnetSubmissionsToBrevo(listId ? { listId } : undefined)
+      return NextResponse.json({
+        success: result.success,
+        data: result,
+      })
+    } else if (syncType === "registered_users") {
       const result = await syncAllRegisteredUsersToBrevo(listId ? { listId } : undefined)
       return NextResponse.json({
         success: result.success,

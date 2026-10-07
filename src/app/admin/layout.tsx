@@ -70,6 +70,9 @@ export default function AdminLayout({
                         <Link href="/admin/registrations" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Registrations
                         </Link>
+                        <Link href="/admin/leads" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Leads
+                        </Link>
                         <Link href="/admin/coupons" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Coupons
                         </Link>
