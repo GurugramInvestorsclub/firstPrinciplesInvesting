@@ -28,6 +28,16 @@ function formatDateIST(date: Date): string {
   }
 }
 
+import { client } from "@/lib/sanity.client"
+
+function formatSlugToTitle(slug: string): string {
+  if (!slug) return "Special Report"
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
 export async function GET(request: NextRequest) {
   try {
     if (!(await isAdminAuthenticated())) {
@@ -37,11 +47,24 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get("slug")?.trim() || ""
     const query = searchParams.get("q")?.trim() || searchParams.get("email")?.trim() || ""
+    const days = searchParams.get("days")?.trim() || ""
 
     const whereClause: any = {}
 
     if (slug) {
       whereClause.slug = slug
+    }
+
+    if (days) {
+      const numDays = parseInt(days, 10)
+      if (!isNaN(numDays) && numDays > 0) {
+        const cutoff = new Date(Date.now() - numDays * 24 * 60 * 60 * 1000)
+        whereClause.createdAt = { gte: cutoff }
+      } else if (days === "today") {
+        const startOfToday = new Date()
+        startOfToday.setHours(0, 0, 0, 0)
+        whereClause.createdAt = { gte: startOfToday }
+      }
     }
 
     if (query) {
@@ -51,16 +74,33 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    const submissions = await prisma.leadMagnetSubmission.findMany({
-      where: whereClause,
-      orderBy: { createdAt: "desc" },
+    const [submissions, sanityMagnets] = await Promise.all([
+      prisma.leadMagnetSubmission.findMany({
+        where: whereClause,
+        orderBy: { createdAt: "desc" },
+      }),
+      client
+        .fetch<Array<{ title?: string; slug?: { current?: string } | string }>>(
+          `*[_type == "leadMagnet"]{ title, "slug": slug.current }`
+        )
+        .catch(() => []),
+    ])
+
+    const leadMagnetTitles: Record<string, string> = {}
+    sanityMagnets.forEach((m: any) => {
+      const s = typeof m?.slug === "string" ? m.slug : m?.slug?.current
+      if (s && m?.title) {
+        leadMagnetTitles[s] = m.title
+      }
     })
 
-    const header = "Name,Email,Resource (Slug),Source,Created At (IST),Submission ID"
+    const header = "Name,Email,Lead Magnet Title,Resource (Slug),Source,Requested On (IST),Submission ID"
     const rows = submissions.map((s) => {
+      const title = leadMagnetTitles[s.slug] || formatSlugToTitle(s.slug)
       return [
         toSafeCsvCell(s.name),
         toSafeCsvCell(s.email),
+        toSafeCsvCell(title),
         toSafeCsvCell(s.slug),
         toSafeCsvCell(s.source || "website"),
         toSafeCsvCell(formatDateIST(s.createdAt)),
