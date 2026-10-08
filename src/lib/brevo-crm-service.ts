@@ -48,7 +48,7 @@ export interface BrevoLeadsSyncResult {
 
 const DEFAULT_BREVO_MEMBERS_LIST_ID = 15
 const DEFAULT_BREVO_REGISTERED_USERS_LIST_ID = 20
-const DEFAULT_BREVO_LEADS_LIST_ID = 15
+const DEFAULT_BREVO_LEADS_LIST_ID = 8
 
 export function getBrevoApiKey(): string | null {
   return process.env.BREVO_API_KEY?.trim() || null
@@ -455,6 +455,23 @@ export async function addSubscriberToBrevoRegisteredList(params: {
   listId?: number
 }): Promise<boolean> {
   const targetListId = params.listId || getBrevoRegisteredUsersListId()
+  return addSubscriberToBrevoActiveList({
+    email: params.email,
+    name: params.name,
+    listId: targetListId,
+  })
+}
+
+/**
+ * Add or update a lead magnet lead in the Brevo Leads list (Hot Leads).
+ * Safe and non-blocking.
+ */
+export async function addLeadToBrevoList(params: {
+  email: string
+  name?: string | null
+  listId?: number
+}): Promise<boolean> {
+  const targetListId = params.listId || getBrevoLeadsListId()
   return addSubscriberToBrevoActiveList({
     email: params.email,
     name: params.name,

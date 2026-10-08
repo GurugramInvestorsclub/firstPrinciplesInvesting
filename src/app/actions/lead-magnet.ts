@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { client } from "@/lib/sanity.client"
 import { singleLeadMagnetQuery } from "@/lib/sanity.queries"
-import { addSubscriberToBrevoActiveList } from "@/lib/brevo-crm-service"
+import { addLeadToBrevoList } from "@/lib/brevo-crm-service"
 import { sendLeadMagnetDeliveryEmail } from "@/lib/email-service"
 import { LeadMagnet } from "@/lib/types"
 
@@ -69,9 +69,9 @@ export async function submitLeadMagnet(params: LeadMagnetSubmitParams): Promise<
       // Continue so the user still receives their requested PDF even if DB logging encounters an issue
     }
 
-    // 3. Sync contact with Brevo CRM
+    // 3. Sync contact with Brevo CRM (Hot Leads list)
     try {
-      await addSubscriberToBrevoActiveList({
+      await addLeadToBrevoList({
         email,
         name,
       })
