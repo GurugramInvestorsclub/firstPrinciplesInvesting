@@ -154,6 +154,7 @@ export async function addSubscriberToBrevoActiveList(params: {
   email: string
   name?: string | null
   listId?: number
+  attributes?: Record<string, string | number | boolean>
 }): Promise<boolean> {
   const apiKey = getBrevoApiKey()
   const targetListId = params.listId || getBrevoActiveMembersListId()
@@ -170,9 +171,9 @@ export async function addSubscriberToBrevoActiveList(params: {
   }
 
   const { firstName, lastName } = splitName(params.name)
-  const attributes: Record<string, string> = {}
-  if (firstName) attributes.FIRSTNAME = firstName
-  if (lastName) attributes.LASTNAME = lastName
+  const attributes: Record<string, string | number | boolean> = { ...(params.attributes || {}) }
+  if (firstName && !attributes.FIRSTNAME) attributes.FIRSTNAME = firstName
+  if (lastName && !attributes.LASTNAME) attributes.LASTNAME = lastName
 
   try {
     const res = await fetch("https://api.brevo.com/v3/contacts", {
@@ -464,18 +465,38 @@ export async function addSubscriberToBrevoRegisteredList(params: {
 
 /**
  * Add or update a lead magnet lead in the Brevo Leads list (Hot Leads).
+ * Includes the lead magnet identifier (LEAD_MAGNET), submission date (LEAD_DATE),
+ * and running history (LEAD_HISTORY) as custom Brevo contact attributes.
  * Safe and non-blocking.
  */
 export async function addLeadToBrevoList(params: {
   email: string
   name?: string | null
+  slug?: string | null
+  submittedAt?: Date | string | null
   listId?: number
 }): Promise<boolean> {
   const targetListId = params.listId || getBrevoLeadsListId()
+
+  const dateObj = params.submittedAt ? new Date(params.submittedAt) : new Date()
+  const dateStr = !isNaN(dateObj.getTime())
+    ? dateObj.toISOString().split("T")[0]
+    : new Date().toISOString().split("T")[0]
+
+  const customAttributes: Record<string, string> = {
+    LEAD_DATE: dateStr,
+  }
+
+  if (params.slug) {
+    customAttributes.LEAD_MAGNET = params.slug
+    customAttributes.LEAD_HISTORY = `${params.slug} (${dateStr})`
+  }
+
   return addSubscriberToBrevoActiveList({
     email: params.email,
     name: params.name,
     listId: targetListId,
+    attributes: customAttributes,
   })
 }
 
@@ -616,6 +637,7 @@ export async function syncAllLeadMagnetSubmissionsToBrevo(options?: {
         email: true,
         name: true,
         slug: true,
+        createdAt: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -624,8 +646,18 @@ export async function syncAllLeadMagnetSubmissionsToBrevo(options?: {
 
     result.totalLeadsInDb = submissions.length
 
-    // Deduplicate by email
-    const leadsMap = new Map<string, { email: string; name: string }>()
+    // Deduplicate by email, keeping latest submission info and collecting all unique slugs
+    const leadsMap = new Map<
+      string,
+      {
+        email: string
+        name: string
+        latestSlug: string
+        latestDate: Date
+        allSlugs: string[]
+      }
+    >()
+
     for (const s of submissions) {
       if (s.email && s.email.trim().includes("@")) {
         const norm = s.email.trim().toLowerCase()
@@ -633,7 +665,15 @@ export async function syncAllLeadMagnetSubmissionsToBrevo(options?: {
           leadsMap.set(norm, {
             email: norm,
             name: s.name,
+            latestSlug: s.slug,
+            latestDate: s.createdAt,
+            allSlugs: s.slug ? [s.slug] : [],
           })
+        } else {
+          const existing = leadsMap.get(norm)!
+          if (s.slug && !existing.allSlugs.includes(s.slug)) {
+            existing.allSlugs.push(s.slug)
+          }
         }
       }
     }
@@ -642,32 +682,45 @@ export async function syncAllLeadMagnetSubmissionsToBrevo(options?: {
     const currentBrevoEmails = await fetchBrevoListContactEmails(targetListId)
     result.previouslyInBrevo = currentBrevoEmails.size
 
-    // 3. Compute missing leads to add
-    const toAdd: Array<{ email: string; name: string }> = []
-    for (const [email, info] of leadsMap.entries()) {
-      if (!currentBrevoEmails.has(email)) {
-        toAdd.push(info)
-      } else {
-        result.retainedCount++
-      }
-    }
-
-    // 4. Add missing leads in concurrent chunks of 10
+    // 3. Sync all unique leads with tags/attributes in concurrent chunks of 10
+    const leadsToSync = Array.from(leadsMap.values())
     const addChunkSize = 10
-    for (let i = 0; i < toAdd.length; i += addChunkSize) {
-      const chunk = toAdd.slice(i, i + addChunkSize)
+
+    for (let i = 0; i < leadsToSync.length; i += addChunkSize) {
+      const chunk = leadsToSync.slice(i, i + addChunkSize)
       await Promise.all(
         chunk.map(async (lead) => {
+          const wasInBrevo = currentBrevoEmails.has(lead.email)
+          const dateStr = lead.latestDate
+            ? lead.latestDate.toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0]
+
+          const customAttributes: Record<string, string> = {
+            LEAD_DATE: dateStr,
+          }
+          if (lead.latestSlug) {
+            customAttributes.LEAD_MAGNET = lead.latestSlug
+          }
+          if (lead.allSlugs.length > 0) {
+            customAttributes.LEAD_HISTORY = lead.allSlugs.join(", ")
+          }
+
           const ok = await addSubscriberToBrevoActiveList({
             email: lead.email,
             name: lead.name,
             listId: targetListId,
+            attributes: customAttributes,
           })
+
           if (ok) {
-            result.addedCount++
-            result.addedEmails.push(lead.email)
+            if (wasInBrevo) {
+              result.retainedCount++
+            } else {
+              result.addedCount++
+              result.addedEmails.push(lead.email)
+            }
           } else {
-            result.errors.push(`Failed to add ${lead.email} to Brevo list ${targetListId}`)
+            result.errors.push(`Failed to sync ${lead.email} to Brevo list ${targetListId}`)
           }
         })
       )

@@ -963,6 +963,7 @@ export interface SendLeadMagnetDeliveryEmailParams {
   toName: string
   reportTitle: string
   pdfUrl: string
+  slug?: string
   customSubject?: string
   customPreviewText?: string
   disclaimer?: string | null
@@ -1166,6 +1167,7 @@ export async function sendLeadMagnetDeliveryEmail(params: SendLeadMagnetDelivery
       ],
       subject,
       htmlContent: emailHtml,
+      tags: params.slug ? ["lead-magnet", params.slug] : ["lead-magnet"],
     }
 
     // Attach PDF directly if URL is provided

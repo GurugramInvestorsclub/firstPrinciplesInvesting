@@ -69,11 +69,13 @@ export async function submitLeadMagnet(params: LeadMagnetSubmitParams): Promise<
       // Continue so the user still receives their requested PDF even if DB logging encounters an issue
     }
 
-    // 3. Sync contact with Brevo CRM (Hot Leads list)
+    // 3. Sync contact with Brevo CRM (Hot Leads list with lead magnet tag and date)
     try {
       await addLeadToBrevoList({
         email,
         name,
+        slug,
+        submittedAt: new Date(),
       })
     } catch (crmError) {
       console.warn("Brevo contact sync error (non-fatal):", crmError)
@@ -97,6 +99,7 @@ export async function submitLeadMagnet(params: LeadMagnetSubmitParams): Promise<
           toName: name,
           reportTitle: leadMagnet.title,
           pdfUrl,
+          slug,
           customSubject: leadMagnet.emailSubject,
           customPreviewText: leadMagnet.emailPreviewText,
           disclaimer: resolvedDisclaimer,
