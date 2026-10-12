@@ -72,6 +72,8 @@ export default function AdminCouponsPage() {
   const [editingCouponId, setEditingCouponId] = useState<string | null>(null)
   const [editExpiry, setEditExpiry] = useState("")
   const [editValue, setEditValue] = useState("")
+  const [editMaxUses, setEditMaxUses] = useState("")
+  const [editPerUserLimit, setEditPerUserLimit] = useState("")
 
   const sortedEvents = useMemo(
     () => [...events].sort((a, b) => a.eventId.localeCompare(b.eventId)),
@@ -238,6 +240,8 @@ export default function AdminCouponsPage() {
           id: couponId,
           expiryDate: expiryDate.toISOString(),
           value: editValue,
+          maxUses: editMaxUses.trim() === "" ? null : Number(editMaxUses),
+          perUserLimit: editPerUserLimit.trim() === "" ? null : Number(editPerUserLimit),
         }),
       })
 
@@ -266,6 +270,10 @@ export default function AdminCouponsPage() {
     } else {
       setEditValue(String(coupon.valueRupees ?? 0))
     }
+
+    // Set edit max uses & per user limit
+    setEditMaxUses(coupon.maxUses === null ? "" : String(coupon.maxUses))
+    setEditPerUserLimit(coupon.perUserLimit === null ? "" : String(coupon.perUserLimit))
   }
 
   const formatMoney = (value: number) =>
@@ -627,9 +635,45 @@ export default function AdminCouponsPage() {
                           valueText
                         )}
                       </td>
-                      <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>{usageText}</td>
                       <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>
-                        {coupon.perUserLimit ?? "-"}
+                        {editingCouponId === coupon.id ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                              <span style={{ fontSize: "11px", color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
+                                {coupon.usedCount} /
+                              </span>
+                              <input
+                                type="number"
+                                min={coupon.usedCount}
+                                placeholder="Unlimited"
+                                style={{ ...inputStyle, padding: "4px 8px", fontSize: "12px", width: "85px" }}
+                                value={editMaxUses}
+                                onChange={(e) => setEditMaxUses(e.target.value)}
+                                title={`Total allowed uses (min: ${coupon.usedCount}). Leave blank for unlimited.`}
+                              />
+                            </div>
+                            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                              (blank = unlimited)
+                            </span>
+                          </div>
+                        ) : (
+                          usageText
+                        )}
+                      </td>
+                      <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>
+                        {editingCouponId === coupon.id ? (
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="-"
+                            style={{ ...inputStyle, padding: "4px 8px", fontSize: "12px", width: "55px" }}
+                            value={editPerUserLimit}
+                            onChange={(e) => setEditPerUserLimit(e.target.value)}
+                            title="Per user limit (optional, leave blank for no limit)"
+                          />
+                        ) : (
+                          coupon.perUserLimit ?? "-"
+                        )}
                       </td>
                       <td style={{ padding: "10px 8px", color: "var(--text-secondary)" }}>
                         {coupon.eventId ?? "All"}

@@ -395,7 +395,15 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (body?.expiryDate !== undefined) {
-      data.expiryDate = parseExpiryDate(body.expiryDate)
+      const parsedExpiry = new Date(body.expiryDate)
+      if (
+        !Number.isNaN(parsedExpiry.getTime()) &&
+        existingCoupon.expiryDate.getTime() === parsedExpiry.getTime()
+      ) {
+        data.expiryDate = existingCoupon.expiryDate
+      } else {
+        data.expiryDate = parseExpiryDate(body.expiryDate)
+      }
     }
 
     if (body?.eventId !== undefined) {
