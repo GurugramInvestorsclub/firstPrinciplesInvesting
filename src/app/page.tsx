@@ -10,9 +10,10 @@ import { Testimonials } from "@/components/homepage/Testimonials"
 import { LogoMarquee } from "@/components/events/LogoMarquee"
 import { MembershipPromoSection } from "@/components/homepage/MembershipPromoSection"
 import { ActiveSuper30Section } from "@/components/homepage/ActiveSuper30Section"
+import { ActiveWebinarSection } from "@/components/homepage/ActiveWebinarSection"
 import { client } from "@/lib/sanity.client"
-import { recentPostsQuery, upcomingEventsHomeQuery, testimonialsQuery, allSuper30ProgramsQuery } from "@/lib/sanity.queries"
-import { Testimonial, Super30Program } from "@/lib/types"
+import { recentPostsQuery, upcomingEventsHomeQuery, testimonialsQuery, allSuper30ProgramsQuery, activeWebinarQuery } from "@/lib/sanity.queries"
+import { Testimonial, Super30Program, Event } from "@/lib/types"
 import { getStartOfTodayKolkata } from "@/lib/utils"
 
 export const revalidate = 60 // revalidate every minute
@@ -23,6 +24,7 @@ export default async function Home() {
   const events = await client.fetch(upcomingEventsHomeQuery, { startOfDay }, { next: { revalidate: 60 } })
   const testimonials = await client.fetch<Testimonial[]>(testimonialsQuery, {}, { next: { revalidate: 60 } })
   const super30Programs = await client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } }).catch(() => [])
+  const activeWebinar = await client.fetch<Event | null>(activeWebinarQuery, { startOfDay }, { next: { revalidate: 60 } }).catch(() => null)
 
   const activeSuper30 = super30Programs && super30Programs.length > 0 ? super30Programs[0] : undefined
 
@@ -35,6 +37,7 @@ export default async function Home() {
         <Manifesto />
         <Method />
         <ProofStats />
+        <ActiveWebinarSection event={activeWebinar ?? undefined} />
         <ActiveSuper30Section program={activeSuper30} />
         <MembershipPromoSection />
         <Testimonials testimonials={testimonials} />

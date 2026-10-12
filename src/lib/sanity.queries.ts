@@ -136,6 +136,28 @@ export const upcomingEventsHomeQuery = groq`
   }
 `
 
+export const activeWebinarQuery = groq`
+  *[_type == "event" && date >= $startOfDay && lower(title) != "test" && !(lower(title) match "test *")] | order(date asc)[0] {
+    _id,
+    eventId,
+    title,
+    subHeading,
+    slug,
+    date,
+    location,
+    price,
+    highlightStat,
+    shortDescription,
+    image,
+    speaker,
+    learningPoints,
+    registrationLink,
+    superProfileLink,
+    startTime,
+    endTime
+  }
+`
+
 export const singleEventQuery = groq`
   *[_type == "event" && slug.current == $slug][0] {
     eventId,
