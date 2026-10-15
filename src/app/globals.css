@@ -718,6 +718,42 @@
   border-color: #D97706 !important;
 }
 
+/* ─── Light Mode Overrides for Article Disclaimer Box ─── */
+.article-theme-light .article-disclaimer-box {
+  background-color: #FFFFFF !important;
+  background-image: radial-gradient(circle at top left, rgba(245, 184, 0, 0.08), transparent 70%), linear-gradient(to bottom, #FFFDF8, #FAF7EE) !important;
+  border-color: #FCD34D !important;
+  box-shadow: 0 4px 20px -2px rgba(180, 83, 9, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  color: #334155 !important;
+}
+
+.article-theme-light .article-disclaimer-box,
+.article-theme-light .article-disclaimer-box div,
+.article-theme-light .article-disclaimer-box p,
+.article-theme-light .article-disclaimer-box span,
+.article-theme-light .article-disclaimer-box li {
+  color: #334155 !important;
+}
+
+.article-theme-light .article-disclaimer-box strong,
+.article-theme-light .article-disclaimer-box b,
+.article-theme-light .article-disclaimer-box .text-gold,
+.article-theme-light .article-disclaimer-box h1,
+.article-theme-light .article-disclaimer-box h2,
+.article-theme-light .article-disclaimer-box h3,
+.article-theme-light .article-disclaimer-box h4 {
+  color: #B45309 !important;
+}
+
+.article-theme-light .article-disclaimer-box a {
+  color: #B45309 !important;
+  text-decoration: underline !important;
+}
+
+.article-theme-light .article-disclaimer-box a:hover {
+  color: #92400E !important;
+}
+
 /* ─── Article List Typography (Bullets & Numbers) ─── */
 .prose ul,
 .prose-lg ul {

@@ -138,7 +138,7 @@ export default async function InsightPage({ params }: Props) {
                         </div>
 
                         {/* Disclaimer Section */}
-                        <div className="my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-xs leading-relaxed text-neutral-200 font-mono">
+                        <div className="article-disclaimer-box my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-xs leading-relaxed text-neutral-200 font-mono">
                             {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
                                 <div className="text-xs leading-relaxed space-y-2 [&_p]:text-xs [&_p]:leading-relaxed [&_p]:text-neutral-200 [&_strong]:text-gold [&_strong]:text-xs [&_span]:text-xs">
                                     <RichText value={post.disclaimer} />
@@ -232,7 +232,7 @@ export default async function InsightPage({ params }: Props) {
                         ) : null}
 
                         {/* Bottom Disclaimer Section */}
-                        <div className="mt-6 mb-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-xs leading-relaxed text-neutral-200 font-mono">
+                        <div className="article-disclaimer-box mt-6 mb-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-xs leading-relaxed text-neutral-200 font-mono">
                             {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
                                 <div className="text-xs leading-relaxed space-y-2 [&_p]:text-xs [&_p]:leading-relaxed [&_p]:text-neutral-200 [&_strong]:text-gold [&_strong]:text-xs [&_span]:text-xs">
                                     <RichText value={post.disclaimer} />
