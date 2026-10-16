@@ -368,18 +368,23 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             </div>
 
             {/* Sidebar Footer */}
-            <div className={`p-2.5 px-3.5 border-t text-[11px] font-mono flex items-center justify-between shrink-0 select-none ${
-                isLight ? "border-[#E5E1D8] text-slate-600 font-medium" : "border-white/10 text-neutral-300 font-medium"
+            <div className={`p-3 px-3.5 border-t text-[11px] font-mono flex items-center justify-between gap-3 shrink-0 select-none ${
+                isLight ? "border-[#E5E1D8] text-slate-600" : "border-white/10 text-neutral-300"
             }`}>
-                <span className="truncate max-w-[180px]">
+                <span className="truncate max-w-[145px] font-medium" title={headings.find(h => h.id === activeId)?.text || "Top of page"}>
                     {headings.find(h => h.id === activeId)?.text || "Top of page"}
                 </span>
                 <button 
                     onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                    className="hover:text-gold transition-colors flex items-center gap-1 cursor-pointer font-bold"
-                    title="Scroll to top"
+                    className={`group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono font-bold tracking-wider transition-all duration-200 cursor-pointer select-none active:scale-95 shrink-0 ${
+                        isLight
+                            ? "bg-amber-500/10 hover:bg-amber-600 border-amber-600/30 hover:border-amber-600 text-amber-700 hover:text-white shadow-sm"
+                            : "bg-gold/15 hover:bg-gold border-gold/35 hover:border-gold text-gold hover:text-black shadow-[0_0_12px_rgba(245,184,0,0.12)] hover:shadow-[0_0_16px_rgba(245,184,0,0.3)]"
+                    }`}
+                    title="Scroll to top of memo"
+                    aria-label="Scroll to top"
                 >
-                    <ArrowUp className="w-3.5 h-3.5 text-gold" />
+                    <ArrowUp className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-y-0.5" />
                     <span>Top</span>
                 </button>
             </div>
