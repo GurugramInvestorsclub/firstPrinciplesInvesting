@@ -92,7 +92,7 @@ export default async function InsightPage({ params }: Props) {
                 category={post.access || "insights"}
                 isPremium={isSubscriberOnly}
             />
-            {isAdmin && (
+            {isAdmin && isPendingApproval && (
                 <AdminPreviewToolbar post={post} slug={slug} />
             )}
             {isSubscriberOnly && <CopyProtection />}

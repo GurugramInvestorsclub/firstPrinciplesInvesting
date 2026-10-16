@@ -146,67 +146,67 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
         if (level === 3) {
             textStyles = isActive
                 ? isLight
-                    ? "text-[12px] font-semibold text-[#0F172A]"
-                    : "text-[12px] font-semibold text-white"
+                    ? "text-[12.5px] font-bold text-[#0F172A]"
+                    : "text-[12.5px] font-bold text-white"
                 : isLight
-                    ? "text-[12px] font-medium text-slate-600 group-hover:text-[#0F172A]"
-                    : "text-[12px] font-medium text-neutral-400 group-hover:text-neutral-200"
+                    ? "text-[12.5px] font-medium text-[#1E293B] group-hover:text-black"
+                    : "text-[12.5px] font-medium text-[#CBD5E1] group-hover:text-white"
             paddingLeft = "pl-[18px]"
         } else if (level === 4) {
             textStyles = isActive
                 ? isLight
-                    ? "text-[11px] font-semibold text-[#0F172A]"
-                    : "text-[11px] font-semibold text-white"
+                    ? "text-[12px] font-bold text-[#0F172A]"
+                    : "text-[12px] font-bold text-white"
                 : isLight
-                    ? "text-[11px] font-medium text-slate-500 group-hover:text-[#0F172A]"
-                    : "text-[11px] font-medium text-neutral-400/80 group-hover:text-neutral-200"
+                    ? "text-[12px] font-medium text-[#334155] group-hover:text-black"
+                    : "text-[12px] font-medium text-[#94A3B8] group-hover:text-[#F1F5F9]"
             paddingLeft = "pl-[30px]"
         } else if (level === 5) {
             textStyles = isActive
                 ? isLight
-                    ? "text-[11px] font-semibold text-[#0F172A]"
-                    : "text-[11px] font-semibold text-white"
+                    ? "text-[11.5px] font-bold text-[#0F172A]"
+                    : "text-[11.5px] font-bold text-white"
                 : isLight
-                    ? "text-[11px] font-normal text-slate-500 group-hover:text-[#0F172A]"
-                    : "text-[11px] font-normal text-neutral-500 group-hover:text-neutral-300"
+                    ? "text-[11.5px] font-medium text-[#475569] group-hover:text-black"
+                    : "text-[11.5px] font-medium text-[#94A3B8] group-hover:text-[#F1F5F9]"
             paddingLeft = "pl-[42px]"
         } else if (level >= 6) {
             textStyles = isActive
                 ? isLight
-                    ? "text-[10px] font-semibold text-[#0F172A]"
-                    : "text-[10px] font-semibold text-white"
+                    ? "text-[11.5px] font-bold text-[#0F172A]"
+                    : "text-[11.5px] font-bold text-white"
                 : isLight
-                    ? "text-[10px] font-normal text-slate-500 group-hover:text-[#0F172A]"
-                    : "text-[10px] font-normal text-neutral-500/80 group-hover:text-neutral-300"
+                    ? "text-[11.5px] font-medium text-[#475569] group-hover:text-black"
+                    : "text-[11.5px] font-medium text-[#94A3B8] group-hover:text-[#F1F5F9]"
             paddingLeft = "pl-[54px]"
         } else {
             // H2
             textStyles = isActive
                 ? isLight
-                    ? "text-[13px] font-semibold text-[#0F172A]"
-                    : "text-[13px] font-semibold text-white"
+                    ? "text-[13px] font-bold text-[#0F172A]"
+                    : "text-[13px] font-bold text-white"
                 : isLight
-                    ? "text-[13px] font-semibold text-[#334155] group-hover:text-[#0F172A]"
-                    : "text-[13px] font-semibold text-neutral-300 group-hover:text-white"
+                    ? "text-[13px] font-bold text-[#0F172A] group-hover:text-black"
+                    : "text-[13px] font-semibold text-[#F1F5F9] group-hover:text-white"
             paddingLeft = "pl-2.5"
         }
 
         const lineCount = Math.max(0, level - 2)
 
         const activeItemClasses = isLight
-            ? "border-l-2 border-[#D97706] bg-[#F5B800]/12 shadow-[inset_1px_0_0_0_rgba(217,119,6,0.3)]"
-            : "border-l-2 border-gold bg-gold/[0.08] shadow-[inset_1px_0_0_0_rgba(245,184,0,0.25)]"
+            ? "border-l-2 border-[#D97706] bg-[#F5B800]/16 shadow-[inset_1px_0_0_0_rgba(217,119,6,0.3)]"
+            : "border-l-2 border-gold bg-gold/[0.14] shadow-[inset_1px_0_0_0_rgba(245,184,0,0.35)]"
 
         const inactiveItemClasses = isLight
             ? "border-l-2 border-transparent hover:border-slate-300 hover:bg-black/[0.04]"
-            : "border-l-2 border-transparent hover:border-neutral-700/60 hover:bg-white/[0.03]"
+            : "border-l-2 border-transparent hover:border-neutral-700/60 hover:bg-white/[0.05]"
 
         return (
             <li key={heading.id} id={`toc-item-${heading.id}`} className={spacingClass}>
                 <a
                     href={`#${heading.id}`}
                     onClick={(e) => scrollToHeading(e, heading.id)}
-                    className={`group relative flex items-center py-1 pr-2 rounded-r-[2px] transition-all duration-150 cursor-pointer ${paddingLeft} ${
+                    className={`group relative flex items-center py-1.5 pr-2 rounded-r-[2px] transition-all duration-150 cursor-pointer ${paddingLeft} ${
                         isActive ? activeItemClasses : inactiveItemClasses
                     }`}
                 >
@@ -222,11 +222,11 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
                                                 ? "bg-[#D97706]/70"
                                                 : "bg-[#D97706]/30"
                                             : i === lineCount - 1
-                                                ? "bg-gold/50"
-                                                : "bg-gold/20"
+                                                ? "bg-gold/60"
+                                                : "bg-gold/30"
                                         : isLight
-                                            ? "bg-slate-300/70 group-hover:bg-slate-400"
-                                            : "bg-white/[0.07] group-hover:bg-white/[0.16]"
+                                            ? "bg-slate-300/80 group-hover:bg-slate-400"
+                                            : "bg-white/[0.14] group-hover:bg-white/[0.25]"
                                 }`}
                                 style={{ left: `${6 + i * 12}px` }}
                             />
@@ -315,7 +315,7 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             aria-label="Table of contents"
             onMouseEnter={() => { isHoveringRef.current = true }}
             onMouseLeave={() => { isHoveringRef.current = false }}
-            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r overflow-hidden pointer-events-auto ${
+            className={`hidden lg:flex fixed left-0 top-24 bottom-6 z-40 w-72 max-w-[85vw] flex-col transition-all duration-300 ease-in-out shadow-2xl rounded-r-2xl border-y border-r overflow-hidden pointer-events-auto antialiased ${
                 isLight
                     ? "bg-[#F7F7F5]/95 border-[#E5E1D8] text-[#1A1A1A] backdrop-blur-md"
                     : "bg-[#12110F]/95 border-neutral-800/80 text-neutral-200 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
@@ -327,13 +327,13 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             }`}>
                 <div className="flex items-center gap-2 min-w-0">
                     <List className={`w-4 h-4 shrink-0 ${isLight ? "text-[#D97706]" : "text-gold"}`} />
-                    <span className={`text-[11px] font-mono font-semibold uppercase tracking-[0.1em] truncate ${
-                        isLight ? "text-[#1A1A1A]" : "text-gold/90"
+                    <span className={`text-[11px] font-mono font-bold uppercase tracking-[0.1em] truncate ${
+                        isLight ? "text-[#0F172A]" : "text-gold"
                     }`}>
                         In This Memo
                     </span>
                     <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold shrink-0 ${
-                        isLight ? "bg-slate-200 text-slate-700" : "bg-gold/10 text-gold border border-gold/20"
+                        isLight ? "bg-slate-200 text-slate-800" : "bg-gold/15 text-gold border border-gold/30 font-bold"
                     }`}>
                         {headings.length}
                     </span>
@@ -342,8 +342,8 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
                     onClick={() => toggleCollapsed(true)}
                     className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                         isLight 
-                            ? "hover:bg-slate-200 text-slate-600 hover:text-black" 
-                            : "hover:bg-white/10 text-neutral-400 hover:text-white"
+                            ? "hover:bg-slate-200 text-slate-700 hover:text-black" 
+                            : "hover:bg-white/10 text-neutral-300 hover:text-white"
                     }`}
                     title="Close sidebar"
                     aria-label="Close sidebar"
@@ -368,18 +368,18 @@ export function TableOfContents({ headings, variant = "desktop", className = "" 
             </div>
 
             {/* Sidebar Footer */}
-            <div className={`p-2.5 px-3.5 border-t text-[10px] font-mono flex items-center justify-between shrink-0 select-none ${
-                isLight ? "border-[#E5E1D8] text-slate-500" : "border-white/5 text-neutral-500"
+            <div className={`p-2.5 px-3.5 border-t text-[11px] font-mono flex items-center justify-between shrink-0 select-none ${
+                isLight ? "border-[#E5E1D8] text-slate-600 font-medium" : "border-white/10 text-neutral-300 font-medium"
             }`}>
                 <span className="truncate max-w-[180px]">
                     {headings.find(h => h.id === activeId)?.text || "Top of page"}
                 </span>
                 <button 
                     onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                    className="hover:text-gold transition-colors flex items-center gap-1 cursor-pointer"
+                    className="hover:text-gold transition-colors flex items-center gap-1 cursor-pointer font-bold"
                     title="Scroll to top"
                 >
-                    <ArrowUp className="w-3 h-3" />
+                    <ArrowUp className="w-3.5 h-3.5 text-gold" />
                     <span>Top</span>
                 </button>
             </div>
