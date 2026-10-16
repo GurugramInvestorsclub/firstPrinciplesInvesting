@@ -6,6 +6,7 @@ import {
   Users,
   DollarSign,
   CreditCard,
+  IndianRupee,
   Calendar,
   Filter,
   CheckCircle2,
@@ -546,8 +547,26 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* Top Metric Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
-        {/* Card 1: Average LTV */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+        {/* Card 1: Total Revenue */}
+        <div style={cardStyle}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+            <span style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "13px", fontWeight: 500 }}>
+              Total Revenue
+            </span>
+            <div style={{ background: "rgba(245, 184, 0, 0.15)", padding: "8px", borderRadius: "8px" }}>
+              <IndianRupee style={{ width: "20px", height: "20px", color: "var(--gold)" }} />
+            </div>
+          </div>
+          <div style={{ fontSize: "28px", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>
+            {formatCurrency(kpis.totalRevenue || (kpis.totalSubscriptionRevenue + kpis.totalWebinarRevenue))}
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px", marginTop: "6px" }}>
+            Subscriptions + Webinars combined
+          </div>
+        </div>
+
+        {/* Card 2: Average LTV */}
         <div style={cardStyle}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
             <span style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "13px", fontWeight: 500 }}>
