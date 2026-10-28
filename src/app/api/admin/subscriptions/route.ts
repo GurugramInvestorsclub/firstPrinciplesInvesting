@@ -1,6 +1,9 @@
 import { InsightsPlanKey } from "@prisma/client"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
-import { getInsightsSubscriptionUiState } from "@/lib/insights-subscription-service"
+import {
+  autoExpirePastManualSubscriptions,
+  getInsightsSubscriptionUiState,
+} from "@/lib/insights-subscription-service"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
@@ -27,6 +30,8 @@ export async function GET() {
     if (!(await isAdminAuthenticated())) {
       return unauthorized()
     }
+
+    await autoExpirePastManualSubscriptions()
 
     const [subscriptions, registrationsWithPhone] = await Promise.all([
       prisma.insightsSubscription.findMany({

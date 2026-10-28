@@ -769,8 +769,65 @@ async function findCurrentMembershipRecord(userId: string): Promise<Subscription
   })
 }
 
+export async function autoExpirePastManualSubscriptions(userId?: string): Promise<number> {
+  try {
+    const now = new Date()
+    const whereClause: Prisma.InsightsSubscriptionWhereInput = {
+      status: InsightsSubscriptionStatus.ACTIVE,
+      OR: [
+        { source: "manual_neft" },
+        { razorpayPlanId: "MANUAL_GRANT" },
+        { razorpaySubscriptionId: null },
+      ],
+      currentEndAt: {
+        lt: now,
+      },
+    }
+
+    if (userId) {
+      whereClause.userId = userId
+    }
+
+    const expired = await prisma.insightsSubscription.findMany({
+      where: whereClause,
+      select: { id: true, currentEndAt: true },
+    })
+
+    if (expired.length === 0) {
+      return 0
+    }
+
+    await prisma.insightsSubscription.updateMany({
+      where: {
+        id: { in: expired.map((s) => s.id) },
+      },
+      data: {
+        status: InsightsSubscriptionStatus.EXPIRED,
+        endedAt: now,
+      },
+    })
+
+    for (const sub of expired) {
+      try {
+        await logSubscriptionAudit(prisma, sub.id, "MANUAL_SUBSCRIPTION_AUTO_EXPIRED", {
+          currentEndAt: sub.currentEndAt,
+          expiredAt: now,
+        })
+      } catch (err) {
+        console.error(`Failed to audit manual subscription expiration for ${sub.id}:`, err)
+      }
+    }
+
+    return expired.length
+  } catch (error) {
+    console.error("Error during autoExpirePastManualSubscriptions:", error)
+    return 0
+  }
+}
+
 export async function autoSyncCreatedSubscriptionForUser(userId: string): Promise<void> {
   try {
+    await autoExpirePastManualSubscriptions(userId)
     const subscription = await prisma.insightsSubscription.findFirst({
       where: {
         userId,
@@ -1526,6 +1583,50 @@ export async function manuallyActivateCapturedInsightsSubscription(params: {
           providerPaymentStatus: providerPayment.status,
           source: "admin",
         })
+
+        if (subscription.userId) {
+          const previousSubs = await tx.insightsSubscription.findMany({
+            where: {
+              userId: subscription.userId,
+              id: { not: subscription.id },
+              OR: [
+                {
+                  status: {
+                    in: [
+                      InsightsSubscriptionStatus.PENDING,
+                      InsightsSubscriptionStatus.HALTED,
+                      InsightsSubscriptionStatus.PAUSED,
+                      InsightsSubscriptionStatus.CREATED,
+                    ],
+                  },
+                },
+                { source: "manual_neft" },
+                { razorpayPlanId: "MANUAL_GRANT" },
+                { razorpaySubscriptionId: null },
+              ],
+            },
+            select: { id: true, razorpaySubscriptionId: true },
+          })
+
+          if (previousSubs.length > 0) {
+            await tx.insightsSubscription.updateMany({
+              where: {
+                id: { in: previousSubs.map((s) => s.id) },
+              },
+              data: {
+                status: InsightsSubscriptionStatus.EXPIRED,
+                endedAt: new Date(),
+                lastWebhookAt: new Date(),
+              },
+            })
+
+            for (const oldSub of previousSubs) {
+              await logSubscriptionAudit(tx, oldSub.id, "SUBSCRIPTION_SUPERSEDED_BY_MANUAL_ACTIVATION", {
+                supersededBySubscriptionId: subscription.id,
+              })
+            }
+          }
+        }
       }
 
       return tx.insightsSubscription.findUniqueOrThrow({
@@ -1626,20 +1727,27 @@ async function applyProviderSubscriptionSnapshot(
     mappedStatus = InsightsSubscriptionStatus.ACTIVE
   }
 
-  // When a subscription becomes ACTIVE, expire any older pending, halted, or created subscriptions
+  // When a subscription becomes ACTIVE, expire any older pending, halted, created, or manual subscriptions
   if (mappedStatus === InsightsSubscriptionStatus.ACTIVE && currentSub?.userId) {
     const previousSubs = await tx.insightsSubscription.findMany({
       where: {
         userId: currentSub.userId,
         id: { not: subscription.id },
-        status: {
-          in: [
-            InsightsSubscriptionStatus.PENDING,
-            InsightsSubscriptionStatus.HALTED,
-            InsightsSubscriptionStatus.PAUSED,
-            InsightsSubscriptionStatus.CREATED,
-          ],
-        },
+        OR: [
+          {
+            status: {
+              in: [
+                InsightsSubscriptionStatus.PENDING,
+                InsightsSubscriptionStatus.HALTED,
+                InsightsSubscriptionStatus.PAUSED,
+                InsightsSubscriptionStatus.CREATED,
+              ],
+            },
+          },
+          { source: "manual_neft" },
+          { razorpayPlanId: "MANUAL_GRANT" },
+          { razorpaySubscriptionId: null },
+        ],
       },
       select: { id: true, razorpaySubscriptionId: true },
     })
@@ -1775,7 +1883,7 @@ export async function createInsightsSubscription(params: {
         resolvedPhone = u?.phone ?? null
       }
 
-      const existing = await tx.insightsSubscription.findFirst({
+      const openSubs = await tx.insightsSubscription.findMany({
         where: {
           userId: params.userId,
           status: {
@@ -1795,10 +1903,20 @@ export async function createInsightsSubscription(params: {
         },
       })
 
-      if (existing) {
-        const ageMs = Date.now() - existing.createdAt.getTime()
+      let existingToReplace: (typeof openSubs)[number] | null = null
+
+      for (const existing of openSubs) {
+        const isManual =
+          existing.source === "manual_neft" ||
+          existing.razorpayPlanId === "MANUAL_GRANT" ||
+          existing.razorpaySubscriptionId === null
+        const hasAccess = membershipHasAccess(existing)
+        const effectiveEnd = getEffectiveEndAt(existing)
+        const isEnded = !hasAccess || (effectiveEnd !== null && effectiveEnd.getTime() <= Date.now())
 
         if (existing.status === InsightsSubscriptionStatus.CREATED) {
+          const ageMs = Date.now() - existing.createdAt.getTime()
+
           if (!existing.razorpaySubscriptionId) {
             if (ageMs > SUBSCRIPTION_CREATION_STALE_MS) {
               await tx.insightsSubscription.update({
@@ -1812,6 +1930,7 @@ export async function createInsightsSubscription(params: {
               await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_CREATION_STALE_EXPIRED", {
                 ageMs,
               })
+              existing.status = InsightsSubscriptionStatus.EXPIRED
             } else {
               throw new InsightsSubscriptionApiError(
                 409,
@@ -1833,6 +1952,7 @@ export async function createInsightsSubscription(params: {
                 ageMs,
                 razorpaySubscriptionId: existing.razorpaySubscriptionId,
               })
+              existing.status = InsightsSubscriptionStatus.EXPIRED
             } else if (existing.planKey === slugToPlanKey(params.plan)) {
               return { type: "reuse", subscription: existing, userPhone: resolvedPhone }
             } else {
@@ -1849,7 +1969,28 @@ export async function createInsightsSubscription(params: {
                 razorpaySubscriptionId: existing.razorpaySubscriptionId,
                 newPlan: params.plan,
               })
+              existing.status = InsightsSubscriptionStatus.EXPIRED
             }
+          }
+        } else if (isEnded) {
+          // The previous subscription or manual/complimentary grant has reached its end date or has no access.
+          // Auto-expire it so checkout can proceed cleanly.
+          await tx.insightsSubscription.update({
+            where: { id: existing.id },
+            data: {
+              status: InsightsSubscriptionStatus.EXPIRED,
+              endedAt: existing.endedAt || effectiveEnd || new Date(),
+            },
+          })
+          await logSubscriptionAudit(tx, existing.id, "SUBSCRIPTION_PREVIOUS_EXPIRED_ON_CHECKOUT", {
+            previousStatus: existing.status,
+            isManual,
+            effectiveEnd,
+            newPlan: params.plan,
+          })
+          existing.status = InsightsSubscriptionStatus.EXPIRED
+          if (!existingToReplace) {
+            existingToReplace = existing
           }
         } else if (
           existing.status === InsightsSubscriptionStatus.PENDING ||
@@ -1864,7 +2005,22 @@ export async function createInsightsSubscription(params: {
             previousRazorpaySubscriptionId: existing.razorpaySubscriptionId,
             newPlan: params.plan,
           })
+          if (!existingToReplace) {
+            existingToReplace = existing
+          }
+        } else if (isManual) {
+          // User currently has an active complimentary / manual offline grant,
+          // but wants to upgrade to a paid recurring Razorpay subscription. Allow checkout!
+          await logSubscriptionAudit(tx, existing.id, "MANUAL_SUBSCRIPTION_UPGRADE_INITIATED", {
+            previousStatus: existing.status,
+            manualGrantId: existing.id,
+            newPlan: params.plan,
+          })
+          if (!existingToReplace) {
+            existingToReplace = existing
+          }
         } else {
+          // Active recurring Razorpay subscription that still has current access
           throw new InsightsSubscriptionApiError(
             409,
             "ALREADY_SUBSCRIBED",
@@ -1886,8 +2042,14 @@ export async function createInsightsSubscription(params: {
             plan: params.plan,
             couponCode: testOffer?.couponCode ?? null,
             offerId: testOffer?.offerId ?? null,
-            ...(existing?.razorpaySubscriptionId
-              ? { replacesRazorpaySubscriptionId: existing.razorpaySubscriptionId }
+            ...(existingToReplace?.razorpaySubscriptionId
+              ? { replacesRazorpaySubscriptionId: existingToReplace.razorpaySubscriptionId }
+              : {}),
+            ...(existingToReplace &&
+            (existingToReplace.source === "manual_neft" ||
+              existingToReplace.razorpayPlanId === "MANUAL_GRANT" ||
+              !existingToReplace.razorpaySubscriptionId)
+              ? { replacesManualGrantId: existingToReplace.id }
               : {}),
           },
         },
