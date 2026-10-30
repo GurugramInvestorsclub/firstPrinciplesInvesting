@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const identifier = buildRateLimitIdentifier(request, `super30-unlock:${session.user.id}`)
+        const userId = session.user.id
+        const identifier = buildRateLimitIdentifier(request, `super30-unlock:${userId}`)
         let rateLimit: Awaited<ReturnType<typeof consumeRateLimit>> | null = null
         try {
             rateLimit = await consumeRateLimit({
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
 
         // Check existing access
         const existingAccess = await prisma.super30UserAccess.findUnique({
-            where: { userId: session.user.id },
+            where: { userId },
         })
 
         if (existingAccess) {
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
 
             await tx.super30UserAccess.create({
                 data: {
-                    userId: session.user.id,
+                    userId,
                     codeId: codeRecord.id,
                 },
             })
