@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { buildRateLimitIdentifier, consumeRateLimit } from "@/lib/rate-limit"
 import { NextRequest, NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -11,6 +12,32 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { success: false, error: "Please log in to redeem a Super 30 Passcode" },
                 { status: 401 }
+            )
+        }
+
+        const identifier = buildRateLimitIdentifier(request, `super30-unlock:${session.user.id}`)
+        let rateLimit: Awaited<ReturnType<typeof consumeRateLimit>> | null = null
+        try {
+            rateLimit = await consumeRateLimit({
+                scope: "forum:super30-unlock",
+                identifier,
+                maxRequests: 5,
+                windowSeconds: 15 * 60,
+                blockDurationSeconds: 30 * 60,
+            })
+        } catch (error) {
+            console.error("Super30 unlock rate limiter unavailable; continuing without throttle", error)
+        }
+
+        if (rateLimit && !rateLimit.allowed) {
+            return NextResponse.json(
+                { success: false, error: "Too many passcode attempts. Please try again later." },
+                {
+                    status: 429,
+                    headers: {
+                        "Retry-After": String(rateLimit.retryAfterSeconds),
+                    },
+                }
             )
         }
 
@@ -60,19 +87,37 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Unlock access & increment count
-        await prisma.$transaction([
-            prisma.super30UserAccess.create({
+        // Atomic lock & update to prevent concurrent race conditions
+        const result = await prisma.$transaction(async (tx) => {
+            const updateCount = await tx.$executeRaw`
+                UPDATE "super30_codes"
+                SET "used_count" = "used_count" + 1
+                WHERE "id" = ${codeRecord.id}
+                  AND "is_active" = true
+                  AND ("expiry_date" IS NULL OR "expiry_date" > NOW())
+                  AND ("max_uses" IS NULL OR "used_count" < "max_uses")
+            `
+
+            if (updateCount === 0) {
+                return false
+            }
+
+            await tx.super30UserAccess.create({
                 data: {
                     userId: session.user.id,
                     codeId: codeRecord.id,
                 },
-            }),
-            prisma.super30Code.update({
-                where: { id: codeRecord.id },
-                data: { usedCount: { increment: 1 } },
-            }),
-        ])
+            })
+
+            return true
+        })
+
+        if (!result) {
+            return NextResponse.json(
+                { success: false, error: "This passcode has reached its maximum redemptions limit." },
+                { status: 400 }
+            )
+        }
 
         return NextResponse.json({
             success: true,

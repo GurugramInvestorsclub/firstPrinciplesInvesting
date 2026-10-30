@@ -21,7 +21,7 @@ function LoginContent() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
         const paramCallback = params.get("callbackUrl")
-        if (paramCallback && paramCallback.startsWith("/")) {
+        if (paramCallback && paramCallback.startsWith("/") && !paramCallback.startsWith("//") && !paramCallback.includes("\\")) {
             setCallbackUrl(paramCallback)
         }
 

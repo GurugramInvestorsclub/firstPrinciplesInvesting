@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
     const [sendEmail, setSendEmail] = useState(true);
     const [resetting, setResetting] = useState(false);
     const [resetError, setResetError] = useState<string | null>(null);
-    const [resetResult, setResetResult] = useState<{ temporaryPassword: string; emailSent: boolean } | null>(null);
+    const [resetResult, setResetResult] = useState<{ temporaryPassword?: string; emailSent: boolean } | null>(null);
     const [copied, setCopied] = useState(false);
 
     const openResetModal = (user: UserData) => {
@@ -695,49 +695,66 @@ export default function AdminUsersPage() {
                                     ✓ Password updated successfully!
                                 </div>
 
-                                <div
-                                    style={{
-                                        background: "rgba(0,0,0,0.4)",
-                                        border: "1px solid rgba(245, 184, 0, 0.3)",
-                                        borderRadius: "10px",
-                                        padding: "16px",
-                                        marginBottom: "16px",
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>
-                                        Temporary Password
-                                    </div>
+                                {resetResult.temporaryPassword ? (
                                     <div
                                         style={{
-                                            fontFamily: "monospace",
-                                            fontSize: "20px",
-                                            fontWeight: "bold",
-                                            color: "var(--gold)",
-                                            letterSpacing: "1px",
-                                            marginBottom: "12px",
-                                            wordBreak: "break-all",
+                                            background: "rgba(0,0,0,0.4)",
+                                            border: "1px solid rgba(245, 184, 0, 0.3)",
+                                            borderRadius: "10px",
+                                            padding: "16px",
+                                            marginBottom: "16px",
+                                            textAlign: "center",
                                         }}
                                     >
-                                        {resetResult.temporaryPassword}
+                                        <div style={{ fontSize: "11px", color: "#aaa", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>
+                                            Temporary Password
+                                        </div>
+                                        <div
+                                            style={{
+                                                fontFamily: "monospace",
+                                                fontSize: "20px",
+                                                fontWeight: "bold",
+                                                color: "var(--gold)",
+                                                letterSpacing: "1px",
+                                                marginBottom: "12px",
+                                                wordBreak: "break-all",
+                                            }}
+                                        >
+                                            {resetResult.temporaryPassword}
+                                        </div>
+                                        <button
+                                            onClick={() => handleCopyPassword(resetResult.temporaryPassword!)}
+                                            style={{
+                                                padding: "8px 16px",
+                                                background: copied ? "rgba(34,197,94,0.2)" : "rgba(245,184,0,0.15)",
+                                                color: copied ? "#4ade80" : "var(--gold)",
+                                                border: `1px solid ${copied ? "#4ade80" : "var(--gold)"}`,
+                                                borderRadius: "6px",
+                                                fontSize: "12px",
+                                                fontWeight: 600,
+                                                cursor: "pointer",
+                                                transition: "all 0.2s",
+                                            }}
+                                        >
+                                            {copied ? "✓ Copied to Clipboard!" : "📋 Copy Temporary Password"}
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleCopyPassword(resetResult.temporaryPassword)}
+                                ) : (
+                                    <div
                                         style={{
-                                            padding: "8px 16px",
-                                            background: copied ? "rgba(34,197,94,0.2)" : "rgba(245,184,0,0.15)",
-                                            color: copied ? "#4ade80" : "var(--gold)",
-                                            border: `1px solid ${copied ? "#4ade80" : "var(--gold)"}`,
-                                            borderRadius: "6px",
-                                            fontSize: "12px",
-                                            fontWeight: 600,
-                                            cursor: "pointer",
-                                            transition: "all 0.2s",
+                                            background: "rgba(34,197,94,0.1)",
+                                            border: "1px solid rgba(34,197,94,0.3)",
+                                            borderRadius: "10px",
+                                            padding: "16px",
+                                            marginBottom: "16px",
+                                            textAlign: "center",
+                                            color: "#4ade80",
+                                            fontSize: "13px",
                                         }}
                                     >
-                                        {copied ? "✓ Copied to Clipboard!" : "📋 Copy Temporary Password"}
-                                    </button>
-                                </div>
+                                        🔒 Temporary password generated and dispatched securely via email to the user.
+                                    </div>
+                                )}
 
                                 <p style={{ fontSize: "12px", color: "#888", marginBottom: "20px", textAlign: "center" }}>
                                     {resetResult.emailSent

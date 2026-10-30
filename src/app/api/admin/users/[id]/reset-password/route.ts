@@ -67,7 +67,7 @@ export async function POST(
         return NextResponse.json({
             success: true,
             message: `Password reset successfully for ${user.email}`,
-            temporaryPassword,
+            temporaryPassword: sendEmail ? undefined : temporaryPassword,
             emailSent
         })
     } catch (error) {

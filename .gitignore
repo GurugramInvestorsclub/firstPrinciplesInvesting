@@ -42,3 +42,10 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+
+# reports, investigation scripts and debug dumps with PII
+scripts/*report*.json
+scripts/*.log
+scratch/
+tmp/
