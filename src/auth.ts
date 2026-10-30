@@ -6,6 +6,25 @@ import bcrypt from "bcryptjs"
 import { authConfig } from "./auth.config"
 import { addSubscriberToBrevoRegisteredList } from "@/lib/brevo-crm-service"
 
+const baseAdapter = PrismaAdapter(prisma)
+const adapter = {
+    ...baseAdapter,
+    async getUserByEmail(email: string) {
+        if (!baseAdapter.getUserByEmail) return null
+        const user = await baseAdapter.getUserByEmail(email)
+        if (user) return user
+
+        const secondary = await prisma.userSecondaryEmail.findUnique({
+            where: { email: email.toLowerCase().trim() },
+            include: { user: true },
+        })
+        if (secondary?.user) {
+            return secondary.user as any
+        }
+        return null
+    },
+}
+
 const {
     handlers,
     auth,
@@ -13,7 +32,7 @@ const {
     signOut
 } = NextAuth({
     ...authConfig,
-    adapter: PrismaAdapter(prisma),
+    adapter,
     providers: [
         ...authConfig.providers,
         Credentials({
@@ -70,7 +89,7 @@ const {
         }),
     ],
     events: {
-        async signIn({ user }) {
+        async signIn({ user, account }) {
             if (user?.email) {
                 addSubscriberToBrevoRegisteredList({
                     email: user.email,
@@ -78,6 +97,15 @@ const {
                 }).catch((err) => {
                     console.error("Failed to sync sign-in user to Brevo:", err)
                 })
+
+                if (account?.provider === "google" && user.id) {
+                    prisma.user.updateMany({
+                        where: { id: user.id, emailVerified: null },
+                        data: { emailVerified: new Date() },
+                    }).catch((err) => {
+                        console.error("Failed to mark emailVerified on Google signIn:", err)
+                    })
+                }
             }
         },
         async createUser({ user }) {
