@@ -74,7 +74,7 @@ export default auth(async (req) => {
         }
     }
 
-    // Protect /admin pages. API routes are additionally protected server-side with signed token verification.
+    // Protect /admin frontend pages.
     if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
         const session = req.cookies.get("admin_session")
         const token = session?.value
@@ -90,9 +90,23 @@ export default auth(async (req) => {
         }
     }
 
+    // Protect /api/admin routes (defense-in-depth). Note: /api/admin/login must remain accessible.
+    if (pathname.startsWith("/api/admin") && pathname !== "/api/admin/login") {
+        const session = req.cookies.get("admin_session")
+        const token = session?.value
+        if (!token) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+
+        const isValid = await verifyAdminSessionToken(token)
+        if (!isValid) {
+            return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+        }
+    }
+
     return NextResponse.next()
 })
 
 export const config = {
-    matcher: ["/admin/:path*", "/dashboard/:path*"],
+    matcher: ["/admin/:path*", "/api/admin/:path*", "/dashboard/:path*"],
 }

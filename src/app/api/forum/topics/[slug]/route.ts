@@ -81,8 +81,8 @@ export async function GET(
             },
         })
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        return NextResponse.json({ success: false, error: message }, { status: 500 })
+        console.error("Error in forum topic [slug] route:", error)
+        return NextResponse.json({ success: false, error: "An error occurred while processing your request" }, { status: 500 })
     }
 }
 
@@ -149,7 +149,7 @@ export async function POST(
 
         return NextResponse.json({ success: true, post: newPost })
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        return NextResponse.json({ success: false, error: message }, { status: 500 })
+        console.error("Error in forum topic [slug] route:", error)
+        return NextResponse.json({ success: false, error: "An error occurred while processing your request" }, { status: 500 })
     }
 }

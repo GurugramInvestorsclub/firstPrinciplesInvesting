@@ -175,8 +175,8 @@ export async function GET(request: NextRequest) {
             topics: formattedTopics,
         })
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        return NextResponse.json({ success: false, error: message }, { status: 500 })
+        console.error("Error in forum topics route:", error)
+        return NextResponse.json({ success: false, error: "An error occurred while loading topics" }, { status: 500 })
     }
 }
 
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true, topic: newTopic })
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
-        return NextResponse.json({ success: false, error: message }, { status: 500 })
+        console.error("Error in forum topics route:", error)
+        return NextResponse.json({ success: false, error: "An error occurred while loading topics" }, { status: 500 })
     }
 }

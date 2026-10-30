@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ success: true, data: formattedUsers })
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error)
+        console.error("Error fetching admin users:", error); const message = "Failed to fetch users"
         return NextResponse.json(
             { success: false, error: message },
             { status: 500 }

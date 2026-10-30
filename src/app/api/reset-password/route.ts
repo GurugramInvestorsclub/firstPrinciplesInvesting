@@ -58,12 +58,18 @@ export async function POST(req: Request) {
 
         await prisma.$transaction(async (tx) => {
             // Update the user
-            await tx.user.update({
+            const updatedUser = await tx.user.update({
                 where: { email },
                 data: {
                     password: hashedPassword,
                     emailVerified: new Date(),
                 },
+                select: { id: true },
+            })
+
+            // Invalidate any existing active database sessions
+            await tx.session.deleteMany({
+                where: { userId: updatedUser.id },
             })
 
             // Delete the verification token and any other reset tokens for this email

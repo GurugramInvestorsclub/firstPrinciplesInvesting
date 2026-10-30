@@ -46,14 +46,19 @@ export async function POST(
 
         const hashedPassword = await bcrypt.hash(temporaryPassword, 10)
 
-        // Update the password and mark emailVerified in database
-        await prisma.user.update({
-            where: { id },
-            data: { 
-                password: hashedPassword,
-                emailVerified: new Date()
-            }
-        })
+        // Update the password, mark emailVerified, and invalidate any existing sessions
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id },
+                data: { 
+                    password: hashedPassword,
+                    emailVerified: new Date()
+                }
+            }),
+            prisma.session.deleteMany({
+                where: { userId: id }
+            })
+        ])
 
         let emailSent = false
         if (sendEmail) {

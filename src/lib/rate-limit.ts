@@ -118,54 +118,76 @@ export async function consumeRateLimit(params: ConsumeRateLimitParams): Promise<
   const windowThreshold = new Date(now.getTime() - windowMs)
   const keyHash = hashIdentifier(params.scope, params.identifier)
 
-  return prisma.$transaction(
-    async (tx) => {
-      await acquireRateLimitLock(tx, `rate-limit:${params.scope}:${keyHash}`)
+  try {
+    return await prisma.$transaction(
+      async (tx) => {
+        await acquireRateLimitLock(tx, `rate-limit:${params.scope}:${keyHash}`)
 
-      const existing = await tx.apiRateLimit.findUnique({
-        where: {
-          scope_keyHash: {
-            scope: params.scope,
-            keyHash,
-          },
-        },
-      })
-
-      if (!existing) {
-        await tx.apiRateLimit.create({
-          data: {
-            scope: params.scope,
-            keyHash,
-            count: 1,
-            windowStart: now,
-            blockedUntil: null,
+        const existing = await tx.apiRateLimit.findUnique({
+          where: {
+            scope_keyHash: {
+              scope: params.scope,
+              keyHash,
+            },
           },
         })
 
-        return {
-          allowed: true,
-          retryAfterSeconds: 0,
-          remaining: Math.max(params.maxRequests - 1, 0),
+        if (!existing) {
+          await tx.apiRateLimit.create({
+            data: {
+              scope: params.scope,
+              keyHash,
+              count: 1,
+              windowStart: now,
+              blockedUntil: null,
+            },
+          })
+
+          return {
+            allowed: true,
+            retryAfterSeconds: 0,
+            remaining: Math.max(params.maxRequests - 1, 0),
+          }
         }
-      }
 
-      if (existing.blockedUntil && existing.blockedUntil > now) {
-        const retryAfterSeconds = Math.max(
-          1,
-          Math.ceil((existing.blockedUntil.getTime() - now.getTime()) / 1000)
-        )
-        return {
-          allowed: false,
-          retryAfterSeconds,
-          remaining: 0,
+        if (existing.blockedUntil && existing.blockedUntil > now) {
+          const retryAfterSeconds = Math.max(
+            1,
+            Math.ceil((existing.blockedUntil.getTime() - now.getTime()) / 1000)
+          )
+          return {
+            allowed: false,
+            retryAfterSeconds,
+            remaining: 0,
+          }
         }
-      }
 
-      const windowExpired = existing.windowStart <= windowThreshold
-      const nextCount = windowExpired ? 1 : existing.count + 1
+        const windowExpired = existing.windowStart <= windowThreshold
+        const nextCount = windowExpired ? 1 : existing.count + 1
 
-      if (nextCount > params.maxRequests) {
-        const blockedUntil = new Date(now.getTime() + blockDurationMs)
+        if (nextCount > params.maxRequests) {
+          const blockedUntil = new Date(now.getTime() + blockDurationMs)
+          await tx.apiRateLimit.update({
+            where: {
+              scope_keyHash: {
+                scope: params.scope,
+                keyHash,
+              },
+            },
+            data: {
+              count: nextCount,
+              windowStart: windowExpired ? now : existing.windowStart,
+              blockedUntil,
+            },
+          })
+
+          return {
+            allowed: false,
+            retryAfterSeconds: Math.max(1, Math.ceil(blockDurationMs / 1000)),
+            remaining: 0,
+          }
+        }
+
         await tx.apiRateLimit.update({
           where: {
             scope_keyHash: {
@@ -176,41 +198,30 @@ export async function consumeRateLimit(params: ConsumeRateLimitParams): Promise<
           data: {
             count: nextCount,
             windowStart: windowExpired ? now : existing.windowStart,
-            blockedUntil,
+            blockedUntil: null,
           },
         })
 
         return {
-          allowed: false,
-          retryAfterSeconds: Math.max(1, Math.ceil(blockDurationMs / 1000)),
-          remaining: 0,
+          allowed: true,
+          retryAfterSeconds: 0,
+          remaining: Math.max(params.maxRequests - nextCount, 0),
         }
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        maxWait: 3000,
+        timeout: 5000,
       }
-
-      await tx.apiRateLimit.update({
-        where: {
-          scope_keyHash: {
-            scope: params.scope,
-            keyHash,
-          },
-        },
-        data: {
-          count: nextCount,
-          windowStart: windowExpired ? now : existing.windowStart,
-          blockedUntil: null,
-        },
-      })
-
-      return {
-        allowed: true,
-        retryAfterSeconds: 0,
-        remaining: Math.max(params.maxRequests - nextCount, 0),
-      }
-    },
-    {
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      maxWait: 15000,
-      timeout: 30000,
+    )
+  } catch (rateLimitDbError) {
+    // Fail-safe circuit breaker: If database is under heavy load or connection wait times out,
+    // do not crash the checkout or signup request. Log warning and allow request to proceed safely.
+    console.warn("[RateLimit] Transaction contention or timeout; failing open safely:", rateLimitDbError instanceof Error ? rateLimitDbError.message : rateLimitDbError)
+    return {
+      allowed: true,
+      retryAfterSeconds: 0,
+      remaining: 1,
     }
-  )
+  }
 }
