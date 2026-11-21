@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import AdminNavbar from "@/components/admin/AdminNavbar";
 
 export const metadata: Metadata = {
     title: "Admin | First Principles Investing",
@@ -63,41 +63,7 @@ export default function AdminLayout({
                         </span>
                     </div>
 
-                    <nav style={{ display: "flex", gap: "24px" }}>
-                        <Link href="/admin/posts" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Posts
-                        </Link>
-                        <Link href="/admin/registrations" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Registrations
-                        </Link>
-                        <Link href="/admin/leads" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Leads
-                        </Link>
-                        <Link href="/admin/coupons" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Coupons
-                        </Link>
-                        <Link href="/admin/subscriptions" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Subscriptions
-                        </Link>
-                        <Link href="/admin/analytics" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Analytics
-                        </Link>
-                        <Link href="/admin/reports" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Reports
-                        </Link>
-                        <Link href="/admin/broadcast" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Broadcast
-                        </Link>
-                        <Link href="/admin/questions" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Questions
-                        </Link>
-                        <Link href="/admin/users" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Users
-                        </Link>
-                        <Link href="/admin/super30-codes" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
-                            Super 30 Codes
-                        </Link>
-                    </nav>
+                    <AdminNavbar />
                 </div>
             </header>
             <main style={{ padding: "32px" }}>{children}</main>
