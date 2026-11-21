@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { prisma } from "@/lib/prisma"
-import { generateReport } from "@/lib/weekly-report-service"
+import { generateReport, ensureWeeklyReportTableExists } from "@/lib/weekly-report-service"
 
 export const dynamic = "force-dynamic"
 
@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
     if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
+
+    await ensureWeeklyReportTableExists()
 
     const { searchParams } = new URL(request.url)
     const reportType = searchParams.get("type") // "WEEKLY" | "CUSTOM" | "ALL"

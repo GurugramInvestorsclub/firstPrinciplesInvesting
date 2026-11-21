@@ -172,8 +172,6 @@ export default function AdminReportsPage() {
             const found = json.data.find((r: ReportItem) => r.id === selectedReportId)
             setCurrentReport(found || json.data[0])
           }
-        } else {
-          setCurrentReport(null)
         }
       }
     } catch (err) {
@@ -209,6 +207,10 @@ export default function AdminReportsPage() {
         throw new Error(json.error || "Failed to generate weekly report")
       }
       showNotification("Weekly report generated successfully!")
+      if (json.data) {
+        setCurrentReport(json.data)
+        if (json.data.id) setSelectedReportId(json.data.id)
+      }
       await fetchReportsList(true)
     } catch (err) {
       showNotification(err instanceof Error ? err.message : "Generation failed", "error")
