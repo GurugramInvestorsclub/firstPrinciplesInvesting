@@ -482,4 +482,45 @@ model LeadMagnetSubmission {
   @@map("lead_magnet_submissions")
 }
 
+model WeeklyReport {
+  id                      String   @id @default(cuid())
+  reportType              String   @default("WEEKLY") @map("report_type") // "WEEKLY" | "CUSTOM"
+  title                   String?
+  year                    Int?
+  weekNumber              Int?     @map("week_number")
+  startDate               DateTime @map("start_date")
+  endDate                 DateTime @map("end_date")
+
+  // Traffic Telemetry (PostHog)
+  totalVisitors           Int      @default(0) @map("total_visitors")
+  totalPageviews          Int      @default(0) @map("total_pageviews")
+  topPagePath             String   @default("/") @map("top_page_path")
+  topPageViews            Int      @default(0) @map("top_page_views")
+  topPages                Json?    @map("top_pages")
+  insightsVisitors        Int      @default(0) @map("insights_visitors")
+  insightsPageviews       Int      @default(0) @map("insights_pageviews")
+  topReferrers            Json?    @map("top_referrers")
+
+  // Subscriptions & Revenue (DB)
+  totalNewSubscriptions  Int      @default(0) @map("total_new_subscriptions")
+  activeSubscriptions     Int      @default(0) @map("active_subscriptions")
+  subscriptionRevenue     Int      @default(0) @map("subscription_revenue")
+  webinarRevenue          Int      @default(0) @map("webinar_revenue")
+  totalRevenue            Int      @default(0) @map("total_revenue")
+  newSignups              Int      @default(0) @map("new_signups")
+
+  // Comparisons & Detailed Breakdowns
+  wowMetrics              Json?    @map("wow_metrics")
+  detailedBreakdown       Json?    @map("detailed_breakdown")
+
+  status                  String   @default("GENERATED")
+  errorMessage            String?  @map("error_message")
+  generatedAt             DateTime @default(now()) @map("generated_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  @@index([reportType, startDate, endDate])
+  @@index([year, weekNumber])
+  @@map("weekly_reports")
+}
+
 

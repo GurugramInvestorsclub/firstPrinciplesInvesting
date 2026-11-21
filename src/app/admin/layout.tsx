@@ -82,6 +82,9 @@ export default function AdminLayout({
                         <Link href="/admin/analytics" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Analytics
                         </Link>
+                        <Link href="/admin/reports" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
+                            Reports
+                        </Link>
                         <Link href="/admin/broadcast" className="text-text-secondary hover:text-text-primary transition-colors text-sm font-medium">
                             Broadcast
                         </Link>
