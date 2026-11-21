@@ -493,7 +493,7 @@ export default function AdminReportsPage() {
             >
               {reportsList.map((r) => (
                 <option key={r.id} value={r.id} style={{ background: "#1a1a1a", color: "#fff" }}>
-                  {r.title} ({formatDateLabel(r.startDate)} - {formatDateLabel(r.endDate)})
+                  {r.title}
                 </option>
               ))}
               {reportsList.length === 0 && (

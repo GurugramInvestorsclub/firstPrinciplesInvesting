@@ -259,7 +259,7 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
     ] = await Promise.all([
       prisma.insightsSubscription.findMany({
         where: { createdAt: { gte: start, lte: end } },
-        select: { id: true, planKey: true },
+        select: { id: true, planKey: true, notes: true },
       }),
       prisma.insightsSubscription.count({
         where: { status: "ACTIVE" },
@@ -269,7 +269,7 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
           status: "CAPTURED",
           createdAt: { gte: start, lte: end },
         },
-        select: { amount: true },
+        select: { amount: true, subscriptionId: true },
       }),
       prisma.payment.findMany({
         where: {
@@ -296,8 +296,42 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
 
     totalNewSubscriptions = newSubs.length
     activeSubscriptions = activeSubsCount
-    subscriptionRevenue = subCharges.reduce((acc, c) => acc + (c.amount || 0), 0)
-    webinarRevenue = webinarPayments.reduce((acc, p) => acc + (p.amount || 0), 0)
+
+    // Convert Razorpay charges (stored in paise) to rupees
+    let totalSubRev = 0
+    for (const c of subCharges) {
+      if (c.amount && c.amount > 100) {
+        // Amounts >= 1000 paise (>= ₹10) are in paise -> convert to rupees by dividing by 100.
+        // Excludes 1-rupee (100 paise) mandate authorization verification tokens.
+        const rupees = c.amount >= 1000 ? Math.round(c.amount / 100) : c.amount
+        totalSubRev += rupees
+      }
+    }
+
+    // Include offline manual grants (NEFT) that record amountPaid in rupees in sub.notes
+    for (const sub of newSubs) {
+      if (sub.notes && typeof sub.notes === "object" && !Array.isArray(sub.notes)) {
+        const notesObj = sub.notes as Record<string, unknown>
+        if (typeof notesObj.amountPaid === "number" && notesObj.amountPaid > 0) {
+          const hasCharge = subCharges.some((c) => c.subscriptionId === sub.id)
+          if (!hasCharge) {
+            totalSubRev += notesObj.amountPaid
+          }
+        }
+      }
+    }
+
+    // Convert webinar ticket payments (stored in paise) to rupees
+    let totalWebRev = 0
+    for (const p of webinarPayments) {
+      if (p.amount && p.amount > 0) {
+        const rupees = p.amount >= 1000 ? Math.round(p.amount / 100) : p.amount
+        totalWebRev += rupees
+      }
+    }
+
+    subscriptionRevenue = totalSubRev
+    webinarRevenue = totalWebRev
     totalRevenue = subscriptionRevenue + webinarRevenue
     newSignups = signupsCount
     cancellations = cancelledSubsCount
