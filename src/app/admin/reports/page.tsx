@@ -24,6 +24,7 @@ import {
   Sparkles,
   Layers,
   Search,
+  Mail,
 } from "lucide-react"
 
 interface TopPageItem {
@@ -336,6 +337,28 @@ export default function AdminReportsPage() {
     showNotification("Report exported to CSV")
   }
 
+  // Email active report to Rahul
+  const [sendingEmail, setSendingEmail] = useState(false)
+  const handleSendEmail = async (reportId?: string) => {
+    if (!reportId) {
+      showNotification("Please select or save a report first to email it", "error")
+      return
+    }
+    setSendingEmail(true)
+    try {
+      const res = await fetch(`/api/admin/reports/${reportId}/send-email`, { method: "POST" })
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || json.message || "Failed to send email")
+      }
+      showNotification("Report emailed successfully to rahul@firstprinciplesresearch.in")
+    } catch (err) {
+      showNotification(err instanceof Error ? err.message : "Failed to send email", "error")
+    } finally {
+      setSendingEmail(false)
+    }
+  }
+
   // The active report to display in hero cards
   const displayReport: ReportItem | null = activeTab === "weekly" ? currentReport : customReport
 
@@ -384,29 +407,56 @@ export default function AdminReportsPage() {
           </div>
         </div>
 
-        {/* Global Action: Export Active CSV */}
-        {displayReport && (
-          <button
-            onClick={() => handleExportCsv(displayReport)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 18px",
-              borderRadius: "8px",
-              background: "rgba(255, 255, 255, 0.06)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              color: "#fff",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <Download style={{ width: "16px", height: "16px" }} />
-            Export CSV
-          </button>
-        )}
+        {/* Global Action: Email to Rahul & Export CSV */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {displayReport && displayReport.id && (
+            <button
+              onClick={() => handleSendEmail(displayReport.id)}
+              disabled={sendingEmail}
+              title="Email this report directly to rahul@firstprinciplesresearch.in"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 18px",
+                borderRadius: "8px",
+                background: "rgba(245, 184, 0, 0.15)",
+                border: "1px solid rgba(245, 184, 0, 0.35)",
+                color: "var(--gold)",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: sendingEmail ? "not-allowed" : "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <Mail style={{ width: "16px", height: "16px" }} />
+              {sendingEmail ? "Sending..." : "Email to Rahul"}
+            </button>
+          )}
+
+          {displayReport && (
+            <button
+              onClick={() => handleExportCsv(displayReport)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 18px",
+                borderRadius: "8px",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                color: "#fff",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <Download style={{ width: "16px", height: "16px" }} />
+              Export CSV
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Mode Selector Tabs */}
@@ -1144,6 +1194,22 @@ export default function AdminReportsPage() {
 
                       <td style={{ padding: "12px 14px", textAlign: "right" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px" }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSendEmail(rep.id!)
+                            }}
+                            title="Email Report to Rahul"
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "var(--gold)",
+                              cursor: "pointer",
+                              padding: "4px",
+                            }}
+                          >
+                            <Mail style={{ width: "15px", height: "15px" }} />
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
