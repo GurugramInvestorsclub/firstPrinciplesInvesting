@@ -19,6 +19,27 @@ export interface WowMetrics {
   signupsGrowthPct: number | null
 }
 
+export interface AbandonedCheckoutItem {
+  id: string
+  userName: string
+  userEmail: string
+  userPhone?: string | null
+  itemType: "subscription" | "webinar"
+  itemLabel: string
+  amount: number // in INR
+  createdAt: string
+  failureReason?: string | null
+}
+
+export interface AbandonedCheckoutsSummary {
+  totalCount: number
+  totalPotentialRevenue: number // in INR
+  subscriptionCount: number
+  webinarCount: number
+  abandonmentRatePct: number
+  items: AbandonedCheckoutItem[]
+}
+
 export interface DetailedBreakdown {
   planDistribution: {
     monthly: number
@@ -29,6 +50,7 @@ export interface DetailedBreakdown {
   webinarRegistrationsCount: number
   avgRevenuePerSubscriber: number
   topArticles?: Array<{ path: string; views: number }>
+  abandonedCheckouts?: AbandonedCheckoutsSummary
 }
 
 export interface ReportData {
@@ -246,6 +268,14 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
   let planDistribution = { monthly: 0, threeMonthly: 0, yearly: 0 }
   let cancellations = 0
   let webinarRegistrationsCount = 0
+  let abandonedCheckouts: AbandonedCheckoutsSummary = {
+    totalCount: 0,
+    totalPotentialRevenue: 0,
+    subscriptionCount: 0,
+    webinarCount: 0,
+    abandonmentRatePct: 0,
+    items: [],
+  }
 
   try {
     const [
@@ -256,6 +286,8 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
       signupsCount,
       cancelledSubsCount,
       webinarRegistrations,
+      rawAbandonedSubs,
+      rawAbandonedPayments,
     ] = await Promise.all([
       prisma.insightsSubscription.findMany({
         where: { createdAt: { gte: start, lte: end } },
@@ -291,6 +323,63 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
       }),
       prisma.registration.count({
         where: { createdAt: { gte: start, lte: end } },
+      }),
+      // Abandoned Subscriptions (created in window without captured charge)
+      prisma.insightsSubscription.findMany({
+        where: {
+          createdAt: { gte: start, lte: end },
+          status: { in: ["CREATED", "EXPIRED"] },
+          charges: { none: { status: "CAPTURED" } },
+        },
+        select: {
+          id: true,
+          planKey: true,
+          createdAt: true,
+          userId: true,
+          notes: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              insightsSubscriptions: {
+                where: { status: "ACTIVE" },
+                select: { id: true },
+                take: 1,
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      // Abandoned Webinar Payments (created or failed in window without completed payment)
+      prisma.payment.findMany({
+        where: {
+          createdAt: { gte: start, lte: end },
+          status: { in: ["CREATED", "FAILED"] },
+        },
+        select: {
+          id: true,
+          eventId: true,
+          amount: true,
+          createdAt: true,
+          failureReason: true,
+          userId: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              payments: {
+                where: { status: "SUCCESS" },
+                select: { eventId: true },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
       }),
     ])
 
@@ -341,6 +430,93 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
       if (sub.planKey === "MONTHLY") planDistribution.monthly += 1
       else if (sub.planKey === "THREE_MONTHLY") planDistribution.threeMonthly += 1
       else if (sub.planKey === "YEARLY") planDistribution.yearly += 1
+    }
+
+    // 4. Process Abandoned Checkouts (Subscriptions & Webinars)
+    const getPlanPrice = (planKey: string) => {
+      switch (planKey?.toUpperCase()) {
+        case "YEARLY": return 9999
+        case "THREE_MONTHLY": return 840
+        case "MONTHLY": return 349
+        default: return 840
+      }
+    }
+
+    const abandonedItems: AbandonedCheckoutItem[] = []
+    const seenUserSubscription = new Set<string>()
+
+    for (const sub of rawAbandonedSubs) {
+      if (sub.user?.insightsSubscriptions && sub.user.insightsSubscriptions.length > 0) {
+        continue
+      }
+      const uKey = sub.userId || sub.user?.email || sub.id
+      if (seenUserSubscription.has(uKey)) continue
+      seenUserSubscription.add(uKey)
+
+      const notesObj = sub.notes && typeof sub.notes === "object" && !Array.isArray(sub.notes)
+        ? (sub.notes as Record<string, unknown>)
+        : null
+
+      const userName = (notesObj?.userName as string) || sub.user?.name || "Guest Reader"
+      const userEmail = (notesObj?.userEmail as string) || sub.user?.email || "No Email"
+      const userPhone = sub.user?.phone || null
+
+      abandonedItems.push({
+        id: sub.id,
+        userName,
+        userEmail,
+        userPhone,
+        itemType: "subscription",
+        itemLabel: `Insights ${sub.planKey === "YEARLY" ? "Annual" : sub.planKey === "THREE_MONTHLY" ? "Quarterly (3-Mo)" : "Monthly"} Plan`,
+        amount: getPlanPrice(sub.planKey),
+        createdAt: sub.createdAt.toISOString(),
+        failureReason: "Abandoned during Razorpay mandate setup",
+      })
+    }
+
+    const seenUserWebinar = new Set<string>()
+    for (const p of rawAbandonedPayments) {
+      if (p.user?.payments && p.user.payments.some((sp) => sp.eventId === p.eventId)) {
+        continue
+      }
+      const uKey = `${p.userId || p.user?.email || p.id}_${p.eventId}`
+      if (seenUserWebinar.has(uKey)) continue
+      seenUserWebinar.add(uKey)
+
+      const amtInRupees = p.amount >= 1000 ? Math.round(p.amount / 100) : p.amount
+
+      abandonedItems.push({
+        id: p.id,
+        userName: p.user?.name || "Guest Attendee",
+        userEmail: p.user?.email || "No Email",
+        userPhone: p.user?.phone || null,
+        itemType: "webinar",
+        itemLabel: p.eventId ? `Event: ${p.eventId}` : "Webinar Ticket",
+        amount: amtInRupees,
+        createdAt: p.createdAt.toISOString(),
+        failureReason: p.failureReason || "Abandoned before completing payment",
+      })
+    }
+
+    abandonedItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    const totalAbandonedCount = abandonedItems.length
+    const totalPotentialRevenue = abandonedItems.reduce((acc, item) => acc + item.amount, 0)
+    const subscriptionAbandonedCount = abandonedItems.filter((i) => i.itemType === "subscription").length
+    const webinarAbandonedCount = abandonedItems.filter((i) => i.itemType === "webinar").length
+
+    const totalCheckoutAttempts = totalNewSubscriptions + webinarPayments.length + totalAbandonedCount
+    const abandonmentRatePct = totalCheckoutAttempts > 0
+      ? Number(((totalAbandonedCount / totalCheckoutAttempts) * 100).toFixed(1))
+      : 0
+
+    abandonedCheckouts = {
+      totalCount: totalAbandonedCount,
+      totalPotentialRevenue,
+      subscriptionCount: subscriptionAbandonedCount,
+      webinarCount: webinarAbandonedCount,
+      abandonmentRatePct,
+      items: abandonedItems,
     }
   } catch (dbErr) {
     console.error("[WeeklyReportService] Database fetch error:", dbErr)
@@ -542,6 +718,7 @@ export async function generateReport(options: GenerateReportOptions = {}): Promi
     webinarRegistrationsCount,
     avgRevenuePerSubscriber: totalNewSubscriptions > 0 ? Math.round(subscriptionRevenue / totalNewSubscriptions) : 0,
     topArticles: topPages.filter((p) => p.path.startsWith("/insights/")),
+    abandonedCheckouts,
   }
 
   const resultPayload: ReportData = {

@@ -39,6 +39,64 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
     )
     .join("")
 
+  const abandoned = report.detailedBreakdown?.abandonedCheckouts
+  const abandonedRows = (abandoned?.items || [])
+    .slice(0, 10)
+    .map(
+      (item) => `
+      <tr style="border-bottom: 1px solid #fce8e6;">
+        <td style="padding: 8px 10px; vertical-align: top;">
+          <strong>${item.userName}</strong><br/>
+          <span style="color: #666; font-size: 11px;">${item.userEmail}</span>
+        </td>
+        <td style="padding: 8px 10px; vertical-align: top; font-size: 12px; color: #333;">
+          ${item.userPhone || '<span style="color: #999;">—</span>'}
+        </td>
+        <td style="padding: 8px 10px; vertical-align: top; font-size: 12px;">
+          <span style="background: #fdf2f2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 500;">
+            ${item.itemLabel}
+          </span>
+        </td>
+        <td style="padding: 8px 10px; vertical-align: top; text-align: right; font-weight: 600; color: #111;">
+          ${formatCurrency(item.amount)}
+        </td>
+      </tr>
+    `
+    )
+    .join("")
+
+  const abandonedSectionHtml = abandoned && abandoned.totalCount > 0
+    ? `
+      <!-- Abandoned Checkouts Section -->
+      <div style="background: #fffafa; border: 1px solid #fed7d7; border-radius: 8px; padding: 18px; margin: 24px 0;">
+        <div style="margin-bottom: 8px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #991b1b; margin: 0;">
+            🛒 Checkout Abandonments at Razorpay (${abandoned.totalCount})
+          </h3>
+          <p style="font-size: 12px; color: #7f1d1d; margin: 4px 0 0 0; font-weight: 600;">
+            Potential Value: ${formatCurrency(abandoned.totalPotentialRevenue)} &bull; Drop-off Rate: ${abandoned.abandonmentRatePct}%
+          </p>
+        </div>
+        <p style="font-size: 12px; color: #555; margin: 0 0 12px 0;">
+          These users initiated checkout but dropped off at the Razorpay gateway before completing payment. You can follow up with them directly:
+        </p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr style="background: #fee2e2; text-align: left; color: #7f1d1d; font-size: 11px; text-transform: uppercase;">
+              <th style="padding: 6px 10px;">Customer</th>
+              <th style="padding: 6px 10px;">Phone</th>
+              <th style="padding: 6px 10px;">Item Attempted</th>
+              <th style="padding: 6px 10px; text-align: right;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${abandonedRows}
+          </tbody>
+        </table>
+      </div>
+    `
+    : ""
+
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 680px; margin: 0 auto; padding: 28px; background: #ffffff; color: #1a1a1a;">
       <!-- Header -->
@@ -134,6 +192,8 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
           ${topPagesRows || '<tr><td colspan="3" style="padding: 12px; text-align: center; color: #888;">No page data recorded</td></tr>'}
         </tbody>
       </table>
+
+      ${abandonedSectionHtml}
 
       <!-- CTA -->
       <div style="text-align: center; margin: 32px 0 20px 0;">

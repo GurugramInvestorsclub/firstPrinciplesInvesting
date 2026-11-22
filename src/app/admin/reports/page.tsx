@@ -25,7 +25,31 @@ import {
   Layers,
   Search,
   Mail,
+  ShoppingCart,
+  Phone,
+  UserX,
 } from "lucide-react"
+
+export interface AbandonedCheckoutItem {
+  id: string
+  userName: string
+  userEmail: string
+  userPhone?: string | null
+  itemType: "subscription" | "webinar"
+  itemLabel: string
+  amount: number
+  createdAt: string
+  failureReason?: string | null
+}
+
+export interface AbandonedCheckoutsSummary {
+  totalCount: number
+  totalPotentialRevenue: number
+  subscriptionCount: number
+  webinarCount: number
+  abandonmentRatePct: number
+  items: AbandonedCheckoutItem[]
+}
 
 interface TopPageItem {
   path: string
@@ -55,6 +79,7 @@ interface DetailedBreakdown {
   webinarRegistrationsCount?: number
   avgRevenuePerSubscriber?: number
   topArticles?: Array<{ path: string; views: number }>
+  abandonedCheckouts?: AbandonedCheckoutsSummary
 }
 
 interface ReportItem {
@@ -301,6 +326,7 @@ export default function AdminReportsPage() {
   // Export active report as CSV
   const handleExportCsv = (rep: ReportItem | null) => {
     if (!rep) return
+    const abandoned = rep.detailedBreakdown?.abandonedCheckouts
     const rows = [
       ["Metric", "Value"],
       ["Report Title", rep.title],
@@ -324,6 +350,23 @@ export default function AdminReportsPage() {
       [""],
       ["Top Referrers", "Visitors"],
       ...(rep.topReferrers || []).map((r) => [r.source, r.count]),
+      ...(abandoned && abandoned.totalCount > 0 ? [
+        [""],
+        ["--- Abandoned Checkouts (Razorpay Drop-offs) ---", ""],
+        ["Total Abandoned", abandoned.totalCount],
+        ["Potential Revenue Lost (INR)", abandoned.totalPotentialRevenue],
+        ["Abandonment Rate (%)", `${abandoned.abandonmentRatePct}%`],
+        ["Customer Name", "Customer Email", "Customer Phone", "Item Attempted", "Value (INR)", "Date", "Failure Reason"],
+        ...abandoned.items.map((item) => [
+          item.userName,
+          item.userEmail,
+          item.userPhone || "",
+          item.itemLabel,
+          item.amount,
+          item.createdAt,
+          item.failureReason || ""
+        ])
+      ] : []),
     ]
 
     const csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n")
@@ -1094,6 +1137,117 @@ export default function AdminReportsPage() {
               </div>
             </div>
           </div>
+
+          {/* ABANDONED CHECKOUTS & CARTS SECTION */}
+          {displayReport.detailedBreakdown?.abandonedCheckouts && (
+            <div style={cardStyle}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ background: "rgba(239, 68, 68, 0.15)", padding: "8px", borderRadius: "8px" }}>
+                      <ShoppingCart style={{ width: "20px", height: "20px", color: "#f87171" }} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: "17px", fontWeight: 700, color: "#fff", margin: 0 }}>
+                        Checkout Abandonments & Gateway Drop-offs
+                      </h3>
+                      <p style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "13px", margin: "4px 0 0 0" }}>
+                        Users who initiated purchase and reached Razorpay but did not complete the transaction.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sub KPI Stats */}
+                <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+                  <div style={{ background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "8px 14px", borderRadius: "8px", textAlign: "right" }}>
+                    <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.5)", textTransform: "uppercase" }}>Abandoned</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "#f87171" }}>
+                      {displayReport.detailedBreakdown.abandonedCheckouts.totalCount}
+                    </div>
+                  </div>
+                  <div style={{ background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "8px 14px", borderRadius: "8px", textAlign: "right" }}>
+                    <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.5)", textTransform: "uppercase" }}>Potential Revenue</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--gold)" }}>
+                      {formatCurrency(displayReport.detailedBreakdown.abandonedCheckouts.totalPotentialRevenue)}
+                    </div>
+                  </div>
+                  <div style={{ background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "8px 14px", borderRadius: "8px", textAlign: "right" }}>
+                    <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.5)", textTransform: "uppercase" }}>Drop-off Rate</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "#f87171" }}>
+                      {displayReport.detailedBreakdown.abandonedCheckouts.abandonmentRatePct}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table of Abandoned Items */}
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left", color: "rgba(255,255,255,0.5)" }}>
+                      <th style={{ padding: "10px 12px" }}>Customer</th>
+                      <th style={{ padding: "10px 12px" }}>Phone / Contact</th>
+                      <th style={{ padding: "10px 12px" }}>Item Attempted</th>
+                      <th style={{ padding: "10px 12px", textAlign: "right" }}>Value</th>
+                      <th style={{ padding: "10px 12px" }}>Date & Time</th>
+                      <th style={{ padding: "10px 12px" }}>Status / Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayReport.detailedBreakdown.abandonedCheckouts.items.map((item) => (
+                      <tr key={item.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                        <td style={{ padding: "12px" }}>
+                          <div style={{ fontWeight: 600, color: "#fff" }}>{item.userName}</div>
+                          <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", marginTop: "2px" }}>{item.userEmail}</div>
+                        </td>
+                        <td style={{ padding: "12px", color: "rgba(255,255,255,0.8)" }}>
+                          {item.userPhone ? (
+                            <a href={`tel:${item.userPhone}`} style={{ color: "var(--gold)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                              <Phone style={{ width: "12px", height: "12px" }} />
+                              {item.userPhone}
+                            </a>
+                          ) : (
+                            <span style={{ color: "rgba(255,255,255,0.4)" }}>—</span>
+                          )}
+                        </td>
+                        <td style={{ padding: "12px" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              padding: "3px 8px",
+                              borderRadius: "4px",
+                              background: item.itemType === "subscription" ? "rgba(245, 184, 0, 0.15)" : "rgba(59, 130, 246, 0.15)",
+                              color: item.itemType === "subscription" ? "var(--gold)" : "#60a5fa",
+                            }}
+                          >
+                            {item.itemLabel}
+                          </span>
+                        </td>
+                        <td style={{ padding: "12px", textAlign: "right", fontWeight: 700, color: "#fff" }}>
+                          {formatCurrency(item.amount)}
+                        </td>
+                        <td style={{ padding: "12px", fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>
+                          {new Date(item.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </td>
+                        <td style={{ padding: "12px", fontSize: "12px", color: "#f87171" }}>
+                          {item.failureReason || "Abandoned at checkout"}
+                        </td>
+                      </tr>
+                    ))}
+                    {displayReport.detailedBreakdown.abandonedCheckouts.items.length === 0 && (
+                      <tr>
+                        <td colSpan={6} style={{ padding: "30px", textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+                          No checkout abandonments recorded during this period.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </>
       ) : (
         <div style={{ ...cardStyle, textAlign: "center", padding: "60px 20px" }}>
