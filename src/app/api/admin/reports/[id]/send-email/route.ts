@@ -29,7 +29,7 @@ export async function POST(
     return NextResponse.json({
       success: emailSent,
       message: emailSent
-        ? "Report emailed successfully to rahul@firstprinciplesresearch.in"
+        ? "Report emailed successfully to rahul@firstprinciplesresearch.in and rakshithsantosh@gmail.com"
         : "Failed to dispatch email (check Brevo/Resend API keys)",
     })
   } catch (error) {

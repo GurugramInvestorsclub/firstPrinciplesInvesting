@@ -394,7 +394,7 @@ export default function AdminReportsPage() {
       if (!res.ok || !json.success) {
         throw new Error(json.error || json.message || "Failed to send email")
       }
-      showNotification("Report emailed successfully to rahul@firstprinciplesresearch.in")
+      showNotification("Report emailed successfully to rahul@firstprinciplesresearch.in and rakshithsantosh@gmail.com")
     } catch (err) {
       showNotification(err instanceof Error ? err.message : "Failed to send email", "error")
     } finally {
@@ -456,7 +456,7 @@ export default function AdminReportsPage() {
             <button
               onClick={() => handleSendEmail(displayReport.id)}
               disabled={sendingEmail}
-              title="Email this report directly to rahul@firstprinciplesresearch.in"
+              title="Email this report directly to rahul@firstprinciplesresearch.in and rakshithsantosh@gmail.com"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -1353,7 +1353,7 @@ export default function AdminReportsPage() {
                               e.stopPropagation()
                               handleSendEmail(rep.id!)
                             }}
-                            title="Email Report to Rahul"
+                            title="Email Report to Rahul and Rakshith"
                             style={{
                               background: "transparent",
                               border: "none",

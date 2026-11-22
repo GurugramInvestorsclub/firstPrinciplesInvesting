@@ -1,10 +1,27 @@
 import { ReportData } from "./weekly-report-service"
 
+export const DEFAULT_REPORT_RECIPIENTS = [
+  "rahul@firstprinciplesresearch.in",
+  "rakshithsantosh@gmail.com",
+]
+
+export function getReportRecipients(): string[] {
+  const envVal = process.env.REPORT_RECIPIENT_EMAILS || process.env.REPORT_RECIPIENT_EMAIL
+  if (!envVal) {
+    return DEFAULT_REPORT_RECIPIENTS
+  }
+  const parsed = envVal.split(",").map((e) => e.trim()).filter(Boolean)
+  if (!parsed.includes("rakshithsantosh@gmail.com") && !process.env.REPORT_RECIPIENT_EMAILS) {
+    parsed.push("rakshithsantosh@gmail.com")
+  }
+  return parsed.length > 0 ? parsed : DEFAULT_REPORT_RECIPIENTS
+}
+
 export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean> {
   const brevoApiKey = process.env.BREVO_API_KEY
   const resendApiKey = process.env.RESEND_API_KEY
   const emailFrom = process.env.EMAIL_FROM || "support@firstprinciplesresearch.in"
-  const recipient = process.env.REPORT_RECIPIENT_EMAIL || "rahul@firstprinciplesresearch.in"
+  const recipients = getReportRecipients()
   const siteUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://firstprinciplesresearch.in"
 
   if (!brevoApiKey && !resendApiKey) {
@@ -220,7 +237,7 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
         },
         body: JSON.stringify({
           sender: { name: "First Principles Investing", email: emailFrom },
-          to: [{ email: recipient }],
+          to: recipients.map((email) => ({ email })),
           subject,
           htmlContent: html,
         }),
@@ -244,7 +261,7 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
         },
         body: JSON.stringify({
           from: emailFrom,
-          to: recipient,
+          to: recipients,
           subject,
           html,
         }),
