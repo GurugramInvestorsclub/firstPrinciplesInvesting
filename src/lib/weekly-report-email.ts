@@ -43,6 +43,15 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
 
   const subject = `Weekly Performance Report: ${report.title}`
 
+  const segmentation = report.detailedBreakdown?.subscriptionSegmentation
+  const newSubsCount = segmentation?.newSubscribersCount ?? report.totalNewSubscriptions
+  const renewingSubsCount = segmentation?.renewingSubscribersCount ?? (report.renewingSubscriptions || 0)
+  const totalPaidInPeriod = segmentation?.totalPaidSubscribers ?? (newSubsCount + renewingSubsCount)
+
+  const retention = report.detailedBreakdown?.renewalRetention
+  const upcoming = report.detailedBreakdown?.upcomingRenewals
+  const trafficTrend = report.detailedBreakdown?.trafficTrend30d
+
   const topPagesRows = (report.topPages || [])
     .slice(0, 5)
     .map(
@@ -55,6 +64,166 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
     `
     )
     .join("")
+
+  // 30-Day Traffic Movement Visual Chart
+  let trafficTrendHtml = ""
+  if (trafficTrend && trafficTrend.weeks && trafficTrend.weeks.length > 0) {
+    const maxVis = Math.max(...trafficTrend.weeks.map((w) => w.visitors), 1)
+    const trendRows = trafficTrend.weeks
+      .map((w) => {
+        const barWidthPct = Math.max(8, Math.round((w.visitors / maxVis) * 100))
+        const wowBadge =
+          w.wowGrowthPct != null
+            ? `<span style="font-size: 11px; font-weight: 700; color: ${w.wowGrowthPct >= 0 ? "#15803d" : "#b91c1c"};">${w.wowGrowthPct >= 0 ? "+" : ""}${w.wowGrowthPct}% WoW</span>`
+            : `<span style="font-size: 11px; color: #94a3b8;">—</span>`
+        return `
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 8px 10px; font-size: 12px; color: #1e293b; width: 34%;">
+              <strong>${w.weekLabel}</strong>
+            </td>
+            <td style="padding: 8px 10px; width: 36%;">
+              <div style="background: #e2e8f0; border-radius: 4px; height: 10px; width: 100%; overflow: hidden;">
+                <div style="background: #F5B800; height: 10px; width: ${barWidthPct}%; border-radius: 4px;"></div>
+              </div>
+            </td>
+            <td style="padding: 8px 10px; font-size: 12px; text-align: right; color: #0f172a; width: 15%;">
+              <strong>${formatNumber(w.visitors)}</strong> <span style="font-size: 10px; color: #64748b;">vis</span>
+            </td>
+            <td style="padding: 8px 10px; text-align: right; width: 15%;">
+              ${wowBadge}
+            </td>
+          </tr>
+        `
+      })
+      .join("")
+
+    trafficTrendHtml = `
+      <!-- 30-Day Traffic Movement Visual -->
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin: 24px 0;">
+        <div style="margin-bottom: 8px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0;">
+            📈 30-Day Traffic Movement (Week-on-Week)
+          </h3>
+          <p style="font-size: 12px; color: #64748b; margin: 4px 0 0 0;">
+            Daily Average: <strong>${formatNumber(trafficTrend.avgDailyVisitors)}</strong> visitors/day &bull; Total Month: <strong>${formatNumber(trafficTrend.totalMonthVisitors)}</strong> visitors
+          </p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px;">
+          <thead>
+            <tr style="background: #f8fafc; color: #475569; font-size: 11px; text-transform: uppercase;">
+              <th style="padding: 6px 10px; text-align: left;">Period</th>
+              <th style="padding: 6px 10px; text-align: left;">Volume</th>
+              <th style="padding: 6px 10px; text-align: right;">Visitors</th>
+              <th style="padding: 6px 10px; text-align: right;">WoW Growth</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${trendRows}
+          </tbody>
+        </table>
+      </div>
+    `
+  }
+
+  // Renewal Performance & Upcoming Pipeline Section
+  const renewalSectionHtml =
+    retention || upcoming
+      ? `
+      <!-- Renewal Health & Upcoming Pipeline -->
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin: 24px 0;">
+        <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 14px;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0;">
+            🔄 Subscription Renewals & Retention
+          </h3>
+        </div>
+        
+        <table style="width: 100%; border-collapse: separate; border-spacing: 10px; margin-bottom: 12px;">
+          <tr>
+            <!-- Past Week Retention -->
+            <td style="width: 50%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; vertical-align: top;">
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">
+                Past Week Retention Rate
+              </div>
+              <div style="font-size: 22px; font-weight: 700; color: ${retention && retention.retentionRatePct >= 80 ? "#15803d" : "#b45309"};">
+                ${retention?.retentionRatePct != null ? `${retention.retentionRatePct}%` : "100%"}
+              </div>
+              <div style="font-size: 12px; color: #475569; margin-top: 6px; line-height: 1.4;">
+                Converted: <strong>${retention?.renewalsConvertedCount ?? 0}</strong> of <strong>${retention?.renewalsDueCount ?? 0}</strong> due<br/>
+                ${
+                  retention && retention.renewalsFailedOrChurnedCount > 0
+                    ? `<span style="color: #b91c1c;">${retention.renewalsFailedOrChurnedCount} churned / did not renew</span>`
+                    : '<span style="color: #15803d; font-weight: 500;">✓ 100% renewal retention</span>'
+                }
+              </div>
+            </td>
+
+            <!-- Next Week Due -->
+            <td style="width: 50%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; vertical-align: top;">
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">
+                Upcoming Renewals (Next 7 Days)
+              </div>
+              <div style="font-size: 22px; font-weight: 700; color: #0f172a;">
+                ${upcoming?.totalDueCount ?? 0} due
+              </div>
+              <div style="font-size: 12px; color: #475569; margin-top: 6px; line-height: 1.4;">
+                Potential Revenue: <strong>${formatCurrency(upcoming?.potentialRevenue ?? 0)}</strong><br/>
+                ${upcoming?.autoRenewingCount ?? 0} auto-renewing &bull; ${upcoming?.slatedForCancellationCount ?? 0} cancelling
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        ${
+          upcoming && upcoming.items && upcoming.items.length > 0
+            ? `
+          <div style="margin-top: 12px;">
+            <div style="font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+              Subscribers Due for Renewal in the Next 7 Days:
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #ffffff; border: 1px solid #edf2f7; border-radius: 6px; overflow: hidden;">
+              <thead>
+                <tr style="background: #f1f5f9; text-align: left; color: #475569; font-size: 11px; text-transform: uppercase;">
+                  <th style="padding: 6px 10px;">Subscriber</th>
+                  <th style="padding: 6px 10px;">Plan</th>
+                  <th style="padding: 6px 10px;">Due Date</th>
+                  <th style="padding: 6px 10px; text-align: right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${upcoming.items
+                  .slice(0, 6)
+                  .map(
+                    (item) => `
+                  <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 7px 10px;">
+                      <strong>${item.userName}</strong><br/>
+                      <span style="font-size: 11px; color: #64748b;">${item.userEmail}</span>
+                    </td>
+                    <td style="padding: 7px 10px;">
+                      <span style="background: #eff6ff; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;">
+                        ${item.planKey === "YEARLY" ? "Annual" : item.planKey === "THREE_MONTHLY" ? "Quarterly" : "Monthly"}
+                      </span>
+                      ${item.cancelAtCycleEnd ? '<span style="color: #b91c1c; font-size: 10px; margin-left: 4px; font-weight: 600;">(Cancelling)</span>' : ""}
+                    </td>
+                    <td style="padding: 7px 10px; color: #334155;">
+                      ${item.renewalDueDate ? new Date(item.renewalDueDate).toLocaleDateString("en-IN", { month: "short", day: "numeric", timeZone: "Asia/Kolkata" }) : "—"}
+                    </td>
+                    <td style="padding: 7px 10px; text-align: right; font-weight: 600; color: #0f172a;">
+                      ${formatCurrency(item.amount)}
+                    </td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    `
+      : ""
 
   const abandoned = report.detailedBreakdown?.abandonedCheckouts
   const abandonedRows = (abandoned?.items || [])
@@ -139,10 +308,18 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
           <!-- Card 1: Subscriptions -->
           <td style="width: 50%; background: #fdfaf3; border: 1px solid #f9e29f; border-radius: 8px; padding: 16px; vertical-align: top;">
             <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #8a6400; margin-bottom: 4px;">
-              Total Subscriptions
+              Subscriptions in Period
             </div>
             <div style="font-size: 24px; font-weight: 700; color: #111;">
-              ${report.totalNewSubscriptions} new
+              ${totalPaidInPeriod} total
+            </div>
+            <div style="margin: 6px 0;">
+              <span style="background: #ecfdf5; color: #065f46; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; border: 1px solid #a7f3d0; margin-right: 4px;">
+                ${newSubsCount} new
+              </span>
+              <span style="background: #eff6ff; color: #1e40af; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; border: 1px solid #bfdbfe;">
+                ${renewingSubsCount} renewed
+              </span>
             </div>
             <div style="font-size: 12px; color: #666; margin-top: 4px;">
               Revenue: <strong>${formatCurrency(report.subscriptionRevenue)}</strong><br/>
@@ -192,6 +369,10 @@ export async function sendWeeklyReportEmail(report: ReportData): Promise<boolean
           </td>
         </tr>
       </table>
+
+      ${renewalSectionHtml}
+
+      ${trafficTrendHtml}
 
       <!-- Top 5 Visited Pages Table -->
       <h3 style="font-size: 15px; font-weight: 700; color: #111; margin: 24px 0 12px 0;">

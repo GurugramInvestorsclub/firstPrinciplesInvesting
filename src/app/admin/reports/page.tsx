@@ -11,7 +11,6 @@ import {
   CreditCard,
   RefreshCw,
   Compass,
-  ArrowUpRight,
   ExternalLink,
   ShieldCheck,
   AlertCircle,
@@ -19,16 +18,74 @@ import {
   Trash2,
   CheckCircle2,
   BookOpen,
-  DollarSign,
   Filter,
-  Sparkles,
-  Layers,
   Search,
   Mail,
   ShoppingCart,
   Phone,
-  UserX,
+  BarChart3,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
+
+export interface SubscriptionSegmentation {
+  newSubscribersCount: number
+  renewingSubscribersCount: number
+  totalPaidSubscribers: number
+  newSubscribersRevenue: number
+  renewingSubscribersRevenue: number
+}
+
+export interface PastWeekRenewalRetention {
+  renewalsDueCount: number
+  renewalsConvertedCount: number
+  renewalsFailedOrChurnedCount: number
+  retentionRatePct: number
+}
+
+export interface UpcomingRenewalItem {
+  subscriptionId: string
+  userName: string
+  userEmail: string
+  userPhone?: string | null
+  planKey: string
+  renewalDueDate: string
+  cancelAtCycleEnd: boolean
+  amount: number
+}
+
+export interface UpcomingRenewalsData {
+  totalDueCount: number
+  autoRenewingCount: number
+  slatedForCancellationCount: number
+  potentialRevenue: number
+  planDistribution: {
+    monthly: number
+    threeMonthly: number
+    yearly: number
+  }
+  items: UpcomingRenewalItem[]
+}
+
+export interface WeeklyTrafficPoint {
+  weekLabel: string
+  weekNumber?: number
+  year?: number
+  startDate: string
+  endDate: string
+  visitors: number
+  pageviews: number
+  wowGrowthPct: number | null
+}
+
+export interface TrafficTrend30d {
+  weeks: WeeklyTrafficPoint[]
+  avgDailyVisitors: number
+  totalMonthVisitors: number
+  totalMonthPageviews: number
+  monthOverMonthGrowthPct: number | null
+}
 
 export interface AbandonedCheckoutItem {
   id: string
@@ -80,6 +137,10 @@ interface DetailedBreakdown {
   avgRevenuePerSubscriber?: number
   topArticles?: Array<{ path: string; views: number }>
   abandonedCheckouts?: AbandonedCheckoutsSummary
+  subscriptionSegmentation?: SubscriptionSegmentation
+  renewalRetention?: PastWeekRenewalRetention
+  upcomingRenewals?: UpcomingRenewalsData
+  trafficTrend30d?: TrafficTrend30d
 }
 
 interface ReportItem {
@@ -99,6 +160,7 @@ interface ReportItem {
   insightsPageviews: number
   topReferrers?: ReferrerItem[]
   totalNewSubscriptions: number
+  renewingSubscriptions?: number
   activeSubscriptions: number
   subscriptionRevenue: number
   webinarRevenue: number
@@ -151,6 +213,8 @@ export default function AdminReportsPage() {
 
   // Feedback State
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null)
+  const [showUpcomingList, setShowUpcomingList] = useState(false)
+  const [hoveredTrafficIndex, setHoveredTrafficIndex] = useState<number | null>(null)
 
   const showNotification = (message: string, type: "success" | "error" = "success") => {
     setNotification({ message, type })
@@ -333,6 +397,14 @@ export default function AdminReportsPage() {
       ["Type", rep.reportType],
       ["Period", `${formatDateLabel(rep.startDate)} to ${formatDateLabel(rep.endDate)}`],
       ["Total Subscriptions (New)", rep.totalNewSubscriptions],
+      ["New Subscribers", rep.detailedBreakdown?.subscriptionSegmentation?.newSubscribersCount ?? rep.totalNewSubscriptions],
+      ["Renewing Subscribers", rep.detailedBreakdown?.subscriptionSegmentation?.renewingSubscribersCount ?? (rep.renewingSubscriptions || 0)],
+      ["Total Paying Subscribers", rep.detailedBreakdown?.subscriptionSegmentation?.totalPaidSubscribers ?? (rep.totalNewSubscriptions + (rep.renewingSubscriptions || 0))],
+      ["Past Week Renewal Retention Rate (%)", `${rep.detailedBreakdown?.renewalRetention?.retentionRatePct ?? 100}%`],
+      ["Renewals Converted in Past Week", rep.detailedBreakdown?.renewalRetention?.renewalsConvertedCount ?? 0],
+      ["Renewals Due in Past Week", rep.detailedBreakdown?.renewalRetention?.renewalsDueCount ?? 0],
+      ["Upcoming Renewals Due Next Week", rep.detailedBreakdown?.upcomingRenewals?.totalDueCount ?? 0],
+      ["Upcoming Renewals Potential Revenue (INR)", rep.detailedBreakdown?.upcomingRenewals?.potentialRevenue ?? 0],
       ["Active Subscribers Base", rep.activeSubscriptions],
       ["Subscription Revenue (INR)", rep.subscriptionRevenue],
       ["Webinar Revenue (INR)", rep.webinarRevenue],
@@ -821,51 +893,72 @@ export default function AdminReportsPage() {
             <div style={cardStyle}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
                 <span style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "13px", fontWeight: 500 }}>
-                  Total Subscriptions in Period
+                  Subscriptions in Period
                 </span>
                 <div style={{ background: "rgba(245, 184, 0, 0.15)", padding: "8px", borderRadius: "8px" }}>
                   <CreditCard style={{ width: "20px", height: "20px", color: "var(--gold)" }} />
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-                <span style={{ fontSize: "32px", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>
-                  {displayReport.totalNewSubscriptions}
-                </span>
-                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>new</span>
-                {displayReport.wowMetrics?.subscriptionGrowthPct != null && (
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: displayReport.wowMetrics.subscriptionGrowthPct >= 0 ? "#10b981" : "#ef4444",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "2px",
-                    }}
-                  >
-                    {displayReport.wowMetrics.subscriptionGrowthPct >= 0 ? <TrendingUp style={{ width: "14px", height: "14px" }} /> : <TrendingDown style={{ width: "14px", height: "14px" }} />}
-                    {displayReport.wowMetrics.subscriptionGrowthPct > 0 ? "+" : ""}{displayReport.wowMetrics.subscriptionGrowthPct}% WoW
-                  </span>
-                )}
-              </div>
+              {(() => {
+                const seg = displayReport.detailedBreakdown?.subscriptionSegmentation
+                const newCount = seg?.newSubscribersCount ?? displayReport.totalNewSubscriptions
+                const renewingCount = seg?.renewingSubscribersCount ?? (displayReport.renewingSubscriptions || 0)
+                const totalCount = seg?.totalPaidSubscribers ?? (newCount + renewingCount)
 
-              <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", marginTop: "8px" }}>
-                Revenue: <strong style={{ color: "#fff" }}>{formatCurrency(displayReport.subscriptionRevenue)}</strong>
-              </div>
+                return (
+                  <>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "32px", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>
+                        {totalCount}
+                      </span>
+                      <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>paying</span>
+                      {displayReport.wowMetrics?.subscriptionGrowthPct != null && (
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: displayReport.wowMetrics.subscriptionGrowthPct >= 0 ? "#10b981" : "#ef4444",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "2px",
+                          }}
+                        >
+                          {displayReport.wowMetrics.subscriptionGrowthPct >= 0 ? <TrendingUp style={{ width: "14px", height: "14px" }} /> : <TrendingDown style={{ width: "14px", height: "14px" }} />}
+                          {displayReport.wowMetrics.subscriptionGrowthPct > 0 ? "+" : ""}{displayReport.wowMetrics.subscriptionGrowthPct}% WoW
+                        </span>
+                      )}
+                    </div>
 
-              {/* Tier breakdown pills */}
-              <div style={{ display: "flex", gap: "8px", marginTop: "14px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", padding: "3px 8px", borderRadius: "4px", color: "rgba(255,255,255,0.8)" }}>
-                  Monthly: {displayReport.detailedBreakdown?.planDistribution?.monthly ?? 0}
-                </span>
-                <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", padding: "3px 8px", borderRadius: "4px", color: "rgba(255,255,255,0.8)" }}>
-                  3-Month: {displayReport.detailedBreakdown?.planDistribution?.threeMonthly ?? 0}
-                </span>
-                <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", padding: "3px 8px", borderRadius: "4px", color: "rgba(255,255,255,0.8)" }}>
-                  Yearly: {displayReport.detailedBreakdown?.planDistribution?.yearly ?? 0}
-                </span>
-              </div>
+                    {/* New vs Renewed Distinction Pills */}
+                    <div style={{ display: "flex", gap: "8px", marginTop: "10px", alignItems: "center" }}>
+                      <span style={{ fontSize: "12px", fontWeight: 600, background: "rgba(16, 185, 129, 0.15)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "2px 8px", borderRadius: "4px" }}>
+                        {newCount} New
+                      </span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, background: "rgba(59, 130, 246, 0.15)", color: "#60a5fa", border: "1px solid rgba(59, 130, 246, 0.3)", padding: "2px 8px", borderRadius: "4px" }}>
+                        {renewingCount} Renewed
+                      </span>
+                    </div>
+
+                    <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", marginTop: "10px" }}>
+                      Revenue: <strong style={{ color: "#fff" }}>{formatCurrency(displayReport.subscriptionRevenue)}</strong>
+                    </div>
+
+                    {/* Tier breakdown pills */}
+                    <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", padding: "3px 8px", borderRadius: "4px", color: "rgba(255,255,255,0.8)" }}>
+                        Monthly: {displayReport.detailedBreakdown?.planDistribution?.monthly ?? 0}
+                      </span>
+                      <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", padding: "3px 8px", borderRadius: "4px", color: "rgba(255,255,255,0.8)" }}>
+                        3-Month: {displayReport.detailedBreakdown?.planDistribution?.threeMonthly ?? 0}
+                      </span>
+                      <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.06)", padding: "3px 8px", borderRadius: "4px", color: "rgba(255,255,255,0.8)" }}>
+                        Yearly: {displayReport.detailedBreakdown?.planDistribution?.yearly ?? 0}
+                      </span>
+                    </div>
+                  </>
+                )
+              })()}
             </div>
 
             {/* Card 2: Total Visitors */}
@@ -1034,7 +1127,319 @@ export default function AdminReportsPage() {
             </div>
           </div>
 
-          {/* DETAILED TABLES: TOP 10 PAGES & TOP REFERRERS */}
+          {/* RENEWALS & RETENTION SECTION */}
+          {(() => {
+            const retention = displayReport.detailedBreakdown?.renewalRetention
+            const upcoming = displayReport.detailedBreakdown?.upcomingRenewals
+
+            if (!retention && !upcoming) return null
+
+            return (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "18px" }}>
+                {/* Past Week Renewal Retention Card */}
+                <div style={cardStyle}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <RotateCcw style={{ width: "18px", height: "18px", color: "var(--gold)" }} />
+                      <span style={{ color: "#fff", fontSize: "14px", fontWeight: 600 }}>
+                        Past Week Renewal Retention
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        padding: "3px 8px",
+                        borderRadius: "4px",
+                        background: (retention?.retentionRatePct ?? 100) >= 80 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                        color: (retention?.retentionRatePct ?? 100) >= 80 ? "#10b981" : "#ef4444",
+                        border: `1px solid ${(retention?.retentionRatePct ?? 100) >= 80 ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
+                      }}
+                    >
+                      {retention?.retentionRatePct ?? 100}% Converted
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                    <span style={{ fontSize: "30px", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>
+                      {retention?.renewalsConvertedCount ?? 0}
+                    </span>
+                    <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>
+                      of {retention?.renewalsDueCount ?? 0} due renewed
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", marginTop: "10px", lineHeight: "1.5" }}>
+                    {retention && retention.renewalsFailedOrChurnedCount > 0 ? (
+                      <span style={{ color: "#ef4444" }}>
+                        {retention.renewalsFailedOrChurnedCount} renewal(s) failed payment or churned during this cycle
+                      </span>
+                    ) : (
+                      <span style={{ color: "#10b981" }}>
+                        ✓ 100% of due subscriptions converted to active renewals
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Upcoming Renewals Card */}
+                <div style={cardStyle}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Calendar style={{ width: "18px", height: "18px", color: "#38bdf8" }} />
+                      <span style={{ color: "#fff", fontSize: "14px", fontWeight: 600 }}>
+                        Upcoming Renewals (Next 7 Days)
+                      </span>
+                    </div>
+                    {upcoming && upcoming.items.length > 0 && (
+                      <button
+                        onClick={() => setShowUpcomingList((prev) => !prev)}
+                        style={{
+                          background: "rgba(255,255,255,0.08)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                          color: "#fff",
+                          fontSize: "11px",
+                          padding: "3px 8px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        {showUpcomingList ? "Hide List" : `View ${upcoming.totalDueCount} Due`}
+                        {showUpcomingList ? <ChevronUp style={{ width: "12px", height: "12px" }} /> : <ChevronDown style={{ width: "12px", height: "12px" }} />}
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                    <span style={{ fontSize: "30px", fontWeight: 700, color: "#fff", letterSpacing: "-0.02em" }}>
+                      {upcoming?.totalDueCount ?? 0}
+                    </span>
+                    <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.6)" }}>subscriptions due</span>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "10px", flexWrap: "wrap", gap: "6px" }}>
+                    <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)" }}>
+                      Potential Pipeline: <strong style={{ color: "var(--gold)" }}>{formatCurrency(upcoming?.potentialRevenue ?? 0)}</strong>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                      {upcoming?.autoRenewingCount ?? 0} auto &bull; {upcoming?.slatedForCancellationCount ?? 0} cancelling
+                    </div>
+                  </div>
+
+                  {/* Expandable Upcoming Subscribers Table */}
+                  {showUpcomingList && upcoming && upcoming.items.length > 0 && (
+                    <div style={{ marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "12px", maxHeight: "220px", overflowY: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                        <thead>
+                          <tr style={{ color: "rgba(255,255,255,0.5)", borderBottom: "1px solid rgba(255,255,255,0.08)", textAlign: "left" }}>
+                            <th style={{ padding: "6px 4px" }}>Subscriber</th>
+                            <th style={{ padding: "6px 4px" }}>Plan</th>
+                            <th style={{ padding: "6px 4px" }}>Due Date</th>
+                            <th style={{ padding: "6px 4px", textAlign: "right" }}>Value</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {upcoming.items.map((sub) => (
+                            <tr key={sub.subscriptionId} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                              <td style={{ padding: "6px 4px" }}>
+                                <div style={{ fontWeight: 600, color: "#fff" }}>{sub.userName}</div>
+                                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>{sub.userEmail}</div>
+                              </td>
+                              <td style={{ padding: "6px 4px" }}>
+                                <span style={{ fontSize: "10px", background: "rgba(255,255,255,0.06)", padding: "2px 5px", borderRadius: "3px", color: "#60a5fa" }}>
+                                  {sub.planKey}
+                                </span>
+                                {sub.cancelAtCycleEnd && (
+                                  <span style={{ fontSize: "9px", color: "#ef4444", marginLeft: "4px" }}>Cancelling</span>
+                                )}
+                              </td>
+                              <td style={{ padding: "6px 4px", color: "rgba(255,255,255,0.7)" }}>
+                                {sub.renewalDueDate ? new Date(sub.renewalDueDate).toLocaleDateString("en-IN", { month: "short", day: "numeric" }) : "—"}
+                              </td>
+                              <td style={{ padding: "6px 4px", textAlign: "right", color: "var(--gold)", fontWeight: 600 }}>
+                                {formatCurrency(sub.amount)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* 30-DAY TRAFFIC MOVEMENT (WEEK-ON-WEEK) VISUAL CHART */}
+          {(() => {
+            const trend = displayReport.detailedBreakdown?.trafficTrend30d
+            if (!trend || !trend.weeks || trend.weeks.length === 0) return null
+
+            const maxVis = Math.max(...trend.weeks.map((w) => w.visitors), 1)
+            const maxPvs = Math.max(...trend.weeks.map((w) => w.pageviews), 1)
+
+            return (
+              <div style={cardStyle}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px", flexWrap: "wrap", gap: "10px" }}>
+                  <div>
+                    <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#fff", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                      <BarChart3 style={{ width: "18px", height: "18px", color: "var(--gold)" }} />
+                      30-Day Traffic Movement & Week-on-Week Progression
+                    </h3>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "13px", margin: "4px 0 0 0" }}>
+                      Progression of weekly unique visitors and pageviews across the last 4 reporting cycles
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
+                    <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                      Avg Daily: <strong style={{ color: "#fff" }}>{formatNumber(trend.avgDailyVisitors)}</strong> visitors
+                    </div>
+                    <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                      Total Month: <strong style={{ color: "var(--gold)" }}>{formatNumber(trend.totalMonthVisitors)}</strong> visitors
+                    </div>
+                    {trend.monthOverMonthGrowthPct != null && (
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          background: trend.monthOverMonthGrowthPct >= 0 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                          color: trend.monthOverMonthGrowthPct >= 0 ? "#10b981" : "#ef4444",
+                          border: `1px solid ${trend.monthOverMonthGrowthPct >= 0 ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
+                        }}
+                      >
+                        {trend.monthOverMonthGrowthPct >= 0 ? "+" : ""}{trend.monthOverMonthGrowthPct}% MoM
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* SVG Visual Bars */}
+                <div style={{ width: "100%", overflowX: "auto" }}>
+                  <svg viewBox="0 0 800 220" style={{ width: "100%", height: "auto", minWidth: "550px" }}>
+                    <defs>
+                      <linearGradient id="goldBarGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#F5B800" stopOpacity="0.9" />
+                        <stop offset="100%" stopColor="#d99b00" stopOpacity="0.6" />
+                      </linearGradient>
+                      <linearGradient id="blueBarGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#2563eb" stopOpacity="0.4" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Horizontal gridlines */}
+                    {[0, 0.25, 0.5, 0.75, 1].map((pct, i) => (
+                      <line
+                        key={i}
+                        x1="50"
+                        y1={170 - pct * 130}
+                        x2="770"
+                        y2={170 - pct * 130}
+                        stroke="rgba(255,255,255,0.07)"
+                        strokeDasharray="4 4"
+                      />
+                    ))}
+
+                    {/* Bars for each of the 4 weeks */}
+                    {trend.weeks.map((w, idx) => {
+                      const totalWeeks = trend.weeks.length
+                      const colWidth = 720 / totalWeeks
+                      const xBase = 50 + idx * colWidth + colWidth / 2
+                      const visHeight = (w.visitors / maxVis) * 120
+                      const pvsHeight = (w.pageviews / maxPvs) * 120
+                      const isHovered = hoveredTrafficIndex === idx
+
+                      return (
+                        <g
+                          key={idx}
+                          onMouseEnter={() => setHoveredTrafficIndex(idx)}
+                          onMouseLeave={() => setHoveredTrafficIndex(null)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {/* Pageviews bar (background) */}
+                          <rect
+                            x={xBase - 28}
+                            y={170 - pvsHeight}
+                            width="24"
+                            height={Math.max(4, pvsHeight)}
+                            rx="4"
+                            fill="url(#blueBarGrad)"
+                            opacity={isHovered ? 1 : 0.8}
+                          />
+
+                          {/* Visitors bar (foreground) */}
+                          <rect
+                            x={xBase + 4}
+                            y={170 - visHeight}
+                            width="24"
+                            height={Math.max(4, visHeight)}
+                            rx="4"
+                            fill="url(#goldBarGrad)"
+                            opacity={isHovered ? 1 : 0.9}
+                          />
+
+                          {/* Visitor count label above bar */}
+                          <text
+                            x={xBase + 16}
+                            y={162 - visHeight}
+                            textAnchor="middle"
+                            fill="#F5B800"
+                            fontSize="11"
+                            fontWeight="600"
+                          >
+                            {w.visitors}
+                          </text>
+
+                          {/* Week label below baseline */}
+                          <text
+                            x={xBase}
+                            y="190"
+                            textAnchor="middle"
+                            fill={idx === totalWeeks - 1 ? "#fff" : "rgba(255,255,255,0.7)"}
+                            fontSize="11"
+                            fontWeight={idx === totalWeeks - 1 ? "700" : "500"}
+                          >
+                            {w.weekLabel.split(" ")[0]}
+                          </text>
+
+                          {/* WoW Growth pill */}
+                          {w.wowGrowthPct != null && (
+                            <text
+                              x={xBase}
+                              y="205"
+                              textAnchor="middle"
+                              fill={w.wowGrowthPct >= 0 ? "#10b981" : "#ef4444"}
+                              fontSize="10"
+                              fontWeight="600"
+                            >
+                              {w.wowGrowthPct >= 0 ? "+" : ""}{w.wowGrowthPct}%
+                            </text>
+                          )}
+                        </g>
+                      )
+                    })}
+                  </svg>
+                </div>
+
+                {/* Legend */}
+                <div style={{ display: "flex", justifyContent: "center", gap: "24px", marginTop: "12px", fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <div style={{ width: "12px", height: "12px", background: "#F5B800", borderRadius: "3px" }} />
+                    <span>Unique Visitors</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <div style={{ width: "12px", height: "12px", background: "#3b82f6", borderRadius: "3px" }} />
+                    <span>Total Pageviews</span>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", gap: "20px" }}>
             {/* Top Visited Pages Ranking Table */}
             <div style={cardStyle}>
@@ -1335,7 +1740,16 @@ export default function AdminReportsPage() {
                       </td>
 
                       <td style={{ padding: "12px 14px", textAlign: "right", fontWeight: 600, color: "#fff" }}>
-                        {rep.totalNewSubscriptions} new
+                        {rep.detailedBreakdown?.subscriptionSegmentation ? (
+                          <span>
+                            {rep.detailedBreakdown.subscriptionSegmentation.totalPaidSubscribers}{" "}
+                            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                              ({rep.detailedBreakdown.subscriptionSegmentation.newSubscribersCount}n / {rep.detailedBreakdown.subscriptionSegmentation.renewingSubscribersCount}r)
+                            </span>
+                          </span>
+                        ) : (
+                          `${rep.totalNewSubscriptions} new`
+                        )}
                       </td>
 
                       <td style={{ padding: "12px 14px", textAlign: "right", fontWeight: 600, color: "var(--gold)" }}>
