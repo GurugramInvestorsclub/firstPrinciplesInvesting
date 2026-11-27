@@ -113,10 +113,10 @@ export function ResearchDesk({
     const navItems = [
         { id: "home", label: "Home", icon: Home },
         { id: "members-only", label: "Members Only", icon: Star },
-        { id: "free-research", label: "Free Research", icon: BookOpen },
         { id: "demergers", label: "Demerger Tracker", icon: GitFork },
         { id: "events", label: "Events", icon: Calendar },
-        { id: "industry-research", label: "Industry Research", icon: Layers, isComingSoon: true }
+        { id: "industry-research", label: "Industry Research", icon: Layers, isComingSoon: true },
+        { id: "free-research", label: "Free Research", icon: BookOpen }
     ]
 
     return (
