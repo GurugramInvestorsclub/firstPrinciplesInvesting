@@ -8,6 +8,7 @@ import { ArticleThemeWrapper, ArticleThemeToggleButton } from "../insights/Artic
 import { extractHeadings } from "@/lib/toc"
 import { TableOfContents } from "../insights/TableOfContents"
 import { ArticleUpdatesBlock } from "../insights/ArticleUpdatesBlock"
+import { ArticleDisclaimer } from "../insights/ArticleDisclaimer"
 
 interface ReaderViewProps {
     slug: string
@@ -418,17 +419,7 @@ export function ReaderView({
 
                     {/* Disclaimer Footnote */}
                     {!shouldLockContent && (
-                        (Array.isArray(report.disclaimer) ? report.disclaimer.length > 0 : Boolean(report.disclaimer)) ? (
-                            <div className="article-disclaimer-box mt-8 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(ellipse_at_top_left,rgba(245,184,0,0.08),transparent_70%),rgba(20,20,24,0.6)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.08)] text-xs font-mono text-neutral-200 leading-relaxed text-left w-full [&_p]:text-xs [&_p]:leading-relaxed [&_p]:text-neutral-200 [&_strong]:text-gold [&_span]:text-xs">
-                                <span className="text-gold font-bold uppercase block mb-1.5 text-[11px] tracking-wider">DISCLAIMER:</span>
-                                <RichText value={report.disclaimer} />
-                            </div>
-                        ) : (
-                            <div className="article-disclaimer-box mt-8 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(ellipse_at_top_left,rgba(245,184,0,0.08),transparent_70%),rgba(20,20,24,0.6)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.08)] text-xs font-mono text-neutral-200 leading-relaxed text-left w-full">
-                                <span className="text-gold font-bold uppercase block mb-1.5 text-[11px] tracking-wider">DISCLAIMER:</span>
-                                First Principles Investing is an independent research house. We do not provide personalized stock recommendations or advisory calls. This research is for educational and learning purposes. All investments are subject to capital risk.
-                            </div>
-                        )
+                        <ArticleDisclaimer disclaimer={report.disclaimer} variant="reader" />
                     )}
 
                 </div>

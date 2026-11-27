@@ -17,15 +17,81 @@ function renderHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6", className: 
     }
 }
 
+function isBlankText(text: string): boolean {
+    return !text.replace(/[\u200B-\u200D\uFEFF]/g, "").trim()
+}
+
+function splitParagraphBlockOnBlankLines(block: any) {
+    if (
+        !block ||
+        block._type !== "block" ||
+        (block.style && block.style !== "normal") ||
+        block.listItem ||
+        !Array.isArray(block.children)
+    ) {
+        return [block]
+    }
+
+    const paragraphs: any[][] = [[]]
+    const blankLineRegex = /\r?\n(?:[ \t]*\r?\n)+/
+
+    for (const child of block.children) {
+        if (child?._type === "span" && typeof child.text === "string" && blankLineRegex.test(child.text)) {
+            const parts = child.text.split(blankLineRegex)
+            parts.forEach((part: string, partIndex: number) => {
+                if (partIndex > 0) {
+                    paragraphs.push([])
+                }
+                if (part.length > 0) {
+                    paragraphs[paragraphs.length - 1].push({
+                        ...child,
+                        _key: child._key ? `${child._key}-${partIndex}` : undefined,
+                        text: part,
+                    })
+                }
+            })
+        } else {
+            paragraphs[paragraphs.length - 1].push(child)
+        }
+    }
+
+    return paragraphs
+        .map((children, idx) => {
+            const nonEmptyChildren = children.filter(
+                (c) => !(c?._type === "span" && typeof c.text === "string" && c.text.length === 0)
+            )
+            const trimmedChildren = nonEmptyChildren.map((c, cIdx) => {
+                if (c?._type !== "span" || typeof c.text !== "string") return c
+                let text = c.text
+                if (cIdx === 0) text = text.replace(/^(?:\r?\n)+/, "")
+                if (cIdx === nonEmptyChildren.length - 1) text = text.replace(/(?:\r?\n)+$/, "")
+                return text === c.text ? c : { ...c, text }
+            })
+
+            const hasNonSpanChild = trimmedChildren.some((c) => c && c._type !== "span")
+            const plainText = getPortableTextChildrenText(trimmedChildren)
+            if (!hasNonSpanChild && isBlankText(plainText)) return null
+
+            return {
+                ...block,
+                _key: block._key ? (paragraphs.length > 1 ? `${block._key}-p${idx}` : block._key) : undefined,
+                children: trimmedChildren,
+            }
+        })
+        .filter(Boolean)
+}
+
 function cleanBlocks(value: any) {
     if (!Array.isArray(value)) return value
 
-    let lastNonEmptyIndex = value.length - 1
+    const normalized = value.flatMap(splitParagraphBlockOnBlankLines)
+
+    let lastNonEmptyIndex = normalized.length - 1
     while (lastNonEmptyIndex >= 0) {
-        const block = value[lastNonEmptyIndex]
+        const block = normalized[lastNonEmptyIndex]
         if (block && block._type === "block") {
             const text = getPortableTextChildrenText(block.children)
-            if (!text || !text.trim()) {
+            if (isBlankText(text)) {
                 lastNonEmptyIndex--
                 continue
             }
@@ -34,7 +100,7 @@ function cleanBlocks(value: any) {
     }
 
     if (lastNonEmptyIndex < 0) return []
-    return value.slice(0, lastNonEmptyIndex + 1)
+    return normalized.slice(0, lastNonEmptyIndex + 1)
 }
 
 const components: PortableTextComponents = {
@@ -90,7 +156,7 @@ const components: PortableTextComponents = {
         ),
         normal: ({ children, value }: any) => {
             const text = getPortableTextChildrenText(value?.children)
-            if (!text || !text.trim()) {
+            if (isBlankText(text)) {
                 return null
             }
             const isSource = /^\s*sources?\s*[:–-]/i.test(text.trim())
@@ -101,7 +167,7 @@ const components: PortableTextComponents = {
                     </p>
                 )
             }
-            return <p className="leading-relaxed mb-3 text-lg last:mb-0 text-justify hyphens-auto [text-justify:inter-word]">{children}</p>
+            return <p className="leading-relaxed mb-[10px] text-lg last:mb-0 text-justify hyphens-auto [text-justify:inter-word]">{children}</p>
         },
     },
     list: {

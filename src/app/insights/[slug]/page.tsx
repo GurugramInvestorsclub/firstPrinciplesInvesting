@@ -26,6 +26,7 @@ import { getStartOfTodayKolkata } from "@/lib/utils"
 import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { AdminPreviewToolbar } from "@/components/insights/AdminPreviewToolbar"
 import { ArticleUpdatesBlock } from "@/components/insights/ArticleUpdatesBlock"
+import { ArticleDisclaimer } from "@/components/insights/ArticleDisclaimer"
 import { ArticleTracker } from "@/components/analytics/ArticleTracker"
 
 export const dynamic = "force-dynamic"
@@ -138,22 +139,7 @@ export default async function InsightPage({ params }: Props) {
                         </div>
 
                         {/* Disclaimer Section */}
-                        <div className="article-disclaimer-box my-6 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-xs leading-relaxed text-neutral-200 font-mono">
-                            {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
-                                <div className="text-xs leading-relaxed space-y-2 [&_p]:text-xs [&_p]:leading-relaxed [&_p]:text-neutral-200 [&_strong]:text-gold [&_strong]:text-xs [&_span]:text-xs">
-                                    <RichText value={post.disclaimer} />
-                                </div>
-                            ) : (
-                                <div className="text-xs text-neutral-200 space-y-2 leading-relaxed">
-                                    <p>
-                                        <strong className="font-bold text-gold text-xs mr-1 uppercase tracking-wider">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
-                                    </p>
-                                    <p>
-                                        First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                        <ArticleDisclaimer disclaimer={post.disclaimer} className="my-6" />
                         
                         {/* Article Updates Block */}
                         <ArticleUpdatesBlock updates={post.updates} />
@@ -232,22 +218,7 @@ export default async function InsightPage({ params }: Props) {
                         ) : null}
 
                         {/* Bottom Disclaimer Section */}
-                        <div className="article-disclaimer-box mt-6 mb-10 p-4 md:p-5 rounded-xl border border-gold/40 bg-[radial-gradient(circle_at_top_left,rgba(245,184,0,0.1),transparent_70%),rgba(245,184,0,0.02)] backdrop-blur-sm shadow-[0_0_20px_rgba(245,184,0,0.1)] text-xs leading-relaxed text-neutral-200 font-mono">
-                            {(Array.isArray(post.disclaimer) ? post.disclaimer.length > 0 : Boolean(post.disclaimer)) ? (
-                                <div className="text-xs leading-relaxed space-y-2 [&_p]:text-xs [&_p]:leading-relaxed [&_p]:text-neutral-200 [&_strong]:text-gold [&_strong]:text-xs [&_span]:text-xs">
-                                    <RichText value={post.disclaimer} />
-                                </div>
-                            ) : (
-                                <div className="text-xs text-neutral-200 space-y-2 leading-relaxed">
-                                    <p>
-                                        <strong className="font-bold text-gold text-xs mr-1 uppercase tracking-wider">Disclaimer:</strong> This report is for educational purposes only and does not constitute investment advice. We may own securities discussed in this report and may buy or sell them without notice. Readers should assume that we are invested and may be biased.
-                                    </p>
-                                    <p>
-                                        First Principles Research is not registered with SEBI as a Research Analyst or Investment Adviser. Please do your own research before making any investment decisions.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                        <ArticleDisclaimer disclaimer={post.disclaimer} className="mt-6 mb-10" />
 
                         {/* Interactive 5-Star Rating Card */}
                         <ArticleStarRating 
