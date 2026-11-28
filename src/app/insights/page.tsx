@@ -7,7 +7,7 @@ import { InsightCard } from "@/components/cards/InsightCard"
 import { LeadMagnetCard } from "@/components/cards/LeadMagnetCard"
 import { SearchInput } from "@/components/ui/search-input"
 import { InsightsAnimations } from "@/components/insights/InsightsAnimations"
-import { getInsightsSubscriptionUiState, userHasInsightsAccess, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
+import { getInsightsSubscriptionUiState, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
 import { InsightsSubscribeButton } from "@/components/insights/InsightsSubscribeButton"
 import { RenewSubscriptionButton } from "@/components/dashboard/RenewSubscriptionButton"
 import { getArticleRatingsMap } from "@/app/actions/ratings"
@@ -20,7 +20,7 @@ import { StickyFooterCheckout } from "@/components/insights/StickyFooterCheckout
 import { BonusMarquee } from "@/components/insights/BonusMarquee"
 
 // Set revalidate to 0 for instant updates (dynamic rendering)
-export const revalidate = 0
+export const revalidate = 60
 
 export default async function InsightsPage({
     searchParams,
@@ -56,10 +56,7 @@ export default async function InsightsPage({
     const isHalted = insightsMembership?.status === "HALTED"
     const isRenewalRequired = isPendingRenewal || isHalted
 
-    const hasSubscriptionAccess =
-        paywallReady && session?.user?.id
-            ? await userHasInsightsAccess(session.user.id)
-            : false
+    const hasSubscriptionAccess = Boolean(paywallReady && insightsMembership?.hasAccess)
 
     const gridPosts = search
         ? (sanityResult as Post[])

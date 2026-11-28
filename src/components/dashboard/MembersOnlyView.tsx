@@ -8,6 +8,7 @@ import { urlForImage } from "@/lib/sanity.image"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
 import { NotesSection } from "@/components/insights/NotesSection"
 import { RenewSubscriptionButton } from "./RenewSubscriptionButton"
+import { calculateReadingTime } from "@/lib/reading-time"
 
 interface MembersOnlyViewProps {
     onSelectReport: (slug: string) => void
@@ -20,25 +21,6 @@ interface MembersOnlyViewProps {
     recordings?: any[]
     notes?: any[]
     ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
-}
-
-
-function calculateReadingTime(body: any[] | undefined): string {
-    if (!body || !Array.isArray(body)) return "15 min read"
-    let text = ""
-    body.forEach((block: any) => {
-        if (block._type === "block" && block.children) {
-            block.children.forEach((child: any) => {
-                if (child.text) {
-                    text += " " + child.text
-                }
-            })
-        }
-    })
-    const wordCount = text.trim().split(/\s+/).filter(Boolean).length
-    if (wordCount === 0) return "15 min read"
-    const min = Math.ceil(wordCount / 220)
-    return `${min} min read`
 }
 
 function formatDate(dateStr: string): string {
@@ -155,7 +137,7 @@ export function MembersOnlyView({
             return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
         }
         if (sortBy === "readTime") {
-            return parseInt(calculateReadingTime(a.body)) - parseInt(calculateReadingTime(b.body))
+            return parseInt(calculateReadingTime(a.wordCount ?? a.body)) - parseInt(calculateReadingTime(b.wordCount ?? b.body))
         }
         return 0
     })
@@ -328,7 +310,7 @@ export function MembersOnlyView({
                                     <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
                                         <div className="flex items-center gap-1">
                                             <Clock className="w-3 h-3 text-neutral-500" />
-                                            <span>{calculateReadingTime(report.body)}</span>
+                                            <span>{calculateReadingTime(report.wordCount ?? report.body)}</span>
                                         </div>
                                         <span className="text-gold">Read Article ↗</span>
                                     </div>

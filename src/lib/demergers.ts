@@ -185,17 +185,17 @@ function normalizeStatus(statusRaw: string): string {
 /**
  * Fetch live data from Google Sheets with fallbacks.
  */
-export async function getDemergerData(): Promise<{ records: DemergerRecord[]; lastUpdated: string; isLive: boolean }> {
+export async function getDemergerData(forceFresh = false): Promise<{ records: DemergerRecord[]; lastUpdated: string; isLive: boolean }> {
     const urls = [SHEET_CSV_URL, GVIZ_CSV_URL]
 
     for (const url of urls) {
         try {
-            const res = await fetch(url, {
-                cache: "no-store",
-                headers: {
-                    "Cache-Control": "no-cache",
-                },
-            })
+            const res = await fetch(
+                url,
+                forceFresh
+                    ? { cache: "no-store", headers: { "Cache-Control": "no-cache" } }
+                    : { next: { revalidate: 300 } }
+            )
 
             if (res.ok) {
                 const text = await res.text()

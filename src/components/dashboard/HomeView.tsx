@@ -6,30 +6,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { urlForImage } from "@/lib/sanity.image"
 
+import { calculateReadingTime } from "@/lib/reading-time"
+
 interface HomeViewProps {
     userName: string
     onNavigate: (tab: string, arg?: string) => void
     posts: any[]
     upcomingEvents: any[]
     ratingStatsMap?: Record<string, { averageRating: number; totalRatings: number }>
-}
-
-function calculateReadingTime(body: any[] | undefined): string {
-    if (!body || !Array.isArray(body)) return "15 min read"
-    let text = ""
-    body.forEach((block: any) => {
-        if (block._type === "block" && block.children) {
-            block.children.forEach((child: any) => {
-                if (child.text) {
-                    text += " " + child.text
-                }
-            })
-        }
-    })
-    const wordCount = text.trim().split(/\s+/).filter(Boolean).length
-    if (wordCount === 0) return "15 min read"
-    const min = Math.ceil(wordCount / 220)
-    return `${min} min read`
 }
 
 function formatDate(dateStr: string): string {
@@ -60,7 +44,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents, ratingSt
                         title: report.title,
                         slug: report.slug?.current,
                         progress: Math.round(parsed.percent),
-                        readTime: calculateReadingTime(report.body)
+                        readTime: calculateReadingTime(report.wordCount ?? report.body)
                     })
                 }
             } catch (e) {
@@ -124,7 +108,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents, ratingSt
                             <div className="space-y-3 max-w-xl">
                                 <div className="flex items-center gap-2 text-xs font-mono text-neutral-500">
                                     <Clock className="w-3.5 h-3.5" />
-                                    <span>{calculateReadingTime(latestPremium.body)}</span>
+                                    <span>{calculateReadingTime(latestPremium.wordCount ?? latestPremium.body)}</span>
                                     <span className="w-1 h-1 rounded-full bg-neutral-700" />
                                     <span className="text-gold uppercase font-bold text-[9px] tracking-wider bg-gold/10 px-2 py-0.5 rounded">PREMIUM</span>
                                 </div>
@@ -220,7 +204,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents, ratingSt
                                     </div>
 
                                     <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
-                                        <span>{calculateReadingTime(report.body)}</span>
+                                        <span>{calculateReadingTime(report.wordCount ?? report.body)}</span>
                                         <span className="text-gold">Read Article ↗</span>
                                     </div>
                                 </div>
@@ -324,7 +308,7 @@ export function HomeView({ userName, onNavigate, posts, upcomingEvents, ratingSt
                                     </div>
 
                                     <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[9px] font-mono text-neutral-500">
-                                        <span>{calculateReadingTime(report.body)}</span>
+                                        <span>{calculateReadingTime(report.wordCount ?? report.body)}</span>
                                         <span className="text-gold">Read Article ↗</span>
                                     </div>
                                 </div>

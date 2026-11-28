@@ -1,69 +1,22 @@
-import { PostHog } from "posthog-node"
 import { AnalyticsEvent, EventMap } from "./events"
 
-let serverClient: PostHog | null = null
-
-export function getServerPostHogClient(): PostHog | null {
-    if (serverClient) return serverClient
-
-    const apiKey =
-        process.env.POSTHOG_API_KEY?.trim() ||
-        process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN?.trim() ||
-        process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim()
-    const apiHost =
-        process.env.POSTHOG_HOST?.trim() ||
-        process.env.NEXT_PUBLIC_POSTHOG_HOST?.trim() ||
-        "https://us.i.posthog.com"
-
-    if (!apiKey) {
-        return null
-    }
-
-    try {
-        serverClient = new PostHog(apiKey, {
-            host: apiHost,
-            flushAt: 1,
-            flushInterval: 0,
-        })
-        return serverClient
-    } catch (err) {
-        console.warn("[Analytics Server] Failed to initialize PostHog Node client:", err)
-        return null
-    }
+export function getServerPostHogClient(): null {
+    return null
 }
 
 /**
- * Server-side authoritative event tracking.
- * Used for verified Razorpay webhooks and payment confirmations.
+ * Server-side event tracking stub (PostHog removed).
  */
-export async function trackServerEvent<E extends AnalyticsEvent>(params: {
+export async function trackServerEvent<E extends AnalyticsEvent>(_params: {
     distinctId: string
     event: E
     properties: EventMap[E]
 }): Promise<void> {
-    const client = getServerPostHogClient()
-    if (!client) return
-
-    try {
-        client.capture({
-            distinctId: params.distinctId,
-            event: params.event,
-            properties: {
-                ...params.properties,
-                $lib: "posthog-node",
-                $lib_version: "server-verified",
-            },
-        })
-        // Flush in background
-        await client.flush()
-    } catch (err) {
-        // Analytics must never crash payment or webhook processing
-        console.warn(`[Analytics Server] Failed to capture event "${params.event}":`, err)
-    }
+    // PostHog server tracking removed
 }
 
 /**
- * Interface for PostHog API Query Responses
+ * Interface for Analytics API Query Responses
  */
 export interface PostHogAnalyticsDashboardData {
     configured: boolean
@@ -139,45 +92,12 @@ export interface PostHogQueryResponse {
 }
 
 /**
- * Server-side helper to query PostHog REST API / HogQL
+ * Server-side query helper stub (PostHog removed).
  */
-export async function queryPostHogApi(params: {
+export async function queryPostHogApi(_params: {
     endpoint: string
     method?: "GET" | "POST"
     body?: unknown
 }): Promise<PostHogQueryResponse | null> {
-    const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY?.trim()
-    const projectId = process.env.POSTHOG_PROJECT_ID?.trim()
-    const host =
-        process.env.POSTHOG_HOST?.trim() ||
-        process.env.NEXT_PUBLIC_POSTHOG_HOST?.trim() ||
-        "https://us.i.posthog.com"
-
-    if (!personalApiKey || !projectId) {
-        return null
-    }
-
-    const url = `${host.replace(/\/$/, "")}/api/projects/${projectId}/${params.endpoint.replace(/^\//, "")}`
-
-    try {
-        const res = await fetch(url, {
-            method: params.method || "GET",
-            headers: {
-                Authorization: `Bearer ${personalApiKey}`,
-                "Content-Type": "application/json",
-            },
-            ...(params.body ? { body: JSON.stringify(params.body) } : {}),
-            next: { revalidate: 120 }, // Cache queries for 2 minutes to optimize performance
-        })
-
-        if (!res.ok) {
-            console.warn(`[Analytics Server] PostHog API query failed (${res.status}):`, await res.text())
-            return null
-        }
-
-        return await res.json()
-    } catch (err) {
-        console.warn("[Analytics Server] PostHog API connection error:", err)
-        return null
-    }
+    return null
 }

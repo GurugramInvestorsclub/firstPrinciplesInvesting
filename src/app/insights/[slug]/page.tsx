@@ -27,7 +27,6 @@ import { isAdminAuthenticated } from "@/lib/admin-auth"
 import { AdminPreviewToolbar } from "@/components/insights/AdminPreviewToolbar"
 import { ArticleUpdatesBlock } from "@/components/insights/ArticleUpdatesBlock"
 import { ArticleDisclaimer } from "@/components/insights/ArticleDisclaimer"
-import { ArticleTracker } from "@/components/analytics/ArticleTracker"
 
 export const dynamic = "force-dynamic"
 
@@ -45,9 +44,9 @@ export default async function InsightPage({ params }: Props) {
 
     const startOfDay = getStartOfTodayKolkata().toISOString()
 
-    // Fetch the post contents, auth session, comments, events, Super30 programs, and admin session in parallel
+    // Fetch post, auth session, comments, events, Super30 programs, and admin session in parallel
     const [post, session, commentsResult, upcomingEvents, super30Programs, isAdmin] = await Promise.all([
-        client.fetch<Post | null>(singlePostQuery, { slug }, { cache: "no-store" }),
+        client.fetch<Post | null>(singlePostQuery, { slug }, { next: { revalidate: 60 } }),
         auth(),
         getComments(slug),
         client.fetch<Event[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
@@ -57,12 +56,12 @@ export default async function InsightPage({ params }: Props) {
 
     const liveWebinar = upcomingEvents?.[0]
 
-    const hasSubscriptionAccess =
+    const [hasSubscriptionAccess, ratingResult] = await Promise.all([
         paywallReady && session?.user?.id
-            ? await userHasInsightsAccess(session.user.id)
-            : false
-
-    const ratingResult = await getArticleRating(slug, session?.user?.id)
+            ? userHasInsightsAccess(session.user.id)
+            : Promise.resolve(false),
+        getArticleRating(slug, session?.user?.id),
+    ])
     const ratingStats = ratingResult.stats
 
     const initialComments = (commentsResult.success ? commentsResult.comments : []) as CommentType[]
@@ -87,12 +86,6 @@ export default async function InsightPage({ params }: Props) {
 
     return (
         <ArticleThemeWrapper className="flex flex-col min-h-screen">
-            <ArticleTracker
-                articleId={post._id || slug}
-                title={post.title}
-                category={post.access || "insights"}
-                isPremium={isSubscriberOnly}
-            />
             {isAdmin && isPendingApproval && (
                 <AdminPreviewToolbar post={post} slug={slug} />
             )}

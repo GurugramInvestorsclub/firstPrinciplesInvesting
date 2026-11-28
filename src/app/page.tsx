@@ -20,11 +20,13 @@ export const revalidate = 60 // revalidate every minute
 
 export default async function Home() {
   const startOfDay = getStartOfTodayKolkata().toISOString()
-  const posts = await client.fetch(recentPostsQuery, {}, { next: { revalidate: 60 } })
-  const events = await client.fetch(upcomingEventsHomeQuery, { startOfDay }, { next: { revalidate: 60 } })
-  const testimonials = await client.fetch<Testimonial[]>(testimonialsQuery, {}, { next: { revalidate: 60 } })
-  const super30Programs = await client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } }).catch(() => [])
-  const activeWebinar = await client.fetch<Event | null>(activeWebinarQuery, { startOfDay }, { next: { revalidate: 60 } }).catch(() => null)
+  const [posts, events, testimonials, super30Programs, activeWebinar] = await Promise.all([
+    client.fetch(recentPostsQuery, {}, { next: { revalidate: 60 } }),
+    client.fetch(upcomingEventsHomeQuery, { startOfDay }, { next: { revalidate: 60 } }),
+    client.fetch<Testimonial[]>(testimonialsQuery, {}, { next: { revalidate: 60 } }),
+    client.fetch<Super30Program[]>(allSuper30ProgramsQuery, {}, { next: { revalidate: 60 } }).catch(() => []),
+    client.fetch<Event | null>(activeWebinarQuery, { startOfDay }, { next: { revalidate: 60 } }).catch(() => null),
+  ])
 
   const activeSuper30 = super30Programs && super30Programs.length > 0 ? super30Programs[0] : undefined
 

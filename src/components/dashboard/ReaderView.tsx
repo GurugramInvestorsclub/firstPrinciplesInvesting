@@ -9,6 +9,7 @@ import { extractHeadings } from "@/lib/toc"
 import { TableOfContents } from "../insights/TableOfContents"
 import { ArticleUpdatesBlock } from "../insights/ArticleUpdatesBlock"
 import { ArticleDisclaimer } from "../insights/ArticleDisclaimer"
+import { calculateReadingTime } from "@/lib/reading-time"
 
 interface ReaderViewProps {
     slug: string
@@ -24,24 +25,6 @@ interface SavedNote {
     paragraphIdx: number
     note: string
     isHighlighted: boolean
-}
-
-function calculateReadingTime(body: any[] | undefined): string {
-    if (!body || !Array.isArray(body)) return "15 min read"
-    let text = ""
-    body.forEach((block: any) => {
-        if (block._type === "block" && block.children) {
-            block.children.forEach((child: any) => {
-                if (child.text) {
-                    text += " " + child.text
-                }
-            })
-        }
-    })
-    const wordCount = text.trim().split(/\s+/).filter(Boolean).length
-    if (wordCount === 0) return "15 min read"
-    const min = Math.ceil(wordCount / 220)
-    return `${min} min read`
 }
 
 function getBlockText(block: any): string {
@@ -83,11 +66,48 @@ export function ReaderView({
     hasSubscriptionAccess = false,
     onNavigate
 }: ReaderViewProps) {
-    const report = posts.find(r => r.slug?.current === slug)
+    const baseReport = posts.find(r => r.slug?.current === slug)
     const [fontSize, setFontSize] = useState<"sm" | "base" | "lg">("base")
     const [savedNotes, setSavedNotes] = useState<SavedNote[]>([])
     const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
     const [noteInput, setNoteInput] = useState("")
+    const [loadedDetail, setLoadedDetail] = useState<any | null>(null)
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false)
+
+    useEffect(() => {
+        if (!baseReport || baseReport.body) {
+            setLoadedDetail(null)
+            setIsLoadingDetail(false)
+            return
+        }
+
+        const controller = new AbortController()
+        setIsLoadingDetail(true)
+
+        fetch(`/api/dashboard/post/${encodeURIComponent(slug)}`, {
+            signal: controller.signal,
+        })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (data) {
+                    setLoadedDetail(data)
+                }
+            })
+            .catch((err) => {
+                if (err?.name !== "AbortError") {
+                    console.error("Failed to load report content:", err)
+                }
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) {
+                    setIsLoadingDetail(false)
+                }
+            })
+
+        return () => controller.abort()
+    }, [slug, baseReport])
+
+    const report = baseReport ? { ...baseReport, ...(loadedDetail || {}) } : null
 
     if (!report) {
         return (
@@ -269,7 +289,7 @@ export function ReaderView({
                         <div className="flex items-center gap-4 text-xs font-mono text-neutral-500">
                             <span>PUBLISHED: {formatDate(report.publishedAt)}</span>
                             <span className="w-1.5 h-1.5 rounded-full bg-neutral-700" />
-                            <span>{calculateReadingTime(rawBlocks)}</span>
+                            <span>{calculateReadingTime(report.wordCount ?? rawBlocks)}</span>
                         </div>
                     </div>
                     
@@ -278,6 +298,14 @@ export function ReaderView({
 
                     {/* Markdown Body */}
                     <div className="space-y-3 text-left w-full">
+                        {isLoadingDetail && bodyBlocks.length === 0 ? (
+                            <div className="space-y-4 py-6 animate-pulse">
+                                <div className="h-4 bg-white/10 rounded w-3/4" />
+                                <div className="h-4 bg-white/10 rounded w-full" />
+                                <div className="h-4 bg-white/10 rounded w-5/6" />
+                                <div className="h-4 bg-white/10 rounded w-2/3" />
+                            </div>
+                        ) : null}
                         {bodyBlocks.map((block: any, idx: number) => {
                             const isHeader = block._type === "block" && (block.style === "h1" || block.style === "h2" || block.style === "h3")
                             const paragraphKey = block._key || `p-${idx}`

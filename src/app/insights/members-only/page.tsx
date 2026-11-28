@@ -4,7 +4,7 @@ import { client } from "@/lib/sanity.client"
 import { Post, Recording } from "@/lib/types"
 import { InsightCard } from "@/components/cards/InsightCard"
 import { SearchInput } from "@/components/ui/search-input"
-import { getInsightsSubscriptionUiState, userHasInsightsAccess, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
+import { getInsightsSubscriptionUiState, getCurrentInsightsMembershipForUser } from "@/lib/insights-subscription-service"
 import { InsightsSubscriptionCheckout } from "@/components/insights/InsightsSubscriptionCheckout"
 import { RenewSubscriptionButton } from "@/components/dashboard/RenewSubscriptionButton"
 import { RecordingsCarousel } from "@/components/insights/RecordingsCarousel"
@@ -18,7 +18,7 @@ import { groq } from "next-sanity"
 import { redirect } from "next/navigation"
 import { Lock, FileKey, AlertTriangle } from "lucide-react"
 
-export const revalidate = 0
+export const revalidate = 60
 
 const subscriberPostsQuery = groq`
   *[_type == "post" && access == "subscriber" && (!defined(approvalStatus) || approvalStatus != "pending") && (!defined($search) || title match $search + "*" || excerpt match $search + "*")] | order(publishedAt desc) {
@@ -70,8 +70,7 @@ export default async function MembersOnlyArchivePage({
     const paywallReady =
         subscriptionUi.enabled && subscriptionUi.checkoutReady && subscriptionUi.webhookReady
 
-    const [hasSubscriptionAccess, premiumPosts, recordings, notes, demergerData, ratingsMap, insightsMembership] = await Promise.all([
-        paywallReady ? userHasInsightsAccess(session.user.id) : Promise.resolve(false),
+    const [premiumPosts, recordings, notes, demergerData, ratingsMap, insightsMembership] = await Promise.all([
         client.fetch<Post[]>(subscriberPostsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<Recording[]>(subscriberRecordingsQuery, { search: search || null }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(subscriberNotesQuery, { search: search || null }, { next: { revalidate: 60 } }),
@@ -79,6 +78,8 @@ export default async function MembersOnlyArchivePage({
         getArticleRatingsMap(),
         getCurrentInsightsMembershipForUser(session.user.id),
     ])
+
+    const hasSubscriptionAccess = Boolean(paywallReady && insightsMembership?.hasAccess)
 
     const isPendingRenewal = insightsMembership?.status === "PENDING"
     const isHalted = insightsMembership?.status === "HALTED"

@@ -429,7 +429,7 @@ export default function AdminAnalyticsPage() {
           }}
         >
           <BarChart3 style={{ width: "16px", height: "16px" }} />
-          PostHog Analytics & User Funnels
+          Analytics & User Funnels
         </button>
         <button
           onClick={() => setAnalyticsTab("reconciliation")}

@@ -25,7 +25,7 @@ function cleanDisclaimer(text: string): string {
   return text.replace(/^(disclaimer|disclosure)\s*[:\-]\s*/i, "").trim()
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 interface Props {
   params: Promise<{

@@ -19,23 +19,7 @@ const dashboardPostsQuery = groq`
     access,
     mainImage,
     publishedAt,
-    body,
-    disclaimer,
-    updates[] {
-      _key,
-      title,
-      url,
-      badge,
-      date,
-      description,
-      post-> {
-        _id,
-        title,
-        slug,
-        publishedAt,
-        access
-      }
-    }
+    "wordCount": count(string::split(pt::text(body), " "))
   }
 `
 
@@ -52,7 +36,7 @@ export default async function DashboardPage() {
     // Fetch user membership status, Sanity contents, and user profile phone in parallel
     const [insightsMembership, sanityPosts, upcomingEvents, pastEvents, recordings, notes, ratingsMap, dbUser] = await Promise.all([
         getCurrentInsightsMembershipForUser(userId),
-        client.fetch<any[]>(dashboardPostsQuery, {}, { cache: "no-store" }),
+        client.fetch<any[]>(dashboardPostsQuery, {}, { next: { revalidate: 60 } }),
         client.fetch<any[]>(eventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(pastEventsQuery, { startOfDay }, { next: { revalidate: 60 } }),
         client.fetch<any[]>(recordingsQuery, { search: null }, { next: { revalidate: 60 } }),

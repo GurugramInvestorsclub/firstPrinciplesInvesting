@@ -2,11 +2,11 @@ import type { NextConfig } from "next";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://static.ads-twitter.com https://*.sanity.io https://*.contentsquare.net https://*.contentsquare.com https://us.i.posthog.com https://eu.i.posthog.com https://*.posthog.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://static.ads-twitter.com https://*.sanity.io https://*.contentsquare.net https://*.contentsquare.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://www.google-analytics.com https://*.contentsquare.net https://us.i.posthog.com https://eu.i.posthog.com https://*.posthog.com",
+  "img-src 'self' data: blob: https://cdn.sanity.io https://*.sanity.io https://www.google-analytics.com https://*.contentsquare.net",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://docs.google.com https://drive.google.com https://*.sanity.io wss://*.sanity.io https://*.contentsquare.net https://*.contentsquare.com https://us.i.posthog.com https://eu.i.posthog.com https://*.posthog.com",
+  "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://docs.google.com https://drive.google.com https://*.sanity.io wss://*.sanity.io https://*.contentsquare.net https://*.contentsquare.com",
   "frame-src 'self' https://docs.google.com https://drive.google.com https://sheets.google.com https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://www.youtube-nocookie.com https://*.contentsquare.net",
   "worker-src 'self' blob:",
   "object-src 'none'",
@@ -21,7 +21,7 @@ const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-  { key: "X-DNS-Prefetch-Control", value: "off" },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
   ...(process.env.NODE_ENV === "production"
     ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]
     : []),
